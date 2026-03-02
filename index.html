@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#fdf6f0">
+  <title>HATH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --text:   #3a2e28;
+      --text2:  #8a7a72;
+      --muted:  #b8a99e;
+      --accent: #c07a4a;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+    }
+
+    /* ── BREATHING GLOW BACKGROUND ── */
+    .bg { position: fixed; inset: 0; z-index: 0; }
+    .bg-base {
+      position: absolute; inset: 0;
+      background: #fdf8f4;
+    }
+
+    .glow {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100vmax; height: 100vmax;
+      border-radius: 50%;
+      background: radial-gradient(
+        ellipse at center,
+        rgba(252, 210, 185, 0.55) 0%,
+        rgba(248, 210, 225, 0.35) 35%,
+        rgba(253, 240, 230, 0.15) 65%,
+        transparent 100%
+      );
+      animation: breathe 8s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: translate(-50%, -50%) scale(0.85); opacity: 0.7; }
+      50%       { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+    }
+
+    /* ── APP SHELL ── */
+    .app {
+      position: relative; z-index: 1;
+      max-width: 420px; margin: 0 auto;
+      height: 100dvh;
+      display: flex; flex-direction: column;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 54px 26px 0; flex-shrink: 0;
+    }
+
+    .hamburger {
+      width: 34px; height: 34px;
+      display: flex; flex-direction: column;
+      justify-content: center; gap: 5px;
+      cursor: pointer; border-radius: 8px; padding: 4px;
+    }
+    .hamburger span { display: block; height: 1.5px; background: var(--text2); border-radius: 2px; }
+    .hamburger span:nth-child(2) { width: 65%; }
+    .hamburger span:nth-child(3) { width: 82%; }
+
+    .wordmark {
+      font-family: 'Playfair Display', serif;
+      font-size: 21px; letter-spacing: 0.12em;
+      color: var(--text); font-weight: 400;
+    }
+    .topbar-right { width: 34px; }
+
+    /* ── WELLBEING ── */
+    .wellbeing { text-align: center; padding: 10px 24px 0; flex-shrink: 0; }
+    .well-text { font-size: 12px; font-weight: 400; color: var(--muted); letter-spacing: 0.03em; }
+    .well-dot {
+      display: inline-block; width: 5px; height: 5px;
+      border-radius: 50%; background: #6aad8a;
+      margin-right: 6px; margin-bottom: 1px; vertical-align: middle;
+      animation: softPulse 3s ease-in-out infinite;
+    }
+    .well-dot.warn { background: #c9943a; }
+    .well-dot.alert { background: #c05050; }
+
+    @keyframes softPulse { 0%,100% { opacity:1; } 50% { opacity:0.35; } }
+
+    /* ── BODY ── */
+    .body {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-end;
+      padding: 0 22px 32px; gap: 18px;
+      min-height: 0;
+    }
+
+    /* when chat is active, switch body to stretch from top */
+    .body.chat-mode {
+      justify-content: flex-start;
+    }
+
+    /* ── HINT AREA ── */
+    .hint-area {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 10px; opacity: 0;
+      animation: fadeUp 0.7s ease 0.3s forwards;
+    }
+
+    @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+    .hint-greeting {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px; color: var(--text); font-weight: 400;
+      text-align: center; letter-spacing: -0.2px; line-height: 1.3;
+    }
+    .hint-greeting em { font-style: italic; color: var(--accent); }
+
+    .hint-sub {
+      font-size: 13px; color: var(--text2);
+      text-align: center; line-height: 1.65;
+      max-width: 250px; font-weight: 300;
+    }
+
+    /* live balance peek — subtle, below the greeting */
+    .balance-peek {
+      display: flex; gap: 20px;
+      margin-top: 4px;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .balance-peek.loaded { opacity: 1; }
+
+    .peek-item { text-align: center; }
+    .peek-label { font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+    .peek-value { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--text); letter-spacing: -0.3px; }
+    .peek-divider { width: 1px; background: rgba(0,0,0,0.08); align-self: stretch; margin: 4px 0; }
+
+    .hint-chips {
+      display: flex; flex-wrap: wrap;
+      justify-content: center; gap: 8px; margin-top: 6px;
+    }
+    .chip {
+      font-size: 12.5px; color: var(--text2);
+      cursor: pointer; padding: 2px 0;
+      border-bottom: 1px solid rgba(138,122,114,0.3);
+      transition: color 0.15s, border-color 0.15s;
+      background: none; font-family: 'Inter', sans-serif; font-weight: 400;
+    }
+    .chip:active { color: var(--accent); border-color: var(--accent); }
+
+    /* ── NOTE FROM MATT ── */
+    .matt-note {
+      font-size: 12px; color: var(--text2);
+      text-align: center; font-style: italic;
+      max-width: 280px; line-height: 1.5;
+      opacity: 0; transition: opacity 0.4s ease;
+    }
+    .matt-note.loaded { opacity: 1; }
+    .matt-note strong { font-style: normal; font-weight: 500; color: var(--accent); }
+
+    /* ── CHAT AREA ── */
+    .chat-area {
+      flex: 1; width: 100%;
+      display: none; flex-direction: column;
+      gap: 10px;
+      overflow-y: scroll;
+      overflow-x: hidden;
+      padding: 16px 0 8px;
+      -webkit-overflow-scrolling: touch;
+      min-height: 0;
+      scrollbar-width: none;
+    }
+    .chat-area::-webkit-scrollbar { display: none; }
+
+    .bubble {
+      max-width: 82%; padding: 11px 15px;
+      border-radius: 18px; font-size: 14px;
+      line-height: 1.55; font-weight: 300;
+      animation: bubbleIn 0.22s ease;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    @keyframes bubbleIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+
+    .bubble.user {
+      align-self: flex-end;
+      background: rgba(192,122,74,0.15);
+      color: var(--text); border-bottom-right-radius: 5px;
+    }
+    .bubble.hath {
+      align-self: flex-start;
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(8px);
+      color: var(--text); border-bottom-left-radius: 5px;
+    }
+    .bubble-name {
+      font-size: 10px; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 5px; opacity: 0.8;
+    }
+
+    .typing {
+      align-self: flex-start;
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(8px);
+      border-radius: 18px; border-bottom-left-radius: 5px;
+      padding: 13px 16px; display: flex; gap: 4px;
+    }
+    .typing span {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--muted);
+      animation: bounce 1.1s ease-in-out infinite;
+    }
+    .typing span:nth-child(2) { animation-delay: 0.18s; }
+    .typing span:nth-child(3) { animation-delay: 0.36s; }
+    @keyframes bounce { 0%,60%,100% { transform:translateY(0); } 30% { transform:translateY(-5px); } }
+
+    /* ── CANCEL BUTTON ── */
+    .cancel-wrap {
+      display: none;
+      width: 100%;
+      justify-content: center;
+    }
+    .cancel-wrap.visible { display: flex; }
+
+    .cancel-btn {
+      background: none;
+      border: 1px solid rgba(138,122,114,0.3);
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text2);
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .cancel-btn:active { color: var(--accent); border-color: var(--accent); }
+
+    /* ── INPUT BAR ── */
+    .input-wrap {
+      width: 100%;
+      display: flex; align-items: flex-end; gap: 10px;
+      background: rgba(255,255,255,0.65);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.85);
+      border-radius: 24px; padding: 11px 11px 11px 20px;
+      box-shadow: 0 4px 28px rgba(180,120,90,0.1), 0 1px 0 rgba(255,255,255,0.9) inset;
+      transition: box-shadow 0.2s;
+    }
+    .input-wrap:focus-within {
+      box-shadow: 0 4px 32px rgba(192,122,74,0.18), 0 1px 0 rgba(255,255,255,0.9) inset;
+    }
+    .input-field {
+      flex: 1; border: none; outline: none; background: transparent;
+      font-family: 'Inter', sans-serif; font-size: 15px;
+      font-weight: 300; color: var(--text);
+      resize: none; max-height: 100px; line-height: 1.5;
+    }
+    .input-field::placeholder { color: var(--muted); }
+
+    .send-btn {
+      width: 36px; height: 36px; border-radius: 12px;
+      background: var(--accent); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: opacity 0.15s, transform 0.1s; opacity: 0.85;
+    }
+    .send-btn:active { transform: scale(0.91); opacity: 1; }
+    .send-btn svg { width: 15px; height: 15px; color: white; }
+
+    /* ── DRAWER ── */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(58,46,40,0.25); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s; z-index: 100;
+    }
+    .overlay.open { opacity: 1; pointer-events: all; }
+
+    .drawer {
+      position: fixed; top: 0; left: 0; bottom: 0;
+      width: 72%; max-width: 280px;
+      background: #fdf8f4;
+      transform: translateX(-100%);
+      transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+      z-index: 101; display: flex; flex-direction: column;
+      padding: 60px 0 40px;
+    }
+    .drawer.open { transform: translateX(0); }
+
+    .drawer-header { padding: 0 26px 24px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+    .drawer-wordmark { font-family: 'Playfair Display', serif; font-size: 18px; letter-spacing: 0.1em; color: var(--text); }
+    .drawer-tagline { font-size: 11px; color: var(--muted); margin-top: 3px; font-style: italic; }
+    .drawer-nav { flex: 1; padding: 16px 0; }
+    .drawer-item {
+      display: flex; align-items: center; gap: 13px;
+      padding: 12px 26px; font-size: 14px; font-weight: 400;
+      color: var(--text2); cursor: pointer; transition: color 0.12s;
+    }
+    .drawer-item.active { color: var(--text); font-weight: 500; }
+    .drawer-icon { font-size: 16px; width: 20px; text-align: center; opacity: 0.7; }
+    .drawer-footer { padding: 16px 26px 0; border-top: 1px solid rgba(0,0,0,0.06); font-size: 11px; color: var(--muted); font-style: italic; }
+
+    /* updated-at timestamp */
+    .updated-at { font-size: 10px; color: var(--muted); text-align: center; margin-top: -8px; letter-spacing: 0.03em; opacity: 0; transition: opacity 0.4s; }
+    .updated-at.loaded { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<div class="bg">
+  <div class="bg-base"></div>
+  <div class="glow"></div>
+</div>
+
+<div class="app">
+  <div class="topbar">
+    <div class="hamburger" onclick="toggleDrawer()">
+      <span style="width:100%"></span>
+      <span></span>
+      <span></span>
+    </div>
+    <div class="wordmark" onclick="goHome()" style="cursor:pointer">HATH</div>
+    <div class="topbar-right"></div>
+  </div>
+
+  <div class="wellbeing">
+    <span class="well-text"><span class="well-dot" id="wellDot"></span><span id="wellLabel">Checking in…</span></span>
+  </div>
+
+  <div class="body">
+    <div class="hint-area" id="hintArea">
+      <div class="hint-greeting" id="greetingText"></div>
+      <div class="hint-sub">Ask about a document, check something, or just see where things stand.</div>
+
+      <!-- Live balance peek -->
+      <div class="balance-peek" id="balancePeek">
+        <div class="peek-item">
+          <div class="peek-label">Main</div>
+          <div class="peek-value" id="peekMain">—</div>
+        </div>
+        <div class="peek-divider"></div>
+        <div class="peek-item">
+          <div class="peek-label">Matt</div>
+          <div class="peek-value" id="peekMatt">—</div>
+        </div>
+        <div class="peek-divider"></div>
+        <div class="peek-item">
+          <div class="peek-label">Jessica</div>
+          <div class="peek-value" id="peekJessica">—</div>
+        </div>
+      </div>
+
+      <div class="matt-note" id="mattNote"></div>
+
+      <div class="hint-chips">
+        <span class="chip" onclick="prefill('What does our home insurance cover?')">Home insurance</span>
+        <span class="chip" onclick="prefill('When does the car warranty expire?')">Car warranty</span>
+        <span class="chip" onclick="prefill('Are we on track this month?')">Monthly status</span>
+      </div>
+    </div>
+
+    <div class="chat-area" id="chatArea"></div>
+
+    <div class="updated-at" id="updatedAt"></div>
+
+    <div class="cancel-wrap" id="cancelWrap">
+      <button class="cancel-btn" onclick="cancelMessage()">✕ Stop</button>
+    </div>
+
+    <div class="input-wrap">
+      <textarea
+        class="input-field" id="inputField"
+        placeholder="Ask anything…" rows="1"
+        onkeydown="handleKey(event)" oninput="autoResize(this)"
+      ></textarea>
+      <button class="send-btn" onclick="sendMessage()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="19" x2="12" y2="5"/>
+          <polyline points="5 12 12 5 19 12"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-wordmark">HATH</div>
+    <div class="drawer-tagline">Household Assistant to the Higgins'</div>
+  </div>
+  <nav class="drawer-nav">
+    <div class="drawer-item active" onclick="goHome(); closeDrawer()"><span class="drawer-icon">⌂</span> Home</div>
+    <div class="drawer-item"><span class="drawer-icon">📂</span> Documents</div>
+    <div class="drawer-item"><span class="drawer-icon">💰</span> Finances</div>
+    <div class="drawer-item"><span class="drawer-icon">🔧</span> Maintenance</div>
+    <div class="drawer-item"><span class="drawer-icon">📅</span> Schedule</div>
+    <div class="drawer-item"><span class="drawer-icon">⚙️</span> Settings</div>
+  </nav>
+  <div class="drawer-footer">Built for the Higgins household</div>
+</div>
+
+<script>
+  // ── CONFIG ────────────────────────────────────────────────────
+  const API_URL = 'https://script.google.com/macros/s/AKfycbwcHPI8NxXJUFuxI-kvufgbWc9jzIzObw3m3yocccBMANqovNHkacCXXR3pAkcM0P6G2Q/exec';
+  const AI_URL  = 'https://script.google.com/macros/s/AKfycbwcHPI8NxXJUFuxI-kvufgbWc9jzIzObw3m3yocccBMANqovNHkacCXXR3pAkcM0P6G2Q/exec';
+
+  // Apps Script requires no-cors redirect following — use a JSONP-style
+  // workaround by appending callback param for GET, and for POST we
+  // route through a small fetch wrapper that handles the 302 redirect.
+  async function apsFetch(url, options = {}) {
+    // Apps Script redirects to a new URL on POST — must follow manually
+    const res = await fetch(url, { ...options, redirect: 'follow' });
+    return res.json();
+  }
+
+  // ── GREETING LIBRARY ──────────────────────────────────────────
+  const greetings = [
+    "Alright <em>Blaisie,</em> what's next?",
+    "Ready to Snap Punch some bills, <em>Blaisie?</em>",
+    "Hey <em>Blaisie.</em> What do you need?",
+    "The house is yours, <em>Blaisie.</em> What's up?",
+    "Six-sided star incoming — what can I help with, <em>Blaisie?</em>",
+    "Your gil's safe. What else, <em>Blaisie?</em>",
+    "What's on your mind, <em>Blaisie?</em>",
+  ];
+
+  document.getElementById('greetingText').innerHTML =
+    greetings[Math.floor(Math.random() * greetings.length)];
+
+  // ── LOAD LIVE DATA ────────────────────────────────────────────
+  async function loadData() {
+    try {
+      const res = await fetch(API_URL, { redirect: 'follow' });
+      const data = await res.json();
+
+      if (data.error) {
+        console.warn('HATH API error:', data.error);
+        setWellbeing('OK');
+        return;
+      }
+
+      // Balances
+      if (data.balances) {
+        document.getElementById('peekMain').textContent    = data.balances.main    || '—';
+        document.getElementById('peekMatt').textContent    = data.balances.matt    || '—';
+        document.getElementById('peekJessica').textContent = data.balances.jessica || '—';
+        document.getElementById('balancePeek').classList.add('loaded');
+      }
+
+      // Status / wellbeing
+      setWellbeing(data.status?.label || 'OK');
+
+      // Note from Matt
+      if (data.status?.note) {
+        const noteEl = document.getElementById('mattNote');
+        noteEl.innerHTML = `<strong>Note from Matt:</strong> ${data.status.note}`;
+        noteEl.classList.add('loaded');
+      }
+
+      // Last updated
+      if (data.meta?.updated) {
+        const el = document.getElementById('updatedAt');
+        el.textContent = `Last updated ${data.meta.updated}`;
+        el.classList.add('loaded');
+      }
+
+    } catch (err) {
+      console.warn('Could not load HATH data:', err);
+      setWellbeing('OK'); // fail gracefully, don't hang
+    }
+  }
+
+  function setWellbeing(status) {
+    const dot   = document.getElementById('wellDot');
+    const label = document.getElementById('wellLabel');
+    const s = (status || 'OK').toString().toUpperCase();
+
+    if (s === 'WATCH' || s === 'WARN') {
+      dot.className = 'well-dot warn';
+      label.textContent = 'Worth a look';
+    } else if (s === 'NO' || s === 'ALERT') {
+      dot.className = 'well-dot alert';
+      label.textContent = 'Needs attention';
+    } else {
+      dot.className = 'well-dot';
+      label.textContent = 'Everything looks fine';
+    }
+  }
+
+  loadData();
+
+  // ── DRAWER ────────────────────────────────────────────────────
+  function toggleDrawer() {
+    document.getElementById('drawer').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('open');
+  }
+  function closeDrawer() {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
+  }
+
+  // ── INPUT ─────────────────────────────────────────────────────
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+  }
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  }
+  function prefill(text) {
+    const f = document.getElementById('inputField');
+    f.value = text; f.focus(); autoResize(f);
+  }
+
+  // ── NAVIGATION ────────────────────────────────────────────────
+  function goHome() {
+    document.getElementById('chatArea').style.display = 'none';
+    document.getElementById('hintArea').style.display = 'flex';
+    document.getElementById('updatedAt').style.display = '';
+    document.querySelector('.body').classList.remove('chat-mode');
+    conversationHistory.length = 0;
+    document.getElementById('greetingText').innerHTML =
+      greetings[Math.floor(Math.random() * greetings.length)];
+  }
+
+  // ── STATE ─────────────────────────────────────────────────────
+  let isSending = false;
+  let activeController = null;
+  const conversationHistory = [];
+
+  // ── CANCEL ────────────────────────────────────────────────────
+  function cancelMessage() {
+    if (activeController) {
+      activeController.abort();
+      activeController = null;
+    }
+    // Remove typing indicator if present
+    const typing = document.getElementById('typingIndicator');
+    if (typing) typing.remove();
+    document.getElementById('cancelWrap').classList.remove('visible');
+    isSending = false;
+  }
+
+  // ── CHAT ──────────────────────────────────────────────────────
+  async function sendMessage() {
+    const f = document.getElementById('inputField');
+    const text = f.value.trim();
+    if (!text || isSending) return;
+
+    isSending = true;
+    activeController = new AbortController();
+    document.getElementById('cancelWrap').classList.add('visible');
+    document.getElementById('hintArea').style.display = 'none';
+    document.getElementById('updatedAt').style.display = 'none';
+    const chat = document.getElementById('chatArea');
+    chat.style.display = 'flex';
+    chat.style.flexDirection = 'column';
+    document.querySelector('.body').classList.add('chat-mode');
+
+    addBubble(text, 'user');
+    conversationHistory.push({ role: 'user', content: text });
+    f.value = ''; f.style.height = 'auto';
+
+    const typing = document.createElement('div');
+    typing.className = 'typing';
+    typing.id = 'typingIndicator';
+    typing.innerHTML = '<span></span><span></span><span></span>';
+    chat.appendChild(typing);
+    requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
+
+    try {
+      const res = await fetch(AI_URL, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ message: text }),
+        signal: activeController.signal
+      });
+      const data = await res.json();
+      typing.remove();
+      document.getElementById('cancelWrap').classList.remove('visible');
+
+      const reply = data.reply || data.error || "Something went wrong. Try again?";
+      addBubble(reply, 'hath');
+      conversationHistory.push({ role: 'assistant', content: reply });
+
+    } catch (err) {
+      typing.remove();
+      document.getElementById('cancelWrap').classList.remove('visible');
+      if (err.name !== 'AbortError') {
+        addBubble("I couldn't connect right now. Check your connection and try again.", 'hath');
+      }
+    }
+
+    activeController = null;
+    isSending = false;
+  }
+
+  function addBubble(text, who) {
+    const chat = document.getElementById('chatArea');
+    const b = document.createElement('div');
+    b.className = `bubble ${who}`;
+    if (who === 'hath') {
+      // Convert basic markdown to HTML
+      const html = text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/`(.*?)`/g, '<code>$1</code>')
+        .replace(/\n/g, '<br>');
+      b.innerHTML = `<div class="bubble-name">HATH</div>${html}`;
+    } else {
+      b.textContent = text;
+    }
+    chat.appendChild(b);
+    // Force scroll after paint
+    requestAnimationFrame(() => {
+      chat.scrollTop = chat.scrollHeight;
+    });
+  }
+</script>
+</body>
+</html>
