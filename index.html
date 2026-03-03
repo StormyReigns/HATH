@@ -97,7 +97,59 @@ html, body {
   50%       { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
 }
 
-/* ── APP SHELL ── */
+/* ── BLATHERS ── */
+.blathers-idle {
+  width: 160px; height: 160px;
+  object-fit: contain;
+  animation: blathersBob 4s ease-in-out infinite;
+  filter: drop-shadow(0 8px 20px rgba(100,70,40,0.12));
+}
+
+@keyframes blathersBob {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+.blathers-startled {
+  width: 160px; height: 160px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 20px rgba(100,70,40,0.12));
+  animation: blathersStartle 0.4s ease-out forwards;
+}
+
+@keyframes blathersStartle {
+  0%   { transform: scale(0.8) rotate(-5deg); opacity: 0.5; }
+  60%  { transform: scale(1.1) rotate(3deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* Avatar next to chat bubbles */
+.bubble-row {
+  display: flex; align-items: flex-end; gap: 8px;
+  align-self: flex-start; max-width: 92%;
+}
+
+.bubble-avatar {
+  width: 36px; height: 36px;
+  object-fit: contain; flex-shrink: 0;
+  filter: drop-shadow(0 2px 6px rgba(100,70,40,0.15));
+  transition: opacity 0.2s;
+}
+
+/* ── LOGIN BLAISIE ── */
+.login-blaisie {
+  width: 130px; height: 130px;
+  object-fit: contain;
+  animation: blathersBob 4s ease-in-out infinite;
+  filter: drop-shadow(0 8px 24px rgba(100,70,40,0.15));
+  opacity: 0;
+  animation: blaisieEntrance 0.6s ease 0.5s forwards, blathersBob 4s ease-in-out 1.1s infinite;
+}
+
+@keyframes blaisieEntrance {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 .app {
   position: relative; z-index: 1;
   max-width: 420px; margin: 0 auto;
@@ -375,6 +427,9 @@ html, body {
 
 <div class="login-screen" id="loginScreen">
   <div class="login-wordmark">HATH</div>
+  <img class="login-blaisie"
+       src="https://stormyreigns.github.io/HATH/IMG_7931.png"
+       alt="Blaisie">
   <div class="login-tagline">Household Assistant to the Higgins'</div>
   <div class="login-btn-wrap">
     <div id="googleSignInBtn"></div>
@@ -404,6 +459,9 @@ html, body {
 
   <div class="body">
     <div class="hint-area" id="hintArea">
+      <img id="blathersIdle" class="blathers-idle"
+           src="https://stormyreigns.github.io/HATH/IMG_7941.jpeg"
+           alt="Blathers">
       <div class="hint-greeting" id="greetingText"></div>
       <div class="hint-sub">Ask about a document, check something, or just see where things stand.</div>
 
@@ -658,6 +716,7 @@ html, body {
     document.getElementById('updatedAt').style.display = '';
     document.querySelector('.body').classList.remove('chat-mode');
     conversationHistory.length = 0;
+    setBlathers('sleep');
     document.getElementById('greetingText').innerHTML =
       greetings[Math.floor(Math.random() * greetings.length)];
   }
@@ -690,6 +749,10 @@ html, body {
     activeController = new AbortController();
     document.getElementById('cancelWrap').classList.add('visible');
     document.getElementById('hintArea').style.display = 'none';
+
+    // Blathers wakes up startled, then settles into thinking
+    setBlathers('startled');
+    setTimeout(() => setBlathers('thinking'), 600);
     document.getElementById('updatedAt').style.display = 'none';
     const chat = document.getElementById('chatArea');
     chat.style.display = 'flex';
@@ -735,26 +798,71 @@ html, body {
     isSending = false;
   }
 
-  function addBubble(text, who) {
+  // ── BLATHERS EMOTIONS ─────────────────────────────────────────
+  const BLATHERS = {
+    sleep:    'https://stormyreigns.github.io/HATH/IMG_7941.jpeg',
+    startled: 'https://stormyreigns.github.io/HATH/IMG_7931.png',
+    thinking: 'https://stormyreigns.github.io/HATH/IMG_7939.webp',
+    happy:    'https://stormyreigns.github.io/HATH/IMG_7943.png',
+    clever:   'https://stormyreigns.github.io/HATH/IMG_7938.png',
+    uncertain:'https://stormyreigns.github.io/HATH/IMG_7937.png',
+    announce: 'https://stormyreigns.github.io/HATH/IMG_7942.png'
+  };
+
+  function setBlathers(emotion) {
+    const img = document.getElementById('blathersIdle');
+    if (!img) return;
+    img.src = BLATHERS[emotion] || BLATHERS.sleep;
+    img.className = emotion === 'startled' ? 'blathers-startled' : 'blathers-idle';
+  }
+
+  function addBubble(text, who, emotion) {
     const chat = document.getElementById('chatArea');
-    const b = document.createElement('div');
-    b.className = `bubble ${who}`;
+
     if (who === 'hath') {
-      // Convert basic markdown to HTML
+      // Parse emotion tag from response e.g. [HAPPY] or [UNCERTAIN]
+      let resolvedEmotion = emotion || 'happy';
+      const tagMatch = text.match(/^\[(HAPPY|CLEVER|UNCERTAIN|ANNOUNCE|THINKING)\]\s*/i);
+      if (tagMatch) {
+        resolvedEmotion = tagMatch[1].toLowerCase();
+        text = text.replace(tagMatch[0], '');
+      }
+
+      // Update Blathers avatar
+      setBlathers(resolvedEmotion);
+
+      // Convert markdown to HTML
       const html = text
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.*?)\*/g, '<em>$1</em>')
         .replace(/`(.*?)`/g, '<code>$1</code>')
         .replace(/\n/g, '<br>');
-      b.innerHTML = `<div class="bubble-name">HATH</div>${html}`;
+
+      // Wrap bubble + avatar in a row
+      const row = document.createElement('div');
+      row.className = 'bubble-row';
+
+      const avatar = document.createElement('img');
+      avatar.src = BLATHERS[resolvedEmotion] || BLATHERS.happy;
+      avatar.className = 'bubble-avatar';
+      avatar.alt = 'Blathers';
+
+      const b = document.createElement('div');
+      b.className = 'bubble hath';
+      b.innerHTML = html;
+
+      row.appendChild(avatar);
+      row.appendChild(b);
+      chat.appendChild(row);
+
     } else {
+      const b = document.createElement('div');
+      b.className = 'bubble user';
       b.textContent = text;
+      chat.appendChild(b);
     }
-    chat.appendChild(b);
-    // Force scroll after paint
-    requestAnimationFrame(() => {
-      chat.scrollTop = chat.scrollHeight;
-    });
+
+    requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
   }
 </script>
 
