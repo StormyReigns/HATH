@@ -9,6 +9,7 @@
   <title>HATH</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -28,10 +29,7 @@
 
     /* ── BREATHING GLOW BACKGROUND ── */
     .bg { position: fixed; inset: 0; z-index: 0; }
-    .bg-base {
-      position: absolute; inset: 0;
-      background: #fdf8f4;
-    }
+    .bg-base { position: absolute; inset: 0; background: #fdf8f4; }
 
     .glow {
       position: absolute;
@@ -48,6 +46,49 @@
       );
       animation: breathe 8s ease-in-out infinite;
     }
+
+    @keyframes breathe {
+      0%, 100% { transform: translate(-50%, -50%) scale(0.85); opacity: 0.7; }
+      50%       { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+    }
+
+    /* ── LOGIN SCREEN ── */
+    .login-screen {
+      position: fixed; inset: 0; z-index: 50;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 20px; padding: 40px;
+    }
+
+    .login-wordmark {
+      font-family: 'Playfair Display', serif;
+      font-size: 42px; letter-spacing: 0.15em;
+      color: var(--text); font-weight: 400;
+      opacity: 0;
+      animation: fadeUp 0.7s ease 0.2s forwards;
+    }
+
+    .login-tagline {
+      font-size: 13px; color: var(--text2);
+      letter-spacing: 0.04em; font-style: italic;
+      opacity: 0;
+      animation: fadeUp 0.7s ease 0.4s forwards;
+    }
+
+    .login-btn-wrap {
+      margin-top: 16px;
+      opacity: 0;
+      animation: fadeUp 0.7s ease 0.6s forwards;
+    }
+
+    .login-denied {
+      font-size: 13px; color: #c05050;
+      text-align: center; max-width: 240px;
+      line-height: 1.5; display: none;
+    }
+
+    /* ── APP SCREEN (hidden until authed) ── */
+    .app-screen { display: none; }
 
     @keyframes breathe {
       0%, 100% { transform: translate(-50%, -50%) scale(0.85); opacity: 0.7; }
@@ -326,6 +367,20 @@
   <div class="glow"></div>
 </div>
 
+<!-- ── LOGIN SCREEN ── -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-wordmark">HATH</div>
+  <div class="login-tagline">Household Assistant to the Higgins'</div>
+  <div class="login-btn-wrap">
+    <div id="googleSignInBtn"></div>
+  </div>
+  <div class="login-denied" id="loginDenied">
+    This account doesn't have access to HATH. Please sign in with your Higgins household account.
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div class="app-screen" id="appScreen">
 <div class="app">
   <div class="topbar">
     <div class="hamburger" onclick="toggleDrawer()">
@@ -395,7 +450,8 @@
       </button>
     </div>
   </div>
-</div>
+</div><!-- end .app -->
+</div><!-- end .app-screen -->
 
 <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer">
@@ -415,6 +471,59 @@
 </div>
 
 <script>
+  // ── AUTH ──────────────────────────────────────────────────────
+  const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
+  const ALLOWED_USERS = ['whiskerwallmatt@gmail.com', 'jessicafisher407@gmail.com'];
+
+  function handleCredentialResponse(response) {
+    // Decode the JWT to get email
+    const payload = JSON.parse(atob(response.credential.split('.')[1]));
+    const email   = payload.email?.toLowerCase();
+
+    if (ALLOWED_USERS.includes(email)) {
+      // Personalise greeting based on who logged in
+      if (email === 'jessicafisher407@gmail.com') {
+        // Keep Blaisie greetings as-is
+      } else {
+        // Matt — swap in his greetings
+        greetings.length = 0;
+        greetings.push(
+          "Hey <em>Matt,</em> what do you need?",
+          "What's up, <em>Matt?</em>",
+          "Ready when you are, <em>Matt.</em>",
+          "What can I help with, <em>Matt?</em>"
+        );
+      }
+
+      document.getElementById('loginScreen').style.display  = 'none';
+      document.getElementById('appScreen').style.display    = 'block';
+      document.getElementById('greetingText').innerHTML =
+        greetings[Math.floor(Math.random() * greetings.length)];
+      loadData();
+
+    } else {
+      document.getElementById('loginDenied').style.display = 'block';
+    }
+  }
+
+  window.onload = function() {
+    google.accounts.id.initialize({
+      client_id: CLIENT_ID,
+      callback:  handleCredentialResponse,
+      auto_select: true  // auto signs in if only one account and previously consented
+    });
+    google.accounts.id.renderButton(
+      document.getElementById('googleSignInBtn'),
+      {
+        theme: 'outline',
+        size:  'large',
+        shape: 'pill',
+        text:  'signin_with'
+      }
+    );
+    google.accounts.id.prompt(); // show One Tap if available
+  };
+
   // ── CONFIG ────────────────────────────────────────────────────
   const API_URL = 'https://script.google.com/macros/s/AKfycbwcHPI8NxXJUFuxI-kvufgbWc9jzIzObw3m3yocccBMANqovNHkacCXXR3pAkcM0P6G2Q/exec';
   const AI_URL  = 'https://script.google.com/macros/s/AKfycbwcHPI8NxXJUFuxI-kvufgbWc9jzIzObw3m3yocccBMANqovNHkacCXXR3pAkcM0P6G2Q/exec';
@@ -438,9 +547,7 @@
     "Your gil's safe. What else, <em>Blaisie?</em>",
     "What's on your mind, <em>Blaisie?</em>",
   ];
-
-  document.getElementById('greetingText').innerHTML =
-    greetings[Math.floor(Math.random() * greetings.length)];
+  // Greeting is set after auth — see handleCredentialResponse
 
   // ── LOAD LIVE DATA ────────────────────────────────────────────
   async function loadData() {
@@ -502,7 +609,7 @@
     }
   }
 
-  loadData();
+  loadData(); // called by auth on login
 
   // ── DRAWER ────────────────────────────────────────────────────
   function toggleDrawer() {
