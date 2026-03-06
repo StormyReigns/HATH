@@ -623,6 +623,63 @@
 
     /* Overscroll prevention on scrollable areas */
     .body, .chat-area { overscroll-behavior: none; }
+
+    /* ── DOCUMENTS SCREEN ── */
+    .sub-screen {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      width: 100%;
+      overflow: hidden;
+    }
+    .sub-screen.visible {
+      display: flex;
+    }
+    .screen-breadcrumb {
+      font-size: 11px; color: var(--muted);
+      padding: 8px 0 12px;
+      flex-shrink: 0;
+    }
+    .screen-breadcrumb span {
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--text2);
+    }
+    .screen-breadcrumb span:hover { color: var(--accent); }
+    .screen-breadcrumb .sep { margin: 0 6px; color: var(--muted); cursor: default; }
+    .screen-list {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .screen-list::-webkit-scrollbar { display: none; }
+    .screen-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 4px;
+      font-size: 14px;
+      color: var(--text);
+      cursor: pointer;
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+      font-weight: 300;
+    }
+    .screen-item:active { background: rgba(192,122,74,0.06); }
+    .screen-item-icon { font-size: 18px; opacity: 0.7; }
+    .screen-item-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .screen-footer {
+      padding: 16px 0;
+      font-size: 12px;
+      text-align: center;
+    }
+    .screen-footer a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(192,122,74,0.3);
+    }
+    .screen-footer a:active { opacity: 0.8; }
+    .screen-loading { text-align: center; padding: 24px; color: var(--muted); font-size: 13px; }
   </style>
 </head>
 <body>
@@ -709,8 +766,22 @@
 
     <div class="chat-area" id="chatArea"></div>
 
+    <!-- Documents screen -->
+    <div class="sub-screen" id="documentsScreen">
+      <div class="screen-breadcrumb" id="docsBreadcrumb"></div>
+      <div class="screen-list" id="docsList"></div>
+    </div>
+
+    <!-- Schedule screen -->
+    <div class="sub-screen" id="scheduleScreen">
+      <div class="screen-list" id="scheduleList"></div>
+      <div class="screen-footer">
+        <a href="https://calendar.google.com" target="_blank" rel="noopener">Open in Google Calendar</a>
+      </div>
+    </div>
+
     <!-- Blathers overlaps the input bar, associated with chat -->
-    <div class="input-zone">
+    <div class="input-zone" id="inputZone">
       <div class="blathers-wrap" id="blathersWrap">
         <img id="blathersIdle" class="blathers-idle"
              src="https://stormyreigns.github.io/HATH/IMG_7941.png"
@@ -747,10 +818,10 @@
   </div>
   <nav class="drawer-nav">
     <div class="drawer-item active" onclick="goHome(); closeDrawer()"><span class="drawer-icon">⌂</span> Home</div>
-    <div class="drawer-item"><span class="drawer-icon">📂</span> Documents</div>
+    <div class="drawer-item" onclick="showDocumentsScreen(); closeDrawer()"><span class="drawer-icon">📂</span> Documents</div>
     <div class="drawer-item"><span class="drawer-icon">💰</span> Finances</div>
     <div class="drawer-item"><span class="drawer-icon">🔧</span> Maintenance</div>
-    <div class="drawer-item"><span class="drawer-icon">📅</span> Schedule</div>
+    <div class="drawer-item" onclick="showScheduleScreen(); closeDrawer()"><span class="drawer-icon">📅</span> Schedule</div>
     <div class="drawer-item"><span class="drawer-icon">⚙️</span> Settings</div>
   </nav>
   <div class="drawer-footer">Built for your home</div>
@@ -848,8 +919,9 @@
   };
 
   // ── CONFIG ────────────────────────────────────────────────────
-  const API_URL = 'https://script.google.com/macros/s/AKfycbx1XJ3oSPoTBWGWzkxd5XEyaGXkhiZXhdMmcIQmThaJoV4HYxfO4jHd6L_pMeUDHD4GMA/exec';
-  const AI_URL  = 'https://script.google.com/macros/s/AKfycbx1XJ3oSPoTBWGWzkxd5XEyaGXkhiZXhdMmcIQmThaJoV4HYxfO4jHd6L_pMeUDHD4GMA/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbx1q4Puxg_yLhCEvxD_1CR6-O7ETZKxS5ruDHC-TxjLgn-z1x4V9-QK_axHuArU9xnWJQ/exec';
+  const AI_URL  = 'https://script.google.com/macros/s/AKfycbx1q4Puxg_yLhCEvxD_1CR6-O7ETZKxS5ruDHC-TxjLgn-z1x4V9-QK_axHuArU9xnWJQ/exec';
+  const DOCS_FOLDER_ID = '1UTVAmNx854R9a1YqTPPlZ1gA_V9nUulI';
 
   // Apps Script requires no-cors redirect following — use a JSONP-style
   // workaround by appending callback param for GET, and for POST we
@@ -1054,12 +1126,169 @@
   function goHome() {
     document.getElementById('chatArea').style.display = 'none';
     document.getElementById('hintArea').style.display = 'flex';
+    document.getElementById('documentsScreen').classList.remove('visible');
+    document.getElementById('scheduleScreen').classList.remove('visible');
+    document.getElementById('inputZone').style.display = 'flex';
     document.getElementById('updatedAt').style.display = '';
     document.querySelector('.body').classList.remove('chat-mode');
+    document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
+    document.querySelector('.drawer-item:first-child').classList.add('active');
     conversationHistory.length = 0;
     setBlathers('sleep');
     document.getElementById('greetingText').innerHTML =
       greetings[Math.floor(Math.random() * greetings.length)];
+  }
+
+  function showSubScreen(screenId) {
+    document.getElementById('hintArea').style.display = 'none';
+    document.getElementById('chatArea').style.display = 'none';
+    document.getElementById('documentsScreen').classList.remove('visible');
+    document.getElementById('scheduleScreen').classList.remove('visible');
+    document.getElementById(screenId).classList.add('visible');
+    document.getElementById('inputZone').style.display = 'none';
+    document.getElementById('updatedAt').style.display = 'none';
+    document.querySelector('.body').classList.add('chat-mode');
+  }
+
+  let docsBreadcrumb = [{ id: DOCS_FOLDER_ID, name: 'Shasta Docs' }];
+
+  async function loadFolderContents(folderId) {
+    const list = document.getElementById('docsList');
+    list.innerHTML = '<div class="screen-loading">Loading…</div>';
+    try {
+      const url = `${API_URL}?action=listFolder&folder=${encodeURIComponent(folderId)}`;
+      const res = await fetch(url, { redirect: 'follow' });
+      const data = await res.json();
+      list.innerHTML = '';
+      if (data.error) {
+        list.innerHTML = '<div class="screen-loading">Could not load folder.</div>';
+        return;
+      }
+      const folders = data.folders || [];
+      const files = data.files || [];
+      folders.forEach(f => {
+        const div = document.createElement('div');
+        div.className = 'screen-item';
+        div.innerHTML = `<span class="screen-item-icon">📁</span><span class="screen-item-name">${escapeHtml(f.name)}</span>`;
+        div.onclick = () => openDocsFolder(f.id, f.name);
+        list.appendChild(div);
+      });
+      files.forEach(f => {
+        const div = document.createElement('div');
+        div.className = 'screen-item';
+        div.innerHTML = `<span class="screen-item-icon">📄</span><span class="screen-item-name">${escapeHtml(f.name)}</span>`;
+        div.onclick = () => { if (f.url) window.open(f.url, '_blank'); };
+        list.appendChild(div);
+      });
+      if (folders.length === 0 && files.length === 0) {
+        list.innerHTML = '<div class="screen-loading">This folder is empty.</div>';
+      }
+    } catch (err) {
+      list.innerHTML = '<div class="screen-loading">Could not load folder.</div>';
+    }
+  }
+
+  function openDocsFolder(folderId, folderName) {
+    const idx = docsBreadcrumb.findIndex(b => b.id === folderId);
+    if (idx >= 0) {
+      docsBreadcrumb = docsBreadcrumb.slice(0, idx + 1);
+    } else {
+      docsBreadcrumb.push({ id: folderId, name: folderName });
+    }
+    renderDocsBreadcrumb();
+    loadFolderContents(folderId);
+  }
+
+  function renderDocsBreadcrumb() {
+    const el = document.getElementById('docsBreadcrumb');
+    el.innerHTML = '';
+    docsBreadcrumb.forEach((b, i) => {
+      if (i > 0) {
+        const sep = document.createElement('span');
+        sep.className = 'sep';
+        sep.textContent = ' › ';
+        el.appendChild(sep);
+      }
+      const span = document.createElement('span');
+      span.textContent = b.name;
+      span.onclick = () => {
+        docsBreadcrumb = docsBreadcrumb.slice(0, i + 1);
+        renderDocsBreadcrumb();
+        loadFolderContents(b.id);
+      };
+      el.appendChild(span);
+    });
+  }
+
+  function showDocumentsScreen() {
+    showSubScreen('documentsScreen');
+    docsBreadcrumb = [{ id: DOCS_FOLDER_ID, name: 'Shasta Docs' }];
+    renderDocsBreadcrumb();
+    loadFolderContents(DOCS_FOLDER_ID);
+    document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
+    document.querySelector('.drawer-item:nth-child(2)').classList.add('active');
+  }
+
+  async function showScheduleScreen() {
+    showSubScreen('scheduleScreen');
+    document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
+    document.querySelector('.drawer-item:nth-child(5)').classList.add('active');
+    const list = document.getElementById('scheduleList');
+    list.innerHTML = '<div class="screen-loading">Loading…</div>';
+    const user = localStorage.getItem('shasta_user');
+    if (!user) {
+      list.innerHTML = '<div class="screen-loading">Sign in to see your schedule.</div>';
+      return;
+    }
+    try {
+      const url = `${API_URL}?action=calendar&user=${encodeURIComponent(user)}&days=30`;
+      const res = await fetch(url, { redirect: 'follow' });
+      const data = await res.json();
+      list.innerHTML = '';
+      if (data.error || !data.events || data.events.length === 0) {
+        list.innerHTML = '<div class="screen-loading">No upcoming events.</div>';
+        return;
+      }
+      const byDate = {};
+      data.events.forEach(ev => {
+        const d = new Date(ev.start);
+        const key = d.toDateString();
+        if (!byDate[key]) byDate[key] = [];
+        byDate[key].push(ev);
+      });
+      const keys = Object.keys(byDate).sort((a, b) => new Date(a) - new Date(b));
+      keys.forEach(key => {
+        const events = byDate[key];
+        const d = new Date(key);
+        const label = key === new Date().toDateString() ? 'Today' : key === new Date(Date.now() + 86400000).toDateString() ? 'Tomorrow' : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        const header = document.createElement('div');
+        header.className = 'screen-item';
+        header.style.fontWeight = '500';
+        header.style.color = 'var(--muted)';
+        header.style.fontSize = '11px';
+        header.style.letterSpacing = '0.08em';
+        header.style.textTransform = 'uppercase';
+        header.style.cursor = 'default';
+        header.textContent = label;
+        header.onclick = () => {};
+        list.appendChild(header);
+        events.forEach(ev => {
+          const div = document.createElement('div');
+          div.className = 'screen-item';
+          const time = ev.start ? formatEventTime(ev.start) : '';
+          div.innerHTML = `<span class="screen-item-icon">📅</span><span class="screen-item-name">${escapeHtml(ev.title)}</span><span style="font-size:12px;color:var(--muted)">${time}</span>`;
+          div.onclick = () => { if (ev.url) window.open(ev.url, '_blank'); };
+          list.appendChild(div);
+        });
+      });
+    } catch (err) {
+      list.innerHTML = '<div class="screen-loading">Could not load schedule.</div>';
+    }
+  }
+
+  function formatEventTime(s) {
+    const d = new Date(s);
+    return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
   }
 
   // ── STATE ─────────────────────────────────────────────────────
