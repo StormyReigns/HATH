@@ -185,15 +185,15 @@
       height: 100px;
     }
 
-    /* When drawer opens: Blathers startled + pinched to the right */
+    /* When drawer opens: Blathers startled + pushed into visible strip (right of drawer) */
     body.drawer-open .input-zone {
-      transform: translateX(12%);
+      transform: translateX(min(72vw, 280px));
       transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     body.drawer-open .blathers-wrap img {
       animation: none;
-      transform: scaleX(0.85);
+      transform: scaleX(0.88);
       transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -559,7 +559,7 @@
     <div class="input-zone">
       <div class="blathers-wrap" id="blathersWrap">
         <img id="blathersIdle" class="blathers-idle"
-             src="https://stormyreigns.github.io/HATH/IMG_7941.jpeg"
+             src="https://stormyreigns.github.io/HATH/IMG_7941.png"
              alt="Blathers">
       </div>
       <div class="input-wrap">
@@ -896,7 +896,7 @@
 
   // ── BLATHERS EMOTIONS ─────────────────────────────────────────
   const BLATHERS = {
-    sleep:    'https://stormyreigns.github.io/HATH/IMG_7941.jpeg',
+    sleep:    'https://stormyreigns.github.io/HATH/IMG_7941.png',
     startled: 'https://stormyreigns.github.io/HATH/IMG_7931.png',
     thinking: 'https://stormyreigns.github.io/HATH/IMG_7939.webp',
     happy:    'https://stormyreigns.github.io/HATH/IMG_7943.png',
