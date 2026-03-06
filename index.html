@@ -6,7 +6,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#fdf6f0">
-  <title>HATH</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="https://stormyreigns.github.io/HATH/ShastaApp.png">
+  <title>Shasta</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async></script>
@@ -466,6 +468,10 @@
       height: 100px;
       z-index: 10;
       pointer-events: none;
+      visibility: hidden;
+    }
+    .drawer.open .drawer-blathers {
+      visibility: visible;
     }
     .drawer-blathers img {
       width: 100%;
@@ -505,16 +511,16 @@
 
 <!-- ── LOGIN SCREEN ── -->
 <div class="login-screen" id="loginScreen">
-  <div class="login-wordmark">HATH</div>
+  <div class="login-wordmark">Shasta</div>
   <img class="login-blaisie"
        src="https://stormyreigns.github.io/HATH/D76D3F44-9946-43EE-A9EA-29E164110C98.jpeg"
        alt="Blaisie">
-  <div class="login-tagline">Household Assistant to the Higgins'</div>
+  <div class="login-tagline">Managed by Shasta</div>
   <div class="login-btn-wrap">
     <div id="googleSignInBtn"></div>
   </div>
   <div class="login-denied" id="loginDenied">
-    This account doesn't have access to HATH. Please sign in with your Higgins household account.
+    This account doesn't have access to Shasta. Please sign in with your Higgins household account.
   </div>
 </div>
 
@@ -527,7 +533,7 @@
       <span></span>
       <span></span>
     </div>
-    <div class="wordmark" onclick="goHome()" style="cursor:pointer">HATH</div>
+    <div class="wordmark" onclick="goHome()" style="cursor:pointer">Shasta</div>
     <div class="topbar-right"></div>
   </div>
 
@@ -602,8 +608,8 @@
 <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer">
   <div class="drawer-header">
-    <div class="drawer-wordmark">HATH</div>
-    <div class="drawer-tagline">Household Assistant to the Higgins'</div>
+    <div class="drawer-wordmark">Shasta</div>
+    <div class="drawer-tagline">Managed by Shasta</div>
   </div>
   <nav class="drawer-nav">
     <div class="drawer-item active" onclick="goHome(); closeDrawer()"><span class="drawer-icon">⌂</span> Home</div>
@@ -613,7 +619,7 @@
     <div class="drawer-item"><span class="drawer-icon">📅</span> Schedule</div>
     <div class="drawer-item"><span class="drawer-icon">⚙️</span> Settings</div>
   </nav>
-  <div class="drawer-footer">Built for the Higgins household</div>
+  <div class="drawer-footer">Built for your home</div>
   <div class="drawer-blathers" id="drawerBlathersWrap">
     <img id="blathersDrawer" src="https://stormyreigns.github.io/HATH/IMG_7941.png" alt="Blathers" class="blathers-idle">
   </div>
@@ -630,8 +636,8 @@
 
     if (ALLOWED_USERS.includes(email)) {
       // Remember this user for 30 days
-      localStorage.setItem('hath_user', email);
-      localStorage.setItem('hath_auth_exp', Date.now() + (30 * 24 * 60 * 60 * 1000));
+      localStorage.setItem('shasta_user', email);
+      localStorage.setItem('shasta_auth_exp', Date.now() + (30 * 24 * 60 * 60 * 1000));
       launchApp(email);
     } else {
       document.getElementById('loginDenied').style.display = 'block';
@@ -660,8 +666,8 @@
 
   window.onload = function() {
     // Check for remembered session first
-    const savedUser = localStorage.getItem('hath_user');
-    const savedExp  = localStorage.getItem('hath_auth_exp');
+    const savedUser = localStorage.getItem('shasta_user');
+    const savedExp  = localStorage.getItem('shasta_auth_exp');
 
     if (savedUser && savedExp && Date.now() < parseInt(savedExp)) {
       launchApp(savedUser);
@@ -713,7 +719,7 @@
       const data = await res.json();
 
       if (data.error) {
-        console.warn('HATH API error:', data.error);
+        console.warn('Shasta API error:', data.error);
         setWellbeing('OK');
         return;
       }
@@ -744,7 +750,7 @@
       }
 
     } catch (err) {
-      console.warn('Could not load HATH data:', err);
+      console.warn('Could not load Shasta data:', err);
       setWellbeing('OK'); // fail gracefully, don't hang
     }
   }
