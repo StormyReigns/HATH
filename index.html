@@ -1161,8 +1161,8 @@
   };
 
   // ── CONFIG ────────────────────────────────────────────────────
-  const API_URL = 'https://script.google.com/macros/s/AKfycbxHjzbxX4lirdppykjF17KQFdLjRsHr5T20K0QNZZDRZFdGCEk_3EjQOrIsyjMxZpYgRA/exec';
-  const AI_URL  = 'https://script.google.com/macros/s/AKfycbxHjzbxX4lirdppykjF17KQFdLjRsHr5T20K0QNZZDRZFdGCEk_3EjQOrIsyjMxZpYgRA/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbzcyxkkOnYbJGsveFVU8_sH2PINGBVJ0SAnSPtsfAmHJYVudbzIbped2nmGJB_CkZFL0Q/exec';
+  const AI_URL  = 'https://script.google.com/macros/s/AKfycbzcyxkkOnYbJGsveFVU8_sH2PINGBVJ0SAnSPtsfAmHJYVudbzIbped2nmGJB_CkZFL0Q/exec';
   // Must match your Shasta Docs folder: open it in Drive, copy ID from URL (after /folders/)
   const DOCS_FOLDER_ID = '1UTVAmNx854R9a1YqTPPlZ1gA_V9nUulI';
 
@@ -1579,7 +1579,7 @@
       const res = await fetch(API_URL, {
         method: 'POST',
         redirect: 'follow',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({
           action: 'upload',
           folderId,
@@ -1588,7 +1588,12 @@
           mimeType: mimeType || 'application/octet-stream'
         })
       });
-      const data = await res.json();
+      const raw = await res.text();
+      let data;
+      try { data = JSON.parse(raw); } catch (_) {
+        showDocsToast('Upload failed: Invalid response', true);
+        return;
+      }
       showDocsLoading(false);
       if (data.error) {
         showDocsToast('Upload failed: ' + (data.error || 'Unknown error'), true);
@@ -1611,7 +1616,7 @@
       const res = await fetch(API_URL, {
         method: 'POST',
         redirect: 'follow',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({
           action: 'createDoc',
           folderId,
@@ -1619,7 +1624,13 @@
           text
         })
       });
-      const data = await res.json();
+      const raw = await res.text();
+      let data;
+      try { data = JSON.parse(raw); } catch (_) {
+        showDocsLoading(false);
+        showDocsToast('Failed: Invalid response', true);
+        return;
+      }
       showDocsLoading(false);
       if (data.error) {
         showDocsToast('Failed: ' + (data.error || 'Unknown error'), true);
@@ -1796,11 +1807,15 @@
       const res = await fetch(AI_URL, {
         method: 'POST',
         redirect: 'follow',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ message: text, history: history }),
         signal: activeController.signal
       });
-      const data = await res.json();
+      const text2 = await res.text();
+      let data;
+      try { data = JSON.parse(text2); } catch (_) {
+        throw new Error('Invalid response from server');
+      }
       typing.remove();
       setSendButtonMode('send');
 
