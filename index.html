@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#fdf6f0">
@@ -25,6 +25,15 @@
       font-family: 'Inter', sans-serif;
       -webkit-font-smoothing: antialiased;
       overflow: hidden;
+      overscroll-behavior: none;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .input-field, .chat-area, .bubble {
+      -webkit-user-select: text;
+      user-select: text;
     }
 
     /* ── BREATHING GLOW BACKGROUND ── */
@@ -123,13 +132,28 @@
       100% { transform: scale(1) rotate(0deg); opacity: 1; }
     }
 
-    /* Blathers sits at bottom of hint area, just above input */
-    .blathers-wrap {
+    /* Input zone: Blathers + input bar, Blathers overlaps into input */
+    .input-zone {
       width: 100%;
       display: flex;
-      justify-content: flex-start;
-      padding-left: 8px;
-      margin-bottom: -12px; /* tucks slightly toward input */
+      align-items: flex-end;
+      gap: 0;
+      position: relative;
+    }
+
+    /* Blathers overlaps the input bar, positioned just above submit area */
+    .blathers-wrap {
+      flex-shrink: 0;
+      margin-bottom: -18px;
+      margin-left: -8px;
+      z-index: 2;
+      position: relative;
+    }
+
+    .blathers-wrap .blathers-idle,
+    .blathers-wrap .blathers-startled {
+      width: 100px;
+      height: 100px;
     }
 
     /* Avatar next to chat bubbles — bigger, overlapping */
@@ -168,10 +192,14 @@
       to   { opacity: 1; transform: translateY(0); }
     }
     .app {
-      position: relative; z-index: 1;
-      max-width: 420px; margin: 0 auto;
+      position: fixed;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 100%; max-width: 420px;
       height: 100dvh;
+      z-index: 1;
       display: flex; flex-direction: column;
+      overflow: hidden;
     }
 
     /* ── TOP BAR ── */
@@ -341,31 +369,10 @@
     .typing span:nth-child(3) { animation-delay: 0.36s; }
     @keyframes bounce { 0%,60%,100% { transform:translateY(0); } 30% { transform:translateY(-5px); } }
 
-    /* ── CANCEL BUTTON ── */
-    .cancel-wrap {
-      display: none;
-      width: 100%;
-      justify-content: center;
-    }
-    .cancel-wrap.visible { display: flex; }
-
-    .cancel-btn {
-      background: none;
-      border: 1px solid rgba(138,122,114,0.3);
-      border-radius: 20px;
-      padding: 6px 16px;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text2);
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      transition: border-color 0.15s, color 0.15s;
-    }
-    .cancel-btn:active { color: var(--accent); border-color: var(--accent); }
-
     /* ── INPUT BAR ── */
     .input-wrap {
-      width: 100%;
+      flex: 1;
+      min-width: 0;
       display: flex; align-items: flex-end; gap: 10px;
       background: rgba(255,255,255,0.65);
       backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -392,7 +399,8 @@
       flex-shrink: 0; transition: opacity 0.15s, transform 0.1s; opacity: 0.85;
     }
     .send-btn:active { transform: scale(0.91); opacity: 1; }
-    .send-btn svg { width: 15px; height: 15px; color: white; }
+    .send-btn svg { width: 15px; height: 15px; color: white; flex-shrink: 0; }
+    .send-btn.stop-mode { border-radius: 8px; }
 
     /* ── DRAWER ── */
     .overlay {
@@ -506,29 +514,29 @@
 
     <div class="updated-at" id="updatedAt"></div>
 
-    <!-- Blathers sits above the input bar -->
-    <div class="blathers-wrap" id="blathersWrap">
-      <img id="blathersIdle" class="blathers-idle"
-           src="https://stormyreigns.github.io/HATH/IMG_7941.jpeg"
-           alt="Blathers">
-    </div>
-
-    <div class="cancel-wrap" id="cancelWrap">
-      <button class="cancel-btn" onclick="cancelMessage()">✕ Stop</button>
-    </div>
-
-    <div class="input-wrap">
-      <textarea
-        class="input-field" id="inputField"
-        placeholder="Ask anything…" rows="1"
-        onkeydown="handleKey(event)" oninput="autoResize(this)"
-      ></textarea>
-      <button class="send-btn" onclick="sendMessage()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="19" x2="12" y2="5"/>
-          <polyline points="5 12 12 5 19 12"/>
-        </svg>
-      </button>
+    <!-- Blathers overlaps the input bar, associated with chat -->
+    <div class="input-zone">
+      <div class="blathers-wrap" id="blathersWrap">
+        <img id="blathersIdle" class="blathers-idle"
+             src="https://stormyreigns.github.io/HATH/IMG_7941.jpeg"
+             alt="Blathers">
+      </div>
+      <div class="input-wrap">
+        <textarea
+          class="input-field" id="inputField"
+          placeholder="Ask anything…" rows="1"
+          onkeydown="handleKey(event)" oninput="autoResize(this)"
+        ></textarea>
+        <button class="send-btn" id="sendBtn" onclick="handleSendOrStop()" title="Send">
+          <svg class="send-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="19" x2="12" y2="5"/>
+            <polyline points="5 12 12 5 19 12"/>
+          </svg>
+          <svg class="stop-icon" viewBox="0 0 24 24" style="display:none">
+            <rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
 </div><!-- end .app -->
@@ -740,16 +748,37 @@
   let activeController = null;
   const conversationHistory = [];
 
-  // ── CANCEL ────────────────────────────────────────────────────
+  // ── SEND / STOP BUTTON ────────────────────────────────────────
+  function setSendButtonMode(mode) {
+    const btn = document.getElementById('sendBtn');
+    const sendIcon = btn.querySelector('.send-icon');
+    const stopIcon = btn.querySelector('.stop-icon');
+    if (mode === 'stop') {
+      btn.classList.add('stop-mode');
+      btn.title = 'Stop';
+      if (sendIcon) sendIcon.style.display = 'none';
+      if (stopIcon) stopIcon.style.display = 'block';
+    } else {
+      btn.classList.remove('stop-mode');
+      btn.title = 'Send';
+      if (sendIcon) sendIcon.style.display = 'block';
+      if (stopIcon) stopIcon.style.display = 'none';
+    }
+  }
+
+  function handleSendOrStop() {
+    if (isSending) cancelMessage();
+    else sendMessage();
+  }
+
   function cancelMessage() {
     if (activeController) {
       activeController.abort();
       activeController = null;
     }
-    // Remove typing indicator if present
     const typing = document.getElementById('typingIndicator');
     if (typing) typing.remove();
-    document.getElementById('cancelWrap').classList.remove('visible');
+    setSendButtonMode('send');
     isSending = false;
   }
 
@@ -761,7 +790,7 @@
 
     isSending = true;
     activeController = new AbortController();
-    document.getElementById('cancelWrap').classList.add('visible');
+    setSendButtonMode('stop');
     document.getElementById('hintArea').style.display = 'none';
 
     // Blathers wakes up startled, then settles into thinking
@@ -794,7 +823,7 @@
       });
       const data = await res.json();
       typing.remove();
-      document.getElementById('cancelWrap').classList.remove('visible');
+      setSendButtonMode('send');
 
       const reply = data.reply || data.error || "Something went wrong. Try again?";
       addBubble(reply, 'hath');
@@ -802,7 +831,7 @@
 
     } catch (err) {
       typing.remove();
-      document.getElementById('cancelWrap').classList.remove('visible');
+      setSendButtonMode('send');
       if (err.name !== 'AbortError') {
         addBubble("I couldn't connect right now. Check your connection and try again.", 'hath');
       }
