@@ -1,0 +1,23 @@
+{
+  "name": "Shasta",
+  "short_name": "Shasta",
+  "description": "Managed by Shasta — Your household assistant",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#fdf8f5",
+  "theme_color": "#fdf6f0",
+  "icons": [
+    {
+      "src": "https://stormyreigns.github.io/HATH/ShastaApp.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://stormyreigns.github.io/HATH/ShastaApp.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
