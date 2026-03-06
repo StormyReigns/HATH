@@ -12,6 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async></script>
+  <script type="module" src="https://unpkg.com/@dotlottie/player-component@2.3.0/dist/dotlottie-player.mjs"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -47,6 +48,33 @@
       -webkit-user-select: none;
       user-select: none;
       -webkit-touch-callout: none;
+    }
+
+    /* ── LOAD SCREEN ── */
+    .load-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #fdf8f5;
+      transition: opacity 0.4s ease;
+    }
+    .load-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .load-screen-lottie {
+      width: 160px;
+      height: 160px;
+    }
+    .load-screen-label {
+      margin-top: 20px;
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
     }
 
     /* ── SWIRLING GRADIENT BACKGROUND ── */
@@ -992,6 +1020,18 @@
   <div class="swirl-soft"></div>
 </div>
 
+<!-- ── LOAD SCREEN ── -->
+<div class="load-screen" id="loadScreen">
+  <dotlottie-player
+    class="load-screen-lottie"
+    autoplay
+    loop
+    mode="normal"
+    src="https://stormyreigns.github.io/HATH/Black%20cat%20running.lottie">
+  </dotlottie-player>
+  <div class="load-screen-label">Loading…</div>
+</div>
+
 <!-- ── LOGIN SCREEN ── -->
 <div class="login-screen" id="loginScreen">
   <div class="login-wordmark">ShastApp</div>
@@ -1235,8 +1275,52 @@
     location.reload();
   }
 
-  window.onload = function() {
+  async function preloadApp() {
+    const LOAD_MIN_MS = 1200;
+    const LOAD_MAX_MS = 4000;
+    const start = Date.now();
+
+    const fetchDocsFolder = async (folderId) => {
+      try {
+        const url = `${API_URL}?action=listFolder&folder=${encodeURIComponent(folderId)}`;
+        const res = await fetch(url, { redirect: 'follow' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data.error && (data.folders || data.files)) {
+          docsFolderCache[folderId] = data;
+          return data.folders || [];
+        }
+      } catch (_) {}
+      return [];
+    };
+
+    const fetchBalance = () =>
+      fetch(API_URL, { redirect: 'follow' })
+        .then(r => r.json())
+        .catch(() => null);
+
+    const rootPromise = fetchDocsFolder(DOCS_FOLDER_ID);
+    const balancePromise = fetchBalance();
+
+    const [rootFolders] = await Promise.all([rootPromise, balancePromise]);
+
+    if (rootFolders && rootFolders.length > 0) {
+      rootFolders.forEach(f => fetchDocsFolder(f.id));
+    }
+
+    const elapsed = Date.now() - start;
+    const remaining = Math.max(0, LOAD_MIN_MS - elapsed);
+    await new Promise(r => setTimeout(r, remaining));
+  }
+
+  function hideLoadScreen() {
+    const el = document.getElementById('loadScreen');
+    if (el) el.classList.add('hidden');
+  }
+
+  window.onload = async function() {
     if (!navigator.onLine) {
+      hideLoadScreen();
       showOfflineScreen();
       window.addEventListener('online', hideOfflineScreen);
       return;
@@ -1244,33 +1328,37 @@
     window.addEventListener('offline', showOfflineScreen);
     window.addEventListener('online', hideOfflineScreen);
 
-    // Check for remembered session first
     const savedUser = localStorage.getItem('shasta_user');
     const savedExp  = localStorage.getItem('shasta_auth_exp');
 
+    await preloadApp();
+
     if (savedUser && savedExp && Date.now() < parseInt(savedExp)) {
       launchApp(savedUser);
-      return;
+    } else {
+      google.accounts.id.initialize({
+        client_id:   CLIENT_ID,
+        callback:    handleCredentialResponse,
+        auto_select: true
+      });
+      google.accounts.id.renderButton(
+        document.getElementById('googleSignInBtn'),
+        { theme: 'outline', size: 'large', shape: 'pill', text: 'signin_with' }
+      );
+      google.accounts.id.prompt();
     }
 
-    // No saved session — show Google login
-    google.accounts.id.initialize({
-      client_id:   CLIENT_ID,
-      callback:    handleCredentialResponse,
-      auto_select: true
-    });
-    google.accounts.id.renderButton(
-      document.getElementById('googleSignInBtn'),
-      { theme: 'outline', size: 'large', shape: 'pill', text: 'signin_with' }
-    );
-    google.accounts.id.prompt();
+    hideLoadScreen();
   };
 
   // ── CONFIG ────────────────────────────────────────────────────
-  const API_URL = 'https://script.google.com/macros/s/AKfycbysOxO4zyGoJs9HEql1o4PLDdV6camidnsc3BV2uMWCmi4Q6lk-LcPj7MA1gKWNgHb2wg/exec';
-  const AI_URL  = 'https://script.google.com/macros/s/AKfycbysOxO4zyGoJs9HEql1o4PLDdV6camidnsc3BV2uMWCmi4Q6lk-LcPj7MA1gKWNgHb2wg/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbx-WT41MKwooGU8mqDGQWCVXjvost4nazxe2quZI8cgo9kUZwhOih5bJz5HDXb3xxzdAw/exec';
+  const AI_URL  = 'https://script.google.com/macros/s/AKfycbx-WT41MKwooGU8mqDGQWCVXjvost4nazxe2quZI8cgo9kUZwhOih5bJz5HDXb3xxzdAw/exec';
   // Must match your Shasta Docs folder: open it in Drive, copy ID from URL (after /folders/)
   const DOCS_FOLDER_ID = '1UTVAmNx854R9a1YqTPPlZ1gA_V9nUulI';
+
+  // Docs cache — populated during preload for instant navigation
+  const docsFolderCache = {};
 
   // Apps Script requires no-cors redirect following — use a JSONP-style
   // workaround by appending callback param for GET, and for POST we
@@ -1516,7 +1604,6 @@
   }
 
   let docsBreadcrumb = [{ id: DOCS_FOLDER_ID, name: 'ShastApp Docs' }];
-  const docsFolderCache = {};
 
   function renderDocsList(data) {
     const list = document.getElementById('docsList');
