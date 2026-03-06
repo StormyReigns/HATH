@@ -96,8 +96,8 @@
       position: absolute;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      width: 160px;
-      height: 160px;
+      width: 240px;
+      height: 240px;
       opacity: 0.6;
       pointer-events: none;
     }
@@ -105,6 +105,15 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
+    }
+
+    /* Soft white glow on text so it reads over the gray icon */
+    .login-wordmark, .login-tagline,
+    .hint-greeting, .hint-sub,
+    .peek-label, .peek-value,
+    .upcoming-events-label, .event-item, .event-date, .event-title,
+    .matt-note, .chip {
+      text-shadow: 0 0 8px rgba(255,255,255,0.9), 0 0 16px rgba(255,255,255,0.6);
     }
 
     /* ── LOGIN SCREEN ── */
@@ -355,6 +364,37 @@
     }
     .chip:active { color: var(--accent); border-color: var(--accent); }
 
+    /* ── UPCOMING EVENTS ── */
+    .upcoming-events {
+      width: 100%;
+      max-width: 300px;
+      margin-top: 6px;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .upcoming-events.loaded { opacity: 1; }
+    .upcoming-events-label {
+      font-size: 10px; font-weight: 500; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 6px; text-align: center;
+    }
+    .upcoming-events-list {
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .event-item {
+      font-size: 12px; color: var(--text2);
+      line-height: 1.4; display: flex; align-items: baseline; gap: 8px;
+      font-weight: 300;
+    }
+    .event-date {
+      flex-shrink: 0;
+      font-size: 11px; color: var(--muted);
+      font-family: 'Playfair Display', serif;
+    }
+    .event-title {
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
     /* ── NOTE FROM MATT ── */
     .matt-note {
       font-size: 12px; color: var(--text2);
@@ -583,6 +623,11 @@
         </div>
       </div>
 
+      <div class="upcoming-events" id="upcomingEvents">
+        <div class="upcoming-events-label">Upcoming</div>
+        <div class="upcoming-events-list" id="upcomingEventsList"></div>
+      </div>
+
       <div class="matt-note" id="mattNote"></div>
 
       <div class="hint-chips">
@@ -707,8 +752,8 @@
   };
 
   // ── CONFIG ────────────────────────────────────────────────────
-  const API_URL = 'https://script.google.com/macros/s/AKfycbwcHPI8NxXJUFuxI-kvufgbWc9jzIzObw3m3yocccBMANqovNHkacCXXR3pAkcM0P6G2Q/exec';
-  const AI_URL  = 'https://script.google.com/macros/s/AKfycbwcHPI8NxXJUFuxI-kvufgbWc9jzIzObw3m3yocccBMANqovNHkacCXXR3pAkcM0P6G2Q/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbxQvfdxRTJgxYJSYhHC8Vd2NKbKb8eatTaF4b3xlCiy0pcoeeLWtoaHmVSFB5V0S7B0/exec';
+  const AI_URL  = 'https://script.google.com/macros/s/AKfycbxQvfdxRTJgxYJSYhHC8Vd2NKbKb8eatTaF4b3xlCiy0pcoeeLWtoaHmVSFB5V0S7B0/exec';
 
   // Apps Script requires no-cors redirect following — use a JSONP-style
   // workaround by appending callback param for GET, and for POST we
@@ -770,8 +815,55 @@
 
     } catch (err) {
       console.warn('Could not load Shasta data:', err);
-      setWellbeing('OK'); // fail gracefully, don't hang
+      setWellbeing('OK');
     }
+    loadCalendar();
+  }
+
+  async function loadCalendar() {
+    const user = localStorage.getItem('shasta_user');
+    if (!user) return;
+    try {
+      const url = `${API_URL}?action=calendar&user=${encodeURIComponent(user)}`;
+      const res = await fetch(url, { redirect: 'follow' });
+      const data = await res.json();
+      const list = document.getElementById('upcomingEventsList');
+      const wrap = document.getElementById('upcomingEvents');
+      if (!list || !wrap) return;
+      if (data.error || !data.events || data.events.length === 0) {
+        wrap.style.display = 'none';
+        return;
+      }
+      const events = data.events.slice(0, 3);
+      list.innerHTML = events.map(ev => {
+        const d = formatEventDate(ev.start || ev.date || ev.startTime);
+        const title = (ev.title || ev.summary || 'Event').trim();
+        return `<div class="event-item"><span class="event-date">${d}</span><span class="event-title">${escapeHtml(title)}</span></div>`;
+      }).join('');
+      wrap.classList.add('loaded');
+    } catch (err) {
+      document.getElementById('upcomingEvents').style.display = 'none';
+    }
+  }
+
+  function formatEventDate(s) {
+    if (!s) return '';
+    const d = new Date(s);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const evDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    if (evDate.getTime() === today.getTime()) return 'Today';
+    if (evDate.getTime() === tomorrow.getTime()) return 'Tomorrow';
+    const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
+    return `${mon} ${d.getDate()}`;
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
   }
 
   function setWellbeing(status) {
