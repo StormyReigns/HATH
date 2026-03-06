@@ -91,6 +91,22 @@
       to { transform: rotate(-360deg); }
     }
 
+    /* Centered icon overlay over background */
+    .bg-icon {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 160px;
+      height: 160px;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    .bg-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
     /* ── LOGIN SCREEN ── */
     .login-screen {
       position: fixed; inset: 0; z-index: 50;
@@ -507,6 +523,9 @@
   <div class="bg-base"></div>
   <div class="swirl"></div>
   <div class="swirl-soft"></div>
+  <div class="bg-icon">
+    <img src="https://stormyreigns.github.io/HATH/SleepTokenIcon.png" alt="">
+  </div>
 </div>
 
 <!-- ── LOGIN SCREEN ── -->
