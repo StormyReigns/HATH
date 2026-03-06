@@ -908,8 +908,9 @@
   };
 
   // ── CONFIG ────────────────────────────────────────────────────
-  const API_URL = 'https://script.google.com/macros/s/AKfycbx1q4Puxg_yLhCEvxD_1CR6-O7ETZKxS5ruDHC-TxjLgn-z1x4V9-QK_axHuArU9xnWJQ/exec';
-  const AI_URL  = 'https://script.google.com/macros/s/AKfycbx1q4Puxg_yLhCEvxD_1CR6-O7ETZKxS5ruDHC-TxjLgn-z1x4V9-QK_axHuArU9xnWJQ/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbzcyxkkOnYbJGsveFVU8_sH2PINGBVJ0SAnSPtsfAmHJYVudbzIbped2nmGJB_CkZFL0Q/exec';
+  const AI_URL  = 'https://script.google.com/macros/s/AKfycbzcyxkkOnYbJGsveFVU8_sH2PINGBVJ0SAnSPtsfAmHJYVudbzIbped2nmGJB_CkZFL0Q/exec';
+  // Must match your Shasta Docs folder: open it in Drive, copy ID from URL (after /folders/)
   const DOCS_FOLDER_ID = '1UTVAmNx854R9a1YqTPPlZ1gA_V9nUulI';
 
   // Apps Script requires no-cors redirect following — use a JSONP-style
@@ -1147,10 +1148,22 @@
     try {
       const url = `${API_URL}?action=listFolder&folder=${encodeURIComponent(folderId)}`;
       const res = await fetch(url, { redirect: 'follow' });
-      const data = await res.json();
+      if (!res.ok) {
+        throw new Error('API returned ' + res.status);
+      }
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (_) {
+        console.error('Documents API returned non-JSON:', text.slice(0, 200));
+        list.innerHTML = '<div class="screen-loading">Could not load folder — API response invalid. Check that listFolder is wired in Apps Script doGet.</div>';
+        return;
+      }
       list.innerHTML = '';
       if (data.error) {
-        list.innerHTML = '<div class="screen-loading">Could not load folder.</div>';
+        console.error('Documents API error:', data.error);
+        list.innerHTML = '<div class="screen-loading">Could not load folder. ' + escapeHtml(String(data.error).slice(0, 80)) + (String(data.error).length > 80 ? '…' : '') + '</div>';
         return;
       }
       const folders = data.folders || [];
@@ -1173,7 +1186,8 @@
         list.innerHTML = '<div class="screen-loading">This folder is empty.</div>';
       }
     } catch (err) {
-      list.innerHTML = '<div class="screen-loading">Could not load folder.</div>';
+      console.error('Documents load error:', err);
+      list.innerHTML = '<div class="screen-loading">Could not load folder. ' + escapeHtml(err.message || String(err)) + '</div>';
     }
   }
 
