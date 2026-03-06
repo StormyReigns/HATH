@@ -8,13 +8,13 @@
   "theme_color": "#fdf6f0",
   "icons": [
     {
-      "src": "https://stormyreigns.github.io/HATH/ShastaApp.png",
+      "src": "https://stormyreigns.github.io/HATH/ShastaApp.PNG",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://stormyreigns.github.io/HATH/ShastaApp.png",
+      "src": "https://stormyreigns.github.io/HATH/ShastaApp.PNG",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
