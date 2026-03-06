@@ -757,6 +757,32 @@
     .settings-option-swatch.sunset { background: linear-gradient(135deg, #fceee0, #fce8e0); }
     .settings-option-swatch.ocean { background: linear-gradient(135deg, #e0eef8, #e5f0fa); }
 
+    .settings-input {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 8px;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .settings-input::placeholder { color: var(--muted); }
+    .settings-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .settings-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      cursor: pointer;
+    }
+    .settings-toggle span:first-child { font-size: 14px; color: var(--text); }
+    .settings-toggle input[type="checkbox"] { width: 44px; height: 24px; accent-color: var(--accent); }
+
+    /* Font size schemes */
+    html.font-small { font-size: 14px; }
+    html.font-large { font-size: 18px; }
+
     /* Documents add button — fixed bottom center when folder open */
     #documentsScreen { position: relative; }
     .docs-add-btn {
@@ -1050,6 +1076,22 @@
         <div class="settings-label">Background</div>
         <div class="settings-options" id="bgSchemeOptions"></div>
       </div>
+      <div class="settings-section">
+        <div class="settings-label">Nickname</div>
+        <input type="text" class="settings-input" id="settingsNickname" placeholder="What should we call you?" maxlength="30">
+        <div class="settings-hint">Used in greetings and by the AI</div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-label">Font Size</div>
+        <div class="settings-options" id="fontSizeOptions"></div>
+      </div>
+      <div class="settings-section">
+        <label class="settings-toggle">
+          <span>Dumb Blathers</span>
+          <input type="checkbox" id="settingsDumbBlathers">
+        </label>
+        <div class="settings-hint">Short, concise answers without the AI personality</div>
+      </div>
     </div>
 
     <!-- Schedule screen -->
@@ -1166,25 +1208,13 @@
   }
 
   function launchApp(email) {
-    if (email === 'jessicafisher407@gmail.com') {
-      // Blaisie greetings stay as-is
-    } else {
-      greetings.length = 0;
-      greetings.push(
-        "Hey <em>Matt,</em> what do you need?",
-        "What's up, <em>Matt?</em>",
-        "Ready when you are, <em>Matt.</em>",
-        "What can I help with, <em>Matt?</em>"
-      );
-    }
-
     document.getElementById('loginScreen').style.display  = 'none';
     document.getElementById('appScreen').style.display    = 'block';
-    document.getElementById('greetingText').innerHTML =
-      greetings[Math.floor(Math.random() * greetings.length)];
+    document.getElementById('greetingText').innerHTML = getRandomGreeting();
     loadData();
     setupKeyboardHandling();
     applyBgScheme(localStorage.getItem('shasta_bg_' + email) || 'peach');
+    applyFontSize(localStorage.getItem('shasta_font_' + email) || 'default');
   }
 
   function showOfflineScreen() {
@@ -1244,16 +1274,31 @@
   }
 
   // ── GREETING LIBRARY ──────────────────────────────────────────
-  const greetings = [
-    "Alright <em>Blaisie,</em> what's next?",
-    "Ready to Snap Punch some bills, <em>Blaisie?</em>",
-    "Hey <em>Blaisie.</em> What do you need?",
-    "The house is yours, <em>Blaisie.</em> What's up?",
-    "Six-sided star incoming — what can I help with, <em>Blaisie?</em>",
-    "Your gil's safe. What else, <em>Blaisie?</em>",
-    "What's on your mind, <em>Blaisie?</em>",
+  const GREETING_TEMPLATES = [
+    "Alright <em>{{name}},</em> what's next?",
+    "Ready to Snap Punch some bills, <em>{{name}}?</em>",
+    "Hey <em>{{name}}.</em> What do you need?",
+    "The house is yours, <em>{{name}}.</em> What's up?",
+    "Six-sided star incoming — what can I help with, <em>{{name}}?</em>",
+    "Your gil's safe. What else, <em>{{name}}?</em>",
+    "What's on your mind, <em>{{name}}?</em>",
+    "Hey <em>{{name}}.</em> What can I help with?",
+    "Ready when you are, <em>{{name}}.</em>"
   ];
-  // Greeting is set after auth — see handleCredentialResponse
+
+  function getDisplayName() {
+    const user = localStorage.getItem('shasta_user');
+    if (!user) return 'there';
+    const nick = localStorage.getItem('shasta_nickname_' + user);
+    if (nick && nick.trim()) return nick.trim();
+    return user === 'jessicafisher407@gmail.com' ? 'Blaisie' : 'Matt';
+  }
+
+  function getRandomGreeting() {
+    const name = getDisplayName();
+    const t = GREETING_TEMPLATES[Math.floor(Math.random() * GREETING_TEMPLATES.length)];
+    return t.replace(/\{\{name\}\}/g, name);
+  }
 
   // ── LOAD LIVE DATA ────────────────────────────────────────────
   async function loadData() {
@@ -1447,8 +1492,7 @@
     document.querySelector('.drawer-item:first-child').classList.add('active');
     conversationHistory.length = 0;
     setBlathers('sleep');
-    document.getElementById('greetingText').innerHTML =
-      greetings[Math.floor(Math.random() * greetings.length)];
+    document.getElementById('greetingText').innerHTML = getRandomGreeting();
   }
 
   function showSubScreen(screenId) {
@@ -1773,9 +1817,49 @@
     `).join('');
   }
 
+  const FONT_SIZES = [
+    { id: 'small', name: 'Small' },
+    { id: 'default', name: 'Default' },
+    { id: 'large', name: 'Large' }
+  ];
+
+  function applyFontSize(sizeId) {
+    const html = document.documentElement;
+    html.classList.remove('font-small', 'font-large');
+    if (sizeId === 'small') html.classList.add('font-small');
+    else if (sizeId === 'large') html.classList.add('font-large');
+  }
+
+  function setFontSize(sizeId) {
+    const user = localStorage.getItem('shasta_user');
+    if (user) localStorage.setItem('shasta_font_' + user, sizeId);
+    applyFontSize(sizeId);
+  }
+
+  function renderFontSizeOptions() {
+    const user = localStorage.getItem('shasta_user');
+    const current = (user && localStorage.getItem('shasta_font_' + user)) || 'default';
+    const el = document.getElementById('fontSizeOptions');
+    el.innerHTML = FONT_SIZES.map(s => `
+      <div class="settings-option ${s.id === current ? 'selected' : ''}" onclick="setFontSize('${s.id}'); renderFontSizeOptions();">${s.name}</div>
+    `).join('');
+  }
+
   function showSettingsScreen() {
     showSubScreen('settingsScreen');
     renderBgSchemeOptions();
+    renderFontSizeOptions();
+    const user = localStorage.getItem('shasta_user');
+    const nickEl = document.getElementById('settingsNickname');
+    const dumbEl = document.getElementById('settingsDumbBlathers');
+    if (nickEl) nickEl.value = (user && localStorage.getItem('shasta_nickname_' + user)) || '';
+    if (dumbEl) dumbEl.checked = !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true');
+    nickEl.oninput = () => {
+      if (user) localStorage.setItem('shasta_nickname_' + user, nickEl.value.trim());
+    };
+    dumbEl.onchange = () => {
+      if (user) localStorage.setItem('shasta_dumb_' + user, dumbEl.checked ? 'true' : '');
+    };
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
     document.querySelector('.drawer-item:nth-child(6)').classList.add('active');
   }
@@ -1913,12 +1997,19 @@
     requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
 
     try {
+      const user = localStorage.getItem('shasta_user');
       const history = conversationHistory.slice(-20);
+      const body = {
+        message: text,
+        history: history,
+        nickname: getDisplayName(),
+        dumbMode: !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true')
+      };
       const res = await fetch(AI_URL, {
         method: 'POST',
         redirect: 'follow',
         headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ message: text, history: history }),
+        body: JSON.stringify(body),
         signal: activeController.signal
       });
       const text2 = await res.text();
