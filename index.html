@@ -671,6 +671,198 @@
     }
     .screen-footer a:active { opacity: 0.8; }
     .screen-loading { text-align: center; padding: 24px; color: var(--muted); font-size: 13px; }
+
+    /* Documents add button — fixed bottom center when folder open */
+    #documentsScreen { position: relative; }
+    .docs-add-btn {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      border: none;
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(192,122,74,0.35);
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .docs-add-btn:active { transform: translateX(-50%) scale(0.94); }
+
+    /* Action sheet */
+    .action-sheet-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(58,46,40,0.35);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      z-index: 150;
+    }
+    .action-sheet-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .action-sheet {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 420px;
+      background: #fdf8f4;
+      border-radius: 16px 16px 0 0;
+      padding: 12px 0 24px;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.1);
+      z-index: 151;
+      transform: translateX(-50%) translateY(100%);
+      transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    }
+    .action-sheet-overlay.open .action-sheet {
+      transform: translateX(-50%) translateY(0);
+    }
+    .action-sheet-option {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 26px;
+      font-size: 15px;
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .action-sheet-option:active { background: rgba(192,122,74,0.08); }
+    .action-sheet-option span:first-child { font-size: 20px; opacity: 0.85; }
+
+    /* Paste text modal */
+    .paste-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(58,46,40,0.35);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      z-index: 160;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .paste-modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .paste-modal {
+      width: 100%;
+      max-width: 420px;
+      background: #fdf8f4;
+      border-radius: 16px 16px 0 0;
+      padding: 24px 22px 32px;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.1);
+      transform: translateY(100%);
+      transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    }
+    .paste-modal-overlay.open .paste-modal {
+      transform: translateY(0);
+    }
+    .paste-modal h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 400;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+    .paste-modal .paste-filename {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .paste-modal .paste-filename::placeholder { color: var(--muted); }
+    .paste-modal .paste-content {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      font-size: 14px;
+      font-family: inherit;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 8px;
+      margin-bottom: 16px;
+      resize: vertical;
+      color: var(--text);
+    }
+    .paste-modal .paste-content::placeholder { color: var(--muted); }
+    .paste-modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+    .paste-modal-actions button {
+      padding: 10px 20px;
+      font-size: 14px;
+      font-family: inherit;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.12s;
+    }
+    .paste-modal-actions button:active { opacity: 0.8; }
+    .paste-cancel-btn {
+      background: transparent;
+      color: var(--text2);
+      border: 1px solid rgba(0,0,0,0.12);
+    }
+    .paste-save-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+    }
+
+    /* Docs toast & loading */
+    .docs-toast {
+      position: fixed;
+      bottom: 96px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 20px;
+      font-size: 14px;
+      color: var(--text);
+      background: #fdf8f4;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .docs-toast.visible { opacity: 1; }
+    .docs-toast.error { color: #c05050; }
+    .docs-loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(253,248,245,0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 180;
+    }
+    .docs-loading-overlay.visible {
+      display: flex;
+    }
+    .docs-loading-overlay span {
+      font-size: 15px;
+      color: var(--text2);
+    }
   </style>
 </head>
 <body>
@@ -757,7 +949,10 @@
     <div class="sub-screen" id="documentsScreen">
       <div class="screen-breadcrumb" id="docsBreadcrumb"></div>
       <div class="screen-list" id="docsList"></div>
+      <button type="button" class="docs-add-btn" onclick="openDocsAddMenu()" title="Add document">+</button>
     </div>
+    <input type="file" id="docsFileScan" accept="image/*" capture="environment" style="display:none">
+    <input type="file" id="docsFileUpload" style="display:none">
 
     <!-- Schedule screen -->
     <div class="sub-screen" id="scheduleScreen">
@@ -819,6 +1014,32 @@
     <img id="blathersDrawer" src="https://stormyreigns.github.io/HATH/IMG_7941.png" alt="Blathers" class="blathers-idle">
   </div>
 </div>
+
+<!-- Documents action sheet -->
+<div class="action-sheet-overlay" id="docsActionSheet" onclick="closeDocsAddMenu(event)">
+  <div class="action-sheet" onclick="event.stopPropagation()">
+    <div class="action-sheet-option" onclick="triggerDocsScan()"><span>📷</span> Scan Document</div>
+    <div class="action-sheet-option" onclick="openPasteModal()"><span>📋</span> Paste Text</div>
+    <div class="action-sheet-option" onclick="triggerDocsUpload()"><span>📁</span> Upload File</div>
+  </div>
+</div>
+
+<!-- Paste text modal -->
+<div class="paste-modal-overlay" id="pasteModal" onclick="closePasteModal(event)">
+  <div class="paste-modal" onclick="event.stopPropagation()">
+    <h3>Paste Text</h3>
+    <input type="text" class="paste-filename" id="pasteFilename" placeholder="Filename (e.g. note.txt)">
+    <textarea class="paste-content" id="pasteContent" placeholder="Paste your text here…"></textarea>
+    <div class="paste-modal-actions">
+      <button type="button" class="paste-cancel-btn" onclick="closePasteModal()">Cancel</button>
+      <button type="button" class="paste-save-btn" onclick="savePastedDoc()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Docs loading & toast -->
+<div class="docs-loading-overlay" id="docsLoadingOverlay"><span>Uploading…</span></div>
+<div class="docs-toast" id="docsToast"></div>
 
 <!-- Offline screen -->
 <div class="offline-screen" id="offlineScreen">
@@ -909,8 +1130,8 @@
   };
 
   // ── CONFIG ────────────────────────────────────────────────────
-  const API_URL = 'https://script.google.com/macros/s/AKfycbxwEDrghMOSLdTFXqlHZhYuY_VlQQw_F1NY2NnTePClKaMBe4NiiuNNeP-Yc_6Y4lI72Q/exec';
-  const AI_URL  = 'https://script.google.com/macros/s/AKfycbxwEDrghMOSLdTFXqlHZhYuY_VlQQw_F1NY2NnTePClKaMBe4NiiuNNeP-Yc_6Y4lI72Q/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbxRBkpJKITbFtNPKGLNF7NIEYDFc_A24mSK48cRrvAakd_JMrI5A0qDtspXyf_33w0PWw/exec';
+  const AI_URL  = 'https://script.google.com/macros/s/AKfycbxRBkpJKITbFtNPKGLNF7NIEYDFc_A24mSK48cRrvAakd_JMrI5A0qDtspXyf_33w0PWw/exec';
   // Must match your Shasta Docs folder: open it in Drive, copy ID from URL (after /folders/)
   const DOCS_FOLDER_ID = '1UTVAmNx854R9a1YqTPPlZ1gA_V9nUulI';
 
@@ -1233,6 +1454,157 @@
     document.querySelector('.drawer-item:nth-child(2)').classList.add('active');
   }
 
+  function getCurrentDocsFolderId() {
+    return docsBreadcrumb.length > 0 ? docsBreadcrumb[docsBreadcrumb.length - 1].id : DOCS_FOLDER_ID;
+  }
+
+  function openDocsAddMenu() {
+    document.getElementById('docsActionSheet').classList.add('open');
+  }
+
+  function closeDocsAddMenu(ev) {
+    if (ev && ev.target !== ev.currentTarget) return;
+    document.getElementById('docsActionSheet').classList.remove('open');
+  }
+
+  function triggerDocsScan() {
+    closeDocsAddMenu();
+    document.getElementById('docsFileScan').value = '';
+    document.getElementById('docsFileScan').click();
+  }
+
+  function triggerDocsUpload() {
+    closeDocsAddMenu();
+    document.getElementById('docsFileUpload').value = '';
+    document.getElementById('docsFileUpload').click();
+  }
+
+  function openPasteModal() {
+    closeDocsAddMenu();
+    document.getElementById('pasteFilename').value = '';
+    document.getElementById('pasteContent').value = '';
+    document.getElementById('pasteModal').classList.add('open');
+  }
+
+  function closePasteModal(ev) {
+    if (ev && ev.target !== ev.currentTarget && ev.type === 'click') return;
+    document.getElementById('pasteModal').classList.remove('open');
+  }
+
+  function savePastedDoc() {
+    const filename = document.getElementById('pasteFilename').value.trim();
+    const text = document.getElementById('pasteContent').value.trim();
+    if (!filename) {
+      showDocsToast('Please enter a filename.', true);
+      return;
+    }
+    if (!text) {
+      showDocsToast('Please paste some text.', true);
+      return;
+    }
+    const name = filename.includes('.') ? filename : filename + '.txt';
+    doDocsCreateDoc(text, name);
+  }
+
+  function showDocsLoading(show) {
+    const el = document.getElementById('docsLoadingOverlay');
+    if (show) el.classList.add('visible'); else el.classList.remove('visible');
+  }
+
+  function showDocsToast(msg, isError) {
+    const el = document.getElementById('docsToast');
+    el.textContent = msg;
+    el.classList.toggle('error', !!isError);
+    el.classList.add('visible');
+    clearTimeout(window._docsToastTimer);
+    window._docsToastTimer = setTimeout(() => el.classList.remove('visible'), 2800);
+  }
+
+  async function doDocsUpload(base64, filename, mimeType) {
+    const folderId = getCurrentDocsFolderId();
+    showDocsLoading(true);
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'upload',
+          folderId,
+          filename,
+          base64,
+          mimeType: mimeType || 'application/octet-stream'
+        })
+      });
+      const data = await res.json();
+      showDocsLoading(false);
+      if (data.error) {
+        showDocsToast('Upload failed: ' + (data.error || 'Unknown error'), true);
+        return;
+      }
+      showDocsToast('Saved: ' + (data.fileName || filename));
+      loadFolderContents(folderId);
+    } catch (err) {
+      showDocsLoading(false);
+      showDocsToast('Upload failed: ' + (err.message || 'Network error'), true);
+    }
+  }
+
+  async function doDocsCreateDoc(text, filename) {
+    const folderId = getCurrentDocsFolderId();
+    closePasteModal();
+    showDocsLoading(true);
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'createDoc',
+          folderId,
+          filename,
+          text
+        })
+      });
+      const data = await res.json();
+      showDocsLoading(false);
+      if (data.error) {
+        showDocsToast('Failed: ' + (data.error || 'Unknown error'), true);
+        return;
+      }
+      showDocsToast('Saved: ' + filename);
+      loadFolderContents(folderId);
+    } catch (err) {
+      showDocsLoading(false);
+      showDocsToast('Failed: ' + (err.message || 'Network error'), true);
+    }
+  }
+
+  function initDocsFileInputs() {
+    document.getElementById('docsFileScan').addEventListener('change', function() {
+      const file = this.files && this.files[0];
+      if (!file) return;
+      const fr = new FileReader();
+      fr.onload = () => {
+        const base64 = fr.result.split(',')[1] || fr.result;
+        doDocsUpload(base64, file.name, file.type);
+      };
+      fr.readAsDataURL(file);
+      this.value = '';
+    });
+    document.getElementById('docsFileUpload').addEventListener('change', function() {
+      const file = this.files && this.files[0];
+      if (!file) return;
+      const fr = new FileReader();
+      fr.onload = () => {
+        const base64 = fr.result.split(',')[1] || fr.result;
+        doDocsUpload(base64, file.name, file.type);
+      };
+      fr.readAsDataURL(file);
+      this.value = '';
+    });
+  }
+
   async function showScheduleScreen() {
     showSubScreen('scheduleScreen');
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
@@ -1470,6 +1842,8 @@
 
     requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
   }
+
+  initDocsFileInputs();
 </script>
 </body>
 </html>
