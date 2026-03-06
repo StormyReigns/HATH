@@ -37,28 +37,48 @@
     }
 
     /* ── BREATHING GLOW BACKGROUND ── */
-    .bg { position: fixed; inset: 0; z-index: 0; }
+    .bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
     .bg-base { position: absolute; inset: 0; background: #fdf8f4; }
 
     .glow {
       position: absolute;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      width: 100vmax; height: 100vmax;
+      width: 120vmax; height: 120vmax;
       border-radius: 50%;
       background: radial-gradient(
-        ellipse at center,
-        rgba(252, 210, 185, 0.55) 0%,
-        rgba(248, 210, 225, 0.35) 35%,
-        rgba(253, 240, 230, 0.15) 65%,
-        transparent 100%
+        ellipse 60% 60% at center,
+        rgba(255, 200, 210, 0.7) 0%,
+        rgba(250, 215, 230, 0.5) 30%,
+        rgba(253, 235, 245, 0.25) 55%,
+        transparent 85%
       );
-      animation: breathe 8s ease-in-out infinite;
+      animation: breathe 6s ease-in-out infinite;
+    }
+
+    .glow-soft {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 100vmax; height: 100vmax;
+      margin-left: -50vmax; margin-top: -50vmax;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle at center,
+        rgba(255, 190, 210, 0.5) 0%,
+        rgba(252, 225, 238, 0.2) 50%,
+        transparent 75%
+      );
+      animation: breatheSoft 7s ease-in-out infinite 2s;
     }
 
     @keyframes breathe {
-      0%, 100% { transform: translate(-50%, -50%) scale(0.85); opacity: 0.7; }
-      50%       { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+      0%, 100% { transform: translate(-50%, -50%) scale(0.65); opacity: 0.55; }
+      50%       { transform: translate(-50%, -50%) scale(1.4); opacity: 1; }
+    }
+
+    @keyframes breatheSoft {
+      0%, 100% { transform: translate(-50%, -50%) scale(0.7); opacity: 0.3; }
+      50%       { transform: translate(-50%, -50%) scale(1.35); opacity: 0.75; }
     }
 
     /* ── LOGIN SCREEN ── */
@@ -444,6 +464,7 @@
 <div class="bg">
   <div class="bg-base"></div>
   <div class="glow"></div>
+  <div class="glow-soft"></div>
 </div>
 
 <!-- ── LOGIN SCREEN ── -->
@@ -512,8 +533,6 @@
 
     <div class="chat-area" id="chatArea"></div>
 
-    <div class="updated-at" id="updatedAt"></div>
-
     <!-- Blathers overlaps the input bar, associated with chat -->
     <div class="input-zone">
       <div class="blathers-wrap" id="blathersWrap">
@@ -538,6 +557,8 @@
         </button>
       </div>
     </div>
+
+    <div class="updated-at" id="updatedAt"></div>
   </div>
 </div><!-- end .app -->
 </div><!-- end .app-screen -->
