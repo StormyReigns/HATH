@@ -28,14 +28,25 @@
       -webkit-font-smoothing: antialiased;
       overflow: hidden;
       overscroll-behavior: none;
+      overscroll-behavior-y: none;
       touch-action: manipulation;
       -webkit-user-select: none;
       user-select: none;
+      -webkit-touch-callout: none;
     }
 
     .input-field, .chat-area, .bubble {
       -webkit-user-select: text;
       user-select: text;
+      -webkit-touch-callout: default;
+    }
+
+    /* Prevent pull-to-refresh and text selection on UI */
+    .hamburger, .wordmark, .wellbeing, .peek-item, .upcoming-events,
+    .matt-note, .chip, .send-btn, .cancel-btn, .drawer-item, .drawer-header, .drawer-footer {
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
     }
 
     /* ── SWIRLING GRADIENT BACKGROUND ── */
@@ -96,8 +107,8 @@
       position: absolute;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      width: 240px;
-      height: 240px;
+      width: 480px;
+      height: 480px;
       opacity: 0.6;
       pointer-events: none;
     }
@@ -107,13 +118,13 @@
       object-fit: contain;
     }
 
-    /* Soft white glow on text so it reads over the gray icon */
+    /* Strong white glow on text so it reads over the gray icon */
     .login-wordmark, .login-tagline,
     .hint-greeting, .hint-sub,
     .peek-label, .peek-value,
     .upcoming-events-label, .event-item, .event-date, .event-title,
     .matt-note, .chip {
-      text-shadow: 0 0 8px rgba(255,255,255,0.9), 0 0 16px rgba(255,255,255,0.6);
+      text-shadow: 0 0 12px rgba(255,255,255,1), 0 0 24px rgba(255,255,255,0.9), 0 0 40px rgba(255,255,255,0.7), 0 0 60px rgba(255,255,255,0.5);
     }
 
     /* ── LOGIN SCREEN ── */
@@ -347,6 +358,18 @@
     .balance-peek.loaded { opacity: 1; }
 
     .peek-item { text-align: center; }
+    .peek-value.loading {
+      color: var(--muted);
+      min-width: 1.5em;
+    }
+    .peek-value.loading::before {
+      content: '···';
+      animation: peekPulse 1.2s ease-in-out infinite;
+    }
+    @keyframes peekPulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
     .peek-label { font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
     .peek-value { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--text); letter-spacing: -0.3px; }
     .peek-divider { width: 1px; background: rgba(0,0,0,0.08); align-self: stretch; margin: 4px 0; }
@@ -413,6 +436,7 @@
       overflow-y: scroll;
       overflow-x: hidden;
       padding: 16px 0 8px;
+      scroll-padding-bottom: 80px;
       -webkit-overflow-scrolling: touch;
       min-height: 0;
       scrollbar-width: none;
@@ -555,6 +579,36 @@
     /* updated-at timestamp */
     .updated-at { font-size: 10px; color: var(--muted); text-align: center; margin-top: -8px; letter-spacing: 0.03em; opacity: 0; transition: opacity 0.4s; }
     .updated-at.loaded { opacity: 1; }
+
+    /* Offline screen — warm Blathers message */
+    .offline-screen {
+      position: fixed; inset: 0; z-index: 200;
+      display: none;
+      flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 40px; text-align: center;
+      background: #fdf8f5;
+    }
+    .offline-screen.visible { display: flex; }
+    .offline-blathers {
+      width: 120px; height: 120px;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 20px rgba(100,70,40,0.12));
+      margin-bottom: 20px;
+    }
+    .offline-message {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px; color: var(--text);
+      line-height: 1.5; max-width: 280px;
+      margin-bottom: 8px;
+    }
+    .offline-sub {
+      font-size: 13px; color: var(--text2);
+      font-weight: 300;
+    }
+
+    /* Overscroll prevention on scrollable areas */
+    .body, .chat-area { overscroll-behavior: none; }
   </style>
 </head>
 <body>
@@ -689,6 +743,13 @@
   </div>
 </div>
 
+<!-- Offline screen -->
+<div class="offline-screen" id="offlineScreen">
+  <img class="offline-blathers" src="https://stormyreigns.github.io/HATH/IMG_7937.png" alt="Blathers">
+  <div class="offline-message">Hoo! I can't reach the clouds right now — looks like you're offline.</div>
+  <div class="offline-sub">Everything will be here when you're back. Try again when you're connected.</div>
+</div>
+
 <script>
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -726,9 +787,28 @@
     document.getElementById('greetingText').innerHTML =
       greetings[Math.floor(Math.random() * greetings.length)];
     loadData();
+    setupKeyboardHandling();
+  }
+
+  function showOfflineScreen() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appScreen').style.display = 'none';
+    document.getElementById('offlineScreen').classList.add('visible');
+  }
+  function hideOfflineScreen() {
+    document.getElementById('offlineScreen').classList.remove('visible');
+    location.reload();
   }
 
   window.onload = function() {
+    if (!navigator.onLine) {
+      showOfflineScreen();
+      window.addEventListener('online', hideOfflineScreen);
+      return;
+    }
+    window.addEventListener('offline', showOfflineScreen);
+    window.addEventListener('online', hideOfflineScreen);
+
     // Check for remembered session first
     const savedUser = localStorage.getItem('shasta_user');
     const savedExp  = localStorage.getItem('shasta_auth_exp');
@@ -778,21 +858,29 @@
 
   // ── LOAD LIVE DATA ────────────────────────────────────────────
   async function loadData() {
+    const peekMain = document.getElementById('peekMain');
+    const peekMatt = document.getElementById('peekMatt');
+    const peekJessica = document.getElementById('peekJessica');
+    [peekMain, peekMatt, peekJessica].forEach(el => { if (el) el.classList.add('loading'); el.textContent = ''; });
+
     try {
       const res = await fetch(API_URL, { redirect: 'follow' });
       const data = await res.json();
 
+      [peekMain, peekMatt, peekJessica].forEach(el => { if (el) el.classList.remove('loading'); });
+
       if (data.error) {
         console.warn('Shasta API error:', data.error);
+        peekMain.textContent = '—'; peekMatt.textContent = '—'; peekJessica.textContent = '—';
         setWellbeing('OK');
         return;
       }
 
       // Balances
       if (data.balances) {
-        document.getElementById('peekMain').textContent    = data.balances.main    || '—';
-        document.getElementById('peekMatt').textContent    = data.balances.matt    || '—';
-        document.getElementById('peekJessica').textContent = data.balances.jessica || '—';
+        peekMain.textContent = data.balances.main    || '—';
+        peekMatt.textContent = data.balances.matt    || '—';
+        peekJessica.textContent = data.balances.jessica || '—';
         document.getElementById('balancePeek').classList.add('loaded');
       }
 
@@ -815,6 +903,7 @@
 
     } catch (err) {
       console.warn('Could not load Shasta data:', err);
+      [peekMain, peekMatt, peekJessica].forEach(el => { if (el) el.classList.remove('loading'); el.textContent = '—'; });
       setWellbeing('OK');
     }
     loadCalendar();
@@ -864,6 +953,15 @@
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
+  }
+
+  function friendlyBlathersError(err) {
+    if (!err) return "Hoo! Something got a bit tangled. Could you try that again?";
+    const msg = typeof err === 'string' ? err : (err.message || String(err));
+    if (/network|fetch|failed|connection/i.test(msg)) {
+      return "I'm having trouble reaching the clouds right now — check your connection and we'll try again in a moment.";
+    }
+    return "Hoo! Something got a bit tangled on my end. Could you try that again in a moment?";
   }
 
   function setWellbeing(status) {
@@ -916,6 +1014,24 @@
   function prefill(text) {
     const f = document.getElementById('inputField');
     f.value = text; f.focus(); autoResize(f);
+  }
+
+  function scrollChatForKeyboard() {
+    const chat = document.getElementById('chatArea');
+    if (chat && chat.scrollHeight > 0) {
+      requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
+    }
+  }
+
+  function setupKeyboardHandling() {
+    const input = document.getElementById('inputField');
+    if (!input) return;
+    input.addEventListener('focus', function() {
+      setTimeout(scrollChatForKeyboard, 300);
+    });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', scrollChatForKeyboard);
+    }
   }
 
   // ── NAVIGATION ────────────────────────────────────────────────
@@ -1001,18 +1117,19 @@
     requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
 
     try {
+      const history = conversationHistory.slice(-20);
       const res = await fetch(AI_URL, {
         method: 'POST',
         redirect: 'follow',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ message: text }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, history: history }),
         signal: activeController.signal
       });
       const data = await res.json();
       typing.remove();
       setSendButtonMode('send');
 
-      const reply = data.reply || data.error || "Something went wrong. Try again?";
+      const reply = data.reply || friendlyBlathersError(data.error);
       addBubble(reply, 'hath');
       conversationHistory.push({ role: 'assistant', content: reply });
 
@@ -1020,7 +1137,8 @@
       typing.remove();
       setSendButtonMode('send');
       if (err.name !== 'AbortError') {
-        addBubble("I couldn't connect right now. Check your connection and try again.", 'hath');
+        conversationHistory.pop();
+        addBubble(friendlyBlathersError(err), 'hath');
       }
     }
 
