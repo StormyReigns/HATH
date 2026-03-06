@@ -176,7 +176,6 @@
       margin-left: -8px;
       z-index: 2;
       position: relative;
-      transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .blathers-wrap .blathers-idle,
@@ -185,16 +184,11 @@
       height: 100px;
     }
 
-    /* When drawer opens: Blathers startled + pushed into visible strip (right of drawer) */
-    body.drawer-open .input-zone {
-      transform: translateX(min(72vw, 280px));
-      transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    body.drawer-open .blathers-wrap img {
-      animation: none;
-      transform: scaleX(0.88);
-      transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    /* When drawer open: hide main Blathers (drawer Blathers shows instead) */
+    body.drawer-open .blathers-wrap {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
     }
 
     /* Avatar next to chat bubbles — bigger, overlapping */
@@ -414,7 +408,6 @@
     .input-wrap {
       flex: 1;
       min-width: 0;
-      transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex; align-items: flex-end; gap: 10px;
       background: rgba(255,255,255,0.65);
       backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -460,8 +453,29 @@
       transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
       z-index: 101; display: flex; flex-direction: column;
       padding: 60px 0 40px;
+      overflow: visible;
     }
     .drawer.open { transform: translateX(0); }
+
+    /* Blathers rides with the drawer — at right edge, slides in/out with menu */
+    .drawer-blathers {
+      position: absolute;
+      bottom: 28px;
+      right: -45px;
+      width: 100px;
+      height: 100px;
+      z-index: 10;
+      pointer-events: none;
+    }
+    .drawer-blathers img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 20px rgba(100,70,40,0.15));
+    }
+    .drawer-blathers img.blathers-startled {
+      animation: blathersStartle 0.4s ease-out forwards;
+    }
 
     .drawer-header { padding: 0 26px 24px; border-bottom: 1px solid rgba(0,0,0,0.06); }
     .drawer-wordmark { font-family: 'Playfair Display', serif; font-size: 18px; letter-spacing: 0.1em; color: var(--text); }
@@ -600,6 +614,9 @@
     <div class="drawer-item"><span class="drawer-icon">⚙️</span> Settings</div>
   </nav>
   <div class="drawer-footer">Built for the Higgins household</div>
+  <div class="drawer-blathers" id="drawerBlathersWrap">
+    <img id="blathersDrawer" src="https://stormyreigns.github.io/HATH/IMG_7941.png" alt="Blathers" class="blathers-idle">
+  </div>
 </div>
 
 <script>
@@ -758,17 +775,17 @@
     document.getElementById('overlay').classList.toggle('open');
     if (wasOpen) {
       document.body.classList.remove('drawer-open');
-      setBlathers('sleep');
+      setDrawerBlathers('sleep');
     } else {
       document.body.classList.add('drawer-open');
-      setBlathers('startled');
+      setDrawerBlathers('startled');
     }
   }
   function closeDrawer() {
     document.getElementById('drawer').classList.remove('open');
     document.getElementById('overlay').classList.remove('open');
     document.body.classList.remove('drawer-open');
-    setBlathers('sleep');
+    setDrawerBlathers('sleep');
   }
 
   // ── INPUT ─────────────────────────────────────────────────────
@@ -910,9 +927,15 @@
     if (!img) return;
     img.src = BLATHERS[emotion] || BLATHERS.sleep;
     img.className = emotion === 'startled' ? 'blathers-startled' : 'blathers-idle';
-    // Keep wrap visible at all times
     const wrap = document.getElementById('blathersWrap');
     if (wrap) wrap.style.display = 'flex';
+  }
+
+  function setDrawerBlathers(emotion) {
+    const img = document.getElementById('blathersDrawer');
+    if (!img) return;
+    img.src = BLATHERS[emotion] || BLATHERS.sleep;
+    img.className = emotion === 'startled' ? 'blathers-startled' : 'blathers-idle';
   }
 
   function addBubble(text, who, emotion) {
