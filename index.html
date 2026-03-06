@@ -118,27 +118,17 @@
       object-fit: contain;
     }
 
-    /* Frosted overlay between icon and text — softens the icon, improves readability */
-    .frosted-overlay {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: 340px;
-      height: 340px;
-      border-radius: 50%;
-      background: rgba(253, 248, 245, 0.5);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      pointer-events: none;
-    }
-
-    /* Strong white glow on text so it reads over the gray icon */
+    /* White outline + thickened glow on text that overlaps the icon */
     .login-wordmark, .login-tagline,
     .hint-greeting, .hint-sub,
     .peek-label, .peek-value,
     .upcoming-events-label, .event-item, .event-date, .event-title,
     .matt-note, .chip {
-      text-shadow: 0 0 12px rgba(255,255,255,1), 0 0 24px rgba(255,255,255,0.9), 0 0 40px rgba(255,255,255,0.7), 0 0 60px rgba(255,255,255,0.5);
+      text-shadow:
+        -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff,
+        -2px 0 0 #fff, 2px 0 0 #fff, 0 -2px 0 #fff, 0 2px 0 #fff,
+        0 0 16px rgba(255,255,255,1), 0 0 32px rgba(255,255,255,0.95),
+        0 0 48px rgba(255,255,255,0.9), 0 0 72px rgba(255,255,255,0.8);
     }
 
     /* ── LOGIN SCREEN ── */
@@ -691,7 +681,6 @@
   <div class="bg-icon">
     <img src="https://stormyreigns.github.io/HATH/SleepTokenIcon.png" alt="">
   </div>
-  <div class="frosted-overlay"></div>
 </div>
 
 <!-- ── LOGIN SCREEN ── -->
