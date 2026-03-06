@@ -626,6 +626,32 @@
     .sub-screen.visible {
       display: flex;
     }
+    .docs-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 0 12px;
+      flex-shrink: 0;
+    }
+    .docs-header .screen-breadcrumb { padding: 0; flex: 1; min-width: 0; }
+    .docs-refresh-btn {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.12s;
+      padding: 0;
+    }
+    .docs-refresh-btn:hover, .docs-refresh-btn:active { color: var(--accent); }
+    .docs-refresh-btn svg { width: 18px; height: 18px; }
     .screen-breadcrumb {
       font-size: 11px; color: var(--muted);
       padding: 8px 0 12px;
@@ -879,7 +905,7 @@
   <img class="login-blaisie"
        src="https://stormyreigns.github.io/HATH/D76D3F44-9946-43EE-A9EA-29E164110C98.jpeg"
        alt="Blaisie">
-  <div class="login-tagline">Managed by ShastApp</div>
+  <div class="login-tagline">Managed by Shasta</div>
   <div class="login-btn-wrap">
     <div id="googleSignInBtn"></div>
   </div>
@@ -947,7 +973,12 @@
 
     <!-- Documents screen -->
     <div class="sub-screen" id="documentsScreen">
-      <div class="screen-breadcrumb" id="docsBreadcrumb"></div>
+      <div class="docs-header">
+        <div class="screen-breadcrumb" id="docsBreadcrumb"></div>
+        <button type="button" class="docs-refresh-btn" onclick="refreshCurrentDocsFolder()" title="Refresh folder" aria-label="Refresh">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </button>
+      </div>
       <div class="screen-list" id="docsList"></div>
       <button type="button" class="docs-add-btn" onclick="openDocsAddMenu()" title="Add document">+</button>
     </div>
@@ -997,7 +1028,7 @@
   <div class="drawer-header">
     <div class="drawer-header-text">
       <div class="drawer-wordmark">ShastApp</div>
-      <div class="drawer-tagline">Managed by ShastApp</div>
+      <div class="drawer-tagline">Managed by Shasta</div>
     </div>
     <img class="drawer-header-icon" src="https://stormyreigns.github.io/HATH/SleepTokenIcon.png" alt="">
   </div>
@@ -1130,8 +1161,8 @@
   };
 
   // ── CONFIG ────────────────────────────────────────────────────
-  const API_URL = 'https://script.google.com/macros/s/AKfycbxRBkpJKITbFtNPKGLNF7NIEYDFc_A24mSK48cRrvAakd_JMrI5A0qDtspXyf_33w0PWw/exec';
-  const AI_URL  = 'https://script.google.com/macros/s/AKfycbxRBkpJKITbFtNPKGLNF7NIEYDFc_A24mSK48cRrvAakd_JMrI5A0qDtspXyf_33w0PWw/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbxHjzbxX4lirdppykjF17KQFdLjRsHr5T20K0QNZZDRZFdGCEk_3EjQOrIsyjMxZpYgRA/exec';
+  const AI_URL  = 'https://script.google.com/macros/s/AKfycbxHjzbxX4lirdppykjF17KQFdLjRsHr5T20K0QNZZDRZFdGCEk_3EjQOrIsyjMxZpYgRA/exec';
   // Must match your Shasta Docs folder: open it in Drive, copy ID from URL (after /folders/)
   const DOCS_FOLDER_ID = '1UTVAmNx854R9a1YqTPPlZ1gA_V9nUulI';
 
@@ -1363,9 +1394,45 @@
   }
 
   let docsBreadcrumb = [{ id: DOCS_FOLDER_ID, name: 'ShastApp Docs' }];
+  const docsFolderCache = {};
 
-  async function loadFolderContents(folderId) {
+  function renderDocsList(data) {
     const list = document.getElementById('docsList');
+    list.innerHTML = '';
+    if (data.error) {
+      list.innerHTML = '<div class="screen-loading">Could not load folder. ' + escapeHtml(String(data.error).slice(0, 80)) + (String(data.error).length > 80 ? '…' : '') + '</div>';
+      return;
+    }
+    const folders = data.folders || [];
+    const files = data.files || [];
+    folders.forEach(f => {
+      const div = document.createElement('div');
+      div.className = 'screen-item';
+      div.innerHTML = `<span class="screen-item-icon">📁</span><span class="screen-item-name">${escapeHtml(f.name)}</span>`;
+      div.onclick = () => openDocsFolder(f.id, f.name);
+      list.appendChild(div);
+    });
+    files.forEach(f => {
+      const div = document.createElement('div');
+      div.className = 'screen-item';
+      div.innerHTML = `<span class="screen-item-icon">📄</span><span class="screen-item-name">${escapeHtml(f.name)}</span>`;
+      div.onclick = () => { if (f.url) window.open(f.url, '_blank'); };
+      list.appendChild(div);
+    });
+    if (folders.length === 0 && files.length === 0) {
+      list.innerHTML = '<div class="screen-loading">This folder is empty.</div>';
+    }
+  }
+
+  async function loadFolderContents(folderId, forceRefresh) {
+    const list = document.getElementById('docsList');
+    const cached = !forceRefresh && docsFolderCache[folderId];
+
+    if (cached) {
+      renderDocsList(cached);
+      return;
+    }
+
     list.innerHTML = '<div class="screen-loading">Loading…</div>';
     try {
       const url = `${API_URL}?action=listFolder&folder=${encodeURIComponent(folderId)}`;
@@ -1382,35 +1449,20 @@
         list.innerHTML = '<div class="screen-loading">Could not load folder — API response invalid. Check that listFolder is wired in Apps Script doGet.</div>';
         return;
       }
-      list.innerHTML = '';
-      if (data.error) {
-        console.error('Documents API error:', data.error);
-        list.innerHTML = '<div class="screen-loading">Could not load folder. ' + escapeHtml(String(data.error).slice(0, 80)) + (String(data.error).length > 80 ? '…' : '') + '</div>';
-        return;
+      if (!data.error && (data.folders || data.files)) {
+        docsFolderCache[folderId] = data;
       }
-      const folders = data.folders || [];
-      const files = data.files || [];
-      folders.forEach(f => {
-        const div = document.createElement('div');
-        div.className = 'screen-item';
-        div.innerHTML = `<span class="screen-item-icon">📁</span><span class="screen-item-name">${escapeHtml(f.name)}</span>`;
-        div.onclick = () => openDocsFolder(f.id, f.name);
-        list.appendChild(div);
-      });
-      files.forEach(f => {
-        const div = document.createElement('div');
-        div.className = 'screen-item';
-        div.innerHTML = `<span class="screen-item-icon">📄</span><span class="screen-item-name">${escapeHtml(f.name)}</span>`;
-        div.onclick = () => { if (f.url) window.open(f.url, '_blank'); };
-        list.appendChild(div);
-      });
-      if (folders.length === 0 && files.length === 0) {
-        list.innerHTML = '<div class="screen-loading">This folder is empty.</div>';
-      }
+      renderDocsList(data);
     } catch (err) {
       console.error('Documents load error:', err);
       list.innerHTML = '<div class="screen-loading">Could not load folder. ' + escapeHtml(err.message || String(err)) + '</div>';
     }
+  }
+
+  function refreshCurrentDocsFolder() {
+    const folderId = getCurrentDocsFolderId();
+    delete docsFolderCache[folderId];
+    loadFolderContents(folderId, true);
   }
 
   function openDocsFolder(folderId, folderName) {
@@ -1543,7 +1595,8 @@
         return;
       }
       showDocsToast('Saved: ' + (data.fileName || filename));
-      loadFolderContents(folderId);
+      delete docsFolderCache[folderId];
+      loadFolderContents(folderId, true);
     } catch (err) {
       showDocsLoading(false);
       showDocsToast('Upload failed: ' + (err.message || 'Network error'), true);
@@ -1573,7 +1626,8 @@
         return;
       }
       showDocsToast('Saved: ' + filename);
-      loadFolderContents(folderId);
+      delete docsFolderCache[folderId];
+      loadFolderContents(folderId, true);
     } catch (err) {
       showDocsLoading(false);
       showDocsToast('Failed: ' + (err.message || 'Network error'), true);
