@@ -118,6 +118,20 @@
       object-fit: contain;
     }
 
+    /* Frosted overlay between icon and text — softens the icon, improves readability */
+    .frosted-overlay {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 340px;
+      height: 340px;
+      border-radius: 50%;
+      background: rgba(253, 248, 245, 0.5);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      pointer-events: none;
+    }
+
     /* Strong white glow on text so it reads over the gray icon */
     .login-wordmark, .login-tagline,
     .hint-greeting, .hint-sub,
@@ -620,6 +634,7 @@
   <div class="bg-icon">
     <img src="https://stormyreigns.github.io/HATH/SleepTokenIcon.png" alt="">
   </div>
+  <div class="frosted-overlay"></div>
 </div>
 
 <!-- ── LOGIN SCREEN ── -->
@@ -688,6 +703,7 @@
         <span class="chip" onclick="prefill('What does our home insurance cover?')">Home insurance</span>
         <span class="chip" onclick="prefill('When does the car warranty expire?')">Car warranty</span>
         <span class="chip" onclick="prefill('Are we on track this month?')">Monthly status</span>
+        <span class="chip" onclick="prefill('What documents do we have about our pet?')">Pet records</span>
       </div>
     </div>
 
@@ -832,8 +848,8 @@
   };
 
   // ── CONFIG ────────────────────────────────────────────────────
-  const API_URL = 'https://script.google.com/macros/s/AKfycbxQvfdxRTJgxYJSYhHC8Vd2NKbKb8eatTaF4b3xlCiy0pcoeeLWtoaHmVSFB5V0S7B0/exec';
-  const AI_URL  = 'https://script.google.com/macros/s/AKfycbxQvfdxRTJgxYJSYhHC8Vd2NKbKb8eatTaF4b3xlCiy0pcoeeLWtoaHmVSFB5V0S7B0/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbx1XJ3oSPoTBWGWzkxd5XEyaGXkhiZXhdMmcIQmThaJoV4HYxfO4jHd6L_pMeUDHD4GMA/exec';
+  const AI_URL  = 'https://script.google.com/macros/s/AKfycbx1XJ3oSPoTBWGWzkxd5XEyaGXkhiZXhdMmcIQmThaJoV4HYxfO4jHd6L_pMeUDHD4GMA/exec';
 
   // Apps Script requires no-cors redirect following — use a JSONP-style
   // workaround by appending callback param for GET, and for POST we
