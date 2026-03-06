@@ -176,12 +176,25 @@
       margin-left: -8px;
       z-index: 2;
       position: relative;
+      transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .blathers-wrap .blathers-idle,
     .blathers-wrap .blathers-startled {
       width: 100px;
       height: 100px;
+    }
+
+    /* When drawer opens: Blathers startled + pinched to the right */
+    body.drawer-open .input-zone {
+      transform: translateX(12%);
+      transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body.drawer-open .blathers-wrap img {
+      animation: none;
+      transform: scaleX(0.85);
+      transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     /* Avatar next to chat bubbles — bigger, overlapping */
@@ -401,6 +414,7 @@
     .input-wrap {
       flex: 1;
       min-width: 0;
+      transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex; align-items: flex-end; gap: 10px;
       background: rgba(255,255,255,0.65);
       backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -739,12 +753,22 @@
 
   // ── DRAWER ────────────────────────────────────────────────────
   function toggleDrawer() {
+    const wasOpen = document.getElementById('drawer').classList.contains('open');
     document.getElementById('drawer').classList.toggle('open');
     document.getElementById('overlay').classList.toggle('open');
+    if (wasOpen) {
+      document.body.classList.remove('drawer-open');
+      setBlathers('sleep');
+    } else {
+      document.body.classList.add('drawer-open');
+      setBlathers('startled');
+    }
   }
   function closeDrawer() {
     document.getElementById('drawer').classList.remove('open');
     document.getElementById('overlay').classList.remove('open');
+    document.body.classList.remove('drawer-open');
+    setBlathers('sleep');
   }
 
   // ── INPUT ─────────────────────────────────────────────────────
