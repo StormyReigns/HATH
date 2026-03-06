@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="theme-color" content="#fdf6f0">
+  <meta name="theme-color" content="#fdf6f0" id="themeColorMeta">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="https://stormyreigns.github.io/HATH/ShastaApp.png">
   <title>ShastApp</title>
@@ -779,9 +779,17 @@
     .settings-toggle span:first-child { font-size: 14px; color: var(--text); }
     .settings-toggle input[type="checkbox"] { width: 44px; height: 24px; accent-color: var(--accent); }
 
-    /* Font size schemes */
-    html.font-small { font-size: 14px; }
-    html.font-large { font-size: 18px; }
+    /* Font size schemes — use zoom to scale all content */
+    html.font-small .app-screen,
+    html.font-small .login-screen,
+    html.font-small .offline-screen,
+    html.font-small .drawer,
+    html.font-small .overlay { zoom: 0.875; }
+    html.font-large .app-screen,
+    html.font-large .login-screen,
+    html.font-large .offline-screen,
+    html.font-large .drawer,
+    html.font-large .overlay { zoom: 1.125; }
 
     /* Documents add button — fixed bottom center when folder open */
     #documentsScreen { position: relative; }
@@ -1259,8 +1267,8 @@
   };
 
   // ── CONFIG ────────────────────────────────────────────────────
-  const API_URL = 'https://script.google.com/macros/s/AKfycbx07d-Vpj8_fCqL8FLjzmi5oB1wvu5XLrY_AgJIoLu9GvzLiqF0LsRm37Y7s__6ypkFzA/exec';
-  const AI_URL  = 'https://script.google.com/macros/s/AKfycbx07d-Vpj8_fCqL8FLjzmi5oB1wvu5XLrY_AgJIoLu9GvzLiqF0LsRm37Y7s__6ypkFzA/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbysOxO4zyGoJs9HEql1o4PLDdV6camidnsc3BV2uMWCmi4Q6lk-LcPj7MA1gKWNgHb2wg/exec';
+  const AI_URL  = 'https://script.google.com/macros/s/AKfycbysOxO4zyGoJs9HEql1o4PLDdV6camidnsc3BV2uMWCmi4Q6lk-LcPj7MA1gKWNgHb2wg/exec';
   // Must match your Shasta Docs folder: open it in Drive, copy ID from URL (after /folders/)
   const DOCS_FOLDER_ID = '1UTVAmNx854R9a1YqTPPlZ1gA_V9nUulI';
 
@@ -1785,18 +1793,21 @@
   }
 
   const BG_SCHEMES = [
-    { id: 'peach', name: 'Peach', swatch: 'peach' },
-    { id: 'lavender', name: 'Lavender', swatch: 'lavender' },
-    { id: 'sage', name: 'Sage', swatch: 'sage' },
-    { id: 'sunset', name: 'Sunset', swatch: 'sunset' },
-    { id: 'ocean', name: 'Ocean', swatch: 'ocean' }
+    { id: 'peach', name: 'Peach', swatch: 'peach', themeColor: '#fdf6f0' },
+    { id: 'lavender', name: 'Lavender', swatch: 'lavender', themeColor: '#f8f5fd' },
+    { id: 'sage', name: 'Sage', swatch: 'sage', themeColor: '#f5faf8' },
+    { id: 'sunset', name: 'Sunset', swatch: 'sunset', themeColor: '#fdf8f2' },
+    { id: 'ocean', name: 'Ocean', swatch: 'ocean', themeColor: '#f2f8fd' }
   ];
 
   function applyBgScheme(schemeId) {
     const bg = document.querySelector('.bg');
     if (!bg) return;
     BG_SCHEMES.forEach(s => bg.classList.remove('bg-scheme-' + s.id));
-    if (schemeId && schemeId !== 'peach') bg.classList.add('bg-scheme-' + schemeId);
+    const scheme = BG_SCHEMES.find(s => s.id === (schemeId || 'peach'));
+    if (scheme && scheme.id !== 'peach') bg.classList.add('bg-scheme-' + scheme.id);
+    const meta = document.getElementById('themeColorMeta');
+    if (meta && scheme) meta.setAttribute('content', scheme.themeColor);
   }
 
   function setBgScheme(schemeId) {
