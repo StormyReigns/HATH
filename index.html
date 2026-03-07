@@ -13,7 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async></script>
   <script type="module" src="https://unpkg.com/@dotlottie/player-component@2.3.0/dist/dotlottie-player.mjs"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js" async></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -2272,29 +2272,32 @@
     return canvas.toDataURL('image/jpeg', 0.92);
   }
 
-  function waitForTesseract(ms) {
-    return new Promise((resolve, reject) => {
-      if (window.Tesseract) return resolve(window.Tesseract);
-      const deadline = Date.now() + (ms || 15000);
-      const check = () => {
-        if (window.Tesseract) return resolve(window.Tesseract);
-        if (Date.now() > deadline) return reject(new Error('OCR script did not load'));
-        setTimeout(check, 200);
-      };
-      check();
-    });
-  }
-
   async function runOcrOnImage(file) {
+    let dataUrl;
     try {
-      const dataUrl = await fileToJpegDataUrl(file, 2000);
-      const Tesseract = await waitForTesseract();
-      const worker = await Tesseract.createWorker('eng');
+      dataUrl = await fileToJpegDataUrl(file, 2000);
+    } catch (e) {
+      console.warn('Image prep failed:', e);
+      throw new Error('Could not process image');
+    }
+    const getWorker = async () => {
+      for (let i = 0; i < 30; i++) {
+        if (window.Tesseract && typeof window.Tesseract.createWorker === 'function') {
+          return window.Tesseract.createWorker('eng');
+        }
+        await new Promise(r => setTimeout(r, 200));
+      }
+      const { createWorker } = await import('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.esm.min.js');
+      return createWorker('eng');
+    };
+    const workerPromise = getWorker();
+    const worker = await workerPromise;
+    try {
       const { data } = await worker.recognize(dataUrl);
       await worker.terminate();
       return (data?.text || '').trim();
     } catch (e) {
-      console.warn('OCR failed:', e);
+      try { await worker.terminate(); } catch (_) {}
       throw e;
     }
   }
@@ -2347,7 +2350,8 @@
       }).catch(err => {
         if (!pendingUpload) return;
         console.warn('OCR error:', err);
-        ocrStatus.textContent = 'OCR failed — will save as image only.';
+        const msg = (err && err.message) ? String(err.message).slice(0, 60) : 'Unknown error';
+        ocrStatus.textContent = 'OCR failed (' + msg + ') — will save as image only.';
       });
     } else if (isImage && !file) {
       ocrStatus.textContent = 'No text found — will save as image only.';
