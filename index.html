@@ -1361,7 +1361,7 @@
     .docs-add-btn:active { transform: translateX(-50%) scale(0.94); }
 
     /* ── PROJECTS SCREEN ── */
-    #projectsScreen { flex-direction: column; padding: 0 4px; }
+    #projectsScreen { flex-direction: column; padding: 0 4px; min-height: 0; }
     .projects-landing { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
     .projects-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -1480,6 +1480,7 @@
     .projects-view {
       flex: 1; display: flex; flex-direction: column;
       overflow: hidden; padding: 0; position: relative;
+      min-height: 0;
     }
     .projects-view-header {
       display: flex; align-items: flex-start; gap: 10px;
@@ -1536,9 +1537,10 @@
       0%, 100% { filter: brightness(1); }
       50% { filter: brightness(1.15); }
     }
-    .projects-phase-cards-wrap { flex: 1; min-height: 200px; min-width: 0; display: flex; flex-direction: column; }
+    .projects-phase-cards-wrap { flex: 1 1 0; min-height: 200px; min-width: 0; display: flex; flex-direction: column; }
     .projects-phase-cards {
-      flex: 1; overflow-x: auto; overflow-y: hidden;
+      flex: 1; min-height: 0;
+      overflow-x: auto; overflow-y: hidden;
       display: flex; align-items: stretch; gap: 12px;
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
@@ -1660,12 +1662,12 @@
       position: absolute; inset: 0;
       display: flex; align-items: center; justify-content: center;
       background: rgba(0,0,0,0.35);
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.3s ease;
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
       z-index: 10;
     }
     .celebration-project-full { position: absolute; }
-    .celebration-overlay.show { opacity: 1; pointer-events: auto; }
+    .celebration-overlay.show { opacity: 1; visibility: visible; pointer-events: auto; }
     .celebration-content {
       background: white;
       padding: 24px 36px;
