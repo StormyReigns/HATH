@@ -1643,6 +1643,14 @@
       transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
       box-shadow: 0 0 16px rgba(42,111,181,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
     }
+    .phase-quote {
+      margin-top: 16px; padding-top: 12px;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      font-family: 'Playfair Display', serif;
+      font-size: 13px; font-style: italic;
+      color: var(--text2);
+      line-height: 1.5;
+    }
     .projects-swipe-hint {
       font-size: 12px; color: var(--muted);
       text-align: center; padding: 12px;
@@ -1675,6 +1683,15 @@
     }
     .celebration-icon { font-size: 48px; }
     .celebration-project-content .celebration-icon { font-size: 64px; }
+    .celebration-quote {
+      margin-top: 16px; padding-top: 12px;
+      border-top: 1px solid rgba(0,0,0,0.08);
+      font-family: 'Playfair Display', serif;
+      font-size: 15px; font-style: italic;
+      color: var(--text2);
+      line-height: 1.5;
+      max-width: 280px;
+    }
     @keyframes celebration-pop {
       to { transform: scale(1); opacity: 1; }
     }
@@ -1729,6 +1746,7 @@
       touch-action: pan-y pinch-zoom;
     }
     html.dark-mode .projects-phase-card { background: rgba(45,40,38,0.6); border-color: rgba(255,255,255,0.08); }
+    html.dark-mode .phase-quote { border-top-color: rgba(255,255,255,0.1); }
     html.dark-mode .projects-list-item { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); }
     html.dark-mode .projects-list-delete-btn:hover,
     html.dark-mode .projects-list-delete-btn:active { background: rgba(220,80,80,0.2); }
@@ -2157,7 +2175,7 @@
           </div>
         </div>
         <div class="celebration-overlay celebration-project celebration-project-full" id="projectCelebrationOverlay">
-          <div class="celebration-content celebration-project-content"><span class="celebration-icon">🎉</span><span>Project complete!</span></div>
+          <div class="celebration-content celebration-project-content"><span class="celebration-icon">🎉</span><span>Project complete!</span><p class="celebration-quote" id="celebrationCompleteQuote"></p></div>
         </div>
         <div class="projects-swipe-hint" id="projectsSwipeHint">← Swipe to change phase →</div>
       </div>
@@ -3163,6 +3181,63 @@
   let projectsViewing = null;
   let projectsCurrentPhaseIndex = 0;
 
+  const PHASE_QUOTES = {
+    makingProgress: [
+      { speaker: 'King of Red Lions', quote: 'The Great Sea stretches endlessly before you, and yet you sail on. That is no small thing.' },
+      { speaker: 'King of Red Lions', quote: 'Each wave you cross brings you closer. Do not look back at the distance already traveled — look forward.' },
+      { speaker: 'King of Red Lions', quote: 'The chart is in your hands. Trust it. Trust yourself.' },
+      { speaker: 'King of Red Lions', quote: 'Many have turned back at this point. You have not. Remember that.' },
+      { speaker: 'King of Red Lions', quote: 'The wind shifts in your favor. Now is the time to press forward.' },
+      { speaker: 'King of Red Lions', quote: 'You are further along than you know.' },
+      { speaker: 'King of Red Lions', quote: 'I have watched many set sail on this sea. Few navigate it with your determination.' },
+      { speaker: 'King of Red Lions', quote: 'Rest when the wind dies. Sail hard when it rises. You are doing both correctly.' }
+    ],
+    finalPhase: [
+      { speaker: 'King of Red Lions', quote: 'I can see the light on the horizon. You are nearly there. Do not stop now.' },
+      { speaker: 'King of Red Lions', quote: 'One shore remains. After everything you have crossed to reach this point — one shore.' },
+      { speaker: 'King of Red Lions', quote: 'This is where lesser sailors turn cautious. You must be bold.' },
+      { speaker: 'King of Red Lions', quote: 'The final leg of any journey is the hardest. Not because of what lies ahead, but because of how much you have already given.' },
+      { speaker: 'King of Red Lions', quote: 'I have guided you across this entire sea. I will not leave you now. Sail on.' }
+    ],
+    complete: [
+      { speaker: 'King of Red Lions', quote: '...At last. You have done it. I could not be more proud of what you have become.' },
+      { speaker: 'King of Red Lions', quote: 'The sea is calm now. It was not always so. You made it so.' },
+      { speaker: 'King of Red Lions', quote: 'When we first set sail, I was not certain you were ready. I was wrong to doubt.' },
+      { speaker: 'King of Red Lions', quote: 'This journey is complete. But the sea remembers every captain who crossed it with courage.' },
+      { speaker: 'King of Red Lions', quote: 'You may lower the sail. You have earned this rest.' }
+    ],
+    rare: [
+      { speaker: 'Tingle', quote: 'Tingle Tingle! Kooloo-Limpah! I don\'t know what you\'re building but it sounds EXPENSIVE! Tingle is so jealous!' },
+      { speaker: 'Tingle', quote: 'If you find any rupees during this project, Tingle accepts donations. Just saying. Kooloo-Limpah!' },
+      { speaker: 'Tingle', quote: 'Tingle made a map of your progress! It cost 398 rupees to print. Worth it? Tingle thinks yes.' },
+      { speaker: 'Tingle', quote: 'You are doing AMAZING! Almost as amazing as Tingle! ...Almost.' },
+      { speaker: 'Tingle', quote: 'Kooloo-Limpah! Tingle cannot help with this phase but Tingle believes in you! For a small fee!' }
+    ]
+  };
+  const RARE_QUOTE_CHANCE = 0.03;
+
+  function getPhaseQuote(phaseIdx, totalPhases) {
+    if (!totalPhases) return null;
+    const isLastPhase = phaseIdx === totalPhases - 1;
+    let pool, q;
+    if (isLastPhase) {
+      pool = PHASE_QUOTES.finalPhase;
+    } else {
+      if (Math.random() < RARE_QUOTE_CHANCE) {
+        pool = PHASE_QUOTES.rare;
+      } else {
+        pool = PHASE_QUOTES.makingProgress;
+      }
+    }
+    q = pool[Math.floor(Math.random() * pool.length)];
+    return q ? `${q.speaker}:\n\n"${q.quote}"` : null;
+  }
+
+  function getCompleteQuote() {
+    const q = PHASE_QUOTES.complete[Math.floor(Math.random() * PHASE_QUOTES.complete.length)];
+    return q ? `${q.speaker}:\n\n"${q.quote}"` : null;
+  }
+
   function hapticLight() { try { if (navigator.vibrate) navigator.vibrate(15); } catch (_) {} }
   function hapticDoublePulse() { try { if (navigator.vibrate) navigator.vibrate([18, 50, 18]); } catch (_) {} }
 
@@ -3359,6 +3434,8 @@
       progressHtml = `<div class="phase-progress-wrap"><div class="phase-progress-bar"><div class="phase-progress-fill${completeClass}" style="width:${pct}%"></div></div></div>`;
     }
     const phaseLabel = p.phases.length > 1 ? `Phase ${idx + 1} of ${p.phases.length}` : `Phase ${idx + 1}`;
+    const quoteText = getPhaseQuote(idx, p.phases.length);
+    const quoteBlock = quoteText ? `<div class="phase-quote">${escapeHtml(quoteText).replace(/\n/g, '<br>')}</div>` : '';
     return `<div class="projects-phase-card" data-phase-idx="${idx}">
       <div class="phase-badge">${phaseLabel}</div>
       <h3 class="phase-title">${escapeHtml(ph.title || 'Untitled phase')}</h3>
@@ -3368,6 +3445,7 @@
       ${undoBlock}
       ${timelineHtml}
       ${progressHtml}
+      ${quoteBlock}
     </div>`;
   }
 
@@ -3428,6 +3506,12 @@
 
   function showProjectCelebrationThenLand(completedProjectId) {
     const overlay = document.getElementById('projectCelebrationOverlay');
+    const quoteEl = document.getElementById('celebrationCompleteQuote');
+    if (quoteEl) {
+      const q = getCompleteQuote();
+      quoteEl.innerHTML = q ? escapeHtml(q).replace(/\n/g, '<br>') : '';
+      quoteEl.style.display = q ? 'block' : 'none';
+    }
     if (overlay) overlay.classList.add('show');
     setTimeout(() => {
       if (overlay) overlay.classList.remove('show');
