@@ -37,14 +37,16 @@
       -webkit-touch-callout: none;
       background-color: #fdf8f5;
     }
-    /* Explicit top safe-area fill — prevents white bar under status bar on some devices */
+    /* Explicit top safe-area fill — prevents white bar under status bar.
+       iOS Safari bug: env(safe-area-inset-top) can return 0 in portrait; use 47px fallback. */
     html::before {
       content: '';
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      height: env(safe-area-inset-top, 0px);
+      height: max(env(safe-area-inset-top, 0px), 47px);
+      min-height: 47px;
       background-color: #fdf8f5;
       z-index: 9999;
       pointer-events: none;
@@ -299,7 +301,7 @@
     html.dark-mode .blatherbook-input-wrap { background: rgba(35,30,28,0.8); border-color: rgba(255,255,255,0.08); }
     html.dark-mode .blatherbook-input { background: rgba(35,30,28,0.8); border-color: rgba(255,255,255,0.12); color: var(--text); }
     html.dark-mode, html.dark-mode body { background-color: #1a1816; }
-    html.dark-mode::before { background-color: #1a1816; }
+    html.dark-mode::before { background-color: #1a1816 !important; }
     html.dark-mode .offline-screen { background: #1a1816; }
     /* Dark mode: soften or remove light text-shadow for readability */
     html.dark-mode .login-wordmark, html.dark-mode .login-tagline,
@@ -1112,6 +1114,8 @@
     }
     .blatherbook-send svg { width: 18px; height: 18px; }
     .blatherbook-send:active { opacity: 0.9; }
+    .blatherbook-send.stop-mode .blatherbook-send-icon { display: none; }
+    .blatherbook-send.stop-mode .blatherbook-stop-icon { display: block !important; }
 
     .schedule-calendars-list { max-height: 200px; overflow-y: auto; margin-bottom: 12px; }
     .schedule-calendar-item {
@@ -1818,8 +1822,9 @@
     <div class="blatherbook-messages" id="blatherbookMessages"></div>
     <div class="blatherbook-input-wrap">
       <textarea class="blatherbook-input" id="blatherbookInput" placeholder="Ask about what you're looking at…" rows="1" onkeydown="blatherbookHandleKey(event)" oninput="autoResizeBlatherbook(this)"></textarea>
-      <button type="button" class="blatherbook-send" id="blatherbookSend" onclick="sendBlatherBookMessage()" title="Send">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+      <button type="button" class="blatherbook-send" id="blatherbookSend" onclick="handleBlatherBookSendOrStop()" title="Send">
+        <svg class="blatherbook-send-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+        <svg class="blatherbook-stop-icon" viewBox="0 0 24 24" style="display:none"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg>
       </button>
     </div>
   </div>
@@ -1943,6 +1948,16 @@
     }
   }
 
+  const PING_INTERVAL_MS = 4 * 60 * 1000; // 4 minutes
+  let pingIntervalId = null;
+
+  function startKeepalivePing() {
+    if (pingIntervalId) return;
+    pingIntervalId = setInterval(function() {
+      fetch(API_URL + '?action=ping', { redirect: 'follow' }).catch(function() {});
+    }, PING_INTERVAL_MS);
+  }
+
   function launchApp(email) {
     document.getElementById('loginScreen').style.display  = 'none';
     document.getElementById('appScreen').style.display    = 'block';
@@ -1952,6 +1967,7 @@
     applyBgScheme(localStorage.getItem('shasta_bg_' + email) || 'peach');
     applyFontSize(localStorage.getItem('shasta_font_' + email) || 'default');
     applyDarkMode(localStorage.getItem('shasta_dark_' + email) === 'true');
+    startKeepalivePing();
   }
 
   function showOfflineScreen() {
@@ -2000,13 +2016,14 @@
         .then(d => (d && d.files) ? d.files : [])
         .catch(() => []);
 
+    const pingPromise = fetch(API_URL + '?action=ping', { redirect: 'follow' }).catch(() => null);
     const rootPromise = fetchDocsFolder(DOCS_FOLDER_ID);
     const balancePromise = fetchBalance();
     const tabListPromise = fetchTabList();
     const docIndexPromise = fetchDocIndex();
 
     const [rootFolders, , tabs, docIndex] = await Promise.all([
-      rootPromise, balancePromise, tabListPromise, docIndexPromise
+      rootPromise, balancePromise, tabListPromise, docIndexPromise, pingPromise
     ]);
     window.shastaTabs = tabs || [];
     window.shastaDocIndex = docIndex || [];
@@ -3655,6 +3672,8 @@
   let activeController = null;
   const conversationHistory = [];
   const blatherbookHistory = [];
+  let blatherbookIsSending = false;
+  let blatherbookActiveController = null;
 
   // ── SEND / STOP BUTTON ────────────────────────────────────────
   function setSendButtonMode(mode) {
@@ -3872,8 +3891,42 @@
   function blatherbookHandleKey(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
+      handleBlatherBookSendOrStop();
+    }
+  }
+
+  function setBlatherBookSendMode(mode) {
+    const btn = document.getElementById('blatherbookSend');
+    if (!btn) return;
+    if (mode === 'stop') {
+      btn.classList.add('stop-mode');
+      btn.title = 'Stop';
+    } else {
+      btn.classList.remove('stop-mode');
+      btn.title = 'Send';
+    }
+  }
+
+  function handleBlatherBookSendOrStop() {
+    if (blatherbookIsSending) {
+      cancelBlatherBookMessage();
+    } else {
       sendBlatherBookMessage();
     }
+  }
+
+  function cancelBlatherBookMessage() {
+    if (blatherbookActiveController) {
+      blatherbookActiveController.abort();
+      blatherbookActiveController = null;
+    }
+    const container = document.getElementById('blatherbookMessages');
+    if (container) {
+      const typing = container.querySelector('.typing');
+      if (typing) typing.remove();
+    }
+    setBlatherBookSendMode('send');
+    blatherbookIsSending = false;
   }
 
   function autoResizeBlatherbook(el) {
@@ -3885,12 +3938,14 @@
     const inp = document.getElementById('blatherbookInput');
     const sendBtn = document.getElementById('blatherbookSend');
     const text = (inp && inp.value || '').trim();
-    if (!text) return;
+    if (!text || blatherbookIsSending) return;
     inp.value = '';
     if (inp) { inp.style.height = 'auto'; }
     addBlatherBookBubble(text, 'user');
     blatherbookHistory.push({ role: 'user', content: text });
-    sendBtn.disabled = true;
+    blatherbookIsSending = true;
+    blatherbookActiveController = new AbortController();
+    setBlatherBookSendMode('stop');
 
     const typing = document.createElement('div');
     typing.className = 'typing';
@@ -3917,7 +3972,8 @@
         method: 'POST',
         redirect: 'follow',
         headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
+        signal: blatherbookActiveController.signal
       });
       const raw = await res.text();
       let data;
@@ -3930,9 +3986,14 @@
       blatherbookHistory.push({ role: 'assistant', content: reply });
     } catch (err) {
       typing.remove();
-      addBlatherBookBubble(friendlyBlathersError(err), 'hath');
+      if (err.name !== 'AbortError') {
+        blatherbookHistory.pop();
+        addBlatherBookBubble(friendlyBlathersError(err), 'hath');
+      }
     }
-    sendBtn.disabled = false;
+    blatherbookActiveController = null;
+    blatherbookIsSending = false;
+    setBlatherBookSendMode('send');
   }
 
   initDocsFileInputs();
