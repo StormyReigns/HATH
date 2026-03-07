@@ -44,6 +44,7 @@
 
     /* Prevent pull-to-refresh and text selection on UI */
     .hamburger, .wordmark, .wellbeing, .peek-item, .upcoming-events,
+    .schedule-chip, .schedule-event, .schedule-event-star, .schedule-mini-cal-day,
     .matt-note, .chip, .send-btn, .cancel-btn, .drawer-item, .drawer-header, .drawer-footer {
       -webkit-user-select: none;
       user-select: none;
@@ -166,6 +167,7 @@
     .hint-greeting, .hint-sub,
     .peek-label, .peek-value,
     .upcoming-events-label, .event-item, .event-date, .event-title,
+    .schedule-title, .schedule-date-header, .schedule-event-title, .schedule-event-time,
     .matt-note, .chip,
     .bubble, .bubble-name,
     .screen-breadcrumb, .screen-breadcrumb span,
@@ -442,7 +444,9 @@
       margin-top: 6px;
       opacity: 0;
       transition: opacity 0.4s ease;
+      cursor: pointer;
     }
+    .upcoming-events:active { opacity: 0.85; }
     .upcoming-events.loaded { opacity: 1; }
     .upcoming-events-label {
       font-size: 10px; font-weight: 500; letter-spacing: 0.08em;
@@ -834,6 +838,158 @@
     .screen-footer a:active { opacity: 0.8; }
     .screen-loading { text-align: center; padding: 24px; color: var(--muted); font-size: 13px; }
 
+    /* Schedule screen */
+    #scheduleScreen { flex-direction: column; padding: 8px 0 24px; }
+    .schedule-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 0 12px; flex-shrink: 0;
+    }
+    .schedule-title {
+      font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 400;
+      color: var(--text); letter-spacing: 0.02em;
+    }
+    .schedule-calendar-btn {
+      min-width: 44px; min-height: 44px;
+      width: 40px; height: 40px;
+      border: none; background: rgba(192,122,74,0.1);
+      color: var(--accent); cursor: pointer;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0; transition: background 0.15s, color 0.15s;
+    }
+    .schedule-calendar-btn:hover, .schedule-calendar-btn:active { background: rgba(192,122,74,0.2); }
+    .schedule-calendar-btn.active { background: rgba(192,122,74,0.2); }
+    .schedule-calendar-btn svg { width: 22px; height: 22px; }
+    .schedule-chips-wrap {
+      flex-shrink: 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      margin-bottom: 8px;
+    }
+    .schedule-chips-wrap::-webkit-scrollbar { display: none; }
+    .schedule-chips {
+      display: flex; gap: 8px; padding: 4px 0;
+      padding-right: env(safe-area-inset-right, 0);
+    }
+    .schedule-chip {
+      flex-shrink: 0;
+      padding: 8px 14px;
+      font-size: 13px; font-weight: 400;
+      color: var(--text2);
+      background: rgba(255,255,255,0.5);
+      border-radius: 20px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.15s, color 0.15s;
+    }
+    .schedule-chip.active {
+      background: rgba(192,122,74,0.2);
+      color: var(--accent);
+    }
+    .schedule-chip:active { opacity: 0.9; }
+    .schedule-event {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 4px;
+      font-size: 14px; color: var(--text);
+      cursor: pointer;
+      font-weight: 300;
+      transition: background 0.15s;
+    }
+    .schedule-event:hover, .schedule-event:active { background: rgba(192,122,74,0.04); }
+    .schedule-event.starred { background: rgba(192,122,74,0.06); }
+    .schedule-event-dot {
+      flex-shrink: 0; width: 10px; height: 10px; border-radius: 50%;
+    }
+    .schedule-event-dot.shared { background: var(--accent); }
+    .schedule-event-dot.matt { background: #4a7ac4; }
+    .schedule-event-dot.jessica { background: #c47ab8; }
+    .schedule-event-time {
+      flex-shrink: 0; font-size: 12px; color: var(--muted);
+      font-family: 'Playfair Display', serif; min-width: 52px;
+    }
+    .schedule-event-main {
+      flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .schedule-event-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .schedule-event-badge {
+      flex-shrink: 0; font-size: 10px; font-weight: 500;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      padding: 2px 6px; border-radius: 4px;
+    }
+    .schedule-event-badge.finance { background: rgba(74,122,196,0.2); color: #3a6ab5; }
+    .schedule-event-badge.medical { background: rgba(180,80,80,0.2); color: #a04040; }
+    .schedule-event-badge.pets { background: rgba(120,160,80,0.2); color: #5a8a30; }
+    .schedule-event-badge.home { background: rgba(160,120,60,0.2); color: #8a6a30; }
+    .schedule-event-star {
+      flex-shrink: 0; min-width: 44px; min-height: 44px;
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted); cursor: pointer;
+      transition: color 0.15s;
+    }
+    .schedule-event-star:hover, .schedule-event-star:active { color: var(--accent); }
+    .schedule-event-star.starred { color: #d4a030; }
+    .schedule-event-star svg { width: 20px; height: 20px; }
+    .schedule-date-header {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted);
+      padding: 16px 4px 6px; font-family: 'Playfair Display', serif;
+    }
+    .schedule-date-header:first-of-type { padding-top: 4px; }
+    .schedule-mini-cal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.3);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .schedule-mini-cal-overlay.open {
+      opacity: 1; pointer-events: all;
+    }
+    .schedule-mini-cal {
+      position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 201;
+      width: calc(100vw - 48px); max-width: 320px;
+      background: #fdfaf8;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+      opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(0.96);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .schedule-mini-cal.open {
+      opacity: 1; pointer-events: all; transform: translate(-50%, -50%) scale(1);
+    }
+    .schedule-mini-cal-title {
+      font-family: 'Playfair Display', serif; font-size: 18px;
+      color: var(--text); text-align: center; margin-bottom: 16px;
+    }
+    .schedule-mini-cal-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      gap: 4px; font-size: 12px;
+    }
+    .schedule-mini-cal-dow {
+      text-align: center; font-size: 10px; color: var(--muted);
+      letter-spacing: 0.04em; padding: 4px 0;
+    }
+    .schedule-mini-cal-day {
+      position: relative;
+      aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+      border-radius: 8px; cursor: pointer;
+      color: var(--text2); font-weight: 400;
+      transition: background 0.15s, color 0.15s;
+    }
+    .schedule-mini-cal-day.other-month { color: var(--muted); opacity: 0.6; }
+    .schedule-mini-cal-day.has-events::after {
+      content: ''; position: absolute; bottom: 4px;
+      width: 4px; height: 4px; border-radius: 50%;
+      background: var(--accent);
+    }
+    .schedule-mini-cal-day:hover, .schedule-mini-cal-day:active { background: rgba(192,122,74,0.15); }
+    .schedule-mini-cal-day.today { background: rgba(192,122,74,0.2); color: var(--accent); font-weight: 500; }
+    .schedule-mini-cal-day.today.has-events::after { background: var(--text); }
+
     /* Settings screen */
     #settingsScreen { padding: 8px 0 24px; }
     .settings-section { padding: 16px 0; border-bottom: 1px solid rgba(0,0,0,0.06); }
@@ -1194,7 +1350,7 @@
         </div>
       </div>
 
-      <div class="upcoming-events" id="upcomingEvents">
+      <div class="upcoming-events" id="upcomingEvents" onclick="showScheduleScreen(); closeDrawer()" role="button" tabindex="0" aria-label="View schedule">
         <div class="upcoming-events-label">Upcoming</div>
         <div class="upcoming-events-list" id="upcomingEventsList"></div>
       </div>
@@ -1259,10 +1415,26 @@
 
     <!-- Schedule screen -->
     <div class="sub-screen" id="scheduleScreen">
+      <div class="schedule-header">
+        <h2 class="schedule-title">Schedule</h2>
+        <button type="button" class="schedule-calendar-btn" id="scheduleCalendarBtn" onclick="toggleScheduleMiniCalendar()" title="Calendar" aria-label="Toggle calendar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </button>
+      </div>
+      <div class="schedule-chips-wrap">
+        <div class="schedule-chips" id="scheduleChips"></div>
+      </div>
       <div class="screen-list" id="scheduleList"></div>
       <div class="screen-footer">
         <a href="https://calendar.google.com" target="_blank" rel="noopener">Open in Google Calendar</a>
       </div>
+    </div>
+
+    <!-- Schedule mini calendar overlay -->
+    <div class="schedule-mini-cal-overlay" id="scheduleMiniCalOverlay" onclick="closeScheduleMiniCalendar(event)"></div>
+    <div class="schedule-mini-cal" id="scheduleMiniCal" onclick="event.stopPropagation()">
+      <div class="schedule-mini-cal-title" id="scheduleMiniCalTitle"></div>
+      <div class="schedule-mini-cal-grid" id="scheduleMiniCalGrid"></div>
     </div>
 
     <!-- Blathers overlaps the input bar, associated with chat -->
@@ -2497,12 +2669,247 @@
     document.querySelector('.drawer-item:nth-child(6)').classList.add('active');
   }
 
+  const SCHEDULE_FILTER_KEYWORDS = {
+    finance: ['finance', 'financial', 'bill', 'pay', 'payment', 'due', 'insurance', 'tax', 'rent', 'mortgage'],
+    medical: ['hospital', 'doctor', 'dr', 'medical', 'dentist', 'appointment', 'clinic', 'prescription'],
+    pets: ['vet', 'grooming', 'gonzo', 'shasta', 'taquito', 'pet'],
+    home: ['repair', 'maintenance', 'inspection', 'plumber', 'electrician', 'cleaner']
+  };
+
+  const STARRED_STORAGE_KEY = 'shasta_starred_events';
+
+  function getEventId(ev) {
+    return ev.id || (ev.start + '|' + (ev.title || '').trim() + '|' + (ev.calendar || 'shared'));
+  }
+
+  function getEventCategory(ev) {
+    const t = ((ev.title || '') + ' ' + (ev.description || '')).toLowerCase();
+    for (const [cat, keywords] of Object.entries(SCHEDULE_FILTER_KEYWORDS)) {
+      if (keywords.some(kw => t.includes(kw))) return cat;
+    }
+    return null;
+  }
+
+  function getStarredEvents() {
+    try {
+      const raw = localStorage.getItem(STARRED_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (_) { return []; }
+  }
+
+  function setStarredEvents(ids) {
+    localStorage.setItem(STARRED_STORAGE_KEY, JSON.stringify(ids));
+  }
+
+  function isEventStarred(ev) {
+    const id = getEventId(ev);
+    return getStarredEvents().includes(id);
+  }
+
+  function toggleEventStarred(ev) {
+    const id = getEventId(ev);
+    let ids = getStarredEvents();
+    if (ids.includes(id)) ids = ids.filter(x => x !== id);
+    else ids.push(id);
+    setStarredEvents(ids);
+  }
+
+  let scheduleEvents = [];
+  let scheduleFilter = 'all';
+
+  function renderScheduleChips() {
+    const wrap = document.getElementById('scheduleChips');
+    if (!wrap) return;
+    const chips = [
+      { id: 'all', label: 'All' },
+      { id: 'starred', label: 'Starred' },
+      { id: 'finance', label: 'Finance' },
+      { id: 'medical', label: 'Medical' },
+      { id: 'pets', label: 'Pets' },
+      { id: 'home', label: 'Home' }
+    ];
+    wrap.innerHTML = chips.map(c => {
+      const active = scheduleFilter === c.id ? ' active' : '';
+      return `<button type="button" class="schedule-chip${active}" data-filter="${c.id}">${escapeHtml(c.label)}</button>`;
+    }).join('');
+    wrap.querySelectorAll('.schedule-chip').forEach(btn => {
+      btn.onclick = () => {
+        scheduleFilter = btn.dataset.filter;
+        renderScheduleChips();
+        renderScheduleList();
+      };
+    });
+  }
+
+  function filterScheduleEvents(events) {
+    if (scheduleFilter === 'all') return events;
+    if (scheduleFilter === 'starred') {
+      const starred = getStarredEvents();
+      return events.filter(ev => starred.includes(getEventId(ev)));
+    }
+    return events.filter(ev => getEventCategory(ev) === scheduleFilter);
+  }
+
+  function renderScheduleList() {
+    const list = document.getElementById('scheduleList');
+    if (!list) return;
+    const filtered = filterScheduleEvents(scheduleEvents);
+    if (filtered.length === 0) {
+      list.innerHTML = '<div class="screen-loading">' + (scheduleFilter === 'all' ? 'No upcoming events.' : 'No events match this filter.') + '</div>';
+      return;
+    }
+    const byDate = {};
+    filtered.forEach(ev => {
+      const d = new Date(ev.start || ev.date || ev.startTime);
+      const key = d.toDateString();
+      if (!byDate[key]) byDate[key] = [];
+      byDate[key].push(ev);
+    });
+    const keys = Object.keys(byDate).sort((a, b) => new Date(a) - new Date(b));
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    list.innerHTML = '';
+    keys.forEach(key => {
+      const events = byDate[key];
+      const d = new Date(key);
+      let label = key === today.toDateString() ? 'Today' : key === tomorrow.toDateString() ? 'Tomorrow' : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      const header = document.createElement('div');
+      header.className = 'schedule-date-header';
+      header.textContent = label;
+      header.dataset.dateKey = key;
+      list.appendChild(header);
+
+      events.forEach(ev => {
+        const div = document.createElement('div');
+        div.className = 'schedule-event' + (isEventStarred(ev) ? ' starred' : '');
+        div.dataset.dateKey = key;
+        const cal = (ev.calendar || 'shared').toLowerCase();
+        const time = ev.start ? formatEventTime(ev.start) : '';
+        const title = (ev.title || ev.summary || 'Event').trim();
+        const cat = getEventCategory(ev);
+        const badge = cat ? `<span class="schedule-event-badge ${cat}">${cat}</span>` : '';
+        const starClass = isEventStarred(ev) ? ' starred' : '';
+        const starSvg = isEventStarred(ev)
+          ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
+          : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+        div.innerHTML = `
+          <span class="schedule-event-dot ${cal}"></span>
+          <span class="schedule-event-time">${escapeHtml(time)}</span>
+          <div class="schedule-event-main">
+            <span class="schedule-event-title">${escapeHtml(title)}</span>
+            ${badge}
+          </div>
+          <div class="schedule-event-star${starClass}" onclick="event.stopPropagation(); scheduleToggleStar(event)">${starSvg}</div>
+        `;
+        div.onclick = () => { if (ev.url) window.open(ev.url, '_blank'); };
+        div._eventData = ev;
+        list.appendChild(div);
+      });
+    });
+  }
+
+  function scheduleToggleStar(e) {
+    const starEl = e.target.closest('.schedule-event-star');
+    const eventRow = starEl ? starEl.closest('.schedule-event') : null;
+    if (!eventRow || !eventRow._eventData) return;
+    toggleEventStarred(eventRow._eventData);
+    renderScheduleList();
+  }
+
+  function toggleScheduleMiniCalendar() {
+    const overlay = document.getElementById('scheduleMiniCalOverlay');
+    const panel = document.getElementById('scheduleMiniCal');
+    const btn = document.getElementById('scheduleCalendarBtn');
+    if (!overlay || !panel || !btn) return;
+    const isOpen = overlay.classList.contains('open');
+    if (isOpen) {
+      overlay.classList.remove('open');
+      panel.classList.remove('open');
+      btn.classList.remove('active');
+    } else {
+      overlay.classList.add('open');
+      panel.classList.add('open');
+      btn.classList.add('active');
+      renderScheduleMiniCalendar();
+    }
+  }
+
+  function closeScheduleMiniCalendar(e) {
+    if (e && e.target !== document.getElementById('scheduleMiniCalOverlay')) return;
+    const overlay = document.getElementById('scheduleMiniCalOverlay');
+    const panel = document.getElementById('scheduleMiniCal');
+    const btn = document.getElementById('scheduleCalendarBtn');
+    if (overlay) overlay.classList.remove('open');
+    if (panel) panel.classList.remove('open');
+    if (btn) btn.classList.remove('active');
+  }
+
+  function renderScheduleMiniCalendar() {
+    const titleEl = document.getElementById('scheduleMiniCalTitle');
+    const gridEl = document.getElementById('scheduleMiniCalGrid');
+    if (!titleEl || !gridEl) return;
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const first = new Date(year, month, 1);
+    const last = new Date(year, month + 1, 0);
+    titleEl.textContent = first.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+    const daysWithEvents = new Set();
+    scheduleEvents.forEach(ev => {
+      const d = new Date(ev.start || ev.date || ev.startTime);
+      daysWithEvents.add(d.toDateString());
+    });
+
+    const dow = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    let html = dow.map(d => `<div class="schedule-mini-cal-dow">${d}</div>`).join('');
+    const startPad = first.getDay();
+    for (let i = 0; i < startPad; i++) {
+      const prev = new Date(first);
+      prev.setDate(prev.getDate() - (startPad - i));
+      html += `<div class="schedule-mini-cal-day other-month">${prev.getDate()}</div>`;
+    }
+    const todayStr = now.toDateString();
+    for (let d = 1; d <= last.getDate(); d++) {
+      const dStr = new Date(year, month, d).toDateString();
+      const hasEvents = daysWithEvents.has(dStr);
+      const isToday = dStr === todayStr;
+      const cls = ['schedule-mini-cal-day'];
+      if (isToday) cls.push('today');
+      if (hasEvents) cls.push('has-events');
+      html += `<div class="${cls.join(' ')}" data-date="${dStr}">${d}</div>`;
+    }
+    const remaining = 42 - (startPad + last.getDate());
+    for (let i = 1; i <= remaining; i++) {
+      const next = new Date(last);
+      next.setDate(next.getDate() + i);
+      html += `<div class="schedule-mini-cal-day other-month">${next.getDate()}</div>`;
+    }
+    gridEl.innerHTML = html;
+    gridEl.querySelectorAll('.schedule-mini-cal-day[data-date]').forEach(el => {
+      el.onclick = () => {
+        scrollScheduleToDate(el.dataset.date);
+        closeScheduleMiniCalendar({ target: document.getElementById('scheduleMiniCalOverlay') });
+      };
+    });
+  }
+
+  function scrollScheduleToDate(dateStr) {
+    const list = document.getElementById('scheduleList');
+    const header = list ? list.querySelector(`[data-date-key="${dateStr}"]`) : null;
+    if (header) header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   async function showScheduleScreen() {
     showSubScreen('scheduleScreen');
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
     document.querySelector('.drawer-item:nth-child(5)').classList.add('active');
     const list = document.getElementById('scheduleList');
     list.innerHTML = '<div class="screen-loading">Loading…</div>';
+    renderScheduleChips();
     const user = localStorage.getItem('shasta_user');
     if (!user) {
       list.innerHTML = '<div class="screen-loading">Sign in to see your schedule.</div>';
@@ -2512,45 +2919,18 @@
       const url = `${API_URL}?action=calendar&user=${encodeURIComponent(user)}&days=30`;
       const res = await fetch(url, { redirect: 'follow' });
       const data = await res.json();
-      list.innerHTML = '';
       if (data.error || !data.events || data.events.length === 0) {
+        scheduleEvents = [];
         list.innerHTML = '<div class="screen-loading">No upcoming events.</div>';
+        renderScheduleChips();
         return;
       }
-      const byDate = {};
-      data.events.forEach(ev => {
-        const d = new Date(ev.start);
-        const key = d.toDateString();
-        if (!byDate[key]) byDate[key] = [];
-        byDate[key].push(ev);
-      });
-      const keys = Object.keys(byDate).sort((a, b) => new Date(a) - new Date(b));
-      keys.forEach(key => {
-        const events = byDate[key];
-        const d = new Date(key);
-        const label = key === new Date().toDateString() ? 'Today' : key === new Date(Date.now() + 86400000).toDateString() ? 'Tomorrow' : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-        const header = document.createElement('div');
-        header.className = 'screen-item';
-        header.style.fontWeight = '500';
-        header.style.color = 'var(--muted)';
-        header.style.fontSize = '11px';
-        header.style.letterSpacing = '0.08em';
-        header.style.textTransform = 'uppercase';
-        header.style.cursor = 'default';
-        header.textContent = label;
-        header.onclick = () => {};
-        list.appendChild(header);
-        events.forEach(ev => {
-          const div = document.createElement('div');
-          div.className = 'screen-item';
-          const time = ev.start ? formatEventTime(ev.start) : '';
-          div.innerHTML = `<span class="screen-item-icon">📅</span><span class="screen-item-name">${escapeHtml(ev.title)}</span><span style="font-size:12px;color:var(--muted)">${time}</span>`;
-          div.onclick = () => { if (ev.url) window.open(ev.url, '_blank'); };
-          list.appendChild(div);
-        });
-      });
+      scheduleEvents = data.events;
+      renderScheduleList();
     } catch (err) {
+      scheduleEvents = [];
       list.innerHTML = '<div class="screen-loading">Could not load schedule.</div>';
+      renderScheduleChips();
     }
   }
 
