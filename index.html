@@ -70,6 +70,7 @@
     .load-screen-lottie {
       width: 160px;
       height: 160px;
+      opacity: 0.6;
     }
     .load-screen-label {
       margin-top: 20px;
@@ -159,6 +160,141 @@
     }
     .bg-scheme-ocean .swirl-soft {
       background: conic-gradient(from 180deg at 50% 50%, rgba(250,252,255,0.9) 0deg, rgba(210,232,252,0.5) 60deg, rgba(255,255,255,0.95) 120deg, rgba(228,240,255,0.6) 180deg, rgba(238,248,255,0.85) 240deg, rgba(232,242,252,0.55) 300deg, rgba(255,255,255,0.9) 360deg);
+    }
+
+    /* Dark mode — overrides when html.dark-mode */
+    html.dark-mode {
+      --text:   #f0e8e2;
+      --text2:  #b8a99e;
+      --muted:  #8a7a72;
+      --accent: #e09868;
+    }
+    html.dark-mode .load-screen { background: #1a1816; }
+    html.dark-mode .load-screen-label { color: var(--muted); }
+    html.dark-mode .bg-base { background: #1a1816 !important; }
+    html.dark-mode .swirl {
+      background: conic-gradient(from 0deg at 50% 50%, rgba(35,30,28,0.95) 0deg, rgba(45,35,40,0.85) 45deg, rgba(40,32,38,0.8) 90deg, rgba(38,33,36,0.85) 135deg, rgba(32,28,30,0.9) 180deg, rgba(42,35,38,0.8) 225deg, rgba(38,30,35,0.75) 270deg, rgba(40,35,38,0.85) 315deg, rgba(35,30,28,0.95) 360deg);
+    }
+    html.dark-mode .swirl-soft {
+      background: conic-gradient(from 180deg at 50% 50%, rgba(38,35,40,0.9) 0deg, rgba(50,40,48,0.6) 60deg, rgba(35,30,28,0.95) 120deg, rgba(45,38,42,0.8) 180deg, rgba(40,36,38,0.85) 240deg, rgba(48,40,45,0.7) 300deg, rgba(35,30,28,0.9) 360deg);
+    }
+    html.dark-mode .login-wordmark,
+    html.dark-mode .login-tagline { color: var(--text); }
+    html.dark-mode .login-wordmark { color: var(--text); }
+    html.dark-mode .overlay { background: rgba(0,0,0,0.6); }
+    html.dark-mode .drawer { background: #252220; }
+    html.dark-mode .drawer-header { border-color: rgba(255,255,255,0.08); }
+    html.dark-mode .drawer-footer { border-color: rgba(255,255,255,0.08); }
+    html.dark-mode .drawer-item { color: var(--text2); }
+    html.dark-mode .drawer-item.active { color: var(--text); }
+    html.dark-mode .well-dot { background: var(--accent); }
+    html.dark-mode .well-dot.warn { background: #e8b050; }
+    html.dark-mode .well-dot.alert { background: #e07070; }
+    html.dark-mode .input-wrap {
+      background: rgba(45,40,38,0.8);
+      border-color: rgba(255,255,255,0.1);
+      box-shadow: 0 4px 28px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.05) inset;
+    }
+    html.dark-mode .input-wrap:focus-within {
+      box-shadow: 0 4px 32px rgba(224,152,104,0.2), 0 1px 0 rgba(255,255,255,0.08) inset;
+    }
+    html.dark-mode .input-field { color: var(--text); }
+    html.dark-mode .input-field::placeholder { color: var(--muted); }
+    html.dark-mode .bubble.user { background: rgba(224,152,104,0.2); color: var(--text); }
+    html.dark-mode .bubble.hath { background: rgba(45,40,38,0.9); color: var(--text); }
+    html.dark-mode .typing { background: rgba(45,40,38,0.9); }
+    html.dark-mode .typing span { background: var(--muted); }
+    html.dark-mode .screen-item { border-color: rgba(255,255,255,0.06); }
+    html.dark-mode .screen-item:active { background: rgba(224,152,104,0.12); }
+    html.dark-mode .screen-breadcrumb span { color: var(--text2); }
+    html.dark-mode .docs-header { border-color: transparent; }
+    html.dark-mode .docs-selection-bar {
+      background: rgba(224,152,104,0.15);
+      border-color: rgba(255,255,255,0.06);
+    }
+    html.dark-mode .screen-item.selected { background: rgba(224,152,104,0.15); }
+    html.dark-mode .screen-item-edit-btn:hover { background: rgba(255,255,255,0.08); }
+    html.dark-mode .docs-add-btn { background: var(--accent); color: #fff; }
+    html.dark-mode .settings-section { border-color: rgba(255,255,255,0.08); }
+    html.dark-mode .settings-option {
+      background: rgba(45,40,38,0.8);
+      border-color: rgba(255,255,255,0.12);
+    }
+    html.dark-mode .settings-option.selected {
+      border-color: var(--accent);
+      background: rgba(224,152,104,0.2);
+    }
+    html.dark-mode .settings-input {
+      background: rgba(45,40,38,0.8);
+      border-color: rgba(255,255,255,0.12);
+      color: var(--text);
+    }
+    html.dark-mode .settings-input::placeholder { color: var(--muted); }
+    html.dark-mode .paste-modal, html.dark-mode .schedule-mini-cal {
+      background: #252220;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    }
+    html.dark-mode .paste-modal h3,
+    html.dark-mode .schedule-mini-cal-title { color: var(--text); }
+    html.dark-mode .paste-modal .paste-filename,
+    html.dark-mode .paste-modal .paste-content {
+      background: rgba(35,30,28,0.8);
+      border-color: rgba(255,255,255,0.12);
+      color: var(--text);
+    }
+    html.dark-mode .paste-modal .paste-filename::placeholder,
+    html.dark-mode .paste-modal .paste-content::placeholder { color: var(--muted); }
+    html.dark-mode .paste-cancel-btn {
+      background: transparent;
+      color: var(--text2);
+      border-color: rgba(255,255,255,0.2);
+    }
+    html.dark-mode .paste-save-btn { background: var(--accent); color: #1a1816; }
+    html.dark-mode .schedule-chip {
+      background: rgba(45,40,38,0.8);
+      color: var(--text2);
+    }
+    html.dark-mode .schedule-chip.active {
+      background: rgba(224,152,104,0.25);
+      color: var(--accent);
+    }
+    html.dark-mode .schedule-event:hover,
+    html.dark-mode .schedule-event:active { background: rgba(224,152,104,0.08); }
+    html.dark-mode .schedule-event.starred { background: rgba(224,152,104,0.12); }
+    html.dark-mode .schedule-calendar-btn {
+      background: rgba(224,152,104,0.2);
+      color: var(--accent);
+    }
+    html.dark-mode .schedule-calendar-btn:hover,
+    html.dark-mode .schedule-calendar-btn:active,
+    html.dark-mode .schedule-calendar-btn.active { background: rgba(224,152,104,0.3); }
+    html.dark-mode .schedule-mini-cal-day.other-month { opacity: 0.5; }
+    html.dark-mode .schedule-mini-cal-day.today { background: rgba(224,152,104,0.25); }
+    html.dark-mode .schedule-mini-cal-day:hover,
+    html.dark-mode .schedule-mini-cal-day:active { background: rgba(224,152,104,0.2); }
+    html.dark-mode .docs-toast { background: #252220; color: var(--text); }
+    html.dark-mode .action-sheet { background: #252220; }
+    html.dark-mode .action-sheet-option { color: var(--text); }
+    html.dark-mode .action-sheet-option:hover { background: rgba(255,255,255,0.06); }
+    html.dark-mode body { background: #1a1816; }
+    html.dark-mode .offline-screen { background: #1a1816; }
+    /* Dark mode: soften or remove light text-shadow for readability */
+    html.dark-mode .login-wordmark, html.dark-mode .login-tagline,
+    html.dark-mode .wordmark, html.dark-mode .well-text,
+    html.dark-mode .hint-greeting, html.dark-mode .hint-sub,
+    html.dark-mode .peek-label, html.dark-mode .peek-value,
+    html.dark-mode .upcoming-events-label, html.dark-mode .event-item,
+    html.dark-mode .event-date, html.dark-mode .event-title,
+    html.dark-mode .schedule-title, html.dark-mode .schedule-date-header,
+    html.dark-mode .schedule-event-title, html.dark-mode .schedule-event-time,
+    html.dark-mode .matt-note, html.dark-mode .chip,
+    html.dark-mode .bubble, html.dark-mode .bubble-name,
+    html.dark-mode .screen-breadcrumb, html.dark-mode .screen-breadcrumb span,
+    html.dark-mode .screen-item, html.dark-mode .screen-item-name,
+    html.dark-mode .screen-loading, html.dark-mode .screen-footer a,
+    html.dark-mode .drawer-wordmark, html.dark-mode .drawer-tagline,
+    html.dark-mode .drawer-item, html.dark-mode .drawer-footer {
+      text-shadow: 0 1px 2px rgba(0,0,0,0.4);
     }
 
     /* Soft white glow on text for readability */
@@ -1392,6 +1528,13 @@
     <!-- Settings screen -->
     <div class="sub-screen" id="settingsScreen">
       <div class="settings-section">
+        <label class="settings-toggle">
+          <span>Dark mode</span>
+          <input type="checkbox" id="settingsDarkMode">
+        </label>
+        <div class="settings-hint">Use a dark theme across the app</div>
+      </div>
+      <div class="settings-section">
         <div class="settings-label">Background</div>
         <div class="settings-options" id="bgSchemeOptions"></div>
       </div>
@@ -1593,6 +1736,7 @@
     setupKeyboardHandling();
     applyBgScheme(localStorage.getItem('shasta_bg_' + email) || 'peach');
     applyFontSize(localStorage.getItem('shasta_font_' + email) || 'default');
+    applyDarkMode(localStorage.getItem('shasta_dark_' + email) === 'true');
   }
 
   function showOfflineScreen() {
@@ -1700,16 +1844,49 @@
   }
 
   // ── GREETING LIBRARY ──────────────────────────────────────────
-  const GREETING_TEMPLATES = [
-    "Alright <em>{{name}},</em> what's next?",
-    "Ready to Snap Punch some bills, <em>{{name}}?</em>",
-    "Hey <em>{{name}}.</em> What do you need?",
-    "The house is yours, <em>{{name}}.</em> What's up?",
-    "Six-sided star incoming — what can I help with, <em>{{name}}?</em>",
-    "Your gil's safe. What else, <em>{{name}}?</em>",
-    "What's on your mind, <em>{{name}}?</em>",
-    "Hey <em>{{name}}.</em> What can I help with?",
-    "Ready when you are, <em>{{name}}.</em>"
+  // Weighted pools: Marcus (4) > Sleep Token (3) > Tim & Eric (2) = Monk (2) = FFXIV (2)
+  const GREETING_POOLS = [
+    { weight: 4, quotes: [
+      "Robert. I don't like this rock.",
+      "It's pissing me off, Robert.",
+      "Robert. Help.",
+      "I don't like this. I don't like any of this.",
+      "Why is it like this. Why.",
+      "Robert I swear.",
+      "This is a laundering felony, Robert.",
+      "I didn't ask for this."
+    ]},
+    { weight: 3, quotes: [
+      "The offering has been made. The bills have been paid.",
+      "Even in arcadia, someone has to check the mail.",
+      "This place will become your home.",
+      "The night belongs to you. The dishes do not.",
+      "Vessel has logged the grocery receipt.",
+      "What is left to give but the wifi password."
+    ]},
+    { weight: 2, quotes: [
+      "GREAT JOB.",
+      "Have you tried turning the house off and on again.",
+      "This has been a presentation.",
+      "Blathers is not responsible for any of this.",
+      "Please enjoy your household.",
+      "Shasta has reviewed your data. Shasta approves."
+    ]},
+    { weight: 2, quotes: [
+      "Ready to Snap Punch some bills, <em>{{name}}?</em>",
+      "Six-sided star incoming — what can I help with, <em>{{name}}?</em>"
+    ]},
+    { weight: 2, quotes: [
+      "Your gil's safe. What else, <em>{{name}}?</em>"
+    ]},
+    { weight: 2, quotes: [
+      "Alright <em>{{name}},</em> what's next?",
+      "Hey <em>{{name}}.</em> What do you need?",
+      "The house is yours, <em>{{name}}.</em> What's up?",
+      "What's on your mind, <em>{{name}}?</em>",
+      "Hey <em>{{name}}.</em> What can I help with?",
+      "Ready when you are, <em>{{name}}.</em>"
+    ]}
   ];
 
   function getDisplayName() {
@@ -1722,8 +1899,17 @@
 
   function getRandomGreeting() {
     const name = getDisplayName();
-    const t = GREETING_TEMPLATES[Math.floor(Math.random() * GREETING_TEMPLATES.length)];
-    return t.replace(/\{\{name\}\}/g, name);
+    const totalWeight = GREETING_POOLS.reduce((s, p) => s + p.weight, 0);
+    let r = Math.random() * totalWeight;
+    for (const pool of GREETING_POOLS) {
+      r -= pool.weight;
+      if (r <= 0) {
+        const t = pool.quotes[Math.floor(Math.random() * pool.quotes.length)];
+        return t.replace(/\{\{name\}\}/g, name);
+      }
+    }
+    const fallback = GREETING_POOLS[GREETING_POOLS.length - 1].quotes[0];
+    return fallback.replace(/\{\{name\}\}/g, name);
   }
 
   // ── LOAD LIVE DATA ────────────────────────────────────────────
@@ -2601,7 +2787,35 @@
     const scheme = BG_SCHEMES.find(s => s.id === (schemeId || 'peach'));
     if (scheme && scheme.id !== 'peach') bg.classList.add('bg-scheme-' + scheme.id);
     const meta = document.getElementById('themeColorMeta');
-    if (meta && scheme) meta.setAttribute('content', scheme.themeColor);
+    if (meta && scheme) meta.setAttribute('content', isDarkMode() ? '#1a1816' : scheme.themeColor);
+  }
+
+  function isDarkMode() {
+    return document.documentElement.classList.contains('dark-mode');
+  }
+
+  function applyDarkMode(on) {
+    const html = document.documentElement;
+    const meta = document.getElementById('themeColorMeta');
+    if (on) {
+      html.classList.add('dark-mode');
+      if (meta) meta.setAttribute('content', '#1a1816');
+    } else {
+      html.classList.remove('dark-mode');
+      if (meta) {
+        const user = localStorage.getItem('shasta_user');
+        const schemeId = (user && localStorage.getItem('shasta_bg_' + user)) || 'peach';
+        const scheme = BG_SCHEMES.find(s => s.id === schemeId) || BG_SCHEMES[0];
+        meta.setAttribute('content', scheme.themeColor);
+      }
+    }
+  }
+
+  function setDarkMode(on) {
+    const user = localStorage.getItem('shasta_user');
+    if (user) localStorage.setItem('shasta_dark_' + user, on ? 'true' : '');
+    applyDarkMode(on);
+    applyBgScheme(localStorage.getItem('shasta_bg_' + user) || 'peach');
   }
 
   function setBgScheme(schemeId) {
@@ -2657,13 +2871,18 @@
     const user = localStorage.getItem('shasta_user');
     const nickEl = document.getElementById('settingsNickname');
     const dumbEl = document.getElementById('settingsDumbBlathers');
+    const darkEl = document.getElementById('settingsDarkMode');
     if (nickEl) nickEl.value = (user && localStorage.getItem('shasta_nickname_' + user)) || '';
     if (dumbEl) dumbEl.checked = !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true');
+    if (darkEl) darkEl.checked = !!(user && localStorage.getItem('shasta_dark_' + user) === 'true');
     nickEl.oninput = () => {
       if (user) localStorage.setItem('shasta_nickname_' + user, nickEl.value.trim());
     };
     dumbEl.onchange = () => {
       if (user) localStorage.setItem('shasta_dumb_' + user, dumbEl.checked ? 'true' : '');
+    };
+    darkEl.onchange = () => {
+      setDarkMode(darkEl.checked);
     };
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
     document.querySelector('.drawer-item:nth-child(6)').classList.add('active');
