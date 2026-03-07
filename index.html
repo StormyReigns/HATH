@@ -13,7 +13,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async></script>
   <script type="module" src="https://unpkg.com/@dotlottie/player-component@2.3.0/dist/dotlottie-player.mjs"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js" async></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -327,13 +326,13 @@
     /* ── TOP BAR ── */
     .topbar {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 54px 26px 0; flex-shrink: 0;
+      padding: max(54px, env(safe-area-inset-top)) 26px 0; flex-shrink: 0;
     }
 
     .hamburger {
-      width: 34px; height: 34px;
+      min-width: 44px; min-height: 44px;
       display: flex; flex-direction: column;
-      justify-content: center; gap: 5px;
+      justify-content: center; align-items: center; gap: 5px;
       cursor: pointer; border-radius: 8px; padding: 4px;
     }
     .hamburger span { display: block; height: 1.5px; background: var(--text2); border-radius: 2px; }
@@ -365,7 +364,7 @@
     .body {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: flex-end;
-      padding: 0 22px 32px; gap: 18px;
+      padding: 0 22px max(32px, env(safe-area-inset-bottom)); gap: 18px;
       min-height: 0;
     }
 
@@ -552,13 +551,14 @@
     }
     .input-field {
       flex: 1; border: none; outline: none; background: transparent;
-      font-family: 'Inter', sans-serif; font-size: 15px;
+      font-family: 'Inter', sans-serif; font-size: 16px;
       font-weight: 300; color: var(--text);
       resize: none; max-height: 100px; line-height: 1.5;
     }
     .input-field::placeholder { color: var(--muted); }
 
     .send-btn {
+      min-width: 44px; min-height: 44px;
       width: 36px; height: 36px; border-radius: 12px;
       background: var(--accent); border: none; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
@@ -696,6 +696,7 @@
     .docs-header .screen-breadcrumb { padding: 0; flex: 1; min-width: 0; }
     .docs-refresh-btn {
       flex-shrink: 0;
+      min-width: 44px; min-height: 44px;
       width: 32px;
       height: 32px;
       border: none;
@@ -766,6 +767,7 @@
       flex-shrink: 0;
     }
     .screen-item-edit-btn {
+      min-width: 44px; min-height: 44px;
       width: 32px;
       height: 32px;
       border: none;
@@ -864,7 +866,7 @@
     .settings-input {
       width: 100%;
       padding: 10px 12px;
-      font-size: 14px;
+      font-size: 16px;
       font-family: inherit;
       border: 1px solid rgba(0,0,0,0.08);
       border-radius: 8px;
@@ -899,7 +901,7 @@
     #documentsScreen { position: relative; }
     .docs-add-btn {
       position: fixed;
-      bottom: 28px;
+      bottom: max(28px, env(safe-area-inset-bottom));
       left: 50%;
       transform: translateX(-50%);
       width: 52px;
@@ -943,7 +945,7 @@
       max-width: 420px;
       background: #fdf8f4;
       border-radius: 16px 16px 0 0;
-      padding: 12px 0 24px;
+      padding: 12px 0 max(24px, env(safe-area-inset-bottom));
       box-shadow: 0 -4px 24px rgba(0,0,0,0.1);
       z-index: 151;
       transform: translateX(-50%) translateY(100%);
@@ -987,7 +989,7 @@
       max-width: 420px;
       background: #fdf8f4;
       border-radius: 16px 16px 0 0;
-      padding: 24px 22px 32px;
+      padding: 24px 22px max(32px, env(safe-area-inset-bottom));
       box-shadow: 0 -4px 24px rgba(0,0,0,0.1);
       transform: translateY(100%);
       transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
@@ -1005,7 +1007,7 @@
     .paste-modal .paste-filename {
       width: 100%;
       padding: 10px 12px;
-      font-size: 14px;
+      font-size: 16px;
       font-family: inherit;
       border: 1px solid rgba(0,0,0,0.08);
       border-radius: 8px;
@@ -1017,7 +1019,7 @@
       width: 100%;
       min-height: 120px;
       padding: 12px;
-      font-size: 14px;
+      font-size: 16px;
       font-family: inherit;
       border: 1px solid rgba(0,0,0,0.08);
       border-radius: 8px;
@@ -2237,7 +2239,7 @@
     pendingUpload = null;
   }
 
-  async function fileToJpegDataUrl(file, maxDim) {
+  async function fileToJpegBase64(file, maxDim) {
     let bitmap;
     if (typeof createImageBitmap === 'function') {
       bitmap = await createImageBitmap(file);
@@ -2269,57 +2271,29 @@
     ctx.fillRect(0, 0, w, h);
     ctx.drawImage(bitmap, 0, 0, w, h);
     if (bitmap.close) bitmap.close();
-    return canvas.toDataURL('image/jpeg', 0.92);
-  }
-
-  function ocrErrDetail(e) {
-    if (!e) return 'Unknown';
-    const m = e?.message || e?.reason?.message || (typeof e === 'string' ? e : null);
-    if (m && m !== 'Unknown error') return m;
-    const s = e?.toString?.();
-    if (s && s !== '[object Object]') return s;
-    if (e?.stack) return String(e.stack).split('\n')[0].slice(0, 80);
-    return m || 'Unknown';
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+    return dataUrl.split(',')[1] || '';
   }
 
   async function runOcrOnImage(file) {
-    let dataUrl;
+    let base64;
     try {
-      dataUrl = await fileToJpegDataUrl(file, 2000);
+      base64 = await fileToJpegBase64(file, 2000);
     } catch (e) {
       console.warn('Image prep failed:', e);
-      const err = new Error('Could not process image');
-      err._ocrDetail = ocrErrDetail(e);
-      throw err;
+      throw new Error('Could not process image');
     }
-    const getWorker = async () => {
-      for (let i = 0; i < 30; i++) {
-        if (window.Tesseract && typeof window.Tesseract.createWorker === 'function') {
-          return window.Tesseract.createWorker('eng');
-        }
-        await new Promise(r => setTimeout(r, 200));
-      }
-      const { createWorker } = await import('https://unpkg.com/tesseract.js@5/dist/tesseract.esm.min.js');
-      return createWorker('eng');
-    };
-    let worker;
-    try {
-      worker = await getWorker();
-    } catch (e) {
-      console.warn('Worker init failed:', e);
-      const err = new Error('OCR script failed to load');
-      err._ocrDetail = ocrErrDetail(e);
-      throw err;
-    }
-    try {
-      const { data } = await worker.recognize(dataUrl);
-      await worker.terminate();
-      return (data?.text || '').trim();
-    } catch (e) {
-      try { await worker.terminate(); } catch (_) {}
-      e._ocrDetail = ocrErrDetail(e);
-      throw e;
-    }
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'ocr', base64 })
+    });
+    const raw = await res.text();
+    let data;
+    try { data = JSON.parse(raw); } catch (_) { throw new Error('OCR service error'); }
+    if (data.error) throw new Error(data.error);
+    return (data.text || '').trim();
   }
 
   function confirmUploadWithName() {
@@ -2370,9 +2344,8 @@
       }).catch(err => {
         if (!pendingUpload) return;
         console.warn('OCR error:', err);
-        let msg = err?._ocrDetail || err?.message || (typeof err === 'string' ? err : err?.toString?.());
-        if (!msg || msg === '[object Object]') msg = err?.reason?.message || 'Script/network issue — try again';
-        ocrStatus.textContent = 'OCR failed (' + String(msg).slice(0, 80) + ') — will save as image only.';
+        const msg = (err && err.message) ? String(err.message).slice(0, 100) : 'Server error';
+        ocrStatus.textContent = 'OCR failed: ' + msg + ' — will save as image only.';
       });
     } else if (isImage && !file) {
       ocrStatus.textContent = 'No text found — will save as image only.';
