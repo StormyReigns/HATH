@@ -1973,10 +1973,28 @@
         .then(r => r.json())
         .catch(() => null);
 
+    const fetchTabList = () =>
+      fetch(API_URL + '?action=tabList', { redirect: 'follow' })
+        .then(r => r.json())
+        .then(d => (d && d.tabs) ? d.tabs : [])
+        .catch(() => []);
+
+    const fetchDocIndex = () =>
+      fetch(API_URL + '?action=docIndex', { redirect: 'follow' })
+        .then(r => r.json())
+        .then(d => (d && d.files) ? d.files : [])
+        .catch(() => []);
+
     const rootPromise = fetchDocsFolder(DOCS_FOLDER_ID);
     const balancePromise = fetchBalance();
+    const tabListPromise = fetchTabList();
+    const docIndexPromise = fetchDocIndex();
 
-    const [rootFolders] = await Promise.all([rootPromise, balancePromise]);
+    const [rootFolders, , tabs, docIndex] = await Promise.all([
+      rootPromise, balancePromise, tabListPromise, docIndexPromise
+    ]);
+    window.shastaTabs = tabs || [];
+    window.shastaDocIndex = docIndex || [];
 
     if (rootFolders && rootFolders.length > 0) {
       rootFolders.forEach(f => fetchDocsFolder(f.id));
@@ -2033,6 +2051,20 @@
 
   // Docs cache — populated during preload for instant navigation
   const docsFolderCache = {};
+
+  // Client-side tab routing: keyword match (words > 3 chars) in tab name or purpose
+  function scoreTabsForMessage(message) {
+    const tabs = window.shastaTabs;
+    if (!Array.isArray(tabs) || tabs.length === 0) return [];
+    const words = (message || '').toLowerCase().split(/\s+/).filter(w => w.length > 3);
+    if (words.length === 0) return [];
+    const matched = [];
+    tabs.forEach(t => {
+      const s = ((t.tabName || '') + ' ' + (t.purpose || '')).toLowerCase();
+      if (words.some(w => s.indexOf(w) >= 0)) matched.push(t.tabName);
+    });
+    return matched;
+  }
 
   // Apps Script requires no-cors redirect following — use a JSONP-style
   // workaround by appending callback param for GET, and for POST we
@@ -2887,16 +2919,16 @@
 
   function confirmUploadWithName() {
     if (!pendingUpload) return;
-    const name = document.getElementById('uploadNameInput').value.trim();
-    const filename = name || pendingUpload.originalName;
+    const name = document.getElementById('uploadNameInput').value.trim() || getBaseName(pendingUpload.originalName);
+    const base = getBaseName(name) || name;
+    const filename = base + getFileExtension(pendingUpload.originalName);
     const createSearchableDoc = document.getElementById('uploadOcrCheckbox').checked && (pendingUpload.ocrText || '').trim();
     const base64 = pendingUpload.base64;
     const mimeType = pendingUpload.mimeType;
     const ocrText = pendingUpload.ocrText || '';
     closeUploadNameModal();
     if (createSearchableDoc) {
-      const baseName = filename.replace(/\.[^.]+$/, '') || filename;
-      const docName = baseName + ' (text)';
+      const docName = base + ' (text)';
       doDocsUploadImageAndText(base64, filename, mimeType, ocrText, docName);
     } else {
       doDocsUpload(base64, filename, mimeType);
@@ -2907,7 +2939,7 @@
     const isImage = (mimeType || '').startsWith('image/');
     pendingUpload = { originalName, base64, mimeType, file, ocrText: null };
     const input = document.getElementById('uploadNameInput');
-    input.value = originalName;
+    input.value = getBaseName(originalName);
     const ocrSection = document.getElementById('uploadOcrSection');
     const ocrStatus = document.getElementById('uploadOcrStatus');
     const ocrCheckWrap = document.getElementById('uploadOcrCheckboxWrap');
@@ -3677,11 +3709,13 @@
     try {
       const user = localStorage.getItem('shasta_user');
       const history = conversationHistory.slice(-20);
+      const matchedTabs = scoreTabsForMessage(text);
       const body = {
         message: text,
         history: history,
         nickname: getDisplayName(),
-        dumbMode: !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true')
+        dumbMode: !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true'),
+        tabs: matchedTabs.length > 0 ? matchedTabs : undefined
       };
       const res = await fetch(AI_URL, {
         method: 'POST',
@@ -3853,11 +3887,16 @@
     try {
       const user = localStorage.getItem('shasta_user');
       const history = blatherbookHistory.slice(-20);
+      const matchedTabs = scoreTabsForMessage(text);
+      const onDocs = document.getElementById('documentsScreen').classList.contains('visible');
+      const crumb = docsBreadcrumb && docsBreadcrumb.length > 0 ? docsBreadcrumb[docsBreadcrumb.length - 1] : null;
       const body = {
         message: text,
         history,
         nickname: getDisplayName(),
-        dumbMode: !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true')
+        dumbMode: !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true'),
+        tabs: matchedTabs.length > 0 ? matchedTabs : undefined,
+        ...(onDocs && crumb && { currentFolderId: crumb.id, currentFolderName: crumb.name, currentFolderPath: docsBreadcrumb.map(b => b.name).join('/') })
       };
       const res = await fetch(AI_URL, {
         method: 'POST',
