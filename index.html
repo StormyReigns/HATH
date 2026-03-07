@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#fdf6f0" id="themeColorMeta">
+  <meta name="theme-color" content="#fdf8f5" id="themeColorMeta">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="https://stormyreigns.github.io/HATH/ShastaApp.png">
   <title>ShastApp</title>
@@ -25,6 +25,7 @@
 
     html, body {
       height: 100%;
+      min-height: 100dvh;
       font-family: 'Inter', sans-serif;
       -webkit-font-smoothing: antialiased;
       overflow: hidden;
@@ -34,6 +35,19 @@
       -webkit-user-select: none;
       user-select: none;
       -webkit-touch-callout: none;
+      background-color: #fdf8f5;
+    }
+    /* Explicit top safe-area fill — prevents white bar under status bar on some devices */
+    html::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: env(safe-area-inset-top, 0px);
+      background-color: #fdf8f5;
+      z-index: 9999;
+      pointer-events: none;
     }
 
     .input-field, .chat-area, .bubble {
@@ -284,7 +298,8 @@
     html.dark-mode .blatherbook-header { border-color: rgba(255,255,255,0.08); }
     html.dark-mode .blatherbook-input-wrap { background: rgba(35,30,28,0.8); border-color: rgba(255,255,255,0.08); }
     html.dark-mode .blatherbook-input { background: rgba(35,30,28,0.8); border-color: rgba(255,255,255,0.12); color: var(--text); }
-    html.dark-mode body { background: #1a1816; }
+    html.dark-mode, html.dark-mode body { background-color: #1a1816; }
+    html.dark-mode::before { background-color: #1a1816; }
     html.dark-mode .offline-screen { background: #1a1816; }
     /* Dark mode: soften or remove light text-shadow for readability */
     html.dark-mode .login-wordmark, html.dark-mode .login-tagline,
