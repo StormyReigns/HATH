@@ -1469,22 +1469,27 @@
       50% { background-position: 100% 50%; }
     }
     .projects-phase-cards {
-      flex: 1; overflow-x: hidden;
-      display: flex; align-items: stretch;
+      flex: 1; overflow-x: auto; overflow-y: hidden;
+      display: flex; align-items: stretch; gap: 12px;
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding: 0 8%;
     }
+    .projects-phase-cards::-webkit-scrollbar { display: none; }
+    .projects-phase-cards.single-phase { overflow-x: hidden; padding: 0; }
     .projects-phase-card {
-      flex: 0 0 100%;
+      flex: 0 0 84%;
+      min-width: 84%;
       scroll-snap-align: center;
       padding: 20px;
-      margin: 0 4px;
       background: rgba(255,255,255,0.7);
       border-radius: 16px;
       border: 1px solid rgba(0,0,0,0.06);
       display: flex; flex-direction: column;
       min-height: 200px;
     }
+    .projects-phase-card-single { flex: 0 0 100%; min-width: 100%; }
     .phase-badge {
       font-size: 11px; color: var(--muted);
       text-transform: uppercase; letter-spacing: 0.06em;
@@ -1522,6 +1527,21 @@
       margin-top: auto;
     }
     .phase-complete-btn:active { opacity: 0.9; }
+    .phase-undo-btn {
+      font-size: 12px; padding: 6px 12px; margin-top: 8px;
+      background: transparent; color: var(--muted);
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 6px; cursor: pointer;
+    }
+    .phase-undo-btn:hover { color: var(--text2); }
+    .phase-undo-btn:active { opacity: 0.8; }
+    .projects-undo-btn {
+      font-size: 12px; padding: 4px 0; margin-top: 6px;
+      background: none; border: none;
+      color: var(--muted); cursor: pointer;
+      align-self: flex-start;
+    }
+    .projects-undo-btn:hover { color: var(--text2); text-decoration: underline; }
     .phase-timeline {
       font-size: 12px; color: var(--text2);
       margin-top: 8px;
@@ -1598,6 +1618,7 @@
       touch-action: pan-y pinch-zoom;
     }
     html.dark-mode .projects-phase-card { background: rgba(45,40,38,0.6); border-color: rgba(255,255,255,0.08); }
+    html.dark-mode .phase-undo-btn { border-color: rgba(255,255,255,0.2); }
     html.dark-mode .phase-timeline.urgent { color: #e07070; }
     html.dark-mode .project-phase-editor { background: rgba(255,255,255,0.06); }
     html.dark-mode .projects-completed-bar {
@@ -2007,21 +2028,10 @@
                 <div class="projects-progress-fill" id="projectsOverallProgressFill"></div>
               </div>
             </div>
+            <button type="button" class="projects-undo-btn" id="projectsUndoBtn" onclick="projectsUndoProjectCompletion()" style="display:none">Undo completion</button>
           </div>
         </div>
-        <div class="projects-phase-cards" id="projectsPhaseCards">
-          <div class="projects-phase-card" id="projectsPhaseCard">
-            <div class="phase-badge">Phase <span id="phaseNumber">1</span></div>
-            <h3 class="phase-title" id="phaseTitle"></h3>
-            <p class="phase-desc" id="phaseDesc"></p>
-            <div class="phase-checklist" id="phaseChecklist" style="display:none"></div>
-            <button type="button" class="phase-complete-btn" id="phaseCompleteBtn" style="display:none">Complete</button>
-            <div class="phase-timeline" id="phaseTimeline" style="display:none"></div>
-            <div class="phase-progress-wrap" id="phaseProgressWrap" style="display:none">
-              <div class="phase-progress-bar"><div class="phase-progress-fill" id="phaseProgressFill"></div></div>
-            </div>
-          </div>
-        </div>
+        <div class="projects-phase-cards" id="projectsPhaseCards"></div>
         <div class="projects-swipe-hint" id="projectsSwipeHint">← Swipe to change phase →</div>
       </div>
     </div>
@@ -3013,7 +3023,9 @@
   let projectsEditing = null;
   let projectsViewing = null;
   let projectsCurrentPhaseIndex = 0;
-  let projectsPhaseTouchStartX = 0;
+
+  function hapticLight() { try { if (navigator.vibrate) navigator.vibrate(15); } catch (_) {} }
+  function hapticDoublePulse() { try { if (navigator.vibrate) navigator.vibrate([18, 50, 18]); } catch (_) {} }
 
   function getProjects() {
     const user = localStorage.getItem('shasta_user');
@@ -3118,91 +3130,105 @@
     renderProjectsLanding();
   }
 
+  function isPhaseComplete(ph) {
+    if (!ph) return false;
+    if (ph.checklist && ph.checklist.length > 0) return ph.checklist.every(c => c.done);
+    return !!ph.completed;
+  }
+
   function renderProjectsView() {
     const p = projectsViewing;
     if (!p) return;
     document.getElementById('projectsViewTitle').textContent = p.title;
     const prog = getProjectProgress(p);
     document.getElementById('projectsOverallProgressFill').style.width = prog + '%';
-    renderPhaseCard();
+    const undoBtn = document.getElementById('projectsUndoBtn');
+    if (undoBtn) undoBtn.style.display = isProjectCompleted(p) ? 'block' : 'none';
+    renderPhaseCards();
   }
 
-  function renderPhaseCard() {
-    const p = projectsViewing;
-    if (!p) return;
-    if (!p.phases || p.phases.length === 0) {
-      document.getElementById('phaseNumber').textContent = '0';
-      document.getElementById('phaseTitle').textContent = 'No phases yet';
-      document.getElementById('phaseDesc').textContent = 'Edit this project to add phases.';
-      document.getElementById('phaseDesc').style.display = 'block';
-      document.getElementById('phaseChecklist').style.display = 'none';
-      document.getElementById('phaseCompleteBtn').style.display = 'none';
-      document.getElementById('phaseTimeline').style.display = 'none';
-      document.getElementById('phaseProgressWrap').style.display = 'none';
-      document.getElementById('projectsSwipeHint').style.display = 'none';
-      return;
-    }
-    const ph = p.phases[projectsCurrentPhaseIndex];
-    if (!ph) return;
-
-    document.getElementById('phaseNumber').textContent = projectsCurrentPhaseIndex + 1;
-    document.getElementById('phaseTitle').textContent = ph.title || 'Untitled phase';
-    document.getElementById('phaseDesc').textContent = ph.description || '';
-    document.getElementById('phaseDesc').style.display = ph.description ? 'block' : 'none';
-
-    const checklistWrap = document.getElementById('phaseChecklist');
+  function buildPhaseCardHTML(ph, idx) {
+    const phaseComplete = isPhaseComplete(ph);
+    let checklistHtml = '';
     if (ph.checklist && ph.checklist.length > 0) {
-      checklistWrap.style.display = 'block';
-      checklistWrap.innerHTML = ph.checklist.map((c, i) =>
+      checklistHtml = ph.checklist.map((c, i) =>
         `<label class="phase-checklist-item">
-          <input type="checkbox" ${c.done ? 'checked' : ''} onchange="projectsToggleCheck(${projectsCurrentPhaseIndex}, ${i})">
+          <input type="checkbox" ${c.done ? 'checked' : ''} onchange="projectsToggleCheck(${idx}, ${i})">
           <span style="text-decoration:${c.done ? 'line-through' : 'none'};color:${c.done ? 'var(--muted)' : 'var(--text)'}">${escapeHtml(c.text)}</span>
         </label>`
       ).join('');
-    } else {
-      checklistWrap.style.display = 'none';
     }
-
-    const completeBtn = document.getElementById('phaseCompleteBtn');
-    if (ph.checklist && ph.checklist.length > 0) {
-      completeBtn.style.display = 'none';
-    } else {
-      completeBtn.style.display = 'block';
-      completeBtn.onclick = () => projectsCompletePhase(projectsCurrentPhaseIndex);
-    }
-
-    const timelineEl = document.getElementById('phaseTimeline');
+    const checklistBlock = (ph.checklist && ph.checklist.length > 0)
+      ? `<div class="phase-checklist">${checklistHtml}</div>` : '';
+    const completeBtnBlock = !phaseComplete && (!ph.checklist || ph.checklist.length === 0)
+      ? `<button type="button" class="phase-complete-btn" onclick="projectsCompletePhase(${idx})">Complete</button>` : '';
+    const undoBlock = phaseComplete
+      ? `<button type="button" class="phase-undo-btn" onclick="projectsUndoPhaseCompletion(${idx})">Undo</button>` : '';
+    let timelineHtml = '';
     if (ph.completionDate) {
-      timelineEl.style.display = 'block';
       const d = new Date(ph.completionDate);
-      const now = new Date();
-      const hrs = (d - now) / (1000 * 60 * 60);
-      const urgent = hrs <= 48;
-      timelineEl.textContent = 'Due: ' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      timelineEl.classList.toggle('urgent', urgent);
-    } else {
-      timelineEl.style.display = 'none';
+      const hrs = (d - new Date()) / (1000 * 60 * 60);
+      timelineHtml = `<div class="phase-timeline ${hrs <= 48 ? 'urgent' : ''}">Due: ${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>`;
     }
-
-    const progressWrap = document.getElementById('phaseProgressWrap');
+    let progressHtml = '';
     if (ph.checklist && ph.checklist.length > 0) {
-      progressWrap.style.display = 'block';
       const done = ph.checklist.filter(c => c.done).length;
-      const pct = ph.checklist.length > 0 ? (done / ph.checklist.length) * 100 : 0;
-      document.getElementById('phaseProgressFill').style.width = pct + '%';
-    } else {
-      progressWrap.style.display = 'none';
+      const pct = (done / ph.checklist.length) * 100;
+      progressHtml = `<div class="phase-progress-wrap"><div class="phase-progress-bar"><div class="phase-progress-fill" style="width:${pct}%"></div></div></div>`;
     }
+    return `<div class="projects-phase-card" data-phase-idx="${idx}">
+      <div class="phase-badge">Phase ${idx + 1}</div>
+      <h3 class="phase-title">${escapeHtml(ph.title || 'Untitled phase')}</h3>
+      <p class="phase-desc" style="display:${ph.description ? 'block' : 'none'}">${escapeHtml(ph.description || '')}</p>
+      ${checklistBlock}
+      ${completeBtnBlock}
+      ${undoBlock}
+      ${timelineHtml}
+      ${progressHtml}
+    </div>`;
+  }
 
-    document.getElementById('projectsSwipeHint').style.display = p.phases.length > 1 ? 'block' : 'none';
-
-    const card = document.getElementById('projectsPhaseCard');
-    if (card) {
-      card.ontouchstart = (e) => { projectsPhaseTouchStartX = e.touches[0].clientX; };
-      card.ontouchend = (e) => {
-        const dx = e.changedTouches[0].clientX - projectsPhaseTouchStartX;
-        if (Math.abs(dx) > 50) projectsSwipePhase(dx < 0 ? 'next' : 'prev');
+  function renderPhaseCards() {
+    const container = document.getElementById('projectsPhaseCards');
+    const p = projectsViewing;
+    if (!p || !container) return;
+    document.getElementById('projectsSwipeHint').style.display = 'none';
+    if (!p.phases || p.phases.length === 0) {
+      container.classList.add('single-phase');
+      container.innerHTML = `<div class="projects-phase-card projects-phase-card-single">
+        <div class="phase-badge">Phase 0</div>
+        <h3 class="phase-title">No phases yet</h3>
+        <p class="phase-desc">Edit this project to add phases.</p>
+      </div>`;
+      return;
+    }
+    const singlePhase = p.phases.length === 1;
+    container.innerHTML = p.phases.map((ph, idx) => buildPhaseCardHTML(ph, idx)).join('');
+    document.getElementById('projectsSwipeHint').style.display = singlePhase ? 'none' : 'block';
+    if (singlePhase) {
+      container.classList.add('single-phase');
+    } else {
+      container.classList.remove('single-phase');
+      let scrollTimeout;
+      container.onscroll = () => {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+          const cards = container.querySelectorAll('.projects-phase-card');
+          const containerMid = container.scrollLeft + container.offsetWidth / 2;
+          let closest = 0;
+          let closestDist = Infinity;
+          cards.forEach((card, i) => {
+            const cardMid = card.offsetLeft + card.offsetWidth / 2;
+            const dist = Math.abs(containerMid - cardMid);
+            if (dist < closestDist) { closestDist = dist; closest = i; }
+          });
+          if (closest !== projectsCurrentPhaseIndex) projectsCurrentPhaseIndex = closest;
+        }, 150);
       };
+      requestAnimationFrame(() => {
+        const card = container.children[projectsCurrentPhaseIndex];
+        if (card) card.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
+      });
     }
   }
 
@@ -3210,11 +3236,16 @@
     const all = getProjects();
     const p = all.find(x => x.id === projectsViewing.id);
     if (!p || !p.phases[phaseIdx] || !p.phases[phaseIdx].checklist) return;
+    const wasProjectComplete = isProjectCompleted(p);
     p.phases[phaseIdx].checklist[itemIdx].done = !p.phases[phaseIdx].checklist[itemIdx].done;
     p.modifiedAt = Date.now();
     if (isProjectCompleted(p)) p.completedAt = Date.now();
     saveProjects(all);
     projectsViewing = p;
+    const nowProjectComplete = isProjectCompleted(p);
+    const phaseComplete = p.phases[phaseIdx].checklist.every(c => c.done);
+    if (nowProjectComplete && !wasProjectComplete) hapticDoublePulse();
+    else if (phaseComplete) hapticLight();
     renderProjectsView();
   }
 
@@ -3222,14 +3253,54 @@
     const all = getProjects();
     const p = all.find(x => x.id === projectsViewing.id);
     if (!p || !p.phases[phaseIdx]) return;
+    const wasProjectComplete = isProjectCompleted(p);
     p.phases[phaseIdx].completed = true;
     p.modifiedAt = Date.now();
     if (isProjectCompleted(p)) p.completedAt = Date.now();
     saveProjects(all);
     projectsViewing = p;
+    if (isProjectCompleted(p) && !wasProjectComplete) hapticDoublePulse();
+    else hapticLight();
     if (phaseIdx < p.phases.length - 1) {
       projectsCurrentPhaseIndex = phaseIdx + 1;
     }
+    renderProjectsView();
+  }
+
+  function projectsUndoPhaseCompletion(phaseIdx) {
+    const all = getProjects();
+    const p = all.find(x => x.id === projectsViewing.id);
+    if (!p || !p.phases[phaseIdx]) return;
+    const ph = p.phases[phaseIdx];
+    if (ph.checklist && ph.checklist.length > 0) {
+      ph.checklist.forEach(c => { c.done = false; });
+    } else {
+      ph.completed = false;
+    }
+    p.completedAt = null;
+    p.modifiedAt = Date.now();
+    saveProjects(all);
+    projectsViewing = p;
+    renderProjectsView();
+  }
+
+  function projectsUndoProjectCompletion() {
+    const all = getProjects();
+    const p = all.find(x => x.id === projectsViewing.id);
+    if (!p || !isProjectCompleted(p)) return;
+    const lastIdx = p.phases.length - 1;
+    if (lastIdx < 0) return;
+    const ph = p.phases[lastIdx];
+    if (ph.checklist && ph.checklist.length > 0) {
+      ph.checklist.forEach(c => { c.done = false; });
+    } else {
+      ph.completed = false;
+    }
+    p.completedAt = null;
+    p.modifiedAt = Date.now();
+    saveProjects(all);
+    projectsViewing = p;
+    projectsCurrentPhaseIndex = lastIdx;
     renderProjectsView();
   }
 
@@ -3238,10 +3309,10 @@
     if (!p || !p.phases || p.phases.length <= 1) return;
     if (direction === 'next' && projectsCurrentPhaseIndex < p.phases.length - 1) {
       projectsCurrentPhaseIndex++;
-      renderPhaseCard();
+      renderPhaseCards();
     } else if (direction === 'prev' && projectsCurrentPhaseIndex > 0) {
       projectsCurrentPhaseIndex--;
-      renderPhaseCard();
+      renderPhaseCards();
     }
   }
 
