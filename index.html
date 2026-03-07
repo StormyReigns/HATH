@@ -708,6 +708,22 @@
       transition: color 0.12s;
       padding: 0;
     }
+    .docs-header-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+    .docs-edit-btn {
+      font-size: 13px;
+      padding: 6px 10px;
+      border: none;
+      background: transparent;
+      color: var(--text2);
+      cursor: pointer;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+    .docs-edit-btn:hover, .docs-edit-btn:active { color: var(--accent); }
+    .docs-edit-btn.active {
+      background: rgba(192,122,74,0.15);
+      color: var(--accent);
+    }
     .docs-refresh-btn:hover, .docs-refresh-btn:active { color: var(--accent); }
     .docs-refresh-btn svg { width: 18px; height: 18px; }
     .screen-breadcrumb {
@@ -743,6 +759,26 @@
     .screen-item:active { background: rgba(192,122,74,0.06); }
     .screen-item-icon { font-size: 18px; opacity: 0.7; }
     .screen-item-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .screen-item-edit-actions {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .screen-item-edit-btn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+    .screen-item-edit-btn:hover { background: rgba(0,0,0,0.06); color: var(--text2); }
+    .screen-item-edit-btn.delete:hover { color: #c05050; }
     .screen-footer {
       padding: 16px 0;
       font-size: 12px;
@@ -950,6 +986,35 @@
       color: var(--text);
     }
     .paste-modal .paste-content::placeholder { color: var(--muted); }
+    .upload-ocr-section {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(58,46,40,0.08);
+    }
+    .upload-ocr-status {
+      font-size: 13px;
+      color: var(--text2);
+      margin-bottom: 8px;
+    }
+    .upload-ocr-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text);
+      cursor: pointer;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .upload-ocr-checkbox input { cursor: pointer; }
+    .docs-delete-warning {
+      font-size: 14px;
+      color: var(--text2);
+      line-height: 1.5;
+      margin: 0 0 16px;
+    }
+    #docsDeleteConfirmBtn { background: #c05050; color: #fff; }
+    #docsDeleteConfirmBtn:hover { background: #a04040; }
     .paste-modal-actions {
       display: flex;
       gap: 12px;
@@ -1108,9 +1173,12 @@
     <div class="sub-screen" id="documentsScreen">
       <div class="docs-header">
         <div class="screen-breadcrumb" id="docsBreadcrumb"></div>
-        <button type="button" class="docs-refresh-btn" onclick="refreshCurrentDocsFolder()" title="Refresh folder" aria-label="Refresh">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-        </button>
+        <div class="docs-header-actions">
+          <button type="button" class="docs-edit-btn" id="docsEditBtn" onclick="toggleDocsEditMode()" title="Edit mode">Edit</button>
+          <button type="button" class="docs-refresh-btn" onclick="refreshCurrentDocsFolder()" title="Refresh folder" aria-label="Refresh">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          </button>
+        </div>
       </div>
       <div class="screen-list" id="docsList"></div>
       <button type="button" class="docs-add-btn" onclick="openDocsAddMenu()" title="Add document">+</button>
@@ -1212,6 +1280,25 @@
   </div>
 </div>
 
+<!-- Upload filename modal -->
+<div class="paste-modal-overlay" id="uploadNameModal" onclick="closeUploadNameModal(event)">
+  <div class="paste-modal" onclick="event.stopPropagation()">
+    <h3>Name this file</h3>
+    <input type="text" class="paste-filename" id="uploadNameInput" placeholder="Filename">
+    <div class="upload-ocr-section" id="uploadOcrSection" style="display:none">
+      <div class="upload-ocr-status" id="uploadOcrStatus">Extracting text…</div>
+      <label class="upload-ocr-checkbox" id="uploadOcrCheckboxWrap" style="display:none">
+        <input type="checkbox" id="uploadOcrCheckbox" checked>
+        <span>Create searchable doc (read later & AI)</span>
+      </label>
+    </div>
+    <div class="paste-modal-actions">
+      <button type="button" class="paste-cancel-btn" onclick="closeUploadNameModal()">Cancel</button>
+      <button type="button" class="paste-save-btn" onclick="confirmUploadWithName()">Upload</button>
+    </div>
+  </div>
+</div>
+
 <!-- Paste text modal -->
 <div class="paste-modal-overlay" id="pasteModal" onclick="closePasteModal(event)">
   <div class="paste-modal" onclick="event.stopPropagation()">
@@ -1228,6 +1315,30 @@
 <!-- Docs loading & toast -->
 <div class="docs-loading-overlay" id="docsLoadingOverlay"><span>Uploading…</span></div>
 <div class="docs-toast" id="docsToast"></div>
+
+<!-- Rename document modal -->
+<div class="paste-modal-overlay" id="docsRenameModal" onclick="closeDocsRenameModal(event)">
+  <div class="paste-modal" onclick="event.stopPropagation()">
+    <h3>Rename</h3>
+    <input type="text" class="paste-filename" id="docsRenameInput" placeholder="Name">
+    <div class="paste-modal-actions">
+      <button type="button" class="paste-cancel-btn" onclick="closeDocsRenameModal()">Cancel</button>
+      <button type="button" class="paste-save-btn" onclick="confirmDocsRename()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete confirmation modal -->
+<div class="paste-modal-overlay" id="docsDeleteModal" onclick="closeDocsDeleteModal(event)">
+  <div class="paste-modal" onclick="event.stopPropagation()">
+    <h3>Delete</h3>
+    <p class="docs-delete-warning" id="docsDeleteWarning">Are you sure you want to permanently delete this file?</p>
+    <div class="paste-modal-actions">
+      <button type="button" class="paste-cancel-btn" onclick="closeDocsDeleteModal()">Cancel</button>
+      <button type="button" class="paste-save-btn" id="docsDeleteConfirmBtn" onclick="confirmDocsDelete()">Delete</button>
+    </div>
+  </div>
+</div>
 
 <!-- Offline screen -->
 <div class="offline-screen" id="offlineScreen">
@@ -1585,7 +1696,7 @@
         scrollFocusedIntoView();
       });
     }
-    [document.getElementById('pasteFilename'), document.getElementById('pasteContent')].forEach(el => {
+    [document.getElementById('pasteFilename'), document.getElementById('pasteContent'), document.getElementById('uploadNameInput')].forEach(el => {
       if (el) el.addEventListener('focus', scrollFocusedIntoView);
     });
     if (window.visualViewport) {
@@ -1626,6 +1737,18 @@
   }
 
   let docsBreadcrumb = [{ id: DOCS_FOLDER_ID, name: 'ShastApp Docs' }];
+  let docsEditMode = false;
+  let docsPendingRename = null;
+  let docsPendingDelete = null;
+
+  function toggleDocsEditMode() {
+    docsEditMode = !docsEditMode;
+    document.getElementById('docsEditBtn').textContent = docsEditMode ? 'Done' : 'Edit';
+    document.getElementById('docsEditBtn').classList.toggle('active', docsEditMode);
+    const folderId = getCurrentDocsFolderId();
+    const cached = docsFolderCache[folderId];
+    if (cached) renderDocsList(cached);
+  }
 
   function renderDocsList(data) {
     const list = document.getElementById('docsList');
@@ -1639,20 +1762,77 @@
     folders.forEach(f => {
       const div = document.createElement('div');
       div.className = 'screen-item';
-      div.innerHTML = `<span class="screen-item-icon">📁</span><span class="screen-item-name">${escapeHtml(f.name)}</span>`;
-      div.onclick = () => openDocsFolder(f.id, f.name);
+      if (docsEditMode) {
+        div.innerHTML = `<span class="screen-item-icon">📁</span><span class="screen-item-name">${escapeHtml(f.name)}</span><div class="screen-item-edit-actions"><button type="button" class="screen-item-edit-btn" title="Rename" aria-label="Rename">✎</button><button type="button" class="screen-item-edit-btn delete" title="Delete" aria-label="Delete">🗑</button></div>`;
+        div.onclick = (e) => { if (!e.target.closest('.screen-item-edit-btn')) openDocsFolder(f.id, f.name); };
+        div.querySelector('.screen-item-edit-btn:not(.delete)').onclick = (e) => { e.stopPropagation(); openDocsRenameModal('folder', f.id, f.name); };
+        div.querySelector('.screen-item-edit-btn.delete').onclick = (e) => { e.stopPropagation(); openDocsDeleteModal('folder', f.id, f.name); };
+      } else {
+        div.innerHTML = `<span class="screen-item-icon">📁</span><span class="screen-item-name">${escapeHtml(f.name)}</span>`;
+        div.onclick = () => openDocsFolder(f.id, f.name);
+      }
       list.appendChild(div);
     });
     files.forEach(f => {
       const div = document.createElement('div');
       div.className = 'screen-item';
-      div.innerHTML = `<span class="screen-item-icon">📄</span><span class="screen-item-name">${escapeHtml(f.name)}</span>`;
-      div.onclick = () => { if (f.url) window.open(f.url, '_blank'); };
+      if (docsEditMode) {
+        div.innerHTML = `<span class="screen-item-icon">📄</span><span class="screen-item-name">${escapeHtml(f.name)}</span><div class="screen-item-edit-actions"><button type="button" class="screen-item-edit-btn" title="Rename" aria-label="Rename">✎</button><button type="button" class="screen-item-edit-btn delete" title="Delete" aria-label="Delete">🗑</button></div>`;
+        div.onclick = (e) => { if (!e.target.closest('.screen-item-edit-btn') && f.url) window.open(f.url, '_blank'); };
+        div.querySelector('.screen-item-edit-btn:not(.delete)').onclick = (e) => { e.stopPropagation(); openDocsRenameModal('file', f.id, f.name); };
+        div.querySelector('.screen-item-edit-btn.delete').onclick = (e) => { e.stopPropagation(); openDocsDeleteModal('file', f.id, f.name); };
+      } else {
+        div.innerHTML = `<span class="screen-item-icon">📄</span><span class="screen-item-name">${escapeHtml(f.name)}</span>`;
+        div.onclick = () => { if (f.url) window.open(f.url, '_blank'); };
+      }
       list.appendChild(div);
     });
     if (folders.length === 0 && files.length === 0) {
       list.innerHTML = '<div class="screen-loading">This folder is empty.</div>';
     }
+  }
+
+  function openDocsRenameModal(type, id, currentName) {
+    docsPendingRename = { type, id, currentName };
+    document.getElementById('docsRenameInput').value = currentName;
+    document.getElementById('docsRenameModal').classList.add('open');
+    document.getElementById('docsRenameInput').focus();
+  }
+
+  function closeDocsRenameModal(ev) {
+    if (ev && ev.target !== ev.currentTarget && ev.type === 'click') return;
+    document.getElementById('docsRenameModal').classList.remove('open');
+    docsPendingRename = null;
+  }
+
+  function confirmDocsRename() {
+    if (!docsPendingRename) return;
+    const newName = document.getElementById('docsRenameInput').value.trim();
+    if (!newName) return;
+    closeDocsRenameModal();
+    doDocsRename(docsPendingRename.type, docsPendingRename.id, newName);
+    docsPendingRename = null;
+  }
+
+  function openDocsDeleteModal(type, id, name) {
+    docsPendingDelete = { type, id, name };
+    document.getElementById('docsDeleteWarning').textContent =
+      type === 'folder' ? 'Are you sure you want to permanently delete this folder?' : 'Are you sure you want to permanently delete this file?';
+    document.getElementById('docsDeleteModal').classList.add('open');
+  }
+
+  function closeDocsDeleteModal(ev) {
+    if (ev && ev.target !== ev.currentTarget && ev.type === 'click') return;
+    document.getElementById('docsDeleteModal').classList.remove('open');
+    docsPendingDelete = null;
+  }
+
+  function confirmDocsDelete() {
+    if (!docsPendingDelete) return;
+    const { type, id } = docsPendingDelete;
+    closeDocsDeleteModal();
+    doDocsDelete(type, id);
+    docsPendingDelete = null;
   }
 
   async function loadFolderContents(folderId, forceRefresh) {
@@ -1876,6 +2056,174 @@
     }
   }
 
+  async function doDocsRename(type, fileId, newName) {
+    const folderId = getCurrentDocsFolderId();
+    showDocsLoading(true);
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'rename', type, fileId, newName })
+      });
+      const raw = await res.text();
+      let data;
+      try { data = JSON.parse(raw); } catch (_) {
+        showDocsLoading(false);
+        showDocsToast('Rename failed: Invalid response', true);
+        return;
+      }
+      showDocsLoading(false);
+      if (data.error) {
+        showDocsToast('Rename failed: ' + (data.error || 'Unknown error'), true);
+        return;
+      }
+      showDocsToast('Renamed to ' + newName);
+      delete docsFolderCache[folderId];
+      loadFolderContents(folderId, true);
+    } catch (err) {
+      showDocsLoading(false);
+      showDocsToast('Rename failed: ' + (err.message || 'Network error'), true);
+    }
+  }
+
+  async function doDocsDelete(type, fileId) {
+    const folderId = getCurrentDocsFolderId();
+    showDocsLoading(true);
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'delete', type, fileId })
+      });
+      const raw = await res.text();
+      let data;
+      try { data = JSON.parse(raw); } catch (_) {
+        showDocsLoading(false);
+        showDocsToast('Delete failed: Invalid response', true);
+        return;
+      }
+      showDocsLoading(false);
+      if (data.error) {
+        showDocsToast('Delete failed: ' + (data.error || 'Unknown error'), true);
+        return;
+      }
+      showDocsToast('Deleted');
+      delete docsFolderCache[folderId];
+      loadFolderContents(folderId, true);
+    } catch (err) {
+      showDocsLoading(false);
+      showDocsToast('Delete failed: ' + (err.message || 'Network error'), true);
+    }
+  }
+
+  let pendingUpload = null;
+
+  function closeUploadNameModal(ev) {
+    if (ev && ev.target !== ev.currentTarget && ev.type === 'click') return;
+    document.getElementById('uploadNameModal').classList.remove('open');
+    pendingUpload = null;
+  }
+
+  async function runOcrOnImage(base64, mimeType) {
+    try {
+      const dataUrl = 'data:' + (mimeType || 'image/jpeg') + ';base64,' + base64;
+      const { createWorker } = await import('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.esm.min.js');
+      const worker = await createWorker('eng');
+      const { data } = await worker.recognize(dataUrl);
+      await worker.terminate();
+      return (data?.text || '').trim();
+    } catch (e) {
+      console.warn('OCR failed:', e);
+      return '';
+    }
+  }
+
+  function confirmUploadWithName() {
+    if (!pendingUpload) return;
+    const name = document.getElementById('uploadNameInput').value.trim();
+    const filename = name || pendingUpload.originalName;
+    const createSearchableDoc = document.getElementById('uploadOcrCheckbox').checked && (pendingUpload.ocrText || '').trim();
+    closeUploadNameModal();
+    if (createSearchableDoc) {
+      const baseName = filename.replace(/\.[^.]+$/, '') || filename;
+      const docName = baseName + ' (text)';
+      doDocsUploadImageAndText(pendingUpload.base64, filename, pendingUpload.mimeType, pendingUpload.ocrText, docName);
+    } else {
+      doDocsUpload(pendingUpload.base64, filename, pendingUpload.mimeType);
+    }
+    pendingUpload = null;
+  }
+
+  function showUploadNameModal(originalName, base64, mimeType) {
+    const isImage = (mimeType || '').startsWith('image/');
+    pendingUpload = { originalName, base64, mimeType, ocrText: null };
+    const input = document.getElementById('uploadNameInput');
+    input.value = originalName;
+    const ocrSection = document.getElementById('uploadOcrSection');
+    const ocrStatus = document.getElementById('uploadOcrStatus');
+    const ocrCheckWrap = document.getElementById('uploadOcrCheckboxWrap');
+    if (isImage) {
+      ocrSection.style.display = 'block';
+      ocrStatus.textContent = 'Extracting text…';
+      ocrCheckWrap.style.display = 'none';
+    } else {
+      ocrSection.style.display = 'none';
+    }
+    document.getElementById('uploadNameModal').classList.add('open');
+    input.focus();
+    if (isImage) {
+      runOcrOnImage(base64, mimeType).then(text => {
+        if (!pendingUpload) return;
+        pendingUpload.ocrText = text;
+        if (text) {
+          ocrStatus.textContent = 'Text extracted — create searchable doc for reading & AI?';
+          ocrCheckWrap.style.display = 'flex';
+        } else {
+          ocrStatus.textContent = 'No text found — will save as image only.';
+        }
+      });
+    }
+  }
+
+  async function doDocsUploadImageAndText(base64, imageFilename, mimeType, ocrText, docName) {
+    const folderId = getCurrentDocsFolderId();
+    showDocsLoading(true);
+    try {
+      const [uploadRes, docRes] = await Promise.all([
+        fetch(API_URL, {
+          method: 'POST',
+          redirect: 'follow',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ action: 'upload', folderId, filename: imageFilename, base64, mimeType: mimeType || 'application/octet-stream' })
+        }),
+        fetch(API_URL, {
+          method: 'POST',
+          redirect: 'follow',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ action: 'createDoc', folderId, filename: docName, text: ocrText || '' })
+        })
+      ]);
+      const uploadData = await uploadRes.text();
+      const docData = await docRes.text();
+      let uploadJson, docJson;
+      try { uploadJson = JSON.parse(uploadData); } catch (_) { uploadJson = { error: 'Invalid response' }; }
+      try { docJson = JSON.parse(docData); } catch (_) { docJson = { error: 'Invalid response' }; }
+      showDocsLoading(false);
+      if (uploadJson.error || docJson.error) {
+        showDocsToast('Upload failed: ' + (uploadJson.error || docJson.error || 'Unknown error'), true);
+        return;
+      }
+      showDocsToast('Saved image and searchable doc');
+      delete docsFolderCache[folderId];
+      loadFolderContents(folderId, true);
+    } catch (err) {
+      showDocsLoading(false);
+      showDocsToast('Upload failed: ' + (err.message || 'Network error'), true);
+    }
+  }
+
   function initDocsFileInputs() {
     document.getElementById('docsFileScan').addEventListener('change', function() {
       const file = this.files && this.files[0];
@@ -1883,7 +2231,7 @@
       const fr = new FileReader();
       fr.onload = () => {
         const base64 = fr.result.split(',')[1] || fr.result;
-        doDocsUpload(base64, file.name, file.type);
+        showUploadNameModal(file.name, base64, file.type);
       };
       fr.readAsDataURL(file);
       this.value = '';
@@ -1894,7 +2242,7 @@
       const fr = new FileReader();
       fr.onload = () => {
         const base64 = fr.result.split(',')[1] || fr.result;
-        doDocsUpload(base64, file.name, file.type);
+        showUploadNameModal(file.name, base64, file.type);
       };
       fr.readAsDataURL(file);
       this.value = '';
