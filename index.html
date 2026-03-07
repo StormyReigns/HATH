@@ -13,6 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async></script>
   <script type="module" src="https://unpkg.com/@dotlottie/player-component@2.3.0/dist/dotlottie-player.mjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -2236,49 +2237,65 @@
     pendingUpload = null;
   }
 
-  function resizeImageForOcr(dataUrl, maxDim) {
+  async function fileToJpegDataUrl(file, maxDim) {
+    let bitmap;
+    if (typeof createImageBitmap === 'function') {
+      bitmap = await createImageBitmap(file);
+    } else {
+      const dataUrl = await new Promise((res, rej) => {
+        const fr = new FileReader();
+        fr.onload = () => res(fr.result);
+        fr.onerror = () => rej(new Error('Could not read file'));
+        fr.readAsDataURL(file);
+      });
+      bitmap = await new Promise((res, rej) => {
+        const img = new Image();
+        img.onload = () => res(img);
+        img.onerror = () => rej(new Error('Could not load image'));
+        img.src = dataUrl;
+      });
+    }
+    let w = bitmap.width, h = bitmap.height;
+    if (w > maxDim || h > maxDim) {
+      const scale = maxDim / Math.max(w, h);
+      w = Math.round(w * scale);
+      h = Math.round(h * scale);
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    if (bitmap.close) bitmap.close();
+    return canvas.toDataURL('image/jpeg', 0.92);
+  }
+
+  function waitForTesseract(ms) {
     return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        let w = img.width, h = img.height;
-        if (w <= maxDim && h <= maxDim) {
-          resolve(dataUrl);
-          return;
-        }
-        const scale = maxDim / Math.max(w, h);
-        w = Math.round(w * scale);
-        h = Math.round(h * scale);
-        const canvas = document.createElement('canvas');
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(0, 0, w, h);
-        ctx.drawImage(img, 0, 0, w, h);
-        try {
-          resolve(canvas.toDataURL('image/jpeg', 0.92));
-        } catch (e) {
-          resolve(dataUrl);
-        }
+      if (window.Tesseract) return resolve(window.Tesseract);
+      const deadline = Date.now() + (ms || 15000);
+      const check = () => {
+        if (window.Tesseract) return resolve(window.Tesseract);
+        if (Date.now() > deadline) return reject(new Error('OCR script did not load'));
+        setTimeout(check, 200);
       };
-      img.onerror = () => resolve(dataUrl);
-      img.src = dataUrl;
+      check();
     });
   }
 
-  async function runOcrOnImage(base64, mimeType) {
+  async function runOcrOnImage(file) {
     try {
-      const dataUrl = 'data:' + (mimeType || 'image/jpeg') + ';base64,' + base64;
-      const resizedUrl = await resizeImageForOcr(dataUrl, 2000);
-      const { createWorker } = await import('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.esm.min.js');
-      const worker = await createWorker('eng');
-      await worker.setParameters({ tessedit_pageseg_mode: '6' });
-      const { data } = await worker.recognize(resizedUrl);
+      const dataUrl = await fileToJpegDataUrl(file, 2000);
+      const Tesseract = await waitForTesseract();
+      const worker = await Tesseract.createWorker('eng');
+      const { data } = await worker.recognize(dataUrl);
       await worker.terminate();
       return (data?.text || '').trim();
     } catch (e) {
       console.warn('OCR failed:', e);
-      return '';
+      throw e;
     }
   }
 
@@ -2300,9 +2317,9 @@
     }
   }
 
-  function showUploadNameModal(originalName, base64, mimeType) {
+  function showUploadNameModal(originalName, base64, mimeType, file) {
     const isImage = (mimeType || '').startsWith('image/');
-    pendingUpload = { originalName, base64, mimeType, ocrText: null };
+    pendingUpload = { originalName, base64, mimeType, file, ocrText: null };
     const input = document.getElementById('uploadNameInput');
     input.value = originalName;
     const ocrSection = document.getElementById('uploadOcrSection');
@@ -2317,8 +2334,8 @@
     }
     document.getElementById('uploadNameModal').classList.add('open');
     input.focus();
-    if (isImage) {
-      runOcrOnImage(base64, mimeType).then(text => {
+    if (isImage && file) {
+      runOcrOnImage(file).then(text => {
         if (!pendingUpload) return;
         pendingUpload.ocrText = text;
         if (text) {
@@ -2332,6 +2349,8 @@
         console.warn('OCR error:', err);
         ocrStatus.textContent = 'OCR failed — will save as image only.';
       });
+    } else if (isImage && !file) {
+      ocrStatus.textContent = 'No text found — will save as image only.';
     }
   }
 
@@ -2379,7 +2398,7 @@
       const fr = new FileReader();
       fr.onload = () => {
         const base64 = fr.result.split(',')[1] || fr.result;
-        showUploadNameModal(file.name, base64, file.type);
+        showUploadNameModal(file.name, base64, file.type, file);
       };
       fr.readAsDataURL(file);
       this.value = '';
@@ -2390,7 +2409,7 @@
       const fr = new FileReader();
       fr.onload = () => {
         const base64 = fr.result.split(',')[1] || fr.result;
-        showUploadNameModal(file.name, base64, file.type);
+        showUploadNameModal(file.name, base64, file.type, file);
       };
       fr.readAsDataURL(file);
       this.value = '';
