@@ -37,15 +37,14 @@
       -webkit-touch-callout: none;
       background-color: #fdf8f5;
     }
-    /* Explicit top safe-area fill — prevents white bar under status bar.
-       iOS Safari bug: env(safe-area-inset-top) can return 0 in portrait; use 20px fallback. */
+    /* Minimal top safe-area fill — only when env reports it; no forced minimum. */
     html::before {
       content: '';
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      height: max(env(safe-area-inset-top, 0px), 20px);
+      height: env(safe-area-inset-top, 0px);
       background-color: #fdf8f5;
       z-index: 9999;
       pointer-events: none;
@@ -1557,6 +1556,11 @@
     }
     .project-phase-editor textarea { min-height: 60px; resize: vertical; }
     .projects-modal .paste-content { min-height: 80px; }
+    .projects-modal {
+      max-height: 85vh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
     html.dark-mode .projects-phase-card { background: rgba(45,40,38,0.6); border-color: rgba(255,255,255,0.08); }
     html.dark-mode .phase-timeline.urgent { color: #e07070; }
     html.dark-mode .project-phase-editor { background: rgba(255,255,255,0.06); }
@@ -3202,6 +3206,8 @@
     document.getElementById('projectDescInput').value = projectsEditing ? (projectsEditing.description || '') : '';
     document.getElementById('projectFinishDateInput').value = projectsEditing && projectsEditing.finishDate ? projectsEditing.finishDate : '';
     renderProjectPhasesEditors();
+    const modal = document.getElementById('projectModal');
+    if (modal) modal.scrollTop = 0;
     document.getElementById('projectModalOverlay').classList.add('open');
   }
 
@@ -3301,9 +3307,9 @@
     if (isProjectCompleted(newProj)) newProj.completedAt = now;
     else if (projectsEditing && projectsEditing.completedAt) newProj.completedAt = projectsEditing.completedAt;
 
-    if (projectsEditing) {
-      const idx = all.findIndex(p => p.id === projectsEditing.id);
-      if (idx >= 0) all[idx] = newProj;
+    const idx = projectsEditing ? all.findIndex(p => p.id === projectsEditing.id) : -1;
+    if (idx >= 0) {
+      all[idx] = newProj;
     } else {
       all.push(newProj);
     }
