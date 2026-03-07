@@ -1370,7 +1370,7 @@
     .projects-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: var(--text); margin: 0; }
     .projects-completed-bar {
       flex-shrink: 0;
-      overflow-x: auto;
+      overflow: hidden;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
       padding: 12px 0;
@@ -1390,9 +1390,16 @@
     .projects-completed-bar::-webkit-scrollbar { display: none; }
     .projects-completed-scroll {
       display: flex; gap: 12px; padding: 0 12px;
+      animation: victory-lap-scroll 45s linear infinite;
+    }
+    .projects-completed-scroll:hover { animation-play-state: paused; }
+    @keyframes victory-lap-scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
     }
     .projects-completed-chip {
       flex-shrink: 0;
+      display: inline-flex; align-items: center; gap: 8px;
       padding: 10px 16px;
       font-size: 13px;
       font-weight: 500;
@@ -1406,6 +1413,20 @@
     }
     .projects-completed-chip:hover { transform: scale(1.02); box-shadow: 0 4px 12px rgba(192,122,74,0.25); }
     .projects-completed-chip:active { transform: scale(0.98); }
+    .projects-completed-trophy { font-size: 1.1em; line-height: 1; flex-shrink: 0; }
+    .projects-completed-chip-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .projects-completed-chip-delete {
+      width: 24px; height: 24px;
+      border: none; background: transparent;
+      font-size: 18px; line-height: 1;
+      color: var(--muted); opacity: 0.7;
+      cursor: pointer;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .projects-completed-chip-delete:hover,
+    .projects-completed-chip-delete:active { opacity: 1; color: #c05050; background: rgba(192,80,80,0.15); }
     .projects-completed-chip-new {
       animation: chip-add-celebration 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     }
@@ -1414,6 +1435,36 @@
       60% { transform: scale(1.15); opacity: 1; }
       100% { transform: scale(1); opacity: 1; }
     }
+    .projects-list-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.6);
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.06);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .projects-list-item:active { background: rgba(192,122,74,0.08); }
+    .projects-list-progress { font-size: 12px; color: var(--muted); margin-left: auto; }
+    .projects-list-delete-btn {
+      width: 36px; height: 36px;
+      border: none; background: transparent;
+      font-size: 16px; opacity: 0.6;
+      cursor: pointer;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .projects-list-delete-btn:hover, .projects-list-delete-btn:active { opacity: 1; background: rgba(192,50,50,0.15); }
+    .projects-delete-btn {
+      flex-shrink: 0;
+      width: 40px; height: 40px;
+      border: none; background: transparent;
+      font-size: 18px; opacity: 0.7;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+    .projects-delete-btn:hover, .projects-delete-btn:active { opacity: 1; background: rgba(192,50,50,0.12); }
     .projects-in-progress-label {
       font-size: 11px; color: var(--muted);
       text-transform: uppercase; letter-spacing: 0.06em;
@@ -1501,12 +1552,18 @@
       min-width: 84%;
       scroll-snap-align: center;
       padding: 20px;
-      background: rgba(255,255,255,0.7);
+      background: rgba(255,255,255,0.25);
       border-radius: 16px;
-      border: 1px solid rgba(0,0,0,0.06);
+      border: 2px solid rgba(0,0,0,0.1);
       display: flex; flex-direction: column;
       min-height: 200px;
+      backdrop-filter: blur(8px);
     }
+    html.card-scheme-peach .projects-phase-card { background: rgba(252,232,232,0.35); border-color: rgba(220,180,190,0.6); }
+    html.card-scheme-lavender .projects-phase-card { background: rgba(232,229,245,0.35); border-color: rgba(180,170,220,0.6); }
+    html.card-scheme-sage .projects-phase-card { background: rgba(229,240,235,0.35); border-color: rgba(150,195,175,0.6); }
+    html.card-scheme-sunset .projects-phase-card { background: rgba(252,238,224,0.35); border-color: rgba(220,190,160,0.6); }
+    html.card-scheme-ocean .projects-phase-card { background: rgba(224,238,248,0.35); border-color: rgba(150,190,230,0.6); }
     .projects-phase-card-single { flex: 0 0 100%; min-width: 100%; }
     .phase-badge {
       font-size: 11px; color: var(--muted);
@@ -1530,20 +1587,26 @@
       display: flex; align-items: center; gap: 10px;
       padding: 8px 0;
       font-size: 14px; color: var(--text);
+      transition: opacity 0.2s ease;
     }
     .phase-checklist-item input[type="checkbox"] {
       accent-color: var(--accent);
       cursor: pointer;
+      width: 20px; height: 20px;
+      flex-shrink: 0;
     }
     .phase-complete-btn {
-      padding: 12px 20px;
+      padding: 14px 24px;
       font-size: 15px; font-family: inherit;
       background: var(--accent); color: white;
       border: none; border-radius: 10px;
       cursor: pointer;
       align-self: flex-start;
       margin-top: auto;
+      min-height: 48px;
+      transition: transform 0.15s, box-shadow 0.15s;
     }
+    .phase-complete-btn:hover { box-shadow: 0 4px 12px rgba(192,122,74,0.3); }
     .phase-complete-btn:active { opacity: 0.9; }
     .phase-undo-btn {
       font-size: 12px; padding: 6px 12px; margin-top: 8px;
@@ -1666,6 +1729,9 @@
       touch-action: pan-y pinch-zoom;
     }
     html.dark-mode .projects-phase-card { background: rgba(45,40,38,0.6); border-color: rgba(255,255,255,0.08); }
+    html.dark-mode .projects-list-item { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); }
+    html.dark-mode .projects-list-delete-btn:hover,
+    html.dark-mode .projects-list-delete-btn:active { background: rgba(220,80,80,0.2); }
     html.dark-mode .phase-undo-btn { border-color: rgba(255,255,255,0.2); }
     html.dark-mode .phase-timeline.urgent { color: #e07070; }
     html.dark-mode .project-phase-editor { background: rgba(255,255,255,0.06); }
@@ -2073,6 +2139,7 @@
         <div class="projects-view-header">
           <button type="button" class="projects-back-btn" onclick="projectsBackToLanding()" aria-label="Back">←</button>
           <button type="button" class="projects-edit-btn" onclick="openCreateProjectModal(projectsViewing && projectsViewing.id)" aria-label="Edit" title="Edit project">✎</button>
+          <button type="button" class="projects-delete-btn" onclick="projectsConfirmDelete(projectsViewing && projectsViewing.id)" aria-label="Delete" title="Delete project">🗑</button>
           <div class="projects-view-title-wrap">
             <h2 class="projects-view-title" id="projectsViewTitle"></h2>
             <div class="projects-overall-progress">
@@ -2312,6 +2379,18 @@
     <div class="paste-modal-actions">
       <button type="button" class="paste-cancel-btn" onclick="closeDocsDeleteModal()">Cancel</button>
       <button type="button" class="paste-save-btn" id="docsDeleteConfirmBtn" onclick="confirmDocsDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete project confirmation modal -->
+<div class="paste-modal-overlay" id="projectDeleteModal" onclick="closeProjectDeleteModal(event)">
+  <div class="paste-modal" onclick="event.stopPropagation()">
+    <h3>Delete project</h3>
+    <p class="docs-delete-warning" id="projectDeleteWarning">Are you sure you want to delete this project? This cannot be undone.</p>
+    <div class="paste-modal-actions">
+      <button type="button" class="paste-cancel-btn" onclick="closeProjectDeleteModal()">Cancel</button>
+      <button type="button" class="paste-save-btn" id="projectDeleteConfirmBtn" onclick="confirmProjectDelete()" style="background:#c05050;color:white">Delete</button>
     </div>
   </div>
 </div>
@@ -3143,18 +3222,20 @@
     const inProgress = all.filter(p => !isProjectCompleted(p)).sort((a,b) => (b.modifiedAt || 0) - (a.modifiedAt || 0));
 
     const scrollEl = document.getElementById('projectsCompletedScroll');
-    scrollEl.innerHTML = completed.map(p => {
+    const chipHtml = completed.map(p => {
       const animateClass = newlyCompletedId && p.id === newlyCompletedId ? ' projects-completed-chip-new' : '';
-      return `<span class="projects-completed-chip${animateClass}" onclick="projectsSelectCompleted('${p.id}')">${escapeHtml(p.title)}</span>`;
+      return `<span class="projects-completed-chip${animateClass}" onclick="projectsSelectCompleted('${p.id}')"><span class="projects-completed-trophy">🏆</span><span class="projects-completed-chip-title">${escapeHtml(p.title)}</span><button type="button" class="projects-completed-chip-delete" onclick="event.stopPropagation();projectsConfirmDelete('${p.id}')" aria-label="Delete" title="Delete">×</button></span>`;
     }).join('');
+    scrollEl.innerHTML = completed.length > 0 ? chipHtml + chipHtml : '';
 
     const listEl = document.getElementById('projectsInProgressList');
     listEl.innerHTML = inProgress.map(p => {
       const prog = getProjectProgress(p);
-      return `<div class="screen-item" onclick="projectsSelectProject('${p.id}')">
+      return `<div class="projects-list-item" onclick="projectsSelectProject('${p.id}')">
         <span class="screen-item-icon">📋</span>
         <span class="screen-item-name">${escapeHtml(p.title)}</span>
-        <span style="font-size:12px;color:var(--muted);">${Math.round(prog)}%</span>
+        <span class="projects-list-progress">${Math.round(prog)}%</span>
+        <button type="button" class="projects-list-delete-btn" onclick="event.stopPropagation();projectsConfirmDelete('${p.id}')" aria-label="Delete" title="Delete project">🗑</button>
       </div>`;
     }).join('');
 
@@ -3190,6 +3271,41 @@
     document.getElementById('projectsView').style.display = 'none';
     renderProjectsLanding();
   }
+
+  function projectsConfirmDelete(projectId) {
+    if (!projectId) return;
+    const p = getProjects().find(x => x.id === projectId);
+    if (!p) return;
+    const warning = document.getElementById('projectDeleteWarning');
+    if (warning) warning.textContent = `Are you sure you want to delete "${escapeHtml(p.title)}"? This cannot be undone.`;
+    projectPendingDelete = projectId;
+    document.getElementById('projectDeleteModal').classList.add('open');
+  }
+
+  function closeProjectDeleteModal(ev) {
+    if (ev && ev.target !== document.getElementById('projectDeleteModal')) return;
+    document.getElementById('projectDeleteModal').classList.remove('open');
+    projectPendingDelete = null;
+  }
+
+  function confirmProjectDelete() {
+    if (!projectPendingDelete) return;
+    const id = projectPendingDelete;
+    const all = getProjects().filter(p => p.id !== id);
+    saveProjects(all);
+    closeProjectDeleteModal();
+    projectPendingDelete = null;
+    if (projectsViewing && projectsViewing.id === id) {
+      projectsViewing = null;
+      document.getElementById('projectsLanding').style.display = 'flex';
+      document.getElementById('projectsView').style.display = 'none';
+      renderProjectsLanding();
+    } else {
+      renderProjectsLanding();
+    }
+  }
+
+  let projectPendingDelete = null;
 
   function isPhaseComplete(ph) {
     if (!ph) return false;
@@ -3242,8 +3358,9 @@
       const completeClass = pct >= 100 ? ' progress-complete' : '';
       progressHtml = `<div class="phase-progress-wrap"><div class="phase-progress-bar"><div class="phase-progress-fill${completeClass}" style="width:${pct}%"></div></div></div>`;
     }
+    const phaseLabel = p.phases.length > 1 ? `Phase ${idx + 1} of ${p.phases.length}` : `Phase ${idx + 1}`;
     return `<div class="projects-phase-card" data-phase-idx="${idx}">
-      <div class="phase-badge">Phase ${idx + 1}</div>
+      <div class="phase-badge">${phaseLabel}</div>
       <h3 class="phase-title">${escapeHtml(ph.title || 'Untitled phase')}</h3>
       <p class="phase-desc" style="display:${ph.description ? 'block' : 'none'}">${escapeHtml(ph.description || '')}</p>
       ${checklistBlock}
@@ -3318,8 +3435,6 @@
       document.getElementById('projectsLanding').style.display = 'flex';
       document.getElementById('projectsView').style.display = 'none';
       renderProjectsLanding(completedProjectId);
-      const bar = document.getElementById('projectsCompletedBar');
-      if (bar) bar.scrollLeft = 0;
     }, 2000);
   }
 
@@ -3968,9 +4083,13 @@
   function applyBgScheme(schemeId) {
     const bg = document.querySelector('.bg');
     if (!bg) return;
-    BG_SCHEMES.forEach(s => bg.classList.remove('bg-scheme-' + s.id));
-    const scheme = BG_SCHEMES.find(s => s.id === (schemeId || 'peach'));
-    if (scheme && scheme.id !== 'peach') bg.classList.add('bg-scheme-' + scheme.id);
+    const scheme = BG_SCHEMES.find(s => s.id === (schemeId || 'peach')) || BG_SCHEMES[0];
+    BG_SCHEMES.forEach(s => {
+      bg.classList.remove('bg-scheme-' + s.id);
+      document.documentElement.classList.remove('card-scheme-' + s.id);
+    });
+    if (scheme.id !== 'peach') bg.classList.add('bg-scheme-' + scheme.id);
+    document.documentElement.classList.add('card-scheme-' + scheme.id);
     const meta = document.getElementById('themeColorMeta');
     if (meta && scheme) meta.setAttribute('content', isDarkMode() ? '#1a1816' : scheme.themeColor);
   }
