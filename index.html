@@ -38,15 +38,14 @@
       background-color: #fdf8f5;
     }
     /* Explicit top safe-area fill — prevents white bar under status bar.
-       iOS Safari bug: env(safe-area-inset-top) can return 0 in portrait; use 47px fallback. */
+       iOS Safari bug: env(safe-area-inset-top) can return 0 in portrait; use 20px fallback. */
     html::before {
       content: '';
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      height: max(env(safe-area-inset-top, 0px), 47px);
-      min-height: 47px;
+      height: max(env(safe-area-inset-top, 0px), 20px);
       background-color: #fdf8f5;
       z-index: 9999;
       pointer-events: none;
@@ -1362,6 +1361,206 @@
     }
     .docs-add-btn:active { transform: translateX(-50%) scale(0.94); }
 
+    /* ── PROJECTS SCREEN ── */
+    #projectsScreen { flex-direction: column; padding: 0 4px; }
+    .projects-landing { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+    .projects-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; flex-shrink: 0;
+    }
+    .projects-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: var(--text); margin: 0; }
+    .projects-completed-bar {
+      flex-shrink: 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      margin-bottom: 12px;
+    }
+    .projects-completed-bar::-webkit-scrollbar { display: none; }
+    .projects-completed-scroll {
+      display: flex; gap: 10px; padding: 0 4px;
+    }
+    .projects-completed-chip {
+      flex-shrink: 0;
+      padding: 8px 14px;
+      font-size: 13px;
+      color: var(--text2);
+      background: rgba(192,122,74,0.1);
+      border-radius: 20px;
+      cursor: pointer;
+    }
+    .projects-completed-chip:active { background: rgba(192,122,74,0.2); }
+    .projects-in-progress-label {
+      font-size: 11px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 0 4px 8px;
+    }
+    .projects-empty {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: var(--muted);
+      padding: 24px;
+      text-align: center;
+    }
+    .projects-view {
+      flex: 1; display: flex; flex-direction: column;
+      overflow: hidden; padding: 0;
+    }
+    .projects-view-header {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 12px 0 16px; flex-shrink: 0;
+    }
+    .projects-back-btn {
+      flex-shrink: 0;
+      width: 40px; height: 40px;
+      border: none; background: transparent;
+      font-size: 22px; color: var(--text2);
+      cursor: pointer; border-radius: 8px;
+    }
+    .projects-back-btn:active { background: rgba(0,0,0,0.06); }
+    .projects-edit-btn {
+      flex-shrink: 0;
+      width: 40px; height: 40px;
+      border: none; background: transparent;
+      font-size: 18px; color: var(--text2);
+      cursor: pointer; border-radius: 8px;
+    }
+    .projects-edit-btn:active { background: rgba(0,0,0,0.06); }
+    .projects-view-title-wrap { flex: 1; min-width: 0; }
+    .projects-view-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px; font-weight: 400;
+      color: var(--text); margin: 0 0 8px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .projects-overall-progress { margin-top: 4px; }
+    .projects-progress-bar {
+      height: 4px; background: rgba(0,0,0,0.08);
+      border-radius: 2px; overflow: hidden;
+    }
+    .projects-progress-fill {
+      height: 100%; background: var(--accent);
+      border-radius: 2px; transition: width 0.2s;
+    }
+    .projects-phase-cards {
+      flex: 1; overflow-x: hidden;
+      display: flex; align-items: stretch;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    .projects-phase-card {
+      flex: 0 0 100%;
+      scroll-snap-align: center;
+      padding: 20px;
+      margin: 0 4px;
+      background: rgba(255,255,255,0.7);
+      border-radius: 16px;
+      border: 1px solid rgba(0,0,0,0.06);
+      display: flex; flex-direction: column;
+      min-height: 200px;
+    }
+    .phase-badge {
+      font-size: 11px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+    .phase-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px; font-weight: 400;
+      color: var(--text); margin: 0 0 8px;
+    }
+    .phase-desc {
+      font-size: 14px; color: var(--text2);
+      line-height: 1.5; margin: 0 0 16px;
+      flex: 1;
+    }
+    .phase-checklist {
+      margin-bottom: 12px;
+    }
+    .phase-checklist-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 0;
+      font-size: 14px; color: var(--text);
+    }
+    .phase-checklist-item input[type="checkbox"] {
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .phase-complete-btn {
+      padding: 12px 20px;
+      font-size: 15px; font-family: inherit;
+      background: var(--accent); color: white;
+      border: none; border-radius: 10px;
+      cursor: pointer;
+      align-self: flex-start;
+      margin-top: auto;
+    }
+    .phase-complete-btn:active { opacity: 0.9; }
+    .phase-timeline {
+      font-size: 12px; color: var(--text2);
+      margin-top: 8px;
+    }
+    .phase-timeline.urgent { color: #c05050; font-weight: 500; }
+    .phase-progress-wrap { margin-top: 12px; }
+    .phase-progress-bar {
+      height: 6px; background: rgba(0,0,0,0.08);
+      border-radius: 3px; overflow: hidden;
+    }
+    .phase-progress-fill {
+      height: 100%; background: var(--accent);
+      border-radius: 3px; transition: width 0.2s;
+    }
+    .projects-swipe-hint {
+      font-size: 12px; color: var(--muted);
+      text-align: center; padding: 12px;
+      flex-shrink: 0;
+    }
+    .project-date-row { margin-bottom: 16px; }
+    .project-date-label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 4px; }
+    .project-date-input {
+      width: 100%; padding: 10px 12px;
+      font-size: 16px; font-family: inherit;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 8px;
+    }
+    .project-phases-section {
+      border-top: 1px solid rgba(0,0,0,0.08);
+      padding-top: 16px; margin-bottom: 16px;
+    }
+    .project-phases-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 12px;
+    }
+    .project-add-phase-btn {
+      font-size: 13px; padding: 6px 12px;
+      background: rgba(192,122,74,0.15);
+      color: var(--accent);
+      border: none; border-radius: 8px;
+      cursor: pointer;
+    }
+    .project-add-phase-btn:active { opacity: 0.8; }
+    .project-phase-editor {
+      background: rgba(0,0,0,0.03);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .project-phase-editor h4 { font-size: 13px; margin: 0 0 8px; color: var(--text2); }
+    .project-phase-editor input, .project-phase-editor textarea {
+      width: 100%; padding: 8px 10px;
+      font-size: 14px; font-family: inherit;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+    .project-phase-editor textarea { min-height: 60px; resize: vertical; }
+    .projects-modal .paste-content { min-height: 80px; }
+    html.dark-mode .projects-phase-card { background: rgba(45,40,38,0.6); border-color: rgba(255,255,255,0.08); }
+    html.dark-mode .phase-timeline.urgent { color: #e07070; }
+    html.dark-mode .project-phase-editor { background: rgba(255,255,255,0.06); }
+
     /* Action sheet */
     .action-sheet-overlay {
       position: fixed;
@@ -1727,6 +1926,50 @@
       </div>
     </div>
 
+    <!-- Projects screen -->
+    <div class="sub-screen" id="projectsScreen">
+      <div class="projects-landing" id="projectsLanding">
+        <div class="projects-header">
+          <h2 class="projects-title">Projects</h2>
+          <button type="button" class="schedule-add-btn" onclick="openCreateProjectModal()" title="New project" aria-label="New project">+</button>
+        </div>
+        <div class="projects-completed-bar" id="projectsCompletedBar">
+          <div class="projects-completed-scroll" id="projectsCompletedScroll"></div>
+        </div>
+        <div class="projects-in-progress-label">In progress</div>
+        <div class="screen-list" id="projectsInProgressList"></div>
+        <div class="projects-empty" id="projectsEmpty">No projects yet. Tap + to create one.</div>
+      </div>
+      <div class="projects-view" id="projectsView" style="display:none">
+        <div class="projects-view-header">
+          <button type="button" class="projects-back-btn" onclick="projectsBackToLanding()" aria-label="Back">←</button>
+          <button type="button" class="projects-edit-btn" onclick="openCreateProjectModal(projectsViewing && projectsViewing.id)" aria-label="Edit" title="Edit project">✎</button>
+          <div class="projects-view-title-wrap">
+            <h2 class="projects-view-title" id="projectsViewTitle"></h2>
+            <div class="projects-overall-progress">
+              <div class="projects-progress-bar">
+                <div class="projects-progress-fill" id="projectsOverallProgressFill"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="projects-phase-cards" id="projectsPhaseCards">
+          <div class="projects-phase-card" id="projectsPhaseCard">
+            <div class="phase-badge">Phase <span id="phaseNumber">1</span></div>
+            <h3 class="phase-title" id="phaseTitle"></h3>
+            <p class="phase-desc" id="phaseDesc"></p>
+            <div class="phase-checklist" id="phaseChecklist" style="display:none"></div>
+            <button type="button" class="phase-complete-btn" id="phaseCompleteBtn" style="display:none">Complete</button>
+            <div class="phase-timeline" id="phaseTimeline" style="display:none"></div>
+            <div class="phase-progress-wrap" id="phaseProgressWrap" style="display:none">
+              <div class="phase-progress-bar"><div class="phase-progress-fill" id="phaseProgressFill"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="projects-swipe-hint" id="projectsSwipeHint">← Swipe to change phase →</div>
+      </div>
+    </div>
+
     <!-- Schedule mini calendar overlay -->
     <div class="schedule-mini-cal-overlay" id="scheduleMiniCalOverlay" onclick="closeScheduleMiniCalendar(event)"></div>
     <div class="schedule-mini-cal" id="scheduleMiniCal" onclick="event.stopPropagation()">
@@ -1841,6 +2084,7 @@
   </div>
   <nav class="drawer-nav">
     <div class="drawer-item active" onclick="goHome(); closeDrawer()"><span class="drawer-icon">⌂</span> Home</div>
+    <div class="drawer-item" onclick="showProjectsScreen(); closeDrawer()"><span class="drawer-icon">📋</span> Projects</div>
     <div class="drawer-item" onclick="showDocumentsScreen(); closeDrawer()"><span class="drawer-icon">📂</span> Documents</div>
     <div class="drawer-item"><span class="drawer-icon">💰</span> Finances</div>
     <div class="drawer-item"><span class="drawer-icon">🔧</span> Maintenance</div>
@@ -1852,6 +2096,32 @@
     <img id="blathersDrawer" src="https://stormyreigns.github.io/HATH/IMG_7941.png" alt="Blathers" class="blathers-idle">
   </div>
 </div>
+
+<!-- Create/Edit Project modal -->
+<div class="paste-modal-overlay" id="projectModalOverlay" onclick="closeProjectModal(event)">
+  <div class="paste-modal projects-modal" id="projectModal" onclick="event.stopPropagation()">
+    <h3 id="projectModalTitle">New Project</h3>
+    <input type="text" class="paste-filename" id="projectTitleInput" placeholder="Project title">
+    <textarea class="paste-content" id="projectDescInput" placeholder="Description (optional)" rows="2"></textarea>
+    <div class="project-date-row">
+      <label class="project-date-label">Finish date (optional)</label>
+      <input type="date" id="projectFinishDateInput" class="project-date-input">
+    </div>
+    <div class="project-phases-section">
+      <div class="project-phases-header">
+        <span>Phases</span>
+        <button type="button" class="project-add-phase-btn" onclick="addPhaseToProject()">+ Phase</button>
+      </div>
+      <div class="project-phases-list" id="projectPhasesList"></div>
+    </div>
+    <div class="paste-modal-actions">
+      <button type="button" class="paste-cancel-btn" onclick="closeProjectModal()">Cancel</button>
+      <button type="button" class="paste-save-btn" onclick="saveProjectFromModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Phase editor (inline in modal) - template structure added via JS -->
 
 <!-- Documents action sheet -->
 <div class="action-sheet-overlay" id="docsActionSheet" onclick="closeDocsAddMenu(event)">
@@ -2385,6 +2655,7 @@
     document.getElementById('chatArea').style.display = 'none';
     document.getElementById('hintArea').style.display = 'flex';
     document.getElementById('documentsScreen').classList.remove('visible');
+    document.getElementById('projectsScreen').classList.remove('visible');
     document.getElementById('scheduleScreen').classList.remove('visible');
     document.getElementById('settingsScreen').classList.remove('visible');
     document.getElementById('inputZone').style.display = 'flex';
@@ -2402,6 +2673,7 @@
     document.getElementById('hintArea').style.display = 'none';
     document.getElementById('chatArea').style.display = 'none';
     document.getElementById('documentsScreen').classList.remove('visible');
+    document.getElementById('projectsScreen').classList.remove('visible');
     document.getElementById('scheduleScreen').classList.remove('visible');
     document.getElementById('settingsScreen').classList.remove('visible');
     document.getElementById(screenId).classList.add('visible');
@@ -2415,6 +2687,7 @@
     const fab = document.getElementById('blatherbookFab');
     if (!fab) return;
     const onSubScreen = document.getElementById('documentsScreen').classList.contains('visible') ||
+      document.getElementById('projectsScreen').classList.contains('visible') ||
       document.getElementById('scheduleScreen').classList.contains('visible') ||
       document.getElementById('settingsScreen').classList.contains('visible');
     fab.classList.toggle('visible', !!onSubScreen);
@@ -2678,7 +2951,369 @@
     renderDocsBreadcrumb();
     loadFolderContents(DOCS_FOLDER_ID);
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
+    document.querySelector('.drawer-item:nth-child(3)').classList.add('active');
+  }
+
+  // ── PROJECTS ─────────────────────────────────────────────────
+  const PROJECTS_STORAGE_KEY = 'shasta_projects';
+  let projectsEditing = null;
+  let projectsViewing = null;
+  let projectsCurrentPhaseIndex = 0;
+  let projectsPhaseTouchStartX = 0;
+
+  function getProjects() {
+    const user = localStorage.getItem('shasta_user');
+    if (!user) return [];
+    try {
+      const raw = localStorage.getItem(PROJECTS_STORAGE_KEY + '_' + user);
+      return raw ? JSON.parse(raw) : [];
+    } catch (_) { return []; }
+  }
+
+  function saveProjects(arr) {
+    const user = localStorage.getItem('shasta_user');
+    if (!user) return;
+    localStorage.setItem(PROJECTS_STORAGE_KEY + '_' + user, JSON.stringify(arr));
+  }
+
+  function genId() { return 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9); }
+
+  function isProjectCompleted(p) {
+    if (!p.phases || p.phases.length === 0) return false;
+    return p.phases.every(ph => {
+      if (ph.checklist && ph.checklist.length > 0) {
+        return ph.checklist.every(c => c.done);
+      }
+      return !!ph.completed;
+    });
+  }
+
+  function getProjectProgress(p) {
+    if (!p.phases || p.phases.length === 0) return 0;
+    const done = p.phases.filter(ph => {
+      if (ph.checklist && ph.checklist.length > 0) {
+        const total = ph.checklist.length;
+        const completed = ph.checklist.filter(c => c.done).length;
+        return total > 0 && completed === total;
+      }
+      return !!ph.completed;
+    }).length;
+    return p.phases.length > 0 ? (done / p.phases.length) * 100 : 0;
+  }
+
+  function showProjectsScreen() {
+    showSubScreen('projectsScreen');
+    projectsViewing = null;
+    document.getElementById('projectsLanding').style.display = 'flex';
+    document.getElementById('projectsView').style.display = 'none';
+    renderProjectsLanding();
+    document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
     document.querySelector('.drawer-item:nth-child(2)').classList.add('active');
+  }
+
+  function renderProjectsLanding() {
+    const all = getProjects();
+    const completed = all.filter(isProjectCompleted).sort((a,b) => (b.completedAt || 0) - (a.completedAt || 0));
+    const inProgress = all.filter(p => !isProjectCompleted(p)).sort((a,b) => (b.modifiedAt || 0) - (a.modifiedAt || 0));
+
+    const scrollEl = document.getElementById('projectsCompletedScroll');
+    scrollEl.innerHTML = completed.map(p => 
+      `<span class="projects-completed-chip" onclick="projectsSelectCompleted('${p.id}')">${escapeHtml(p.title)}</span>`
+    ).join('');
+
+    const listEl = document.getElementById('projectsInProgressList');
+    listEl.innerHTML = inProgress.map(p => {
+      const prog = getProjectProgress(p);
+      return `<div class="screen-item" onclick="projectsSelectProject('${p.id}')">
+        <span class="screen-item-icon">📋</span>
+        <span class="screen-item-name">${escapeHtml(p.title)}</span>
+        <span style="font-size:12px;color:var(--muted);">${Math.round(prog)}%</span>
+      </div>`;
+    }).join('');
+
+    document.getElementById('projectsEmpty').style.display = inProgress.length === 0 && completed.length === 0 ? 'flex' : 'none';
+    listEl.style.display = inProgress.length === 0 ? 'none' : 'block';
+  }
+
+  function projectsSelectCompleted(id) {
+    projectsSelectProject(id);
+  }
+
+  function projectsSelectProject(id) {
+    const all = getProjects();
+    const p = all.find(x => x.id === id);
+    if (!p) return;
+    projectsViewing = p;
+    projectsCurrentPhaseIndex = 0;
+    const firstIncomplete = p.phases.findIndex(ph => {
+      if (ph.checklist && ph.checklist.length > 0) {
+        return ph.checklist.some(c => !c.done);
+      }
+      return !ph.completed;
+    });
+    if (firstIncomplete >= 0) projectsCurrentPhaseIndex = firstIncomplete;
+    document.getElementById('projectsLanding').style.display = 'none';
+    document.getElementById('projectsView').style.display = 'flex';
+    renderProjectsView();
+  }
+
+  function projectsBackToLanding() {
+    projectsViewing = null;
+    document.getElementById('projectsLanding').style.display = 'flex';
+    document.getElementById('projectsView').style.display = 'none';
+    renderProjectsLanding();
+  }
+
+  function renderProjectsView() {
+    const p = projectsViewing;
+    if (!p) return;
+    document.getElementById('projectsViewTitle').textContent = p.title;
+    const prog = getProjectProgress(p);
+    document.getElementById('projectsOverallProgressFill').style.width = prog + '%';
+    renderPhaseCard();
+  }
+
+  function renderPhaseCard() {
+    const p = projectsViewing;
+    if (!p) return;
+    if (!p.phases || p.phases.length === 0) {
+      document.getElementById('phaseNumber').textContent = '0';
+      document.getElementById('phaseTitle').textContent = 'No phases yet';
+      document.getElementById('phaseDesc').textContent = 'Edit this project to add phases.';
+      document.getElementById('phaseDesc').style.display = 'block';
+      document.getElementById('phaseChecklist').style.display = 'none';
+      document.getElementById('phaseCompleteBtn').style.display = 'none';
+      document.getElementById('phaseTimeline').style.display = 'none';
+      document.getElementById('phaseProgressWrap').style.display = 'none';
+      document.getElementById('projectsSwipeHint').style.display = 'none';
+      return;
+    }
+    const ph = p.phases[projectsCurrentPhaseIndex];
+    if (!ph) return;
+
+    document.getElementById('phaseNumber').textContent = projectsCurrentPhaseIndex + 1;
+    document.getElementById('phaseTitle').textContent = ph.title || 'Untitled phase';
+    document.getElementById('phaseDesc').textContent = ph.description || '';
+    document.getElementById('phaseDesc').style.display = ph.description ? 'block' : 'none';
+
+    const checklistWrap = document.getElementById('phaseChecklist');
+    if (ph.checklist && ph.checklist.length > 0) {
+      checklistWrap.style.display = 'block';
+      checklistWrap.innerHTML = ph.checklist.map((c, i) =>
+        `<label class="phase-checklist-item">
+          <input type="checkbox" ${c.done ? 'checked' : ''} onchange="projectsToggleCheck(${projectsCurrentPhaseIndex}, ${i})">
+          <span style="text-decoration:${c.done ? 'line-through' : 'none'};color:${c.done ? 'var(--muted)' : 'var(--text)'}">${escapeHtml(c.text)}</span>
+        </label>`
+      ).join('');
+    } else {
+      checklistWrap.style.display = 'none';
+    }
+
+    const completeBtn = document.getElementById('phaseCompleteBtn');
+    if (ph.checklist && ph.checklist.length > 0) {
+      completeBtn.style.display = 'none';
+    } else {
+      completeBtn.style.display = 'block';
+      completeBtn.onclick = () => projectsCompletePhase(projectsCurrentPhaseIndex);
+    }
+
+    const timelineEl = document.getElementById('phaseTimeline');
+    if (ph.completionDate) {
+      timelineEl.style.display = 'block';
+      const d = new Date(ph.completionDate);
+      const now = new Date();
+      const hrs = (d - now) / (1000 * 60 * 60);
+      const urgent = hrs <= 48;
+      timelineEl.textContent = 'Due: ' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      timelineEl.classList.toggle('urgent', urgent);
+    } else {
+      timelineEl.style.display = 'none';
+    }
+
+    const progressWrap = document.getElementById('phaseProgressWrap');
+    if (ph.checklist && ph.checklist.length > 0) {
+      progressWrap.style.display = 'block';
+      const done = ph.checklist.filter(c => c.done).length;
+      const pct = ph.checklist.length > 0 ? (done / ph.checklist.length) * 100 : 0;
+      document.getElementById('phaseProgressFill').style.width = pct + '%';
+    } else {
+      progressWrap.style.display = 'none';
+    }
+
+    document.getElementById('projectsSwipeHint').style.display = p.phases.length > 1 ? 'block' : 'none';
+
+    const card = document.getElementById('projectsPhaseCard');
+    if (card) {
+      card.ontouchstart = (e) => { projectsPhaseTouchStartX = e.touches[0].clientX; };
+      card.ontouchend = (e) => {
+        const dx = e.changedTouches[0].clientX - projectsPhaseTouchStartX;
+        if (Math.abs(dx) > 50) projectsSwipePhase(dx < 0 ? 'next' : 'prev');
+      };
+    }
+  }
+
+  function projectsToggleCheck(phaseIdx, itemIdx) {
+    const all = getProjects();
+    const p = all.find(x => x.id === projectsViewing.id);
+    if (!p || !p.phases[phaseIdx] || !p.phases[phaseIdx].checklist) return;
+    p.phases[phaseIdx].checklist[itemIdx].done = !p.phases[phaseIdx].checklist[itemIdx].done;
+    p.modifiedAt = Date.now();
+    if (isProjectCompleted(p)) p.completedAt = Date.now();
+    saveProjects(all);
+    projectsViewing = p;
+    renderProjectsView();
+  }
+
+  function projectsCompletePhase(phaseIdx) {
+    const all = getProjects();
+    const p = all.find(x => x.id === projectsViewing.id);
+    if (!p || !p.phases[phaseIdx]) return;
+    p.phases[phaseIdx].completed = true;
+    p.modifiedAt = Date.now();
+    if (isProjectCompleted(p)) p.completedAt = Date.now();
+    saveProjects(all);
+    projectsViewing = p;
+    if (phaseIdx < p.phases.length - 1) {
+      projectsCurrentPhaseIndex = phaseIdx + 1;
+    }
+    renderProjectsView();
+  }
+
+  function projectsSwipePhase(direction) {
+    const p = projectsViewing;
+    if (!p || !p.phases || p.phases.length <= 1) return;
+    if (direction === 'next' && projectsCurrentPhaseIndex < p.phases.length - 1) {
+      projectsCurrentPhaseIndex++;
+      renderPhaseCard();
+    } else if (direction === 'prev' && projectsCurrentPhaseIndex > 0) {
+      projectsCurrentPhaseIndex--;
+      renderPhaseCard();
+    }
+  }
+
+  function openCreateProjectModal(editId) {
+    if (editId) {
+      projectsEditing = getProjects().find(p => p.id === editId) || null;
+    } else {
+      projectsEditing = { id: genId(), title: '', description: '', phases: [{ id: genId(), title: '', description: '', checklist: null, completionDate: null, completed: false }], createdAt: Date.now(), modifiedAt: Date.now() };
+    }
+    document.getElementById('projectModalTitle').textContent = editId ? 'Edit Project' : 'New Project';
+    document.getElementById('projectTitleInput').value = projectsEditing ? projectsEditing.title : '';
+    document.getElementById('projectDescInput').value = projectsEditing ? (projectsEditing.description || '') : '';
+    document.getElementById('projectFinishDateInput').value = projectsEditing && projectsEditing.finishDate ? projectsEditing.finishDate : '';
+    renderProjectPhasesEditors();
+    document.getElementById('projectModalOverlay').classList.add('open');
+  }
+
+  function closeProjectModal(ev) {
+    if (ev && ev.target !== document.getElementById('projectModalOverlay')) return;
+    document.getElementById('projectModalOverlay').classList.remove('open');
+    projectsEditing = null;
+  }
+
+  function renderProjectPhasesEditors() {
+    const list = document.getElementById('projectPhasesList');
+    const phases = projectsEditing ? projectsEditing.phases : [];
+    list.innerHTML = phases.map((ph, i) => renderPhaseEditor(ph, i)).join('');
+  }
+
+  function renderPhaseEditor(ph, idx) {
+    const checklistStr = ph.checklist && ph.checklist.length > 0
+      ? ph.checklist.map(c => escapeHtml(c.text)).join('\n')
+      : '';
+    return `<div class="project-phase-editor" data-phase-idx="${idx}">
+      <h4>Phase ${idx + 1}</h4>
+      <input type="text" class="phase-editor-title" placeholder="Title" value="${escapeHtml(ph.title || '')}">
+      <textarea class="phase-editor-desc" placeholder="Description (optional)" rows="2">${escapeHtml(ph.description || '')}</textarea>
+      <div class="project-date-row">
+        <label class="project-date-label">Completion date (optional)</label>
+        <input type="date" class="phase-editor-date" value="${ph.completionDate || ''}">
+      </div>
+      <label class="project-date-label">Checklist (optional, one item per line)</label>
+      <textarea class="phase-editor-checklist" placeholder="Item 1&#10;Item 2" rows="3">${checklistStr}</textarea>
+      <button type="button" class="paste-cancel-btn" style="margin-top:8px" onclick="removePhaseFromProject(${idx})">Remove phase</button>
+    </div>`;
+  }
+
+  function addPhaseToProject() {
+    if (!projectsEditing) projectsEditing = { id: genId(), title: '', description: '', phases: [], createdAt: Date.now(), modifiedAt: Date.now() };
+    if (!projectsEditing.phases) projectsEditing.phases = [];
+    projectsEditing.phases.push({
+      id: genId(),
+      title: '',
+      description: '',
+      checklist: null,
+      completionDate: null,
+      completed: false
+    });
+    renderProjectPhasesEditors();
+  }
+
+  function removePhaseFromProject(idx) {
+    if (!projectsEditing || !projectsEditing.phases) return;
+    projectsEditing.phases.splice(idx, 1);
+    renderProjectPhasesEditors();
+  }
+
+  function saveProjectFromModal() {
+    const title = document.getElementById('projectTitleInput').value.trim();
+    if (!title) return;
+    const desc = document.getElementById('projectDescInput').value.trim();
+    const finishDate = document.getElementById('projectFinishDateInput').value || null;
+    const editors = document.querySelectorAll('.project-phase-editor');
+    const phases = [];
+    editors.forEach((ed, i) => {
+      const t = ed.querySelector('.phase-editor-title').value.trim();
+      const d = ed.querySelector('.phase-editor-desc').value.trim();
+      const dateVal = ed.querySelector('.phase-editor-date').value || null;
+      const listRaw = ed.querySelector('.phase-editor-checklist').value.trim();
+      const existing = projectsEditing && projectsEditing.phases[i];
+      let checklist = null;
+      if (listRaw) {
+        const lines = listRaw.split('\n').filter(Boolean);
+        checklist = lines.map((text, j) => {
+          const prev = existing && existing.checklist && existing.checklist[j];
+          return prev ? { ...prev, text: text.trim() } : { id: genId(), text: text.trim(), done: false };
+        });
+      }
+      phases.push({
+        id: existing ? existing.id : genId(),
+        title: t || 'Phase ' + (i + 1),
+        description: d,
+        checklist,
+        completionDate: dateVal,
+        completed: existing ? !!existing.completed : false
+      });
+    });
+
+    const all = getProjects();
+    const now = Date.now();
+    const newProj = {
+      id: projectsEditing ? projectsEditing.id : genId(),
+      title,
+      description: desc,
+      finishDate,
+      phases,
+      createdAt: projectsEditing ? projectsEditing.createdAt : now,
+      modifiedAt: now,
+      completedAt: null
+    };
+    if (isProjectCompleted(newProj)) newProj.completedAt = now;
+    else if (projectsEditing && projectsEditing.completedAt) newProj.completedAt = projectsEditing.completedAt;
+
+    if (projectsEditing) {
+      const idx = all.findIndex(p => p.id === projectsEditing.id);
+      if (idx >= 0) all[idx] = newProj;
+    } else {
+      all.push(newProj);
+    }
+    saveProjects(all);
+    closeProjectModal();
+    renderProjectsLanding();
+    if (projectsViewing && projectsEditing && projectsViewing.id === projectsEditing.id) {
+      projectsViewing = newProj;
+      renderProjectsView();
+    }
   }
 
   function getCurrentDocsFolderId() {
@@ -3180,7 +3815,7 @@
       setDarkMode(darkEl.checked);
     };
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
-    document.querySelector('.drawer-item:nth-child(6)').classList.add('active');
+    document.querySelector('.drawer-item:nth-child(7)').classList.add('active');
   }
 
   const SCHEDULE_FILTER_KEYWORDS = {
@@ -3630,7 +4265,7 @@
   async function showScheduleScreen() {
     showSubScreen('scheduleScreen');
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
-    document.querySelector('.drawer-item:nth-child(5)').classList.add('active');
+    document.querySelector('.drawer-item:nth-child(6)').classList.add('active');
     const list = document.getElementById('scheduleList');
     list.innerHTML = '<div class="screen-loading">Loading…</div>';
     renderScheduleChips();
