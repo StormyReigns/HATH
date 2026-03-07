@@ -1406,6 +1406,14 @@
     }
     .projects-completed-chip:hover { transform: scale(1.02); box-shadow: 0 4px 12px rgba(192,122,74,0.25); }
     .projects-completed-chip:active { transform: scale(0.98); }
+    .projects-completed-chip-new {
+      animation: chip-add-celebration 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes chip-add-celebration {
+      0% { transform: scale(0); opacity: 0; }
+      60% { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
     .projects-in-progress-label {
       font-size: 11px; color: var(--muted);
       text-transform: uppercase; letter-spacing: 0.06em;
@@ -1420,7 +1428,7 @@
     }
     .projects-view {
       flex: 1; display: flex; flex-direction: column;
-      overflow: hidden; padding: 0;
+      overflow: hidden; padding: 0; position: relative;
     }
     .projects-view-header {
       display: flex; align-items: flex-start; gap: 10px;
@@ -1451,23 +1459,33 @@
     }
     .projects-overall-progress { margin-top: 4px; }
     .projects-progress-bar {
-      height: 8px; background: rgba(0,0,0,0.06);
+      height: 16px; background: rgba(0,0,0,0.08);
       border-radius: 999px; overflow: hidden;
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.06);
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
     }
     .projects-progress-fill {
-      height: 100%; min-width: 8px;
-      background: linear-gradient(90deg, #b8854a 0%, #d4a574 40%, #e8c9a0 70%, #d4a574 100%);
+      height: 100%; min-width: 16px;
+      background: linear-gradient(90deg, #2a6fb5 0%, #4a9ad4 35%, #7bc4ef 55%, #4a9ad4 75%, #2a6fb5 100%);
       background-size: 200% 100%;
-      animation: progress-shine 2.5s ease-in-out infinite;
+      animation: progress-shine-blue 3s ease-in-out infinite;
       border-radius: 999px;
-      transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 0 0 12px rgba(192,122,74,0.35), inset 0 1px 0 rgba(255,255,255,0.4);
+      transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 0 16px rgba(42,111,181,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
     }
-    @keyframes progress-shine {
+    .projects-progress-fill.progress-complete,
+    .phase-progress-fill.progress-complete {
+      animation: progress-shine-blue 2s ease-in-out infinite, progress-glow-complete 1.5s ease-in-out infinite;
+      box-shadow: 0 0 24px rgba(42,111,181,0.7), 0 0 48px rgba(42,111,181,0.4), inset 0 1px 0 rgba(255,255,255,0.6);
+    }
+    @keyframes progress-shine-blue {
       0%, 100% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
     }
+    @keyframes progress-glow-complete {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.15); }
+    }
+    .projects-phase-cards-wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; }
     .projects-phase-cards {
       flex: 1; overflow-x: auto; overflow-y: hidden;
       display: flex; align-items: stretch; gap: 12px;
@@ -1549,23 +1567,53 @@
     .phase-timeline.urgent { color: #c05050; font-weight: 500; }
     .phase-progress-wrap { margin-top: 12px; }
     .phase-progress-bar {
-      height: 10px; background: rgba(0,0,0,0.06);
+      height: 14px; background: rgba(0,0,0,0.08);
       border-radius: 999px; overflow: hidden;
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.06);
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
     }
     .phase-progress-fill {
-      height: 100%; min-width: 10px;
-      background: linear-gradient(90deg, #b8854a 0%, #d4a574 40%, #e8c9a0 70%, #d4a574 100%);
+      height: 100%; min-width: 14px;
+      background: linear-gradient(90deg, #2a6fb5 0%, #4a9ad4 35%, #7bc4ef 55%, #4a9ad4 75%, #2a6fb5 100%);
       background-size: 200% 100%;
-      animation: progress-shine 2.5s ease-in-out infinite;
+      animation: progress-shine-blue 3s ease-in-out infinite;
       border-radius: 999px;
-      transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 0 0 14px rgba(192,122,74,0.4), inset 0 1px 0 rgba(255,255,255,0.45);
+      transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 0 16px rgba(42,111,181,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
     }
     .projects-swipe-hint {
       font-size: 12px; color: var(--muted);
       text-align: center; padding: 12px;
       flex-shrink: 0;
+    }
+    .celebration-overlay {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.35);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 10;
+    }
+    .celebration-project-full { position: absolute; }
+    .celebration-overlay.show { opacity: 1; pointer-events: auto; }
+    .celebration-content {
+      background: white;
+      padding: 24px 36px;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      font-size: 18px; font-weight: 600; color: var(--text);
+      transform: scale(0.5); opacity: 0;
+      animation: celebration-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    .celebration-project-content {
+      padding: 36px 48px;
+      font-size: 24px;
+      animation: celebration-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    .celebration-icon { font-size: 48px; }
+    .celebration-project-content .celebration-icon { font-size: 64px; }
+    @keyframes celebration-pop {
+      to { transform: scale(1); opacity: 1; }
     }
     .project-date-row { margin-bottom: 16px; }
     .project-date-label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 4px; }
@@ -1634,8 +1682,12 @@
     html.dark-mode .phase-progress-bar { background: rgba(255,255,255,0.08); }
     html.dark-mode .projects-progress-fill,
     html.dark-mode .phase-progress-fill {
-      background: linear-gradient(90deg, #a07040 0%, #c49460 40%, #d8b080 70%, #c49460 100%);
-      box-shadow: 0 0 16px rgba(192,122,74,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
+      background: linear-gradient(90deg, #2a6fb5 0%, #4a9ad4 35%, #5ab0e8 55%, #4a9ad4 75%, #2a6fb5 100%);
+      box-shadow: 0 0 20px rgba(74,154,212,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+    }
+    html.dark-mode .projects-progress-fill.progress-complete,
+    html.dark-mode .phase-progress-fill.progress-complete {
+      box-shadow: 0 0 28px rgba(74,154,212,0.7), 0 0 56px rgba(74,154,212,0.4), inset 0 1px 0 rgba(255,255,255,0.25);
     }
 
     /* Action sheet */
@@ -2031,7 +2083,15 @@
             <button type="button" class="projects-undo-btn" id="projectsUndoBtn" onclick="projectsUndoProjectCompletion()" style="display:none">Undo completion</button>
           </div>
         </div>
-        <div class="projects-phase-cards" id="projectsPhaseCards"></div>
+        <div class="projects-phase-cards-wrap" style="position:relative;flex:1;overflow:hidden">
+          <div class="projects-phase-cards" id="projectsPhaseCards"></div>
+          <div class="celebration-overlay celebration-phase" id="phaseCelebrationOverlay">
+            <div class="celebration-content"><span class="celebration-icon">✓</span><span>Phase complete!</span></div>
+          </div>
+        </div>
+        <div class="celebration-overlay celebration-project celebration-project-full" id="projectCelebrationOverlay">
+          <div class="celebration-content celebration-project-content"><span class="celebration-icon">🎉</span><span>Project complete!</span></div>
+        </div>
         <div class="projects-swipe-hint" id="projectsSwipeHint">← Swipe to change phase →</div>
       </div>
     </div>
@@ -3077,15 +3137,16 @@
     document.querySelector('.drawer-item:nth-child(2)').classList.add('active');
   }
 
-  function renderProjectsLanding() {
+  function renderProjectsLanding(newlyCompletedId) {
     const all = getProjects();
     const completed = all.filter(isProjectCompleted).sort((a,b) => (b.completedAt || 0) - (a.completedAt || 0));
     const inProgress = all.filter(p => !isProjectCompleted(p)).sort((a,b) => (b.modifiedAt || 0) - (a.modifiedAt || 0));
 
     const scrollEl = document.getElementById('projectsCompletedScroll');
-    scrollEl.innerHTML = completed.map(p => 
-      `<span class="projects-completed-chip" onclick="projectsSelectCompleted('${p.id}')">${escapeHtml(p.title)}</span>`
-    ).join('');
+    scrollEl.innerHTML = completed.map(p => {
+      const animateClass = newlyCompletedId && p.id === newlyCompletedId ? ' projects-completed-chip-new' : '';
+      return `<span class="projects-completed-chip${animateClass}" onclick="projectsSelectCompleted('${p.id}')">${escapeHtml(p.title)}</span>`;
+    }).join('');
 
     const listEl = document.getElementById('projectsInProgressList');
     listEl.innerHTML = inProgress.map(p => {
@@ -3141,7 +3202,11 @@
     if (!p) return;
     document.getElementById('projectsViewTitle').textContent = p.title;
     const prog = getProjectProgress(p);
-    document.getElementById('projectsOverallProgressFill').style.width = prog + '%';
+    const progFill = document.getElementById('projectsOverallProgressFill');
+    if (progFill) {
+      progFill.style.width = prog + '%';
+      progFill.classList.toggle('progress-complete', prog >= 100);
+    }
     const undoBtn = document.getElementById('projectsUndoBtn');
     if (undoBtn) undoBtn.style.display = isProjectCompleted(p) ? 'block' : 'none';
     renderPhaseCards();
@@ -3174,7 +3239,8 @@
     if (ph.checklist && ph.checklist.length > 0) {
       const done = ph.checklist.filter(c => c.done).length;
       const pct = (done / ph.checklist.length) * 100;
-      progressHtml = `<div class="phase-progress-wrap"><div class="phase-progress-bar"><div class="phase-progress-fill" style="width:${pct}%"></div></div></div>`;
+      const completeClass = pct >= 100 ? ' progress-complete' : '';
+      progressHtml = `<div class="phase-progress-wrap"><div class="phase-progress-bar"><div class="phase-progress-fill${completeClass}" style="width:${pct}%"></div></div></div>`;
     }
     return `<div class="projects-phase-card" data-phase-idx="${idx}">
       <div class="phase-badge">Phase ${idx + 1}</div>
@@ -3232,6 +3298,31 @@
     }
   }
 
+  function showPhaseCelebrationThenScroll() {
+    const overlay = document.getElementById('phaseCelebrationOverlay');
+    if (overlay) overlay.classList.add('show');
+    setTimeout(() => {
+      if (overlay) overlay.classList.remove('show');
+      const container = document.getElementById('projectsPhaseCards');
+      const card = container?.children[projectsCurrentPhaseIndex];
+      if (card) card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }, 1000);
+  }
+
+  function showProjectCelebrationThenLand(completedProjectId) {
+    const overlay = document.getElementById('projectCelebrationOverlay');
+    if (overlay) overlay.classList.add('show');
+    setTimeout(() => {
+      if (overlay) overlay.classList.remove('show');
+      projectsViewing = null;
+      document.getElementById('projectsLanding').style.display = 'flex';
+      document.getElementById('projectsView').style.display = 'none';
+      renderProjectsLanding(completedProjectId);
+      const bar = document.getElementById('projectsCompletedBar');
+      if (bar) bar.scrollLeft = 0;
+    }, 2000);
+  }
+
   function projectsToggleCheck(phaseIdx, itemIdx) {
     const all = getProjects();
     const p = all.find(x => x.id === projectsViewing.id);
@@ -3244,9 +3335,18 @@
     projectsViewing = p;
     const nowProjectComplete = isProjectCompleted(p);
     const phaseComplete = p.phases[phaseIdx].checklist.every(c => c.done);
-    if (nowProjectComplete && !wasProjectComplete) hapticDoublePulse();
-    else if (phaseComplete) hapticLight();
-    renderProjectsView();
+    if (nowProjectComplete && !wasProjectComplete) {
+      hapticDoublePulse();
+      renderProjectsView();
+      showProjectCelebrationThenLand(p.id);
+    } else if (phaseComplete) {
+      hapticLight();
+      projectsCurrentPhaseIndex = phaseIdx + 1;
+      renderProjectsView();
+      showPhaseCelebrationThenScroll();
+    } else {
+      renderProjectsView();
+    }
   }
 
   function projectsCompletePhase(phaseIdx) {
@@ -3259,12 +3359,16 @@
     if (isProjectCompleted(p)) p.completedAt = Date.now();
     saveProjects(all);
     projectsViewing = p;
-    if (isProjectCompleted(p) && !wasProjectComplete) hapticDoublePulse();
-    else hapticLight();
-    if (phaseIdx < p.phases.length - 1) {
-      projectsCurrentPhaseIndex = phaseIdx + 1;
+    if (isProjectCompleted(p) && !wasProjectComplete) {
+      hapticDoublePulse();
+      renderProjectsView();
+      showProjectCelebrationThenLand(p.id);
+    } else {
+      hapticLight();
+      projectsCurrentPhaseIndex = phaseIdx < p.phases.length - 1 ? phaseIdx + 1 : phaseIdx;
+      renderProjectsView();
+      showPhaseCelebrationThenScroll();
     }
-    renderProjectsView();
   }
 
   function projectsUndoPhaseCompletion(phaseIdx) {
