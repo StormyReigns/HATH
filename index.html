@@ -1373,24 +1373,39 @@
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(0,0,0,0.06);
+      padding: 12px 0;
       margin-bottom: 12px;
+      position: relative;
+      background: linear-gradient(135deg, rgba(192,122,74,0.08) 0%, rgba(210,165,105,0.12) 35%, rgba(192,122,74,0.08) 70%, rgba(180,140,90,0.1) 100%);
+      background-size: 200% 100%;
+      animation: achievements-shimmer 4s ease-in-out infinite;
+      border-radius: 12px;
+      border: 1px solid rgba(192,122,74,0.25);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 8px rgba(192,122,74,0.12);
+    }
+    @keyframes achievements-shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
     }
     .projects-completed-bar::-webkit-scrollbar { display: none; }
     .projects-completed-scroll {
-      display: flex; gap: 10px; padding: 0 4px;
+      display: flex; gap: 12px; padding: 0 12px;
     }
     .projects-completed-chip {
       flex-shrink: 0;
-      padding: 8px 14px;
+      padding: 10px 16px;
       font-size: 13px;
-      color: var(--text2);
-      background: rgba(192,122,74,0.1);
-      border-radius: 20px;
+      font-weight: 500;
+      color: #5c3d1e;
+      background: linear-gradient(145deg, rgba(255,230,180,0.9) 0%, rgba(245,210,150,0.85) 100%);
+      border-radius: 24px;
       cursor: pointer;
+      border: 1px solid rgba(192,122,74,0.35);
+      box-shadow: 0 2px 6px rgba(192,122,74,0.2), inset 0 1px 0 rgba(255,255,255,0.6);
+      transition: transform 0.15s, box-shadow 0.15s;
     }
-    .projects-completed-chip:active { background: rgba(192,122,74,0.2); }
+    .projects-completed-chip:hover { transform: scale(1.02); box-shadow: 0 4px 12px rgba(192,122,74,0.25); }
+    .projects-completed-chip:active { transform: scale(0.98); }
     .projects-in-progress-label {
       font-size: 11px; color: var(--muted);
       text-transform: uppercase; letter-spacing: 0.06em;
@@ -1436,12 +1451,22 @@
     }
     .projects-overall-progress { margin-top: 4px; }
     .projects-progress-bar {
-      height: 4px; background: rgba(0,0,0,0.08);
-      border-radius: 2px; overflow: hidden;
+      height: 8px; background: rgba(0,0,0,0.06);
+      border-radius: 999px; overflow: hidden;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.06);
     }
     .projects-progress-fill {
-      height: 100%; background: var(--accent);
-      border-radius: 2px; transition: width 0.2s;
+      height: 100%; min-width: 8px;
+      background: linear-gradient(90deg, #b8854a 0%, #d4a574 40%, #e8c9a0 70%, #d4a574 100%);
+      background-size: 200% 100%;
+      animation: progress-shine 2.5s ease-in-out infinite;
+      border-radius: 999px;
+      transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 0 12px rgba(192,122,74,0.35), inset 0 1px 0 rgba(255,255,255,0.4);
+    }
+    @keyframes progress-shine {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
     }
     .projects-phase-cards {
       flex: 1; overflow-x: hidden;
@@ -1504,12 +1529,18 @@
     .phase-timeline.urgent { color: #c05050; font-weight: 500; }
     .phase-progress-wrap { margin-top: 12px; }
     .phase-progress-bar {
-      height: 6px; background: rgba(0,0,0,0.08);
-      border-radius: 3px; overflow: hidden;
+      height: 10px; background: rgba(0,0,0,0.06);
+      border-radius: 999px; overflow: hidden;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.06);
     }
     .phase-progress-fill {
-      height: 100%; background: var(--accent);
-      border-radius: 3px; transition: width 0.2s;
+      height: 100%; min-width: 10px;
+      background: linear-gradient(90deg, #b8854a 0%, #d4a574 40%, #e8c9a0 70%, #d4a574 100%);
+      background-size: 200% 100%;
+      animation: progress-shine 2.5s ease-in-out infinite;
+      border-radius: 999px;
+      transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 0 14px rgba(192,122,74,0.4), inset 0 1px 0 rgba(255,255,255,0.45);
     }
     .projects-swipe-hint {
       font-size: 12px; color: var(--muted);
@@ -1528,11 +1559,12 @@
       border-top: 1px solid rgba(0,0,0,0.08);
       padding-top: 16px; margin-bottom: 16px;
     }
-    .project-phases-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 12px;
+    .project-phases-label {
+      font-size: 13px; font-weight: 600; color: var(--text2);
+      margin: 0 0 12px;
     }
     .project-add-phase-btn {
+      margin-top: 8px;
       font-size: 13px; padding: 6px 12px;
       background: rgba(192,122,74,0.15);
       color: var(--accent);
@@ -1559,11 +1591,31 @@
     .projects-modal {
       max-height: 85vh;
       overflow-y: auto;
+      overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: auto;
+      overscroll-behavior-x: none;
+      touch-action: pan-y pinch-zoom;
     }
     html.dark-mode .projects-phase-card { background: rgba(45,40,38,0.6); border-color: rgba(255,255,255,0.08); }
     html.dark-mode .phase-timeline.urgent { color: #e07070; }
     html.dark-mode .project-phase-editor { background: rgba(255,255,255,0.06); }
+    html.dark-mode .projects-completed-bar {
+      background: linear-gradient(135deg, rgba(192,122,74,0.15) 0%, rgba(210,165,105,0.2) 35%, rgba(192,122,74,0.15) 70%, rgba(180,140,90,0.18) 100%);
+      border-color: rgba(210,165,105,0.4);
+    }
+    html.dark-mode .projects-completed-chip {
+      color: #e8d4b8;
+      background: linear-gradient(145deg, rgba(192,122,74,0.35) 0%, rgba(160,100,60,0.4) 100%);
+      border-color: rgba(210,165,105,0.45);
+    }
+    html.dark-mode .projects-progress-bar,
+    html.dark-mode .phase-progress-bar { background: rgba(255,255,255,0.08); }
+    html.dark-mode .projects-progress-fill,
+    html.dark-mode .phase-progress-fill {
+      background: linear-gradient(90deg, #a07040 0%, #c49460 40%, #d8b080 70%, #c49460 100%);
+      box-shadow: 0 0 16px rgba(192,122,74,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
+    }
 
     /* Action sheet */
     .action-sheet-overlay {
@@ -2112,11 +2164,9 @@
       <input type="date" id="projectFinishDateInput" class="project-date-input">
     </div>
     <div class="project-phases-section">
-      <div class="project-phases-header">
-        <span>Phases</span>
-        <button type="button" class="project-add-phase-btn" onclick="addPhaseToProject()">+ Phase</button>
-      </div>
+      <h4 class="project-phases-label">Phases</h4>
       <div class="project-phases-list" id="projectPhasesList"></div>
+      <button type="button" class="project-add-phase-btn" onclick="addPhaseToProject()">+ Add next phase</button>
     </div>
     <div class="paste-modal-actions">
       <button type="button" class="paste-cancel-btn" onclick="closeProjectModal()">Cancel</button>
@@ -3217,6 +3267,28 @@
     projectsEditing = null;
   }
 
+  function syncPhaseEditorsToState() {
+    if (!projectsEditing || !projectsEditing.phases) return;
+    const editors = document.querySelectorAll('.project-phase-editor');
+    editors.forEach((ed, i) => {
+      const ph = projectsEditing.phases[i];
+      if (!ph) return;
+      ph.title = (ed.querySelector('.phase-editor-title')?.value || '').trim();
+      ph.description = (ed.querySelector('.phase-editor-desc')?.value || '').trim();
+      ph.completionDate = ed.querySelector('.phase-editor-date')?.value || null;
+      const listRaw = (ed.querySelector('.phase-editor-checklist')?.value || '').trim();
+      if (listRaw) {
+        const lines = listRaw.split('\n').filter(Boolean);
+        ph.checklist = lines.map((text, j) => {
+          const prev = ph.checklist && ph.checklist[j];
+          return prev ? { ...prev, text: text.trim() } : { id: genId(), text: text.trim(), done: false };
+        });
+      } else {
+        ph.checklist = null;
+      }
+    });
+  }
+
   function renderProjectPhasesEditors() {
     const list = document.getElementById('projectPhasesList');
     const phases = projectsEditing ? projectsEditing.phases : [];
@@ -3244,6 +3316,7 @@
   function addPhaseToProject() {
     if (!projectsEditing) projectsEditing = { id: genId(), title: '', description: '', phases: [], createdAt: Date.now(), modifiedAt: Date.now() };
     if (!projectsEditing.phases) projectsEditing.phases = [];
+    syncPhaseEditorsToState();
     projectsEditing.phases.push({
       id: genId(),
       title: '',
@@ -3257,6 +3330,7 @@
 
   function removePhaseFromProject(idx) {
     if (!projectsEditing || !projectsEditing.phases) return;
+    syncPhaseEditorsToState();
     projectsEditing.phases.splice(idx, 1);
     renderProjectPhasesEditors();
   }
