@@ -2272,13 +2272,25 @@
     return canvas.toDataURL('image/jpeg', 0.92);
   }
 
+  function ocrErrDetail(e) {
+    if (!e) return 'Unknown';
+    const m = e?.message || e?.reason?.message || (typeof e === 'string' ? e : null);
+    if (m && m !== 'Unknown error') return m;
+    const s = e?.toString?.();
+    if (s && s !== '[object Object]') return s;
+    if (e?.stack) return String(e.stack).split('\n')[0].slice(0, 80);
+    return m || 'Unknown';
+  }
+
   async function runOcrOnImage(file) {
     let dataUrl;
     try {
       dataUrl = await fileToJpegDataUrl(file, 2000);
     } catch (e) {
       console.warn('Image prep failed:', e);
-      throw new Error('Could not process image');
+      const err = new Error('Could not process image');
+      err._ocrDetail = ocrErrDetail(e);
+      throw err;
     }
     const getWorker = async () => {
       for (let i = 0; i < 30; i++) {
@@ -2287,17 +2299,25 @@
         }
         await new Promise(r => setTimeout(r, 200));
       }
-      const { createWorker } = await import('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.esm.min.js');
+      const { createWorker } = await import('https://unpkg.com/tesseract.js@5/dist/tesseract.esm.min.js');
       return createWorker('eng');
     };
-    const workerPromise = getWorker();
-    const worker = await workerPromise;
+    let worker;
+    try {
+      worker = await getWorker();
+    } catch (e) {
+      console.warn('Worker init failed:', e);
+      const err = new Error('OCR script failed to load');
+      err._ocrDetail = ocrErrDetail(e);
+      throw err;
+    }
     try {
       const { data } = await worker.recognize(dataUrl);
       await worker.terminate();
       return (data?.text || '').trim();
     } catch (e) {
       try { await worker.terminate(); } catch (_) {}
+      e._ocrDetail = ocrErrDetail(e);
       throw e;
     }
   }
@@ -2350,8 +2370,9 @@
       }).catch(err => {
         if (!pendingUpload) return;
         console.warn('OCR error:', err);
-        const msg = (err && err.message) ? String(err.message).slice(0, 60) : 'Unknown error';
-        ocrStatus.textContent = 'OCR failed (' + msg + ') — will save as image only.';
+        let msg = err?._ocrDetail || err?.message || (typeof err === 'string' ? err : err?.toString?.());
+        if (!msg || msg === '[object Object]') msg = err?.reason?.message || 'Script/network issue — try again';
+        ocrStatus.textContent = 'OCR failed (' + String(msg).slice(0, 80) + ') — will save as image only.';
       });
     } else if (isImage && !file) {
       ocrStatus.textContent = 'No text found — will save as image only.';
