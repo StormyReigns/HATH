@@ -1480,7 +1480,7 @@
     .projects-view {
       flex: 1; display: flex; flex-direction: column;
       overflow: hidden; padding: 0; position: relative;
-      min-height: 0;
+      min-height: 0; min-width: 100%;
     }
     .projects-view-header {
       display: flex; align-items: flex-start; gap: 10px;
@@ -1537,18 +1537,36 @@
       0%, 100% { filter: brightness(1); }
       50% { filter: brightness(1.15); }
     }
-    .projects-phase-cards-wrap { flex: 1 1 0; min-height: 200px; min-width: 0; display: flex; flex-direction: column; }
+    .projects-phase-cards-wrap {
+      flex: 1;
+      min-height: 250px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
     .projects-phase-cards {
-      flex: 1; min-height: 0;
-      overflow-x: auto; overflow-y: hidden;
-      display: flex; align-items: stretch; gap: 12px;
+      flex: 1;
+      min-height: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      display: flex;
+      align-items: stretch;
+      gap: 12px;
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
       padding: 0 8%;
     }
     .projects-phase-cards::-webkit-scrollbar { display: none; }
-    .projects-phase-cards.single-phase { overflow-x: hidden; padding: 0; }
+    .projects-phase-cards.single-phase,
+    .projects-phase-cards.projects-phase-cards-single {
+      overflow-x: hidden; padding: 0;
+      flex-direction: column; align-items: stretch;
+    }
+    .projects-phase-cards.projects-phase-cards-single .projects-phase-card {
+      flex: 1 1 auto; min-width: 100%; max-width: 100%;
+    }
     .projects-phase-card {
       flex: 0 0 84%;
       min-width: 84%;
@@ -2170,8 +2188,20 @@
             <button type="button" class="projects-undo-btn" id="projectsUndoBtn" onclick="projectsUndoProjectCompletion()" style="display:none">Undo completion</button>
           </div>
         </div>
-        <div class="projects-phase-cards-wrap" style="position:relative;flex:1;overflow:hidden">
-          <div class="projects-phase-cards" id="projectsPhaseCards"></div>
+        <div class="projects-phase-cards-wrap">
+          <div class="projects-phase-cards projects-phase-cards-single" id="projectsPhaseCards">
+            <div class="projects-phase-card" id="projectsPhaseCard">
+              <div class="phase-badge" id="phaseBadge">Phase 1</div>
+              <h3 class="phase-title" id="phaseTitle"></h3>
+              <p class="phase-desc" id="phaseDesc"></p>
+              <div class="phase-checklist" id="phaseChecklist"></div>
+              <button type="button" class="phase-complete-btn" id="phaseCompleteBtn" style="display:none">Complete</button>
+              <button type="button" class="phase-undo-btn" id="phaseUndoBtn" style="display:none" onclick="projectsUndoPhaseCompletion(projectsCurrentPhaseIndex)">Undo</button>
+              <div class="phase-timeline" id="phaseTimeline" style="display:none"></div>
+              <div class="phase-progress-wrap" id="phaseProgressWrap" style="display:none"><div class="phase-progress-bar"><div class="phase-progress-fill" id="phaseProgressFill"></div></div></div>
+              <div class="phase-quote" id="phaseQuote"></div>
+            </div>
+          </div>
           <div class="celebration-overlay celebration-phase" id="phaseCelebrationOverlay">
             <div class="celebration-content"><span class="celebration-icon">✓</span><span>Phase complete!</span></div>
           </div>
@@ -3451,47 +3481,122 @@
     </div>`;
   }
 
+  let projectsPhaseTouchStartX = 0;
+
   function renderPhaseCards() {
-    const container = document.getElementById('projectsPhaseCards');
     const p = projectsViewing;
-    if (!p || !container) return;
-    document.getElementById('projectsSwipeHint').style.display = 'none';
+    if (!p) return;
+    const badgeEl = document.getElementById('phaseBadge');
+    const titleEl = document.getElementById('phaseTitle');
+    const descEl = document.getElementById('phaseDesc');
+    const checklistEl = document.getElementById('phaseChecklist');
+    const completeBtn = document.getElementById('phaseCompleteBtn');
+    const undoBtn = document.getElementById('phaseUndoBtn');
+    const timelineEl = document.getElementById('phaseTimeline');
+    const progressWrap = document.getElementById('phaseProgressWrap');
+    const progressFill = document.getElementById('phaseProgressFill');
+    const quoteEl = document.getElementById('phaseQuote');
+    const swipeHint = document.getElementById('projectsSwipeHint');
+    const card = document.getElementById('projectsPhaseCard');
+
+    if (!badgeEl || !titleEl || !card) return;
+
     if (!p.phases || p.phases.length === 0) {
-      container.classList.add('single-phase');
-      container.innerHTML = `<div class="projects-phase-card projects-phase-card-single">
-        <div class="phase-badge">Phase 0</div>
-        <h3 class="phase-title">No phases yet</h3>
-        <p class="phase-desc">Edit this project to add phases.</p>
-      </div>`;
+      badgeEl.textContent = 'Phase 0';
+      titleEl.textContent = 'No phases yet';
+      descEl.textContent = 'Edit this project to add phases.';
+      descEl.style.display = 'block';
+      checklistEl.style.display = 'none';
+      checklistEl.innerHTML = '';
+      completeBtn.style.display = 'none';
+      undoBtn.style.display = 'none';
+      timelineEl.style.display = 'none';
+      progressWrap.style.display = 'none';
+      quoteEl.style.display = 'none';
+      swipeHint.style.display = 'none';
       return;
     }
-    const singlePhase = p.phases.length === 1;
-    container.innerHTML = p.phases.map((ph, idx) => buildPhaseCardHTML(ph, idx)).join('');
-    document.getElementById('projectsSwipeHint').style.display = singlePhase ? 'none' : 'block';
-    if (singlePhase) {
-      container.classList.add('single-phase');
+
+    const ph = p.phases[projectsCurrentPhaseIndex];
+    if (!ph) return;
+
+    const phaseComplete = isPhaseComplete(ph);
+    const phaseLabel = p.phases.length > 1 ? `Phase ${projectsCurrentPhaseIndex + 1} of ${p.phases.length}` : `Phase ${projectsCurrentPhaseIndex + 1}`;
+
+    badgeEl.textContent = phaseLabel;
+    titleEl.textContent = ph.title || 'Untitled phase';
+    descEl.textContent = ph.description || '';
+    descEl.style.display = ph.description ? 'block' : 'none';
+
+    if (ph.checklist && ph.checklist.length > 0) {
+      checklistEl.style.display = 'block';
+      checklistEl.innerHTML = ph.checklist.map((c, i) =>
+        `<label class="phase-checklist-item">
+          <input type="checkbox" ${c.done ? 'checked' : ''} onchange="projectsToggleCheck(${projectsCurrentPhaseIndex}, ${i})">
+          <span style="text-decoration:${c.done ? 'line-through' : 'none'};color:${c.done ? 'var(--muted)' : 'var(--text)'}">${escapeHtml(c.text)}</span>
+        </label>`
+      ).join('');
     } else {
-      container.classList.remove('single-phase');
-      let scrollTimeout;
-      container.onscroll = () => {
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(() => {
-          const cards = container.querySelectorAll('.projects-phase-card');
-          const containerMid = container.scrollLeft + container.offsetWidth / 2;
-          let closest = 0;
-          let closestDist = Infinity;
-          cards.forEach((card, i) => {
-            const cardMid = card.offsetLeft + card.offsetWidth / 2;
-            const dist = Math.abs(containerMid - cardMid);
-            if (dist < closestDist) { closestDist = dist; closest = i; }
-          });
-          if (closest !== projectsCurrentPhaseIndex) projectsCurrentPhaseIndex = closest;
-        }, 150);
+      checklistEl.style.display = 'none';
+      checklistEl.innerHTML = '';
+    }
+
+    if (phaseComplete) {
+      completeBtn.style.display = 'none';
+      undoBtn.style.display = 'block';
+    } else if (!ph.checklist || ph.checklist.length === 0) {
+      completeBtn.style.display = 'block';
+      undoBtn.style.display = 'none';
+      completeBtn.onclick = () => projectsCompletePhase(projectsCurrentPhaseIndex);
+    } else {
+      completeBtn.style.display = 'none';
+      undoBtn.style.display = 'none';
+    }
+
+    if (ph.completionDate) {
+      timelineEl.style.display = 'block';
+      const d = new Date(ph.completionDate);
+      const hrs = (d - new Date()) / (1000 * 60 * 60);
+      timelineEl.textContent = 'Due: ' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      timelineEl.className = 'phase-timeline' + (hrs <= 48 ? ' urgent' : '');
+    } else {
+      timelineEl.style.display = 'none';
+    }
+
+    if (ph.checklist && ph.checklist.length > 0) {
+      progressWrap.style.display = 'block';
+      const done = ph.checklist.filter(c => c.done).length;
+      const pct = (done / ph.checklist.length) * 100;
+      progressFill.style.width = pct + '%';
+      progressFill.classList.toggle('progress-complete', pct >= 100);
+    } else {
+      progressWrap.style.display = 'none';
+    }
+
+    const quoteText = getPhaseQuote(projectsCurrentPhaseIndex, p.phases.length);
+    if (quoteText) {
+      quoteEl.style.display = 'block';
+      quoteEl.innerHTML = escapeHtml(quoteText).replace(/\n/g, '<br>');
+    } else {
+      quoteEl.style.display = 'none';
+    }
+
+    swipeHint.style.display = p.phases.length > 1 ? 'block' : 'none';
+
+    if (card && p.phases.length > 1) {
+      card.ontouchstart = (e) => { projectsPhaseTouchStartX = e.touches[0].clientX; };
+      card.ontouchend = (e) => {
+        const dx = e.changedTouches[0].clientX - projectsPhaseTouchStartX;
+        if (Math.abs(dx) > 50) {
+          if (dx < 0 && projectsCurrentPhaseIndex < p.phases.length - 1) {
+            projectsCurrentPhaseIndex++;
+            renderPhaseCards();
+          } else if (dx > 0 && projectsCurrentPhaseIndex > 0) {
+            projectsCurrentPhaseIndex--;
+            renderPhaseCards();
+          }
+        }
       };
-      requestAnimationFrame(() => {
-        const card = container.children[projectsCurrentPhaseIndex];
-        if (card) card.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
-      });
     }
   }
 
@@ -3500,9 +3605,6 @@
     if (overlay) overlay.classList.add('show');
     setTimeout(() => {
       if (overlay) overlay.classList.remove('show');
-      const container = document.getElementById('projectsPhaseCards');
-      const card = container?.children[projectsCurrentPhaseIndex];
-      if (card) card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     }, 1000);
   }
 
