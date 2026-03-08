@@ -1,6 +1,6 @@
 {
-  "name": "Shasta",
-  "short_name": "Shasta",
+  "name": "ShastApp",
+  "short_name": "ShastApp",
   "description": "Managed by Shasta — Your household assistant",
   "start_url": "./",
   "display": "standalone",
