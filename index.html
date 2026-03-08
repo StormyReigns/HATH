@@ -1743,7 +1743,7 @@
       background: transparent;
     }
     .ocean-boat img {
-      height: 52px;
+      height: 104px;
       width: auto;
       display: block;
       object-fit: contain;
@@ -1759,7 +1759,7 @@
       z-index: 2;
     }
     .ocean-windfall img {
-      height: 96px;
+      height: 82px;
       width: auto;
       display: block;
       object-fit: contain;
@@ -3336,26 +3336,70 @@
   };
   const RARE_QUOTE_CHANCE = 0.03;
 
-  function getPhaseQuote(phaseIdx, totalPhases) {
-    if (!totalPhases) return null;
-    const isLastPhase = phaseIdx === totalPhases - 1;
-    let pool, q;
-    if (isLastPhase) {
-      pool = PHASE_QUOTES.finalPhase;
-    } else {
-      if (Math.random() < RARE_QUOTE_CHANCE) {
-        pool = PHASE_QUOTES.rare;
-      } else {
-        pool = PHASE_QUOTES.makingProgress;
-      }
-    }
-    q = pool[Math.floor(Math.random() * pool.length)];
+  function formatQuote(q) {
     return q ? `${q.speaker}:\n\n"${q.quote}"` : null;
   }
 
+  function getPhaseQuotePool(isLastPhase) {
+    if (Math.random() < RARE_QUOTE_CHANCE) return PHASE_QUOTES.rare;
+    return isLastPhase ? PHASE_QUOTES.finalPhase : PHASE_QUOTES.makingProgress;
+  }
+
+  function getStoredPhaseQuote(p, phaseIdx) {
+    if (!p || !p.phases || !p.phases[phaseIdx]) return null;
+    return p.phases[phaseIdx].quote || null;
+  }
+
+  function getStoredCompleteQuote(p) {
+    return (p && p.completeQuote) ? p.completeQuote : null;
+  }
+
+  function ensurePhaseQuotesForProject(p) {
+    if (!p || !p.phases || p.phases.length === 0) return false;
+    const used = new Set(p.phases.map(ph => ph.quote).filter(Boolean));
+    const allPhasePools = [...PHASE_QUOTES.makingProgress, ...PHASE_QUOTES.finalPhase, ...PHASE_QUOTES.rare];
+    let changed = false;
+    p.phases.forEach((ph, idx) => {
+      if (ph.quote) return;
+      const isLastPhase = idx === p.phases.length - 1;
+      const pool = getPhaseQuotePool(isLastPhase);
+      const available = pool.filter(q => !used.has(formatQuote(q)));
+      const poolAll = available.length > 0 ? available : allPhasePools.filter(q => !used.has(formatQuote(q)));
+      const pickFrom = poolAll.length > 0 ? poolAll : allPhasePools;
+      const q = pickFrom[Math.floor(Math.random() * pickFrom.length)];
+      ph.quote = formatQuote(q);
+      if (ph.quote) used.add(ph.quote);
+      changed = true;
+    });
+    if (changed) {
+      const all = getProjects();
+      const idx = all.findIndex(x => x.id === p.id);
+      if (idx >= 0) { all[idx] = p; saveProjects(all); }
+    }
+    return changed;
+  }
+
+  function ensureCompleteQuoteForProject(projectId) {
+    const all = getProjects();
+    const p = all.find(x => x.id === projectId);
+    if (!p || !isProjectCompleted(p)) return p ? p.completeQuote : null;
+    if (p.completeQuote) return p.completeQuote;
+    const used = new Set(p.phases.map(ph => ph.quote).filter(Boolean));
+    const available = PHASE_QUOTES.complete.filter(q => !used.has(formatQuote(q)));
+    const pickFrom = available.length > 0 ? available : PHASE_QUOTES.complete;
+    const q = pickFrom[Math.floor(Math.random() * pickFrom.length)];
+    p.completeQuote = formatQuote(q);
+    const idx = all.findIndex(x => x.id === projectId);
+    if (idx >= 0) { all[idx] = p; saveProjects(all); }
+    return p.completeQuote;
+  }
+
+  function getPhaseQuote(phaseIdx, totalPhases) {
+    return null;
+  }
+
   function getCompleteQuote() {
-    const q = PHASE_QUOTES.complete[Math.floor(Math.random() * PHASE_QUOTES.complete.length)];
-    return q ? `${q.speaker}:\n\n"${q.quote}"` : null;
+    return null;
   }
 
   function hapticLight() { try { if (navigator.vibrate) navigator.vibrate(15); } catch (_) {} }
