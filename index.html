@@ -2147,7 +2147,7 @@
     <div class="topbar-right"></div>
   </div>
 
-  <div class="wellbeing">
+  <div class="wellbeing" id="wellbeing">
     <span class="well-text"><span class="well-dot" id="wellDot"></span><span id="wellLabel">Checking in…</span></span>
   </div>
 
@@ -3007,6 +3007,8 @@
   function goHome() {
     document.getElementById('chatArea').style.display = 'none';
     document.getElementById('hintArea').style.display = 'flex';
+    const wb = document.getElementById('wellbeing');
+    if (wb) wb.style.display = '';
     document.getElementById('documentsScreen').classList.remove('visible');
     document.getElementById('projectsScreen').classList.remove('visible');
     document.getElementById('scheduleScreen').classList.remove('visible');
@@ -3025,6 +3027,8 @@
   function showSubScreen(screenId) {
     document.getElementById('hintArea').style.display = 'none';
     document.getElementById('chatArea').style.display = 'none';
+    const wb = document.getElementById('wellbeing');
+    if (wb) wb.style.display = 'none';
     document.getElementById('documentsScreen').classList.remove('visible');
     document.getElementById('projectsScreen').classList.remove('visible');
     document.getElementById('scheduleScreen').classList.remove('visible');
