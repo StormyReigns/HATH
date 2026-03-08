@@ -35,7 +35,7 @@
       -webkit-user-select: none;
       user-select: none;
       -webkit-touch-callout: none;
-      background-color: #fdf8f5;
+      background: var(--bg-gradient, linear-gradient(135deg, #fdf0e8 0%, #fce4d6 40%, #fad4c0 100%));
     }
     /* Minimal top safe-area fill — only when env reports it; no forced minimum. */
     html::before {
@@ -45,7 +45,7 @@
       left: 0;
       right: 0;
       height: env(safe-area-inset-top, 0px);
-      background-color: #fdf8f5;
+      background-color: transparent;
       z-index: 9999;
       pointer-events: none;
     }
@@ -482,6 +482,7 @@
       z-index: 1;
       display: flex; flex-direction: column;
       overflow: hidden;
+      background: transparent;
     }
 
     /* ── TOP BAR ── */
@@ -3624,7 +3625,11 @@
       if (quoteEl) quoteEl.textContent = '';
       return;
     }
-    const quoteText = isProjectCompleted(p) ? getCompleteQuote() : getPhaseQuote(projectsCurrentPhaseIndex, p.phases.length);
+    ensurePhaseQuotesForProject(p);
+    if (p !== projectsViewing) return;
+    const quoteText = isProjectCompleted(p)
+      ? ensureCompleteQuoteForProject(p.id)
+      : getStoredPhaseQuote(p, projectsCurrentPhaseIndex);
     if (quoteText) {
       quoteEl.style.display = 'block';
       quoteEl.innerHTML = escapeHtml(quoteText).replace(/\n/g, '<br>');
@@ -3704,7 +3709,7 @@
     const overlay = document.getElementById('projectCelebrationOverlay');
     const quoteEl = document.getElementById('celebrationCompleteQuote');
     if (quoteEl) {
-      const q = getCompleteQuote();
+      const q = ensureCompleteQuoteForProject(completedProjectId);
       quoteEl.innerHTML = q ? escapeHtml(q).replace(/\n/g, '<br>') : '';
       quoteEl.style.display = q ? 'block' : 'none';
     }
@@ -3932,7 +3937,8 @@
         description: d,
         checklist,
         completionDate: dateVal,
-        completed: existing ? !!existing.completed : false
+        completed: existing ? !!existing.completed : false,
+        quote: existing && existing.quote ? existing.quote : undefined
       });
     });
     if (phases.length === 0) {
@@ -3953,6 +3959,7 @@
     };
     if (isProjectCompleted(newProj)) newProj.completedAt = now;
     else if (projectsEditing && projectsEditing.completedAt) newProj.completedAt = projectsEditing.completedAt;
+    if (projectsEditing && projectsEditing.completeQuote) newProj.completeQuote = projectsEditing.completeQuote;
 
     const idx = projectsEditing ? all.findIndex(p => p.id === projectsEditing.id) : -1;
     if (idx >= 0) {
