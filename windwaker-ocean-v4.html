@@ -3431,6 +3431,11 @@
     const all = getProjects();
     const p = all.find(x => x.id === id);
     if (!p) return;
+    if (!p.phases || !Array.isArray(p.phases)) {
+      p.phases = [{ id: genId(), title: 'Phase 1', description: '', checklist: null, completionDate: null, completed: false }];
+      const idx = all.findIndex(x => x.id === id);
+      if (idx >= 0) { all[idx] = p; saveProjects(all); }
+    }
     projectsViewing = p;
     projectsCurrentPhaseIndex = 0;
     const firstIncomplete = p.phases.findIndex(ph => {
