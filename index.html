@@ -25,11 +25,25 @@
     }
 
     html {
-      background: linear-gradient(135deg, #fdf0e8 0%, #fce4d6 40%, #fad4c0 100%);
+      background: var(--edge-bg, linear-gradient(135deg, #fdf0e8 0%, #fce4d6 40%, #fad4c0 100%));
       min-height: 100%;
     }
     @media (prefers-color-scheme: dark) {
       html { background: #1a1a1a; }
+    }
+    html::after {
+      content: '';
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: env(safe-area-inset-bottom, 34px);
+      background: var(--edge-bg, linear-gradient(135deg, #fdf0e8 0%, #fce4d6 40%, #fad4c0 100%));
+      z-index: 0;
+      pointer-events: none;
+    }
+    @media (prefers-color-scheme: dark) {
+      html::after { background: #1a1a1a; }
     }
     body {
       height: 100%;
@@ -522,7 +536,7 @@
     .body {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: flex-end;
-      padding: 0 22px max(32px, env(safe-area-inset-bottom)); gap: 18px;
+      padding: 0 22px max(34px, env(safe-area-inset-bottom)); gap: 18px;
       min-height: 0;
     }
 
@@ -1557,8 +1571,8 @@
     }
     .projects-phase-cards::-webkit-scrollbar { display: none; }
     .projects-phase-card {
-      flex: 0 0 68%;
-      min-width: 68%;
+      flex: 0 0 78%;
+      min-width: 78%;
       scroll-snap-align: center;
       padding: 14px;
       background: rgba(255,255,255,0.5);
@@ -1660,6 +1674,7 @@
       font-size: 12px; font-style: italic;
       color: var(--text2);
       line-height: 1.5;
+      text-align: left;
     }
     .projects-korl-quote {
       flex-shrink: 0;
@@ -1668,7 +1683,7 @@
       font-size: 13px; font-style: italic;
       color: var(--text2);
       line-height: 1.5;
-      text-align: center;
+      text-align: left;
       border-top: 1px solid rgba(0,0,0,0.06);
     }
     .projects-ocean-strip {
@@ -1802,6 +1817,7 @@
       color: var(--text2);
       line-height: 1.5;
       max-width: 280px;
+      text-align: left;
     }
     @keyframes celebration-pop {
       to { transform: scale(1); opacity: 1; }
@@ -2281,7 +2297,6 @@
             <div class="celebration-content"><span class="celebration-icon">✓</span><span>Phase complete!</span></div>
           </div>
         </div>
-        <div class="projects-swipe-hint" id="projectsSwipeHint">← Swipe to change phase →</div>
         <div class="projects-korl-quote" id="projectsKorlQuote"></div>
         <div class="projects-ocean-strip" id="projectsOceanStrip">
           <div class="ocean-strip-inner">
@@ -2572,9 +2587,9 @@
     document.getElementById('greetingText').innerHTML = getRandomGreeting();
     loadData();
     setupKeyboardHandling();
+    applyDarkMode(localStorage.getItem('shasta_dark_' + email) === 'true');
     applyBgScheme(localStorage.getItem('shasta_bg_' + email) || 'peach');
     applyFontSize(localStorage.getItem('shasta_font_' + email) || 'default');
-    applyDarkMode(localStorage.getItem('shasta_dark_' + email) === 'true');
     startKeepalivePing();
   }
 
@@ -3334,7 +3349,7 @@
   const RARE_QUOTE_CHANCE = 0.03;
 
   function formatQuote(q) {
-    return q ? `${q.speaker}:\n\n"${q.quote}"` : null;
+    return q ? `${q.speaker}\n"${q.quote}"` : null;
   }
 
   function getPhaseQuotePool(isLastPhase) {
@@ -3564,7 +3579,7 @@
     const oceanBoat = document.getElementById('oceanBoat');
     const oceanDarkness = document.getElementById('oceanDarkness');
     if (oceanStrip) oceanStrip.classList.toggle('complete', prog >= 100);
-    if (oceanBoat) oceanBoat.style.left = (8 + (prog / 100) * 72) + '%';
+    if (oceanBoat) oceanBoat.style.left = (8 + (prog / 100) * 66) + '%';
     if (oceanDarkness) oceanDarkness.style.width = (100 - prog) + '%';
     const undoBtn = document.getElementById('projectsUndoBtn');
     if (undoBtn) undoBtn.style.display = isProjectCompleted(p) ? 'block' : 'none';
@@ -3639,13 +3654,11 @@
     const p = projectsViewing;
     if (!p) return;
     const cardsEl = document.getElementById('projectsPhaseCards');
-    const swipeHint = document.getElementById('projectsSwipeHint');
     if (!cardsEl) return;
 
     const phases = p.phases && Array.isArray(p.phases) ? p.phases : [];
     if (phases.length === 0) {
       cardsEl.innerHTML = '<div class="projects-phase-card"><div class="phase-badge">Phase 0</div><h3 class="phase-title">No phases yet</h3><p class="phase-desc">Edit this project to add phases.</p></div>';
-      if (swipeHint) swipeHint.style.display = 'none';
       updateKorlQuote();
       return;
     }
@@ -3655,7 +3668,6 @@
     } catch (e) {
       cardsEl.innerHTML = '<div class="projects-phase-card"><div class="phase-badge">Error</div><h3 class="phase-title">Could not load phases</h3><p class="phase-desc">Try editing and re-saving the project.</p></div>';
     }
-    if (swipeHint) swipeHint.style.display = phases.length > 1 ? 'block' : 'none';
 
     updateKorlQuote();
 
@@ -4359,11 +4371,11 @@
   }
 
   const BG_SCHEMES = [
-    { id: 'peach', name: 'Peach', swatch: 'peach', themeColor: '#fdf6f0' },
-    { id: 'lavender', name: 'Lavender', swatch: 'lavender', themeColor: '#f8f5fd' },
-    { id: 'sage', name: 'Sage', swatch: 'sage', themeColor: '#f5faf8' },
-    { id: 'sunset', name: 'Sunset', swatch: 'sunset', themeColor: '#fdf8f2' },
-    { id: 'ocean', name: 'Ocean', swatch: 'ocean', themeColor: '#f2f8fd' }
+    { id: 'peach', name: 'Peach', swatch: 'peach', themeColor: '#fdf6f0', edgeBg: 'linear-gradient(135deg, #fdf0e8 0%, #fce4d6 40%, #fad4c0 100%)' },
+    { id: 'lavender', name: 'Lavender', swatch: 'lavender', themeColor: '#f8f5fd', edgeBg: '#f8f5fd' },
+    { id: 'sage', name: 'Sage', swatch: 'sage', themeColor: '#f5faf8', edgeBg: '#f5faf8' },
+    { id: 'sunset', name: 'Sunset', swatch: 'sunset', themeColor: '#fdf8f2', edgeBg: '#fdf8f2' },
+    { id: 'ocean', name: 'Ocean', swatch: 'ocean', themeColor: '#f2f8fd', edgeBg: '#f2f8fd' }
   ];
 
   function applyBgScheme(schemeId) {
@@ -4376,6 +4388,8 @@
     });
     if (scheme.id !== 'peach') bg.classList.add('bg-scheme-' + scheme.id);
     document.documentElement.classList.add('card-scheme-' + scheme.id);
+    const edgeBg = isDarkMode() ? '#1a1a1a' : scheme.edgeBg;
+    document.documentElement.style.setProperty('--edge-bg', edgeBg);
     const meta = document.getElementById('themeColorMeta');
     if (meta && scheme) meta.setAttribute('content', isDarkMode() ? '#1a1816' : scheme.themeColor);
   }
