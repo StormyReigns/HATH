@@ -31,20 +31,6 @@
     @media (prefers-color-scheme: dark) {
       html { background: #1a1a1a; }
     }
-    html::after {
-      content: '';
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: env(safe-area-inset-bottom, 34px);
-      background: var(--edge-bg, linear-gradient(135deg, #fdf0e8 0%, #fce4d6 40%, #fad4c0 100%));
-      z-index: 0;
-      pointer-events: none;
-    }
-    @media (prefers-color-scheme: dark) {
-      html::after { background: #1a1a1a; }
-    }
     body {
       height: 100%;
       min-height: 100dvh;
