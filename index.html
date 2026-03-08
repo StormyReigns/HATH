@@ -1538,16 +1538,16 @@
       50% { filter: brightness(1.15); }
     }
     .projects-phase-cards-wrap {
-      flex: 1;
-      min-height: 180px;
+      flex: 1 1 200px;
+      min-height: 200px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
       position: relative;
     }
     .projects-phase-cards {
-      flex: 1;
-      min-height: 0;
+      flex: 1 1 auto;
+      min-height: 160px;
       overflow-x: auto;
       overflow-y: hidden;
       display: flex;
@@ -1676,13 +1676,14 @@
     }
     .projects-ocean-strip {
       flex-shrink: 0;
-      height: 72px;
+      height: 88px;
       position: relative;
       margin: 0 12px 12px;
       border-radius: 12px;
-      overflow: hidden;
+      overflow: visible;
       border: 2px solid rgba(60,100,140,0.4);
       transition: box-shadow 0.5s ease, border-color 0.5s ease;
+      background: #2a6fb5;
     }
     .projects-ocean-strip.complete {
       border-color: rgba(210,165,80,0.8);
@@ -1695,15 +1696,30 @@
     }
     .ocean-strip-inner {
       position: absolute; inset: 0;
-      background: linear-gradient(180deg, #4a9ad4 0%, #2a6fb5 40%, #1a5090 100%);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #2a6fb5;
+      background: linear-gradient(to bottom,
+        #5eb8ef 0%,
+        #3d94d8 25%,
+        #2a6fb5 60%,
+        #1a5090 100%
+      );
+      box-shadow: inset 0 2px 0 rgba(255,255,255,0.35);
     }
     .ocean-darkness {
       position: absolute;
       top: 0; right: 0; bottom: 0;
       width: 100%;
-      background: linear-gradient(90deg, transparent 0%, rgba(10,15,25,0.95) 70%, rgba(5,8,15,0.98) 100%);
+      background: linear-gradient(to right,
+        rgba(42,111,181,0) 0%,
+        rgba(15,30,55,0.6) 30%,
+        rgba(8,15,35,0.9) 70%,
+        rgba(5,10,25,0.98) 100%
+      );
       transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
       pointer-events: none;
+      z-index: 1;
     }
     .ocean-boat {
       position: absolute;
@@ -1711,13 +1727,16 @@
       transform: translateY(-50%);
       left: 8%;
       transition: left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-      z-index: 2;
+      z-index: 3;
       animation: boat-bob 2.5s ease-in-out infinite;
+      background: transparent;
     }
     .ocean-boat img {
-      height: 48px;
+      height: 52px;
       width: auto;
       display: block;
+      object-fit: contain;
+      background: transparent;
     }
     @keyframes boat-bob {
       0%, 100% { transform: translateY(-50%) rotate(-1deg); }
@@ -1725,13 +1744,15 @@
     }
     .ocean-windfall {
       position: absolute;
-      bottom: 0; right: 0;
-      z-index: 1;
+      bottom: -4px; right: -8px;
+      z-index: 2;
     }
     .ocean-windfall img {
-      height: 90px;
+      height: 96px;
       width: auto;
       display: block;
+      object-fit: contain;
+      object-position: bottom right;
     }
     .projects-swipe-hint {
       font-size: 12px; color: var(--muted);
@@ -2257,9 +2278,9 @@
         <div class="projects-ocean-strip" id="projectsOceanStrip">
           <div class="ocean-strip-inner">
             <div class="ocean-darkness" id="oceanDarkness"></div>
-            <div class="ocean-boat" id="oceanBoat"><img src="WindWakerProg.png" alt="King of Red Lions"></div>
-            <div class="ocean-windfall"><img src="Windfall.png" alt="Windfall Island"></div>
+            <div class="ocean-boat" id="oceanBoat"><img src="https://stormyreigns.github.io/HATH/WindWakerProg.png" alt="King of Red Lions"></div>
           </div>
+          <div class="ocean-windfall"><img src="https://stormyreigns.github.io/HATH/Windfall.png" alt="Windfall Island"></div>
         </div>
         <div class="celebration-overlay celebration-project celebration-project-full" id="projectCelebrationOverlay">
           <div class="celebration-content celebration-project-content"><span class="celebration-icon">🎉</span><span>Project complete!</span><p class="celebration-quote" id="celebrationCompleteQuote"></p></div>
@@ -3412,6 +3433,11 @@
     const all = getProjects();
     const p = all.find(x => x.id === id);
     if (!p) return;
+    if (!p.phases || !Array.isArray(p.phases)) {
+      p.phases = [{ id: genId(), title: 'Phase 1', description: '', checklist: null, completionDate: null, completed: false }];
+      const idx = all.findIndex(x => x.id === id);
+      if (idx >= 0) { all[idx] = p; saveProjects(all); }
+    }
     projectsViewing = p;
     projectsCurrentPhaseIndex = 0;
     const firstIncomplete = p.phases.findIndex(ph => {
@@ -3475,8 +3501,9 @@
   }
 
   function renderProjectsView() {
-    const p = projectsViewing;
-    if (!p) return;
+    if (!projectsViewing) return;
+    const p = getProjects().find(x => x.id === projectsViewing.id) || projectsViewing;
+    projectsViewing = p;
     document.getElementById('projectsViewTitle').textContent = p.title;
     const prog = getProjectProgress(p);
     const oceanStrip = document.getElementById('projectsOceanStrip');
@@ -3490,7 +3517,7 @@
     renderPhaseCards();
   }
 
-  function buildPhaseCardHTML(ph, idx) {
+  function buildPhaseCardHTML(ph, idx, phasesLength) {
     const phaseComplete = isPhaseComplete(ph);
     let checklistHtml = '';
     if (ph.checklist && ph.checklist.length > 0) {
@@ -3520,7 +3547,7 @@
       const completeClass = pct >= 100 ? ' progress-complete' : '';
       progressHtml = `<div class="phase-progress-wrap"><div class="phase-progress-bar"><div class="phase-progress-fill${completeClass}" style="width:${pct}%"></div></div></div>`;
     }
-    const phaseLabel = p.phases.length > 1 ? `Phase ${idx + 1} of ${p.phases.length}` : `Phase ${idx + 1}`;
+    const phaseLabel = (phasesLength || 1) > 1 ? `Phase ${idx + 1} of ${phasesLength || 1}` : `Phase ${idx + 1}`;
     return `<div class="projects-phase-card" data-phase-idx="${idx}">
       <div class="phase-badge">${phaseLabel}</div>
       <h3 class="phase-title">${escapeHtml(ph.title || 'Untitled phase')}</h3>
@@ -3557,15 +3584,20 @@
     const swipeHint = document.getElementById('projectsSwipeHint');
     if (!cardsEl) return;
 
-    if (!p.phases || p.phases.length === 0) {
+    const phases = p.phases && Array.isArray(p.phases) ? p.phases : [];
+    if (phases.length === 0) {
       cardsEl.innerHTML = '<div class="projects-phase-card"><div class="phase-badge">Phase 0</div><h3 class="phase-title">No phases yet</h3><p class="phase-desc">Edit this project to add phases.</p></div>';
       if (swipeHint) swipeHint.style.display = 'none';
       updateKorlQuote();
       return;
     }
 
-    cardsEl.innerHTML = p.phases.map((ph, idx) => buildPhaseCardHTML(ph, idx)).join('');
-    if (swipeHint) swipeHint.style.display = p.phases.length > 1 ? 'block' : 'none';
+    try {
+      cardsEl.innerHTML = phases.map((ph, idx) => buildPhaseCardHTML(ph, idx, phases.length)).join('');
+    } catch (e) {
+      cardsEl.innerHTML = '<div class="projects-phase-card"><div class="phase-badge">Error</div><h3 class="phase-title">Could not load phases</h3><p class="phase-desc">Try editing and re-saving the project.</p></div>';
+    }
+    if (swipeHint) swipeHint.style.display = phases.length > 1 ? 'block' : 'none';
 
     updateKorlQuote();
 
@@ -3846,6 +3878,9 @@
         completed: existing ? !!existing.completed : false
       });
     });
+    if (phases.length === 0) {
+      phases.push({ id: genId(), title: 'Phase 1', description: '', checklist: null, completionDate: null, completed: false });
+    }
 
     const all = getProjects();
     const now = Date.now();
