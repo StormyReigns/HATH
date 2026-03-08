@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#fdf8f5" id="themeColorMeta">
+  <meta name="theme-color" content="#fdf0e8" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="https://stormyreigns.github.io/HATH/ShastaApp.png">
   <title>ShastApp</title>
@@ -23,7 +24,14 @@
       --accent: #c07a4a;
     }
 
-    html, body {
+    html {
+      background: linear-gradient(135deg, #fdf0e8 0%, #fce4d6 40%, #fad4c0 100%);
+      min-height: 100%;
+    }
+    @media (prefers-color-scheme: dark) {
+      html { background: #1a1a1a; }
+    }
+    body {
       height: 100%;
       min-height: 100dvh;
       font-family: 'Inter', sans-serif;
@@ -35,19 +43,7 @@
       -webkit-user-select: none;
       user-select: none;
       -webkit-touch-callout: none;
-      background: var(--bg-gradient, linear-gradient(135deg, #fdf0e8 0%, #fce4d6 40%, #fad4c0 100%));
-    }
-    /* Minimal top safe-area fill — only when env reports it; no forced minimum. */
-    html::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: env(safe-area-inset-top, 0px);
-      background-color: transparent;
-      z-index: 9999;
-      pointer-events: none;
+      background: transparent;
     }
 
     .input-field, .chat-area, .bubble {
