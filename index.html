@@ -1698,15 +1698,26 @@
       position: absolute; inset: 0;
       border-radius: 10px;
       overflow: hidden;
-      background: #2a6fb5;
-      background: linear-gradient(to bottom,
-        #5eb8ef 0%,
-        #3d94d8 25%,
-        #2a6fb5 60%,
-        #1a5090 100%
-      );
-      box-shadow: inset 0 2px 0 rgba(255,255,255,0.35);
+      background: #1a6fd4;
     }
+    .ocean-crackle {
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='120'%3E%3Cpath d='M0,30 L40,15 L70,35 L110,10 L150,28 L180,12 L200,20' stroke='%23a8d8f0' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3Cpath d='M0,58 L30,45 L58,62 L92,42 L132,58 L162,44 L200,54' stroke='%23a8d8f0' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M0,82 L28,70 L60,84 L95,66 L135,80 L168,68 L200,76' stroke='%23a8d8f0' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M0,104 L32,95 L62,106 L98,92 L138,104 L170,93 L200,100' stroke='%23a8d8f0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3Cpath d='M22,0 L35,30 L22,58 L38,82 L28,120' stroke='%23a8d8f0' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3Cpath d='M70,0 L58,25 L74,52 L62,78 L72,120' stroke='%23a8d8f0' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3Cpath d='M120,0 L134,28 L118,54 L132,78 L122,120' stroke='%23a8d8f0' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3Cpath d='M170,0 L156,24 L172,50 L158,74 L168,120' stroke='%23a8d8f0' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='40' cy='15' r='4' fill='%23d8f0ff' opacity='0.8'/%3E%3Ccircle cx='110' cy='10' r='3' fill='%23d8f0ff' opacity='0.7'/%3E%3Ccircle cx='150' cy='28' r='4' fill='%23d8f0ff' opacity='0.8'/%3E%3Ccircle cx='95' cy='66' r='3.5' fill='%23d8f0ff' opacity='0.75'/%3E%3C/svg%3E");
+      background-size: 200px 120px;
+      animation: crackle1 8s linear infinite;
+      opacity: 0.75;
+    }
+    .ocean-crackle2 {
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='80'%3E%3Cpath d='M0,20 L50,8 L90,24 L140,5 L160,14' stroke='%23ffffff' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3Cpath d='M0,44 L38,34 L76,48 L118,32 L160,44' stroke='%23ffffff' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M0,65 L42,56 L82,68 L122,54 L160,64' stroke='%23ffffff' stroke-width='1' fill='none' stroke-linecap='round'/%3E%3Cpath d='M32,0 L24,32 L36,60 L28,80' stroke='%23ffffff' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M90,0 L100,28 L86,54 L96,80' stroke='%23ffffff' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-size: 160px 80px;
+      animation: crackle2 12s linear infinite reverse;
+      opacity: 0.4;
+    }
+    @keyframes crackle1 { from { background-position: 0 0; } to { background-position: -200px 0; } }
+    @keyframes crackle2 { from { background-position: 0 0; } to { background-position: 160px 0; } }
     .ocean-darkness {
       position: absolute;
       top: 0; right: 0; bottom: 0;
@@ -2277,8 +2288,10 @@
         <div class="projects-korl-quote" id="projectsKorlQuote"></div>
         <div class="projects-ocean-strip" id="projectsOceanStrip">
           <div class="ocean-strip-inner">
+            <div class="ocean-crackle"></div>
+            <div class="ocean-crackle2"></div>
             <div class="ocean-darkness" id="oceanDarkness"></div>
-            <div class="ocean-boat" id="oceanBoat"><img src="https://stormyreigns.github.io/HATH/WindWakerProg.png" alt="King of Red Lions"></div>
+            <div class="ocean-boat" id="oceanBoat"><img src="https://stormyreigns.github.io/HATH/WindWakerProg-clean.png" alt="King of Red Lions"></div>
           </div>
           <div class="ocean-windfall"><img src="https://stormyreigns.github.io/HATH/Windfall.png" alt="Windfall Island"></div>
         </div>
