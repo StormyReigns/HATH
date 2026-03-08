@@ -1539,7 +1539,7 @@
     }
     .projects-phase-cards-wrap {
       flex: 1;
-      min-height: 180px;
+      min-height: 200px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -1547,7 +1547,7 @@
     }
     .projects-phase-cards {
       flex: 1;
-      min-height: 0;
+      min-height: 160px;
       overflow-x: auto;
       overflow-y: hidden;
       display: flex;
@@ -1683,6 +1683,7 @@
       overflow: visible;
       border: 2px solid rgba(60,100,140,0.4);
       transition: box-shadow 0.5s ease, border-color 0.5s ease;
+      background: #2a6fb5;
     }
     .projects-ocean-strip.complete {
       border-color: rgba(210,165,80,0.8);
@@ -1697,24 +1698,24 @@
       position: absolute; inset: 0;
       border-radius: 10px;
       overflow: hidden;
-      background: linear-gradient(180deg,
-        #6bc4f5 0%,
-        #4a9ad4 15%,
-        #2a6fb5 50%,
-        #1e5a94 85%,
-        #134070 100%
+      background: #2a6fb5;
+      background: linear-gradient(to bottom,
+        #5eb8ef 0%,
+        #3d94d8 25%,
+        #2a6fb5 60%,
+        #1a5090 100%
       );
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -2px 8px rgba(0,50,100,0.2);
+      box-shadow: inset 0 2px 0 rgba(255,255,255,0.35);
     }
     .ocean-darkness {
       position: absolute;
       top: 0; right: 0; bottom: 0;
       width: 100%;
-      background: linear-gradient(90deg,
-        rgba(20,35,55,0) 0%,
-        rgba(15,25,45,0.7) 40%,
-        rgba(8,12,25,0.95) 75%,
-        rgba(5,8,18,0.98) 100%
+      background: linear-gradient(to right,
+        rgba(42,111,181,0) 0%,
+        rgba(15,30,55,0.6) 30%,
+        rgba(8,15,35,0.9) 70%,
+        rgba(5,10,25,0.98) 100%
       );
       transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
       pointer-events: none;
@@ -1728,13 +1729,14 @@
       transition: left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
       z-index: 3;
       animation: boat-bob 2.5s ease-in-out infinite;
+      background: transparent;
     }
     .ocean-boat img {
       height: 52px;
       width: auto;
       display: block;
       object-fit: contain;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+      background: transparent;
     }
     @keyframes boat-bob {
       0%, 100% { transform: translateY(-50%) rotate(-1deg); }
@@ -3870,6 +3872,9 @@
         completed: existing ? !!existing.completed : false
       });
     });
+    if (phases.length === 0) {
+      phases.push({ id: genId(), title: 'Phase 1', description: '', checklist: null, completionDate: null, completed: false });
+    }
 
     const all = getProjects();
     const now = Date.now();
