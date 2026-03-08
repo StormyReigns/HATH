@@ -540,9 +540,10 @@
       min-height: 0;
     }
 
-    /* when chat is active, switch body to stretch from top */
+    /* when chat is active (sub-screen visible), stretch from top and remove bottom padding */
     .body.chat-mode {
       justify-content: flex-start;
+      padding-bottom: 0;
     }
 
     /* ── HINT AREA ── */
@@ -1372,7 +1373,13 @@
     .docs-add-btn:active { transform: translateX(-50%) scale(0.94); }
 
     /* ── PROJECTS SCREEN ── */
-    #projectsScreen { flex-direction: column; padding: 0 4px; min-height: 0; }
+    #projectsScreen {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 0 4px;
+      min-height: 0;
+    }
     .projects-landing { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
     .projects-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -1549,11 +1556,12 @@
       50% { filter: brightness(1.15); }
     }
     .projects-phase-cards-wrap {
-      flex: 1 1 200px;
-      min-height: 200px;
+      flex: 1;
+      min-height: 0;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
+      overflow-y: auto;
+      overflow-x: hidden;
       position: relative;
     }
     .projects-phase-cards {
@@ -1691,6 +1699,7 @@
       height: 88px;
       position: relative;
       margin: 0 12px 12px;
+      margin-top: auto;
       border-radius: 12px;
       overflow: visible;
       border: 2px solid rgba(60,100,140,0.4);
@@ -1875,7 +1884,9 @@
     html.dark-mode .projects-phase-card { background: rgba(45,40,38,0.6); border-color: rgba(255,255,255,0.08); }
     html.dark-mode .phase-quote { border-top-color: rgba(255,255,255,0.1); }
     html.dark-mode .projects-korl-quote { border-top-color: rgba(255,255,255,0.1); color: var(--text2); }
-    html.dark-mode .projects-list-item { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); }
+    html.dark-mode .projects-list-item { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); color: var(--text); }
+    html.dark-mode .projects-list-item .screen-item-name { color: var(--text); }
+    html.dark-mode .projects-list-item .projects-list-progress { color: var(--muted); }
     html.dark-mode .projects-list-delete-btn:hover,
     html.dark-mode .projects-list-delete-btn:active { background: rgba(220,80,80,0.2); }
     html.dark-mode .phase-undo-btn { border-color: rgba(255,255,255,0.2); }
