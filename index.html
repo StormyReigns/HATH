@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
   <script>
     function setVh() {
       var h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
@@ -378,7 +378,6 @@
     /* Dark mode: soften or remove light text-shadow for readability */
     html.dark-mode .login-wordmark, html.dark-mode .login-tagline,
     html.dark-mode .wordmark, html.dark-mode .well-text,
-    html.dark-mode .hint-greeting, html.dark-mode .hint-sub,
     html.dark-mode .home-project-chip {
       background: rgba(45,40,38,0.75);
       border-color: rgba(224,152,104,0.3);
@@ -409,7 +408,7 @@
     /* Soft white glow on text for readability */
     .login-wordmark, .login-tagline,
     .wordmark, .well-text,
-    .hint-greeting, .hint-sub,
+    .hint-greeting,
     .recent-uploads-label, .recent-upload-date, .recent-upload-name,
     .upcoming-events-label, .event-item, .event-date, .event-title,
     .schedule-title, .schedule-date-header, .schedule-event-title, .schedule-event-time,
@@ -631,7 +630,7 @@
       justify-content: space-between;
       max-width: 420px;
       margin: 0 auto;
-      padding: 2px 32px;
+      padding: 1px 32px;
       gap: 16px;
     }
     .bottom-bar-center {
@@ -741,12 +740,6 @@
       text-align: center; letter-spacing: -0.2px; line-height: 1.3;
     }
     .hint-greeting em { font-style: italic; color: var(--accent); }
-
-    .hint-sub {
-      font-size: 13px; color: var(--text2);
-      text-align: center; line-height: 1.65;
-      max-width: 250px; font-weight: 300;
-    }
 
     /* home in-progress projects scroller */
     .home-projects-scroller {
@@ -1544,7 +1537,7 @@
     .schedule-mini-cal-day.today.has-events::after { background: var(--text); }
 
     /* Settings screen */
-    #settingsScreen { padding: 8px 0 24px; }
+    #settingsScreen { padding: 8px 0 24px; overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; min-height: 0; }
     .settings-section { padding: 16px 0; border-bottom: 1px solid rgba(0,0,0,0.06); }
     .settings-section:last-child { border-bottom: none; }
     .settings-label { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 12px; }
@@ -2572,7 +2565,6 @@
   <div class="body">
     <div class="hint-area" id="hintArea">
       <div class="hint-greeting" id="greetingText"></div>
-      <div class="hint-sub">Ask about a document, check something, or just see where things stand.</div>
 
       <div class="home-projects-scroller" id="homeProjectsScroller" onclick="showProjectsScreen(); closeDrawer()" role="button" tabindex="0" aria-label="View projects">
         <div class="home-projects-label">Projects</div>
@@ -3464,7 +3456,15 @@
     document.getElementById('scheduleScreen').classList.remove('visible');
     document.getElementById('settingsScreen').classList.remove('visible');
     document.getElementById(screenId).classList.add('visible');
-    if (screenId !== 'projectsScreen') document.getElementById('app').classList.remove('in-project-view');
+    if (screenId === 'projectsScreen') {
+      document.getElementById('projectsLanding').style.display = 'flex';
+      document.getElementById('projectsView').style.display = 'none';
+      document.getElementById('app').classList.remove('in-project-view');
+      projectsViewing = null;
+      renderProjectsLanding();
+    } else {
+      document.getElementById('app').classList.remove('in-project-view');
+    }
     document.getElementById('inputZone').style.display = 'none';
     document.getElementById('updatedAt').style.display = 'none';
     document.querySelector('.body').classList.add('chat-mode');
@@ -5152,7 +5152,7 @@
     const darkEl = document.getElementById('settingsDarkMode');
     if (nickEl) nickEl.value = (user && localStorage.getItem('shasta_nickname_' + user)) || '';
     if (dumbEl) dumbEl.checked = !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true');
-    if (darkEl) darkEl.checked = !!(user && localStorage.getItem('shasta_dark_' + user) === 'true');
+    if (darkEl) darkEl.checked = isDarkMode();
     nickEl.oninput = () => {
       if (user) localStorage.setItem('shasta_nickname_' + user, nickEl.value.trim());
     };
