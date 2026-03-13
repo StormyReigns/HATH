@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <script>
     function setVh() {
-      document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px');
+      var h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+      if (h > 0) document.documentElement.style.setProperty('--vh', (h * 0.01) + 'px');
     }
     setVh();
     window.addEventListener('resize', setVh);
-    window.addEventListener('orientationchange', () => setTimeout(setVh, 100));
+    window.addEventListener('orientationchange', function() { setTimeout(setVh, 100); });
+    window.addEventListener('load', setVh);
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', setVh);
   </script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#fdf0e8" media="(prefers-color-scheme: light)">
@@ -493,6 +496,8 @@
       top: 0; left: 50%;
       transform: translateX(-50%);
       width: 100%; max-width: 420px;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
       height: calc(var(--vh, 1vh) * 100);
       padding-bottom: calc(100px + env(safe-area-inset-bottom));
       z-index: 1;
@@ -621,8 +626,9 @@
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: flex-end;
       padding: 0 22px max(34px, env(safe-area-inset-bottom)); gap: 18px;
-      min-height: 180px;
+      min-height: fit-content;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     /* when chat is active (sub-screen visible), stretch from top and use bar padding */
@@ -637,7 +643,7 @@
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       gap: 10px; opacity: 0;
-      min-height: 0;
+      min-height: fit-content;
       animation: fadeUp 0.7s ease 0.3s forwards;
     }
     @media (prefers-reduced-motion: reduce) {
