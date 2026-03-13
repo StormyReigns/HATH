@@ -1462,22 +1462,27 @@
     .projects-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: var(--text); margin: 0; }
     .projects-completed-bar {
       flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
       overflow: hidden;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
-      padding: 12px 0;
-      margin-bottom: 12px;
+      padding: 14px 0 16px;
+      margin-bottom: 16px;
       position: relative;
-      background: linear-gradient(135deg, rgba(192,122,74,0.08) 0%, rgba(210,165,105,0.12) 35%, rgba(192,122,74,0.08) 70%, rgba(180,140,90,0.1) 100%);
-      background-size: 200% 100%;
-      animation: achievements-shimmer 4s ease-in-out infinite;
-      border-radius: 12px;
-      border: 1px solid rgba(192,122,74,0.25);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 8px rgba(192,122,74,0.12);
+      background: linear-gradient(135deg, rgba(212,165,90,0.2) 0%, rgba(235,195,120,0.25) 35%, rgba(200,155,80,0.2) 70%, rgba(218,175,95,0.22) 100%);
+      border-radius: 14px;
+      border: 1px solid rgba(192,140,60,0.4);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 4px 16px rgba(180,120,50,0.15);
     }
-    @keyframes achievements-shimmer {
-      0%, 100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
+    .projects-completed-header {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      font-weight: 500;
+      color: #7d5a28;
+      letter-spacing: 0.04em;
+      padding: 0 14px 10px;
+      flex-shrink: 0;
     }
     .projects-completed-bar::-webkit-scrollbar { display: none; }
     .projects-completed-scroll {
@@ -1491,21 +1496,28 @@
     }
     .projects-completed-chip {
       flex-shrink: 0;
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 16px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #5c3d1e;
-      background: linear-gradient(145deg, rgba(255,230,180,0.9) 0%, rgba(245,210,150,0.85) 100%);
-      border-radius: 24px;
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #4a3515;
+      background: linear-gradient(145deg, #f5e6c8 0%, #e8d4a8 25%, #f0dcb8 50%, #e6d0a0 75%, #f2e2c4 100%);
+      background-size: 200% 100%;
+      background-position: 0% 50%;
+      animation: chip-shimmer 6s ease-in-out infinite;
+      border-radius: 26px;
       cursor: pointer;
-      border: 1px solid rgba(192,122,74,0.35);
-      box-shadow: 0 2px 6px rgba(192,122,74,0.2), inset 0 1px 0 rgba(255,255,255,0.6);
+      border: 1px solid rgba(200,155,70,0.5);
+      box-shadow: 0 2px 8px rgba(160,110,40,0.25), inset 0 1px 0 rgba(255,255,255,0.7), inset 0 -1px 0 rgba(140,100,40,0.1);
       transition: transform 0.15s, box-shadow 0.15s;
     }
-    .projects-completed-chip:hover { transform: scale(1.02); box-shadow: 0 4px 12px rgba(192,122,74,0.25); }
+    @keyframes chip-shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .projects-completed-chip:hover { transform: scale(1.03); box-shadow: 0 6px 20px rgba(180,130,50,0.35), inset 0 1px 0 rgba(255,255,255,0.8); }
     .projects-completed-chip:active { transform: scale(0.98); }
-    .projects-completed-trophy { font-size: 1.1em; line-height: 1; flex-shrink: 0; }
+    .projects-completed-trophy { font-size: 1.3em; line-height: 1; flex-shrink: 0; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15)); }
     .projects-completed-chip-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .projects-completed-chip-delete {
       width: 24px; height: 24px;
@@ -1967,13 +1979,16 @@
     html.dark-mode .phase-timeline.urgent { color: #e07070; }
     html.dark-mode .project-phase-editor { background: rgba(255,255,255,0.06); }
     html.dark-mode .projects-completed-bar {
-      background: linear-gradient(135deg, rgba(192,122,74,0.15) 0%, rgba(210,165,105,0.2) 35%, rgba(192,122,74,0.15) 70%, rgba(180,140,90,0.18) 100%);
-      border-color: rgba(210,165,105,0.4);
+      background: linear-gradient(135deg, rgba(212,165,90,0.25) 0%, rgba(200,155,80,0.3) 35%, rgba(180,140,70,0.25) 70%, rgba(195,150,75,0.28) 100%);
+      border-color: rgba(210,170,100,0.5);
     }
+    html.dark-mode .projects-completed-header { color: #e8d8b8; }
     html.dark-mode .projects-completed-chip {
-      color: #e8d4b8;
-      background: linear-gradient(145deg, rgba(192,122,74,0.35) 0%, rgba(160,100,60,0.4) 100%);
-      border-color: rgba(210,165,105,0.45);
+      color: #2a2418;
+      background: linear-gradient(145deg, #d4c090 0%, #c4a870 25%, #d8c898 50%, #c0a060 75%, #d0b880 100%);
+      background-size: 200% 100%;
+      border-color: rgba(210,170,100,0.55);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -1px 0 rgba(80,60,20,0.2);
     }
     html.dark-mode .projects-progress-bar,
     html.dark-mode .phase-progress-bar { background: rgba(255,255,255,0.08); }
@@ -2354,6 +2369,7 @@
         <h2 class="projects-title">Projects</h2>
       </div>
         <div class="projects-completed-bar" id="projectsCompletedBar">
+          <div class="projects-completed-header">🏆 Victories</div>
           <div class="projects-completed-scroll" id="projectsCompletedScroll"></div>
         </div>
         <div class="projects-in-progress-label">In progress</div>
@@ -3589,6 +3605,9 @@
     const all = getProjects();
     const completed = all.filter(isProjectCompleted).sort((a,b) => (b.completedAt || 0) - (a.completedAt || 0));
     const inProgress = all.filter(p => !isProjectCompleted(p)).sort((a,b) => (b.modifiedAt || 0) - (a.modifiedAt || 0));
+
+    const barEl = document.getElementById('projectsCompletedBar');
+    barEl.style.display = completed.length > 0 ? 'flex' : 'none';
 
     const scrollEl = document.getElementById('projectsCompletedScroll');
     const chipHtml = completed.map(p => {
