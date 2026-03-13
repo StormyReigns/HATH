@@ -293,6 +293,14 @@
       border-color: rgba(255,255,255,0.2);
     }
     html.dark-mode .paste-save-btn { background: var(--accent); color: #1a1816; }
+    html.dark-mode .project-delete-btn {
+      border-color: rgba(220,80,80,0.5);
+      background: rgba(220,80,80,0.15);
+      color: #e07070;
+    }
+    html.dark-mode .project-delete-btn:hover, html.dark-mode .project-delete-btn:active {
+      background: rgba(220,80,80,0.25);
+    }
     html.dark-mode .schedule-chip {
       background: rgba(45,40,38,0.8);
       color: var(--text2);
@@ -584,7 +592,7 @@
       justify-content: space-between;
       max-width: 420px;
       margin: 0 auto;
-      padding: 0 16px;
+      padding: 0 32px;
       gap: 16px;
     }
     .bottom-bar-center {
@@ -620,23 +628,23 @@
     .bottom-bar-hamburger span:nth-child(2) { width: 65%; }
     .bottom-bar-hamburger span:nth-child(3) { width: 82%; }
     .bottom-bar-home {
-      width: 44px;
-      height: 44px;
+      width: 176px;
+      height: 176px;
       background: transparent;
       color: var(--accent);
-      font-size: 22px;
+      font-size: 88px;
       line-height: 1;
     }
     .bottom-bar-home:hover { background: rgba(192,122,74,0.15); }
     .bottom-bar-blathers {
-      width: 56px;
-      height: 56px;
-      min-width: 56px;
-      min-height: 56px;
+      width: 84px;
+      height: 84px;
+      min-width: 84px;
+      min-height: 84px;
     }
     .bottom-bar-blathers img {
-      width: 56px;
-      height: 56px;
+      width: 84px;
+      height: 84px;
       object-fit: contain;
     }
 
@@ -1877,20 +1885,22 @@
     }
     .projects-korl-quote {
       flex-shrink: 0;
-      padding: 10px 16px 12px;
+      padding: 12px 16px 14px;
+      margin-top: 20px;
       font-family: 'Playfair Display', serif;
-      font-size: 13px; font-style: italic;
-      color: var(--text2);
+      font-size: 14px; font-style: italic; font-weight: 500;
+      color: var(--text);
       line-height: 1.5;
       text-align: left;
-      border-top: 1px solid rgba(0,0,0,0.06);
+      border-top: 2px solid rgba(192,122,74,0.25);
+      letter-spacing: 0.02em;
     }
     .projects-ocean-strip {
       flex-shrink: 0;
       height: 88px;
       position: relative;
       margin: 0 12px 12px;
-      margin-top: auto;
+      margin-top: 20px;
       border-radius: 12px;
       overflow: visible;
       border: 2px solid rgba(60,100,140,0.4);
@@ -1967,7 +1977,7 @@
     }
     .ocean-windfall {
       position: absolute;
-      bottom: -4px; right: -8px;
+      bottom: -4px; right: -16px;
       z-index: 2;
     }
     .ocean-windfall img {
@@ -2080,6 +2090,22 @@
       border-top: 1px solid rgba(0,0,0,0.08);
       padding-top: 16px; margin-bottom: 16px;
     }
+    .project-modal-actions {
+      justify-content: space-between;
+      align-items: center;
+    }
+    .project-modal-actions-right { display: flex; gap: 12px; }
+    .project-delete-btn {
+      padding: 10px 20px;
+      font-size: 14px;
+      font-family: inherit;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid rgba(192,80,80,0.4);
+      background: rgba(192,80,80,0.1);
+      color: #c05050;
+    }
+    .project-delete-btn:hover, .project-delete-btn:active { background: rgba(192,80,80,0.2); }
     .project-phases-label {
       font-size: 13px; font-weight: 600; color: var(--text2);
       margin: 0 0 12px;
@@ -2120,7 +2146,7 @@
     }
     html.dark-mode .projects-phase-card { background: rgba(45,40,38,0.6); border-color: rgba(255,255,255,0.08); }
     html.dark-mode .phase-quote { border-top-color: rgba(255,255,255,0.1); }
-    html.dark-mode .projects-korl-quote { border-top-color: rgba(255,255,255,0.1); color: var(--text2); }
+    html.dark-mode .projects-korl-quote { border-top-color: rgba(224,152,104,0.3); color: var(--text); }
     html.dark-mode .projects-list-item { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); }
     html.dark-mode .projects-list-item .projects-list-card-title { color: var(--text); }
     html.dark-mode .projects-list-item .projects-list-card-desc { color: var(--text2); }
@@ -2535,12 +2561,11 @@
       <div class="projects-view" id="projectsView" style="display:none">
         <div class="projects-view-header">
           <button type="button" class="projects-back-btn" onclick="projectsBackToLanding()" aria-label="Back">←</button>
-          <button type="button" class="projects-edit-btn" onclick="openCreateProjectModal(projectsViewing && projectsViewing.id)" aria-label="Edit" title="Edit project">✎</button>
-          <button type="button" class="projects-delete-btn" onclick="projectsConfirmDelete(projectsViewing && projectsViewing.id)" aria-label="Delete" title="Delete project">🗑</button>
           <div class="projects-view-title-wrap">
             <h2 class="projects-view-title" id="projectsViewTitle"></h2>
             <button type="button" class="projects-undo-btn" id="projectsUndoBtn" onclick="projectsUndoProjectCompletion()" style="display:none">Undo completion</button>
           </div>
+          <button type="button" class="projects-edit-btn" onclick="openCreateProjectModal(projectsViewing && projectsViewing.id)" aria-label="Edit" title="Edit project">✎</button>
         </div>
         <div class="projects-phase-cards-wrap">
           <div class="projects-phase-cards" id="projectsPhaseCards"></div>
@@ -2727,9 +2752,12 @@
       <div class="project-phases-list" id="projectPhasesList"></div>
       <button type="button" class="project-add-phase-btn" onclick="addPhaseToProject()">+ Add next phase</button>
     </div>
-    <div class="paste-modal-actions">
-      <button type="button" class="paste-cancel-btn" onclick="closeProjectModal()">Cancel</button>
-      <button type="button" class="paste-save-btn" onclick="saveProjectFromModal()">Save</button>
+    <div class="paste-modal-actions project-modal-actions">
+      <button type="button" class="project-delete-btn" id="projectModalDeleteBtn" onclick="deleteProjectFromEditor()" style="display:none">Delete</button>
+      <div class="project-modal-actions-right">
+        <button type="button" class="paste-cancel-btn" onclick="closeProjectModal()">Cancel</button>
+        <button type="button" class="paste-save-btn" onclick="saveProjectFromModal()">Save</button>
+      </div>
     </div>
   </div>
 </div>
@@ -4283,6 +4311,8 @@
       projectsEditing = { id: genId(), title: '', description: '', phases: [{ id: genId(), title: '', description: '', checklist: null, completionDate: null, completed: false }], createdAt: Date.now(), modifiedAt: Date.now() };
     }
     document.getElementById('projectModalTitle').textContent = editId ? 'Edit Project' : 'New Project';
+    const deleteBtn = document.getElementById('projectModalDeleteBtn');
+    if (deleteBtn) deleteBtn.style.display = editId ? 'block' : 'none';
     document.getElementById('projectTitleInput').value = projectsEditing ? projectsEditing.title : '';
     document.getElementById('projectDescInput').value = projectsEditing ? (projectsEditing.description || '') : '';
     document.getElementById('projectFinishDateInput').value = projectsEditing && projectsEditing.finishDate ? projectsEditing.finishDate : '';
@@ -4296,6 +4326,13 @@
     if (ev && ev.target !== document.getElementById('projectModalOverlay')) return;
     document.getElementById('projectModalOverlay').classList.remove('open');
     projectsEditing = null;
+  }
+
+  function deleteProjectFromEditor() {
+    const id = projectsEditing && projectsEditing.id;
+    if (!id) return;
+    closeProjectModal();
+    projectsConfirmDelete(id);
   }
 
   function syncPhaseEditorsToState() {
