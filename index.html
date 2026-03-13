@@ -505,7 +505,7 @@
       min-height: 100vh;
       min-height: -webkit-fill-available;
       height: calc(var(--vh, 1vh) * 100);
-      padding-bottom: calc(86px + env(safe-area-inset-bottom));
+      padding-bottom: calc(64px + env(safe-area-inset-bottom));
       z-index: 1;
       display: flex; flex-direction: column;
       overflow: hidden;
@@ -541,8 +541,8 @@
       bottom: 0;
       left: 0;
       right: 0;
-      padding-top: 6px;
-      padding-bottom: max(6px, env(safe-area-inset-bottom));
+      padding-top: 4px;
+      padding-bottom: max(4px, env(safe-area-inset-bottom));
       background: var(--edge-bg, linear-gradient(135deg, #fdf0e8 0%, #fce4d6 40%, #fad4c0 100%));
       border-top: 1px solid rgba(0,0,0,0.06);
       z-index: 80;
@@ -603,14 +603,14 @@
     }
     .bottom-bar-add:hover { background: var(--accent); opacity: 0.9; }
     .bottom-bar-blathers {
-      width: 80px;
-      height: 80px;
-      min-width: 80px;
-      min-height: 80px;
+      width: 56px;
+      height: 56px;
+      min-width: 56px;
+      min-height: 56px;
     }
     .bottom-bar-blathers img {
-      width: 80px;
-      height: 80px;
+      width: 56px;
+      height: 56px;
       object-fit: contain;
     }
 
@@ -641,7 +641,7 @@
     /* when chat is active (sub-screen visible), stretch from top and use bar padding */
     .body.chat-mode {
       justify-content: flex-start;
-      padding-bottom: calc(86px + env(safe-area-inset-bottom));
+      padding-bottom: calc(64px + env(safe-area-inset-bottom));
       min-height: 0;
     }
 
@@ -762,7 +762,7 @@
       overflow-y: scroll;
       overflow-x: hidden;
       padding: 16px 0 8px;
-      scroll-padding-bottom: 80px;
+      scroll-padding-bottom: 64px;
       -webkit-overflow-scrolling: touch;
       min-height: 0;
       scrollbar-width: none;
@@ -1100,7 +1100,7 @@
     }
     .docs-selection-delete:hover { background: #a04040; }
     .screen-footer {
-      padding: 16px 0;
+      padding: 12px 0;
       font-size: 12px;
       text-align: center;
     }
@@ -1113,7 +1113,7 @@
     .screen-loading { text-align: center; padding: 24px; color: var(--muted); font-size: 13px; }
 
     /* Schedule screen */
-    #scheduleScreen { flex-direction: column; padding: 8px 0 24px; }
+    #scheduleScreen { flex-direction: column; padding: 8px 0 12px; }
     .schedule-header {
       display: flex; align-items: center; justify-content: space-between;
       padding: 8px 0 12px; flex-shrink: 0;
