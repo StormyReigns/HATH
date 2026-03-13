@@ -499,7 +499,7 @@
       min-height: 100vh;
       min-height: -webkit-fill-available;
       height: calc(var(--vh, 1vh) * 100);
-      padding-bottom: calc(100px + env(safe-area-inset-bottom));
+      padding-bottom: calc(86px + env(safe-area-inset-bottom));
       z-index: 1;
       display: flex; flex-direction: column;
       overflow: hidden;
@@ -535,7 +535,8 @@
       bottom: 0;
       left: 0;
       right: 0;
-      padding-bottom: env(safe-area-inset-bottom);
+      padding-top: 6px;
+      padding-bottom: max(6px, env(safe-area-inset-bottom));
       background: var(--edge-bg, linear-gradient(135deg, #fdf0e8 0%, #fce4d6 40%, #fad4c0 100%));
       border-top: 1px solid rgba(0,0,0,0.06);
       z-index: 80;
@@ -550,7 +551,7 @@
       justify-content: space-between;
       max-width: 420px;
       margin: 0 auto;
-      padding: 10px 20px;
+      padding: 0 16px;
       gap: 16px;
     }
     .bottom-bar-center {
@@ -634,7 +635,7 @@
     /* when chat is active (sub-screen visible), stretch from top and use bar padding */
     .body.chat-mode {
       justify-content: flex-start;
-      padding-bottom: calc(100px + env(safe-area-inset-bottom));
+      padding-bottom: calc(86px + env(safe-area-inset-bottom));
       min-height: 0;
     }
 
