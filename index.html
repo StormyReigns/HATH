@@ -505,7 +505,7 @@
       min-height: 100vh;
       min-height: -webkit-fill-available;
       height: calc(var(--vh, 1vh) * 100);
-      padding-bottom: 0;
+      padding-bottom: calc(32px + env(safe-area-inset-bottom));
       z-index: 1;
       display: flex; flex-direction: column;
       overflow: hidden;
@@ -541,7 +541,8 @@
       bottom: 0;
       left: 0;
       right: 0;
-      padding: 0;
+      padding-top: 2px;
+      padding-bottom: max(2px, env(safe-area-inset-bottom));
       background: var(--edge-bg, linear-gradient(135deg, #fdf0e8 0%, #fce4d6 40%, #fad4c0 100%));
       border-top: 1px solid rgba(0,0,0,0.06);
       z-index: 80;
@@ -631,7 +632,7 @@
     .body {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: flex-end;
-      padding: 0 22px 0; gap: 18px;
+      padding: 0 22px max(17px, env(safe-area-inset-bottom)); gap: 18px;
       min-height: fit-content;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
@@ -640,7 +641,7 @@
     /* when chat is active (sub-screen visible), stretch from top and use bar padding */
     .body.chat-mode {
       justify-content: flex-start;
-      padding-bottom: 0;
+      padding-bottom: calc(32px + env(safe-area-inset-bottom));
       min-height: 0;
     }
 
@@ -761,7 +762,7 @@
       overflow-y: scroll;
       overflow-x: hidden;
       padding: 16px 0 8px;
-      scroll-padding-bottom: 64px;
+      scroll-padding-bottom: 32px;
       -webkit-overflow-scrolling: touch;
       min-height: 0;
       scrollbar-width: none;
@@ -2792,7 +2793,7 @@
 
     const fetchDocsFolder = async (folderId) => {
       try {
-        const url = `${API_URL}?action=listFolder&folder=${encodeURIComponent(folderId)}`;
+        const url = apiUrlWithUser(API_URL, '&action=listFolder&folder=' + encodeURIComponent(folderId));
         const res = await fetch(url, { redirect: 'follow' });
         if (!res.ok) return;
         const data = await res.json();
@@ -2805,18 +2806,18 @@
     };
 
     const fetchBalance = () =>
-      fetch(API_URL, { redirect: 'follow' })
+      fetch(apiUrlWithUser(API_URL), { redirect: 'follow' })
         .then(r => r.json())
         .catch(() => null);
 
     const fetchTabList = () =>
-      fetch(API_URL + '?action=tabList', { redirect: 'follow' })
+      fetch(apiUrlWithUser(API_URL, '&action=tabList'), { redirect: 'follow' })
         .then(r => r.json())
         .then(d => (d && d.tabs) ? d.tabs : [])
         .catch(() => []);
 
     const fetchDocIndex = () =>
-      fetch(API_URL + '?action=docIndex', { redirect: 'follow' })
+      fetch(apiUrlWithUser(API_URL, '&action=docIndex'), { redirect: 'follow' })
         .then(r => r.json())
         .then(d => (d && d.files) ? d.files : [])
         .catch(() => []);
@@ -2883,6 +2884,13 @@
   // ── CONFIG ────────────────────────────────────────────────────
   const API_URL = 'https://script.google.com/macros/s/AKfycbwyQPMjY2lUrGSKnQSlvtM19VbEyHgBG6yC215Y8ucG8eAbZIzlIXKxE3v8jTzsk-KD9w/exec';
   const AI_URL  = 'https://script.google.com/macros/s/AKfycbwyQPMjY2lUrGSKnQSlvtM19VbEyHgBG6yC215Y8ucG8eAbZIzlIXKxE3v8jTzsk-KD9w/exec';
+
+  function getApiUser() { return localStorage.getItem('shasta_user') || ''; }
+  function apiUrlWithUser(base, extraParams) {
+    const u = getApiUser();
+    const sep = base.indexOf('?') >= 0 ? '&' : '?';
+    return base + sep + 'user=' + encodeURIComponent(u) + (extraParams || '');
+  }
   // Must match your Shasta Docs folder: open it in Drive, copy ID from URL (after /folders/)
   const DOCS_FOLDER_ID = '1UTVAmNx854R9a1YqTPPlZ1gA_V9nUulI';
 
@@ -2989,7 +2997,7 @@
     [peekMain, peekMatt, peekJessica].forEach(el => { if (el) el.classList.add('loading'); el.textContent = ''; });
 
     try {
-      const res = await fetch(API_URL, { redirect: 'follow' });
+      const res = await fetch(apiUrlWithUser(API_URL), { redirect: 'follow' });
       const data = await res.json();
 
       [peekMain, peekMatt, peekJessica].forEach(el => { if (el) el.classList.remove('loading'); });
@@ -3443,7 +3451,7 @@
 
     list.innerHTML = '<div class="screen-loading">Loading…</div>';
     try {
-      const url = `${API_URL}?action=listFolder&folder=${encodeURIComponent(folderId)}`;
+      const url = apiUrlWithUser(API_URL, '&action=listFolder&folder=' + encodeURIComponent(folderId));
       const res = await fetch(url, { redirect: 'follow' });
       if (!res.ok) {
         throw new Error('API returned ' + res.status);
@@ -4377,6 +4385,7 @@
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({
           action: 'upload',
+          user: getApiUser(),
           folderId,
           filename,
           base64,
@@ -4414,6 +4423,7 @@
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({
           action: 'createDoc',
+          user: getApiUser(),
           folderId,
           filename,
           text
@@ -4448,7 +4458,7 @@
         method: 'POST',
         redirect: 'follow',
         headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ action: 'rename', type, fileId, newName })
+        body: JSON.stringify({ action: 'rename', user: getApiUser(), type, fileId, newName })
       });
       const raw = await res.text();
       let data;
@@ -4484,7 +4494,7 @@
           method: 'POST',
           redirect: 'follow',
           headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ action: 'delete', type, fileId: id })
+          body: JSON.stringify({ action: 'delete', user: getApiUser(), type, fileId: id })
         }).then(r => r.text()).then(raw => {
           try { return JSON.parse(raw); } catch (_) { return { error: 'Invalid response' }; }
         })
@@ -4560,7 +4570,7 @@
       method: 'POST',
       redirect: 'follow',
       headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ action: 'ocr', base64 })
+      body: JSON.stringify({ action: 'ocr', user: getApiUser(), base64 })
     });
     const raw = await res.text();
     let data;
@@ -4634,13 +4644,13 @@
           method: 'POST',
           redirect: 'follow',
           headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ action: 'upload', folderId, filename: imageFilename, base64, mimeType: mimeType || 'application/octet-stream' })
+          body: JSON.stringify({ action: 'upload', user: getApiUser(), folderId, filename: imageFilename, base64, mimeType: mimeType || 'application/octet-stream' })
         }),
         fetch(API_URL, {
           method: 'POST',
           redirect: 'follow',
           headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ action: 'createDoc', folderId, filename: docName, text: ocrText || '' })
+          body: JSON.stringify({ action: 'createDoc', user: getApiUser(), folderId, filename: docName, text: ocrText || '' })
         })
       ]);
       const uploadData = await uploadRes.text();
@@ -5142,8 +5152,8 @@
     }
     const user = localStorage.getItem('shasta_user');
     const body = eventModalEditing
-      ? { action: 'updateEvent', calendarId: eventModalEditing.calendarId, eventId: eventModalEditing.googleEventId, title, start: startStr, end: endStr, allDay }
-      : { action: 'createEvent', calendarId, title, start: startStr, end: endStr, allDay };
+      ? { action: 'updateEvent', user: getApiUser(), calendarId: eventModalEditing.calendarId, eventId: eventModalEditing.googleEventId, title, start: startStr, end: endStr, allDay }
+      : { action: 'createEvent', user: getApiUser(), calendarId, title, start: startStr, end: endStr, allDay };
     try {
       const res = await fetch(API_URL, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const data = await res.json();
@@ -5159,7 +5169,7 @@
     if (!eventModalEditing || !eventModalEditing.googleEventId) return;
     if (!confirm('Delete this event?')) return;
     try {
-      const res = await fetch(API_URL, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'deleteEvent', eventId: eventModalEditing.googleEventId }) });
+      const res = await fetch(API_URL, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'deleteEvent', user: getApiUser(), eventId: eventModalEditing.googleEventId }) });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       closeEventModal();
@@ -5372,6 +5382,7 @@
       const matchedTabs = scoreTabsForMessage(text);
       const body = {
         message: text,
+        user: getApiUser(),
         history: history,
         nickname: getDisplayName(),
         dumbMode: !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true'),
@@ -5588,6 +5599,7 @@
       const crumb = docsBreadcrumb && docsBreadcrumb.length > 0 ? docsBreadcrumb[docsBreadcrumb.length - 1] : null;
       const body = {
         message: text,
+        user: getApiUser(),
         history,
         nickname: getDisplayName(),
         dumbMode: !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true'),
