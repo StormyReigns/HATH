@@ -1592,8 +1592,6 @@
       margin-bottom: 12px;
     }
     .projects-list-card-phases { font-weight: 500; color: var(--accent); }
-    .projects-list-card-current::before { content: '\u2022 '; }
-    .projects-list-card-due::before { content: '\u2022 '; }
     .projects-list-card-updated { margin-left: auto; }
     .projects-list-card-progress-wrap {
       display: flex; align-items: center; gap: 12px;
@@ -2427,7 +2425,7 @@
       </div>
         <div class="projects-completed-bar" id="projectsCompletedBar">
           <div class="projects-completed-header">🏆 Victories</div>
-          <div class="projects-completed-scroll-viewport">
+          <div class="projects-completed-scroll-viewport" id="projectsCompletedViewport">
             <div class="projects-completed-scroll" id="projectsCompletedScroll"></div>
           </div>
         </div>
@@ -3707,7 +3705,9 @@
       const animateClass = newlyCompletedId && p.id === newlyCompletedId ? ' projects-completed-chip-new' : '';
       return `<span class="projects-completed-chip${animateClass}" onclick="projectsSelectCompleted('${p.id}')"><span class="projects-completed-trophy">🏆</span><span class="projects-completed-chip-title">${escapeHtml(p.title)}</span><button type="button" class="projects-completed-chip-delete" onclick="event.stopPropagation();projectsConfirmDelete('${p.id}')" aria-label="Delete" title="Delete">×</button></span>`;
     }).join('');
-    scrollEl.innerHTML = completed.length > 0 ? chipHtml : '';
+    scrollEl.innerHTML = completed.length > 0 ? chipHtml + chipHtml : '';
+
+    setupVictoriesAutoScroll();
 
     const listEl = document.getElementById('projectsInProgressList');
     listEl.innerHTML = inProgress.map(p => {
@@ -3737,6 +3737,52 @@
 
     document.getElementById('projectsEmpty').style.display = inProgress.length === 0 && completed.length === 0 ? 'flex' : 'none';
     listEl.style.display = inProgress.length === 0 ? 'none' : 'block';
+  }
+
+  let victoriesScrollRaf = 0;
+  let victoriesUserInteracting = false;
+  let victoriesResumeTimer = 0;
+  const VICTORIES_SCROLL_SPEED = 0.4;
+
+  function setupVictoriesAutoScroll() {
+    const viewport = document.getElementById('projectsCompletedViewport');
+    if (!viewport) return;
+    const scrollEl = document.getElementById('projectsCompletedScroll');
+    if (!scrollEl || scrollEl.children.length === 0) return;
+
+    if (victoriesScrollRaf) cancelAnimationFrame(victoriesScrollRaf);
+    if (victoriesResumeTimer) clearTimeout(victoriesResumeTimer);
+
+    function animate() {
+      if (victoriesUserInteracting) return;
+      viewport.scrollLeft += VICTORIES_SCROLL_SPEED;
+      if (viewport.scrollLeft >= viewport.scrollWidth / 2) viewport.scrollLeft = 0;
+      victoriesScrollRaf = requestAnimationFrame(animate);
+    }
+
+    function onUserStart() {
+      victoriesUserInteracting = true;
+      if (victoriesResumeTimer) { clearTimeout(victoriesResumeTimer); victoriesResumeTimer = 0; }
+    }
+
+    function onUserEnd() {
+      victoriesResumeTimer = setTimeout(function() {
+        victoriesUserInteracting = false;
+        victoriesResumeTimer = 0;
+        animate();
+      }, 2000);
+    }
+
+    viewport.ontouchstart = onUserStart;
+    viewport.ontouchcancel = onUserEnd;
+    viewport.ontouchend = onUserEnd;
+    viewport.onmousedown = onUserStart;
+    viewport.onmouseup = onUserEnd;
+    viewport.onmouseleave = onUserEnd;
+    viewport.onwheel = function() { onUserStart(); setTimeout(onUserEnd, 2000); };
+
+    victoriesUserInteracting = false;
+    animate();
   }
 
   function projectsSelectCompleted(id) {
