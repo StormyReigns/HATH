@@ -99,7 +99,7 @@
     }
 
     /* Prevent pull-to-refresh and text selection on UI */
-    .hamburger, .wordmark, .wellbeing, .upcoming-events, .home-project-chip,
+    .hamburger, .wordmark, .wellbeing, .upcoming-events, .home-project-chip, .recent-upload-item,
     .schedule-chip, .schedule-event, .schedule-event-star, .schedule-mini-cal-day,
     .matt-note, .chip, .send-btn, .cancel-btn, .drawer-item, .drawer-header, .drawer-footer {
       -webkit-user-select: none;
@@ -371,7 +371,16 @@
     html.dark-mode .login-wordmark, html.dark-mode .login-tagline,
     html.dark-mode .wordmark, html.dark-mode .well-text,
     html.dark-mode .hint-greeting, html.dark-mode .hint-sub,
-    html.dark-mode .home-project-chip { background: rgba(45,40,38,0.6); border-color: rgba(255,255,255,0.08); }
+    html.dark-mode .home-project-chip {
+      background: rgba(45,40,38,0.75);
+      border-color: rgba(224,152,104,0.3);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    html.dark-mode .home-project-chip-bar { background: rgba(255,255,255,0.1); }
+    html.dark-mode .home-project-chip-fill {
+      background: linear-gradient(90deg, var(--accent) 0%, #e09868 100%);
+    }
+    html.dark-mode .recent-uploads-label, html.dark-mode .recent-upload-item,
     html.dark-mode .upcoming-events-label, html.dark-mode .event-item,
     html.dark-mode .event-date, html.dark-mode .event-title,
     html.dark-mode .schedule-title, html.dark-mode .schedule-date-header,
@@ -393,6 +402,7 @@
     .login-wordmark, .login-tagline,
     .wordmark, .well-text,
     .hint-greeting, .hint-sub,
+    .recent-uploads-label, .recent-upload-date, .recent-upload-name,
     .upcoming-events-label, .event-item, .event-date, .event-title,
     .schedule-title, .schedule-date-header, .schedule-event-title, .schedule-event-time,
     .matt-note, .chip,
@@ -612,7 +622,7 @@
       justify-content: space-between;
       max-width: 420px;
       margin: 0 auto;
-      padding: 0 32px;
+      padding: 2px 32px;
       gap: 16px;
     }
     .bottom-bar-center {
@@ -648,11 +658,11 @@
     .bottom-bar-hamburger span:nth-child(2) { width: 65%; }
     .bottom-bar-hamburger span:nth-child(3) { width: 82%; }
     .bottom-bar-home {
-      width: 88px;
-      height: 88px;
+      width: 80px;
+      height: 80px;
       background: transparent;
       color: var(--accent);
-      font-size: 44px;
+      font-size: 40px;
       line-height: 1;
     }
     .bottom-bar-home:hover { background: rgba(192,122,74,0.15); }
@@ -697,6 +707,9 @@
       justify-content: flex-start;
       padding-bottom: calc(32px + env(safe-area-inset-bottom));
       min-height: 0;
+    }
+    .app.in-project-view {
+      padding-bottom: calc(4px + min(env(safe-area-inset-bottom, 0px), 40px));
     }
 
     /* ── HINT AREA ── */
@@ -759,31 +772,91 @@
     .home-project-chip {
       flex-shrink: 0;
       display: inline-flex;
-      align-items: center;
+      flex-direction: column;
+      align-items: stretch;
       gap: 6px;
-      padding: 6px 12px;
-      font-size: 12px;
+      padding: 10px 14px;
+      min-width: 140px;
+      font-size: 13px;
       color: var(--text);
-      background: rgba(255,255,255,0.6);
-      border: 1px solid rgba(0,0,0,0.08);
-      border-radius: 10px;
+      background: rgba(255,255,255,0.75);
+      border: 2px solid rgba(192,122,74,0.25);
+      border-radius: 12px;
       white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
-    .home-project-chip-title { font-weight: 500; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
-    .home-project-chip-pct { font-size: 11px; color: var(--muted); }
+    .home-project-chip-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .home-project-chip-title {
+      font-weight: 600;
+      font-family: 'Playfair Display', serif;
+      max-width: 110px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 14px;
+    }
+    .home-project-chip-pct {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+    .home-project-chip-phase {
+      font-size: 11px;
+      color: var(--text2);
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .home-project-chip-bar {
+      height: 4px;
+      background: rgba(0,0,0,0.08);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .home-project-chip-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent) 0%, #d4956a 100%);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
 
-    .hint-chips {
-      display: flex; flex-wrap: wrap;
-      justify-content: center; gap: 8px; margin-top: 6px;
+    .recent-uploads {
+      width: 100%;
+      max-width: 300px;
+      margin-top: 6px;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      cursor: pointer;
     }
-    .chip {
-      font-size: 12.5px; color: var(--text2);
-      cursor: pointer; padding: 2px 0;
-      border-bottom: 1px solid rgba(138,122,114,0.3);
-      transition: color 0.15s, border-color 0.15s;
-      background: none; font-family: 'Inter', sans-serif; font-weight: 400;
+    .recent-uploads.has-uploads { opacity: 1; }
+    .recent-uploads:active { opacity: 0.85; }
+    .recent-uploads-label {
+      font-size: 10px; font-weight: 500; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 6px; text-align: center;
     }
-    .chip:active { color: var(--accent); border-color: var(--accent); }
+    .recent-uploads-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .recent-upload-item {
+      font-size: 12px; color: var(--text2);
+      line-height: 1.4; display: flex; align-items: baseline; gap: 8px;
+      font-weight: 300;
+    }
+    .recent-upload-date {
+      flex-shrink: 0;
+      font-size: 11px; color: var(--muted);
+      font-family: 'Playfair Display', serif;
+    }
+    .recent-upload-name {
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
 
     /* ── UPCOMING EVENTS ── */
     .upcoming-events {
@@ -1548,6 +1621,19 @@
     .screen-add-fab:active { transform: translateX(-50%) scale(0.95); }
     html.dark-mode .screen-add-fab { background: var(--accent); box-shadow: 0 4px 16px rgba(192,122,74,0.35); }
 
+    .projects-linkmagic {
+      position: fixed;
+      right: 8px;
+      bottom: calc(76px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
+      width: 160px;
+      height: auto;
+      max-height: 200px;
+      object-fit: contain;
+      object-position: bottom right;
+      z-index: 65;
+      pointer-events: none;
+    }
+
     /* ── PROJECTS SCREEN ── */
     #projectsScreen.visible {
       height: 100%;
@@ -1740,7 +1826,7 @@
       min-height: 0; min-width: 100%;
     }
     .projects-view-header {
-      display: flex; align-items: flex-start; gap: 10px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
       padding: 12px 0 16px; flex-shrink: 0;
     }
     .projects-back-btn {
@@ -1759,12 +1845,20 @@
       cursor: pointer; border-radius: 8px;
     }
     .projects-edit-btn:active { background: rgba(0,0,0,0.06); }
-    .projects-view-title-wrap { flex: 1; min-width: 0; }
+    .projects-view-title-wrap {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
     .projects-view-title {
       font-family: 'Playfair Display', serif;
       font-size: 18px; font-weight: 400;
       color: var(--text); margin: 0 0 8px;
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      text-align: center;
     }
     .projects-overall-progress { margin-top: 4px; }
     .projects-progress-bar {
@@ -1925,8 +2019,8 @@
     }
     .projects-korl-quote {
       flex-shrink: 0;
-      padding: 12px 16px 14px;
-      margin-top: 20px;
+      padding: 8px 16px 6px;
+      margin-top: 8px;
       font-family: 'Playfair Display', serif;
       font-size: 14px; font-style: italic; font-weight: 500;
       color: var(--text);
@@ -1940,7 +2034,7 @@
       height: 88px;
       position: relative;
       margin: 0 12px 12px;
-      margin-top: 20px;
+      margin-top: 4px;
       border-radius: 12px;
       overflow: visible;
       border: 2px solid rgba(60,100,140,0.4);
@@ -2472,7 +2566,7 @@
       <div class="hint-sub">Ask about a document, check something, or just see where things stand.</div>
 
       <div class="home-projects-scroller" id="homeProjectsScroller" onclick="showProjectsScreen(); closeDrawer()" role="button" tabindex="0" aria-label="View projects">
-        <div class="home-projects-label">In progress</div>
+        <div class="home-projects-label">Projects</div>
         <div class="home-projects-scroll-wrap" id="homeProjectsScrollWrap">
           <div class="home-projects-scroll" id="homeProjectsScroll"></div>
         </div>
@@ -2485,11 +2579,9 @@
 
       <div class="matt-note" id="mattNote"></div>
 
-      <div class="hint-chips">
-        <span class="chip" onclick="prefill('What does our home insurance cover?')">Home insurance</span>
-        <span class="chip" onclick="prefill('When does the car warranty expire?')">Car warranty</span>
-        <span class="chip" onclick="prefill('Are we on track this month?')">Monthly status</span>
-        <span class="chip" onclick="prefill('What documents do we have about our pet?')">Pet records</span>
+      <div class="recent-uploads" id="recentUploads" onclick="showDocsScreen(); closeDrawer()" role="button" tabindex="0" aria-label="View documents">
+        <div class="recent-uploads-label">Recent Uploads</div>
+        <div class="recent-uploads-list" id="recentUploadsList"></div>
       </div>
     </div>
 
@@ -2585,6 +2677,7 @@
         <div class="projects-in-progress-label">In progress</div>
         <div class="screen-list" id="projectsInProgressList"></div>
         <div class="projects-empty" id="projectsEmpty">No projects yet. Tap + to create one.</div>
+        <img class="projects-linkmagic" src="https://stormyreigns.github.io/HATH/LinkMagic.png" alt="">
         <button type="button" class="screen-add-fab" id="projectsAddFab" onclick="openCreateProjectModal()" title="Create project" aria-label="Create project">+</button>
       </div>
       <div class="projects-view" id="projectsView" style="display:none">
@@ -3172,6 +3265,7 @@
       setWellbeing('OK');
     }
     renderHomeProjectsScroller();
+    renderRecentUploads();
     loadCalendar();
   }
 
@@ -3345,6 +3439,7 @@
     setBlathers('sleep');
     document.getElementById('greetingText').innerHTML = getRandomGreeting();
     renderHomeProjectsScroller();
+    renderRecentUploads();
     updateBlatherBookVisibility();
     updateBottomBarHome();
     updateScreenAddFabs();
@@ -3360,6 +3455,7 @@
     document.getElementById('scheduleScreen').classList.remove('visible');
     document.getElementById('settingsScreen').classList.remove('visible');
     document.getElementById(screenId).classList.add('visible');
+    if (screenId !== 'projectsScreen') document.getElementById('app').classList.remove('in-project-view');
     document.getElementById('inputZone').style.display = 'none';
     document.getElementById('updatedAt').style.display = 'none';
     document.querySelector('.body').classList.add('chat-mode');
@@ -3370,23 +3466,14 @@
 
   function updateBlatherBookVisibility() {
     const blathersBtn = document.getElementById('bottomBarBlathers');
-    if (!blathersBtn) return;
-    const onSubScreen = document.getElementById('documentsScreen').classList.contains('visible') ||
-      document.getElementById('projectsScreen').classList.contains('visible') ||
-      document.getElementById('scheduleScreen').classList.contains('visible') ||
-      document.getElementById('settingsScreen').classList.contains('visible');
-    blathersBtn.style.display = onSubScreen ? 'flex' : 'none';
+    if (blathersBtn) blathersBtn.style.display = 'flex';
   }
 
   function updateBottomBarHome() {
     const homeBtn = document.getElementById('bottomBarHome');
-    if (!homeBtn) return;
-    const onSubScreen = document.getElementById('documentsScreen').classList.contains('visible') ||
-      document.getElementById('projectsScreen').classList.contains('visible') ||
-      document.getElementById('scheduleScreen').classList.contains('visible') ||
-      document.getElementById('settingsScreen').classList.contains('visible');
-    homeBtn.style.display = onSubScreen ? 'flex' : 'none';
-    homeBtn.parentElement.style.display = onSubScreen ? 'flex' : 'none';
+    if (homeBtn) homeBtn.style.display = 'flex';
+    const center = homeBtn && homeBtn.parentElement;
+    if (center) center.style.display = 'flex';
   }
 
   function updateScreenAddFabs() {
@@ -3846,6 +3933,59 @@
     return { prog, phaseLabel, currentPhaseName, desc, finishStr, updatedStr };
   }
 
+  function getRecentUploadsFromCache() {
+    const files = [];
+    Object.keys(docsFolderCache).forEach(folderId => {
+      const data = docsFolderCache[folderId];
+      if (!data || data.error) return;
+      (data.files || []).forEach(f => {
+        const ms = (f.modifiedTime && new Date(f.modifiedTime).getTime()) ||
+          (f.modifiedDate && new Date(f.modifiedDate).getTime()) ||
+          (f.createdTime && new Date(f.createdTime).getTime()) || 0;
+        files.push({ ...f, _sortMs: ms });
+      });
+    });
+    return files.sort((a, b) => (b._sortMs || 0) - (a._sortMs || 0)).slice(0, 5);
+  }
+
+  function renderRecentUploads() {
+    const wrap = document.getElementById('recentUploads');
+    const listEl = document.getElementById('recentUploadsList');
+    if (!wrap || !listEl) return;
+    const recent = getRecentUploadsFromCache();
+    if (recent.length === 0) {
+      wrap.classList.remove('has-uploads');
+      wrap.style.display = 'none';
+      return;
+    }
+    wrap.style.display = '';
+    wrap.classList.add('has-uploads');
+    listEl.innerHTML = recent.map(f => {
+      const d = f.modifiedTime || f.modifiedDate ? formatRecentDate(f.modifiedTime || f.modifiedDate) : '';
+      const name = escapeHtml((f.name || 'Document').trim());
+      const url = (f.url || '').replace(/"/g, '&quot;');
+      return `<div class="recent-upload-item" data-url="${url}" onclick="event.stopPropagation(); openRecentDoc(this.dataset.url)">` +
+        (d ? `<span class="recent-upload-date">${d}</span>` : '') +
+        `<span class="recent-upload-name">${name}</span></div>`;
+    }).join('');
+  }
+
+  function openRecentDoc(url) {
+    if (url) window.open(url, '_blank');
+    else { showDocsScreen(); closeDrawer(); }
+  }
+
+  function formatRecentDate(s) {
+    if (!s) return '';
+    const d = new Date(s);
+    const now = new Date();
+    const diff = now - d;
+    if (diff < 86400000) return 'Today';
+    if (diff < 172800000) return 'Yesterday';
+    if (diff < 604800000) return d.toLocaleDateString('en-US', { weekday: 'short' });
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
   function renderHomeProjectsScroller() {
     const wrap = document.getElementById('homeProjectsScroller');
     const scrollEl = document.getElementById('homeProjectsScroll');
@@ -3861,7 +4001,8 @@
     scrollEl.innerHTML = inProgress.map(p => {
       const d = getProjectLandingDetails(p);
       const progPct = Math.round(d.prog);
-      return `<span class="home-project-chip" onclick="event.stopPropagation(); showProjectsScreen(); projectsSelectProject('${p.id}'); closeDrawer();"><span class="home-project-chip-title">${escapeHtml(p.title)}</span><span class="home-project-chip-pct">${progPct}%</span></span>`;
+      const phaseInfo = d.currentPhaseName ? escapeHtml(d.currentPhaseName) : (d.phaseLabel || '');
+      return `<span class="home-project-chip" onclick="event.stopPropagation(); showProjectsScreen(); projectsSelectProject('${p.id}'); closeDrawer();"><div class="home-project-chip-top"><span class="home-project-chip-title">${escapeHtml(p.title)}</span><span class="home-project-chip-pct">${progPct}%</span></div>${phaseInfo ? `<span class="home-project-chip-phase">${phaseInfo}</span>` : ''}<div class="home-project-chip-bar"><div class="home-project-chip-fill" style="width:${progPct}%"></div></div></span>`;
     }).join('');
   }
 
@@ -3870,6 +4011,7 @@
     projectsViewing = null;
     document.getElementById('projectsLanding').style.display = 'flex';
     document.getElementById('projectsView').style.display = 'none';
+    document.getElementById('app').classList.remove('in-project-view');
     renderProjectsLanding();
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
     document.querySelector('.drawer-item:nth-child(2)').classList.add('active');
@@ -3998,6 +4140,7 @@
     if (firstIncomplete >= 0) projectsCurrentPhaseIndex = firstIncomplete;
     document.getElementById('projectsLanding').style.display = 'none';
     document.getElementById('projectsView').style.display = 'flex';
+    document.getElementById('app').classList.add('in-project-view');
     renderProjectsView();
     updateScreenAddFabs();
   }
@@ -4006,6 +4149,7 @@
     projectsViewing = null;
     document.getElementById('projectsLanding').style.display = 'flex';
     document.getElementById('projectsView').style.display = 'none';
+    document.getElementById('app').classList.remove('in-project-view');
     renderProjectsLanding();
     updateScreenAddFabs();
   }
@@ -4037,6 +4181,7 @@
       projectsViewing = null;
       document.getElementById('projectsLanding').style.display = 'flex';
       document.getElementById('projectsView').style.display = 'none';
+      document.getElementById('app').classList.remove('in-project-view');
       renderProjectsLanding();
     } else {
       renderProjectsLanding();
