@@ -19,6 +19,14 @@
       }
       setVh();
     }
+    var vvRaf = 0;
+    function setVisualViewportDebounced() {
+      if (vvRaf) cancelAnimationFrame(vvRaf);
+      vvRaf = requestAnimationFrame(function() {
+        vvRaf = 0;
+        setVisualViewport();
+      });
+    }
     function forceLayoutRecalc() {
       setVisualViewport();
       document.body.offsetHeight;
@@ -26,7 +34,7 @@
     }
     setVisualViewport();
     requestAnimationFrame(function() { requestAnimationFrame(setVisualViewport); });
-    window.addEventListener('resize', setVisualViewport);
+    window.addEventListener('resize', setVisualViewportDebounced);
     window.addEventListener('orientationchange', function() { setTimeout(forceLayoutRecalc, 150); });
     window.addEventListener('load', function() {
       setVisualViewport();
@@ -36,8 +44,8 @@
     });
     window.addEventListener('pageshow', function(e) { if (e.persisted) forceLayoutRecalc(); });
     if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', setVisualViewport);
-      window.visualViewport.addEventListener('scroll', setVisualViewport);
+      window.visualViewport.addEventListener('resize', setVisualViewportDebounced);
+      window.visualViewport.addEventListener('scroll', setVisualViewportDebounced);
     }
   </script>
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -593,16 +601,17 @@
     }
     .topbar-left, .topbar-right { width: 34px; }
 
-    /* Bottom bar — covers safe area at bottom, replaces black bar */
-    /* Use top + translateY so iOS visualViewport sync works (bottom:0 is buggy on load) */
+    /* Bottom bar — anchored to layout viewport bottom (stable; avoids tilt/resize jump) */
     .app-bottom-bar {
       position: fixed;
-      top: var(--vvh, 100vh);
-      transform: translateY(-100%);
+      bottom: 0;
       left: 0;
       right: 0;
       padding-top: 0;
       padding-bottom: max(0, min(env(safe-area-inset-bottom, 0px), 40px));
+      transform: translateZ(0);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
       background: var(--edge-bg, linear-gradient(135deg, #fdf0e8 0%, #fce4d6 40%, #fad4c0 100%));
       border-top: 1px solid rgba(0,0,0,0.04);
       box-shadow: 0 -4px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.4);
