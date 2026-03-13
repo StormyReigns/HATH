@@ -8,16 +8,22 @@
       var h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
       if (h > 0) document.documentElement.style.setProperty('--vh', (h * 0.01) + 'px');
     }
+    function forceLayoutRecalc() {
+      setVh();
+      document.body.offsetHeight;
+      window.dispatchEvent(new Event('resize'));
+    }
     setVh();
     requestAnimationFrame(function() { requestAnimationFrame(setVh); });
     window.addEventListener('resize', setVh);
-    window.addEventListener('orientationchange', function() { setTimeout(setVh, 150); });
+    window.addEventListener('orientationchange', function() { setTimeout(forceLayoutRecalc, 150); });
     window.addEventListener('load', function() {
       setVh();
       setTimeout(setVh, 100);
-      setTimeout(setVh, 350);
+      setTimeout(forceLayoutRecalc, 350);
       setTimeout(setVh, 750);
     });
+    window.addEventListener('pageshow', function(e) { if (e.persisted) forceLayoutRecalc(); });
     if (window.visualViewport) window.visualViewport.addEventListener('resize', setVh);
   </script>
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -249,7 +255,6 @@
     }
     html.dark-mode .screen-item.selected { background: rgba(224,152,104,0.15); }
     html.dark-mode .screen-item-edit-btn:hover { background: rgba(255,255,255,0.08); }
-    html.dark-mode .docs-add-btn { background: var(--accent); color: #fff; }
     html.dark-mode .settings-section { border-color: rgba(255,255,255,0.08); }
     html.dark-mode .settings-option {
       background: rgba(45,40,38,0.8);
@@ -314,6 +319,24 @@
     html.dark-mode .action-sheet { background: #252220; }
     html.dark-mode .action-sheet-option { color: var(--text); }
     html.dark-mode .action-sheet-option:hover { background: rgba(255,255,255,0.06); }
+    html.dark-mode .celebration-content {
+      background: linear-gradient(145deg, #2a2520 0%, #1f1c18 100%);
+      border-color: rgba(224,152,104,0.5);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
+      color: var(--text);
+    }
+    html.dark-mode .celebration-content .celebration-sub { color: var(--text2); }
+    html.dark-mode .celebration-project-content .celebration-quest-label,
+    html.dark-mode .celebration-project-content .celebration-title { color: var(--text); }
+    html.dark-mode .celebration-project-content .celebration-quest-label { color: var(--accent); }
+    html.dark-mode .celebration-project-content .celebration-quote { color: var(--text); }
+    html.dark-mode .celebration-image { border-color: rgba(224,152,104,0.25); }
+    html.dark-mode .celebration-continue-btn {
+      background: var(--accent);
+      color: #1a1816;
+      border-color: rgba(224,152,104,0.5);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
     html.dark-mode .blatherbook-fab { background: rgba(45,40,38,0.95); box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
     html.dark-mode .blatherbook-panel { background: #252220; }
     html.dark-mode .blatherbook-header { border-color: rgba(255,255,255,0.08); }
@@ -336,7 +359,10 @@
     html.dark-mode .screen-item, html.dark-mode .screen-item-name,
     html.dark-mode .screen-loading, html.dark-mode .screen-footer a,
     html.dark-mode .drawer-wordmark, html.dark-mode .drawer-tagline,
-    html.dark-mode .drawer-item, html.dark-mode .drawer-footer {
+    html.dark-mode .drawer-item, html.dark-mode .drawer-footer,
+    html.dark-mode .celebration-content, html.dark-mode .celebration-content .celebration-sub,
+    html.dark-mode .celebration-project-content .celebration-title,
+    html.dark-mode .celebration-project-content .celebration-quote {
       text-shadow: 0 1px 2px rgba(0,0,0,0.4);
     }
 
@@ -536,13 +562,14 @@
     .topbar-left, .topbar-right { width: 34px; }
 
     /* Bottom bar — covers safe area at bottom, replaces black bar */
+    /* min() caps erroneous env() on iOS initial load before orientation recalc */
     .app-bottom-bar {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
       padding-top: 2px;
-      padding-bottom: max(2px, env(safe-area-inset-bottom));
+      padding-bottom: max(2px, min(env(safe-area-inset-bottom, 0px), 40px));
       background: var(--edge-bg, linear-gradient(135deg, #fdf0e8 0%, #fce4d6 40%, #fad4c0 100%));
       border-top: 1px solid rgba(0,0,0,0.06);
       z-index: 80;
@@ -550,7 +577,7 @@
     }
     html.dark-mode .app-bottom-bar { background: #1a1816; border-top-color: rgba(255,255,255,0.08); }
     html.dark-mode .bottom-bar-btn:hover { background: rgba(255,255,255,0.06); }
-    html.dark-mode .bottom-bar-add { background: var(--accent); color: white; }
+    html.dark-mode .bottom-bar-home { color: var(--accent); }
     .bottom-bar-inner {
       display: flex;
       align-items: center;
@@ -592,16 +619,15 @@
     }
     .bottom-bar-hamburger span:nth-child(2) { width: 65%; }
     .bottom-bar-hamburger span:nth-child(3) { width: 82%; }
-    .bottom-bar-add {
+    .bottom-bar-home {
       width: 44px;
       height: 44px;
-      background: var(--accent);
-      color: white;
-      font-size: 24px;
+      background: transparent;
+      color: var(--accent);
+      font-size: 22px;
       line-height: 1;
-      font-weight: 300;
     }
-    .bottom-bar-add:hover { background: var(--accent); opacity: 0.9; }
+    .bottom-bar-home:hover { background: rgba(192,122,74,0.15); }
     .bottom-bar-blathers {
       width: 56px;
       height: 56px;
@@ -1113,10 +1139,10 @@
     .screen-loading { text-align: center; padding: 24px; color: var(--muted); font-size: 13px; }
 
     /* Schedule screen */
-    #scheduleScreen { flex-direction: column; padding: 8px 0 12px; }
+    #scheduleScreen { flex-direction: column; padding: 4px 0 6px; }
     .schedule-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 8px 0 12px; flex-shrink: 0;
+      padding: 4px 0 6px; flex-shrink: 0;
     }
     .schedule-title {
       font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 400;
@@ -1252,11 +1278,11 @@
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
     .schedule-chips-wrap::-webkit-scrollbar { display: none; }
     .schedule-chips {
-      display: flex; gap: 8px; padding: 4px 0;
+      display: flex; gap: 8px; padding: 2px 0;
       padding-right: env(safe-area-inset-right, 0);
     }
     .schedule-chip {
@@ -1331,9 +1357,9 @@
     .schedule-date-header {
       font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
       text-transform: uppercase; color: var(--muted);
-      padding: 16px 4px 6px; font-family: 'Playfair Display', serif;
+      padding: 8px 4px 3px; font-family: 'Playfair Display', serif;
     }
-    .schedule-date-header:first-of-type { padding-top: 4px; }
+    .schedule-date-header:first-of-type { padding-top: 2px; }
     .schedule-mini-cal-overlay {
       position: fixed; inset: 0; z-index: 200;
       background: rgba(0,0,0,0.3);
@@ -1450,9 +1476,29 @@
     html.font-large .drawer,
     html.font-large .overlay { zoom: 1.125; }
 
-    /* Documents add button — now in bottom bar; keep for any refs but hide */
-    #documentsScreen { position: relative; }
-    .docs-add-btn { display: none !important; }
+    /* Screen add buttons — low/center floating + on Docs, Projects, Schedule */
+    .screen-add-fab {
+      display: none;
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: calc(76px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
+      width: 56px;
+      height: 56px;
+      border: none;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 28px;
+      line-height: 1;
+      cursor: pointer;
+      z-index: 70;
+      box-shadow: 0 4px 16px rgba(192,122,74,0.4);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .screen-add-fab.visible { display: flex; align-items: center; justify-content: center; }
+    .screen-add-fab:active { transform: translateX(-50%) scale(0.95); }
+    html.dark-mode .screen-add-fab { background: var(--accent); box-shadow: 0 4px 16px rgba(192,122,74,0.35); }
 
     /* ── PROJECTS SCREEN ── */
     #projectsScreen.visible {
@@ -1939,7 +1985,7 @@
     .celebration-overlay {
       position: absolute; inset: 0;
       display: flex; align-items: center; justify-content: center;
-      background: rgba(0,0,0,0.35);
+      background: rgba(0,0,0,0.5);
       opacity: 0; visibility: hidden; pointer-events: none;
       transition: opacity 0.3s ease, visibility 0.3s ease;
       z-index: 10;
@@ -1947,19 +1993,36 @@
     .celebration-project-full { position: absolute; }
     .celebration-overlay.show { opacity: 1; visibility: visible; pointer-events: auto; }
     .celebration-content {
-      background: white;
-      padding: 24px 36px;
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      background: linear-gradient(145deg, #fdf8f4 0%, #f5ebe0 100%);
+      padding: 28px 40px;
+      border-radius: 20px;
+      border: 2px solid rgba(192,122,74,0.4);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.6);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
       font-size: 18px; font-weight: 600; color: var(--text);
       transform: scale(0.5); opacity: 0;
       animation: celebration-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      position: relative;
+      min-width: 260px;
     }
+    .celebration-content .celebration-sub {
+      font-size: 14px; font-weight: 400; color: var(--text2);
+      font-family: 'Playfair Display', serif; font-style: italic;
+    }
+    .celebration-phase-content .celebration-icon { font-size: 44px; margin-bottom: 4px; }
     .celebration-project-content {
-      padding: 36px 48px;
+      padding: 36px 48px 56px;
       font-size: 24px;
       animation: celebration-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    .celebration-project-content .celebration-quest-label {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .celebration-project-content .celebration-title {
+      font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 500;
+      color: var(--text); margin-bottom: 16px;
     }
     .celebration-image {
       width: 100%;
@@ -1967,9 +2030,10 @@
       height: auto;
       display: block;
       border-radius: 12px;
+      border: 1px solid rgba(192,122,74,0.2);
     }
     .celebration-project-content .celebration-quote {
-      margin-top: 20px;
+      margin-top: 16px;
       margin-bottom: 0;
       padding-top: 0;
       border-top: none;
@@ -1982,6 +2046,24 @@
       max-width: 320px;
       text-align: center;
     }
+    .celebration-continue-btn {
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 32px;
+      font-size: 16px; font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      background: var(--accent);
+      color: #fff;
+      border: 2px solid rgba(192,122,74,0.6);
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(192,122,74,0.4);
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .celebration-continue-btn:hover { transform: translateX(-50%) translateY(-1px); box-shadow: 0 6px 20px rgba(192,122,74,0.5); }
+    .celebration-continue-btn:active { transform: translateX(-50%) scale(0.98); }
     .celebration-icon { font-size: 48px; }
     @keyframes celebration-pop {
       to { transform: scale(1); opacity: 1; }
@@ -2375,7 +2457,7 @@
         <button type="button" class="docs-selection-delete" onclick="deleteSelectedDocs()">Delete</button>
       </div>
       <div class="screen-list" id="docsList"></div>
-      <button type="button" class="docs-add-btn" onclick="openDocsAddMenu()" title="Add document">+</button>
+      <button type="button" class="screen-add-fab" id="docsAddFab" onclick="openDocsAddMenu()" title="Add document" aria-label="Add">+</button>
     </div>
     <input type="file" id="docsFileScan" accept="image/*" capture="environment" style="display:none">
     <input type="file" id="docsFileUpload" style="display:none">
@@ -2448,6 +2530,7 @@
         <div class="projects-in-progress-label">In progress</div>
         <div class="screen-list" id="projectsInProgressList"></div>
         <div class="projects-empty" id="projectsEmpty">No projects yet. Tap + to create one.</div>
+        <button type="button" class="screen-add-fab" id="projectsAddFab" onclick="openCreateProjectModal()" title="Create project" aria-label="Create project">+</button>
       </div>
       <div class="projects-view" id="projectsView" style="display:none">
         <div class="projects-view-header">
@@ -2462,7 +2545,12 @@
         <div class="projects-phase-cards-wrap">
           <div class="projects-phase-cards" id="projectsPhaseCards"></div>
           <div class="celebration-overlay celebration-phase" id="phaseCelebrationOverlay">
-            <div class="celebration-content"><span class="celebration-icon">✓</span><span>Phase complete!</span></div>
+            <div class="celebration-content celebration-phase-content">
+              <span class="celebration-icon">✓</span>
+              <span>Phase complete!</span>
+              <span class="celebration-sub" id="phaseCelebrationPhaseName"></span>
+              <span class="celebration-sub" id="phaseCelebrationProjectName"></span>
+            </div>
           </div>
         </div>
         <div class="projects-korl-quote" id="projectsKorlQuote"></div>
@@ -2477,8 +2565,11 @@
         </div>
         <div class="celebration-overlay celebration-project celebration-project-full" id="projectCelebrationOverlay">
           <div class="celebration-content celebration-project-content">
+            <div class="celebration-quest-label">Quest Complete</div>
+            <div class="celebration-title" id="celebrationProjectTitle"></div>
             <img class="celebration-image" src="https://stormyreigns.github.io/HATH/Next%20Adventure.png" alt="Next Adventure">
             <p class="celebration-quote" id="celebrationCompleteQuote"></p>
+            <button type="button" class="celebration-continue-btn" id="celebrationContinueBtn" onclick="dismissProjectCelebration()">Continue</button>
           </div>
         </div>
       </div>
@@ -2570,7 +2661,7 @@
         <span></span><span></span><span></span>
       </button>
       <div class="bottom-bar-center">
-        <button type="button" class="bottom-bar-btn bottom-bar-add" id="bottomBarAdd" onclick="handleBottomBarAdd()" aria-label="Add">+</button>
+        <button type="button" class="bottom-bar-btn bottom-bar-home" id="bottomBarHome" onclick="goHome()" aria-label="Home">⌂</button>
       </div>
       <button type="button" class="bottom-bar-btn bottom-bar-blathers" id="bottomBarBlathers" onclick="openBlatherBookPanel()" aria-label="Ask Blathers">
         <img src="https://stormyreigns.github.io/HATH/BlatherBook.png" alt="Blathers">
@@ -2773,7 +2864,8 @@
     applyFontSize(localStorage.getItem('shasta_font_' + email) || 'default');
     startKeepalivePing();
     updateBlatherBookVisibility();
-    updateBottomBarAdd();
+    updateBottomBarHome();
+    updateScreenAddFabs();
   }
 
   function showOfflineScreen() {
@@ -3212,7 +3304,8 @@
     setBlathers('sleep');
     document.getElementById('greetingText').innerHTML = getRandomGreeting();
     updateBlatherBookVisibility();
-    updateBottomBarAdd();
+    updateBottomBarHome();
+    updateScreenAddFabs();
   }
 
   function showSubScreen(screenId) {
@@ -3229,7 +3322,8 @@
     document.getElementById('updatedAt').style.display = 'none';
     document.querySelector('.body').classList.add('chat-mode');
     updateBlatherBookVisibility();
-    updateBottomBarAdd();
+    updateBottomBarHome();
+    updateScreenAddFabs();
   }
 
   function updateBlatherBookVisibility() {
@@ -3242,25 +3336,27 @@
     blathersBtn.style.display = onSubScreen ? 'flex' : 'none';
   }
 
-  function updateBottomBarAdd() {
-    const addBtn = document.getElementById('bottomBarAdd');
-    if (!addBtn) return;
+  function updateBottomBarHome() {
+    const homeBtn = document.getElementById('bottomBarHome');
+    if (!homeBtn) return;
+    const onSubScreen = document.getElementById('documentsScreen').classList.contains('visible') ||
+      document.getElementById('projectsScreen').classList.contains('visible') ||
+      document.getElementById('scheduleScreen').classList.contains('visible') ||
+      document.getElementById('settingsScreen').classList.contains('visible');
+    homeBtn.style.display = onSubScreen ? 'flex' : 'none';
+    homeBtn.parentElement.style.display = onSubScreen ? 'flex' : 'none';
+  }
+
+  function updateScreenAddFabs() {
     const onDocs = document.getElementById('documentsScreen').classList.contains('visible');
     const onProjects = document.getElementById('projectsScreen').classList.contains('visible');
     const onSchedule = document.getElementById('scheduleScreen').classList.contains('visible');
-    const showAdd = onDocs || onProjects || onSchedule;
-    addBtn.style.display = showAdd ? 'flex' : 'none';
-    addBtn.parentElement.style.display = showAdd ? 'flex' : 'none';
-  }
-
-  function handleBottomBarAdd() {
-    if (document.getElementById('documentsScreen').classList.contains('visible')) {
-      openDocsAddMenu();
-    } else if (document.getElementById('projectsScreen').classList.contains('visible')) {
-      openCreateProjectModal();
-    } else if (document.getElementById('scheduleScreen').classList.contains('visible')) {
-      openEventModal(null);
-    }
+    const docsAdd = document.getElementById('docsAddFab');
+    const projectsAdd = document.getElementById('projectsAddFab');
+    const scheduleAdd = document.getElementById('scheduleAddFab');
+    if (docsAdd) docsAdd.classList.toggle('visible', onDocs);
+    if (projectsAdd) projectsAdd.classList.toggle('visible', onProjects);
+    if (scheduleAdd) scheduleAdd.classList.toggle('visible', onSchedule);
   }
 
   let docsBreadcrumb = [{ id: DOCS_FOLDER_ID, name: 'ShastApp Docs' }];
@@ -3842,7 +3938,7 @@
     document.getElementById('projectsLanding').style.display = 'none';
     document.getElementById('projectsView').style.display = 'flex';
     renderProjectsView();
-    updateBottomBarAdd();
+    updateScreenAddFabs();
   }
 
   function projectsBackToLanding() {
@@ -3850,7 +3946,7 @@
     document.getElementById('projectsLanding').style.display = 'flex';
     document.getElementById('projectsView').style.display = 'none';
     renderProjectsLanding();
-    updateBottomBarAdd();
+    updateScreenAddFabs();
   }
 
   function projectsConfirmDelete(projectId) {
@@ -4030,30 +4126,57 @@
     }, 0);
   }
 
+  let projectCelebrationCompletedId = null;
+
   function showPhaseCelebrationThenScroll() {
     const overlay = document.getElementById('phaseCelebrationOverlay');
+    const phaseNameEl = document.getElementById('phaseCelebrationPhaseName');
+    const projectNameEl = document.getElementById('phaseCelebrationProjectName');
+    const p = projectsViewing;
+    const phaseIdx = projectsCurrentPhaseIndex > 0 ? projectsCurrentPhaseIndex - 1 : 0;
+    if (phaseNameEl && p && p.phases && p.phases[phaseIdx]) {
+      phaseNameEl.textContent = p.phases[phaseIdx].title || 'Phase ' + (phaseIdx + 1);
+      phaseNameEl.style.display = '';
+    } else if (phaseNameEl) phaseNameEl.style.display = 'none';
+    if (projectNameEl && p) {
+      projectNameEl.textContent = p.title ? '"' + p.title + '"' : '';
+      projectNameEl.style.display = p.title ? '' : 'none';
+    } else if (projectNameEl) projectNameEl.style.display = 'none';
     if (overlay) overlay.classList.add('show');
     setTimeout(() => {
       if (overlay) overlay.classList.remove('show');
-    }, 1000);
+      const cardsEl = document.getElementById('projectsPhaseCards');
+      const target = cardsEl && cardsEl.querySelector('.projects-phase-card[data-phase-idx="' + projectsCurrentPhaseIndex + '"]');
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }, 2000);
   }
 
   function showProjectCelebrationThenLand(completedProjectId) {
+    projectCelebrationCompletedId = completedProjectId;
     const overlay = document.getElementById('projectCelebrationOverlay');
     const quoteEl = document.getElementById('celebrationCompleteQuote');
+    const titleEl = document.getElementById('celebrationProjectTitle');
+    const p = getProjects().find(x => x.id === completedProjectId);
+    if (titleEl) titleEl.textContent = (p && p.title) ? p.title : 'Project complete!';
     if (quoteEl) {
       const q = ensureCompleteQuoteForProject(completedProjectId);
       quoteEl.innerHTML = q ? escapeHtml(q).replace(/\n/g, '<br>') : '';
       quoteEl.style.display = q ? 'block' : 'none';
     }
     if (overlay) overlay.classList.add('show');
-    setTimeout(() => {
-      if (overlay) overlay.classList.remove('show');
+  }
+
+  function dismissProjectCelebration() {
+    const overlay = document.getElementById('projectCelebrationOverlay');
+    if (overlay) overlay.classList.remove('show');
+    const id = projectCelebrationCompletedId;
+    projectCelebrationCompletedId = null;
+    if (id) {
       projectsViewing = null;
       document.getElementById('projectsLanding').style.display = 'flex';
       document.getElementById('projectsView').style.display = 'none';
-      renderProjectsLanding(completedProjectId);
-    }, 2000);
+      renderProjectsLanding(id);
+    }
   }
 
   function projectsToggleCheck(phaseIdx, itemIdx) {
