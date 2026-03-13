@@ -8,23 +8,37 @@
       var h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
       if (h > 0) document.documentElement.style.setProperty('--vh', (h * 0.01) + 'px');
     }
-    function forceLayoutRecalc() {
+    function setVisualViewport() {
+      var vv = window.visualViewport;
+      if (vv) {
+        var h = vv.height;
+        if (h > 0) document.documentElement.style.setProperty('--vvh', h + 'px');
+      } else {
+        var h = window.innerHeight;
+        if (h > 0) document.documentElement.style.setProperty('--vvh', h + 'px');
+      }
       setVh();
+    }
+    function forceLayoutRecalc() {
+      setVisualViewport();
       document.body.offsetHeight;
       window.dispatchEvent(new Event('resize'));
     }
-    setVh();
-    requestAnimationFrame(function() { requestAnimationFrame(setVh); });
-    window.addEventListener('resize', setVh);
+    setVisualViewport();
+    requestAnimationFrame(function() { requestAnimationFrame(setVisualViewport); });
+    window.addEventListener('resize', setVisualViewport);
     window.addEventListener('orientationchange', function() { setTimeout(forceLayoutRecalc, 150); });
     window.addEventListener('load', function() {
-      setVh();
-      setTimeout(setVh, 100);
-      setTimeout(forceLayoutRecalc, 350);
-      setTimeout(setVh, 750);
+      setVisualViewport();
+      [50, 100, 200, 350, 500, 750, 1200].forEach(function(delay) {
+        setTimeout(forceLayoutRecalc, delay);
+      });
     });
     window.addEventListener('pageshow', function(e) { if (e.persisted) forceLayoutRecalc(); });
-    if (window.visualViewport) window.visualViewport.addEventListener('resize', setVh);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', setVisualViewport);
+      window.visualViewport.addEventListener('scroll', setVisualViewport);
+    }
   </script>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -45,6 +59,7 @@
       --text2:  #8a7a72;
       --muted:  #b8a99e;
       --accent: #c07a4a;
+      --vvh: 100vh;
     }
 
     html {
@@ -570,20 +585,26 @@
     .topbar-left, .topbar-right { width: 34px; }
 
     /* Bottom bar — covers safe area at bottom, replaces black bar */
-    /* min() caps erroneous env() on iOS initial load before orientation recalc */
+    /* Use top + translateY so iOS visualViewport sync works (bottom:0 is buggy on load) */
     .app-bottom-bar {
       position: fixed;
-      bottom: 0;
+      top: var(--vvh, 100vh);
+      transform: translateY(-100%);
       left: 0;
       right: 0;
       padding-top: 2px;
       padding-bottom: max(2px, min(env(safe-area-inset-bottom, 0px), 40px));
       background: var(--edge-bg, linear-gradient(135deg, #fdf0e8 0%, #fce4d6 40%, #fad4c0 100%));
-      border-top: 1px solid rgba(0,0,0,0.06);
+      border-top: 1px solid rgba(0,0,0,0.04);
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.4);
       z-index: 80;
       flex-shrink: 0;
     }
-    html.dark-mode .app-bottom-bar { background: #1a1816; border-top-color: rgba(255,255,255,0.08); }
+    html.dark-mode .app-bottom-bar {
+      background: #1a1816;
+      border-top-color: rgba(255,255,255,0.04);
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
     html.dark-mode .bottom-bar-btn:hover { background: rgba(255,255,255,0.06); }
     html.dark-mode .bottom-bar-home { color: var(--accent); }
     .bottom-bar-inner {
