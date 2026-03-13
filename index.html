@@ -9,9 +9,15 @@
       if (h > 0) document.documentElement.style.setProperty('--vh', (h * 0.01) + 'px');
     }
     setVh();
+    requestAnimationFrame(function() { requestAnimationFrame(setVh); });
     window.addEventListener('resize', setVh);
-    window.addEventListener('orientationchange', function() { setTimeout(setVh, 100); });
-    window.addEventListener('load', setVh);
+    window.addEventListener('orientationchange', function() { setTimeout(setVh, 150); });
+    window.addEventListener('load', function() {
+      setVh();
+      setTimeout(setVh, 100);
+      setTimeout(setVh, 350);
+      setTimeout(setVh, 750);
+    });
     if (window.visualViewport) window.visualViewport.addEventListener('resize', setVh);
   </script>
   <meta name="apple-mobile-web-app-capable" content="yes">
