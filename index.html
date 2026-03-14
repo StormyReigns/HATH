@@ -1180,6 +1180,7 @@
     .screen-breadcrumb .sep { margin: 0 6px; color: var(--muted); cursor: default; }
     .screen-list {
       flex: 1;
+      min-height: 0;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
@@ -1550,7 +1551,7 @@
     /* Settings screen */
     #settingsScreen { padding: 8px 0 24px; overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; min-height: 0; display: flex; flex-direction: column; }
     #settingsScreen.visible { display: flex !important; }
-    .settings-section { padding: 16px 0; border-bottom: 1px solid rgba(0,0,0,0.06); }
+    .settings-section { padding: 16px 0; border-bottom: 1px solid rgba(0,0,0,0.06); flex-shrink: 0; }
     .settings-section:last-child { border-bottom: none; }
     .settings-label { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 12px; }
     .settings-options { display: flex; flex-wrap: wrap; gap: 10px; }
@@ -1827,7 +1828,7 @@
       text-transform: uppercase; letter-spacing: 0.06em;
       padding: 0 4px 8px;
     }
-    #projectsInProgressList { flex: 1; min-height: 120px; overflow-y: auto; }
+    #projectsInProgressList { flex: 1; min-height: 0; overflow-y: auto; }
     .projects-empty {
       flex: 1;
       display: flex; align-items: center; justify-content: center;
@@ -3567,6 +3568,10 @@
     const list = document.getElementById('docsList');
     if (!list) return;
     list.innerHTML = '';
+    if (!data) {
+      list.innerHTML = '<div class="screen-loading">Loading…</div>';
+      return;
+    }
     if (data.error) {
       list.innerHTML = '<div class="screen-loading">Could not load folder. ' + escapeHtml(String(data.error).slice(0, 80)) + (String(data.error).length > 80 ? '…' : '') + '</div>';
       return;
@@ -5108,8 +5113,7 @@
     } else {
       html.classList.remove('dark-mode');
       if (meta) {
-        const user = localStorage.getItem('shasta_user');
-        const schemeId = (user && localStorage.getItem('shasta_bg_' + user)) || 'peach';
+        const schemeId = localStorage.getItem('shasta_bg_' + getSettingsUser()) || 'peach';
         const scheme = BG_SCHEMES.find(s => s.id === schemeId) || BG_SCHEMES[0];
         meta.setAttribute('content', scheme.themeColor);
       }
@@ -5117,21 +5121,21 @@
   }
 
   function setDarkMode(on) {
-    const user = localStorage.getItem('shasta_user');
-    if (user) localStorage.setItem('shasta_dark_' + user, on ? 'true' : '');
+    const user = getSettingsUser();
+    localStorage.setItem('shasta_dark_' + user, on ? 'true' : '');
     applyDarkMode(on);
     applyBgScheme(localStorage.getItem('shasta_bg_' + user) || 'peach');
   }
 
   function setBgScheme(schemeId) {
-    const user = localStorage.getItem('shasta_user');
-    if (user) localStorage.setItem('shasta_bg_' + user, schemeId);
+    const user = getSettingsUser();
+    localStorage.setItem('shasta_bg_' + user, schemeId);
     applyBgScheme(schemeId);
   }
 
   function renderBgSchemeOptions() {
-    const user = localStorage.getItem('shasta_user');
-    const current = (user && localStorage.getItem('shasta_bg_' + user)) || 'peach';
+    const user = getSettingsUser();
+    const current = localStorage.getItem('shasta_bg_' + user) || 'peach';
     const el = document.getElementById('bgSchemeOptions');
     if (!el) return;
     el.innerHTML = BG_SCHEMES.map(s => `
@@ -5156,19 +5160,23 @@
   }
 
   function setFontSize(sizeId) {
-    const user = localStorage.getItem('shasta_user');
-    if (user) localStorage.setItem('shasta_font_' + user, sizeId);
+    const user = getSettingsUser();
+    localStorage.setItem('shasta_font_' + user, sizeId);
     applyFontSize(sizeId);
   }
 
   function renderFontSizeOptions() {
-    const user = localStorage.getItem('shasta_user');
-    const current = (user && localStorage.getItem('shasta_font_' + user)) || 'default';
+    const user = getSettingsUser();
+    const current = localStorage.getItem('shasta_font_' + user) || 'default';
     const el = document.getElementById('fontSizeOptions');
     if (!el) return;
     el.innerHTML = FONT_SIZES.map(s => `
       <div class="settings-option ${s.id === current ? 'selected' : ''}" onclick="setFontSize('${s.id}'); renderFontSizeOptions();">${s.name}</div>
     `).join('');
+  }
+
+  function getSettingsUser() {
+    return localStorage.getItem('shasta_user') || '_default';
   }
 
   function showSettingsScreen() {
@@ -5177,20 +5185,20 @@
       renderBgSchemeOptions();
       renderFontSizeOptions();
     } catch (e) { console.warn('Settings render error:', e); }
-    const user = localStorage.getItem('shasta_user');
+    const user = getSettingsUser();
     const nickEl = document.getElementById('settingsNickname');
     const dumbEl = document.getElementById('settingsDumbBlathers');
     const darkEl = document.getElementById('settingsDarkMode');
     if (nickEl) {
-      nickEl.value = (user && localStorage.getItem('shasta_nickname_' + user)) || '';
+      nickEl.value = localStorage.getItem('shasta_nickname_' + user) || '';
       nickEl.oninput = () => {
-        if (user) localStorage.setItem('shasta_nickname_' + user, nickEl.value.trim());
+        localStorage.setItem('shasta_nickname_' + user, nickEl.value.trim());
       };
     }
     if (dumbEl) {
-      dumbEl.checked = !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true');
+      dumbEl.checked = localStorage.getItem('shasta_dumb_' + user) === 'true';
       dumbEl.onchange = () => {
-        if (user) localStorage.setItem('shasta_dumb_' + user, dumbEl.checked ? 'true' : '');
+        localStorage.setItem('shasta_dumb_' + user, dumbEl.checked ? 'true' : '');
       };
     }
     if (darkEl) {
