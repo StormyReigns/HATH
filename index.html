@@ -8,6 +8,15 @@
       var h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
       if (h > 0) document.documentElement.style.setProperty('--vh', (h * 0.01) + 'px');
     }
+    function updateSafeBottom() {
+      var testEl = document.createElement('div');
+      testEl.style.cssText = 'position:fixed;bottom:0;left:0;width:1px;height:env(safe-area-inset-bottom,0px);pointer-events:none;opacity:0;';
+      document.body.appendChild(testEl);
+      var measured = testEl.getBoundingClientRect().height || 0;
+      document.body.removeChild(testEl);
+      var capped = Math.min(measured, 34);
+      document.documentElement.style.setProperty('--safe-bottom', capped + 'px');
+    }
     function setVisualViewport() {
       var vv = window.visualViewport;
       if (vv) {
@@ -28,6 +37,7 @@
       });
     }
     function forceLayoutRecalc() {
+      updateSafeBottom();
       setVisualViewport();
       document.body.offsetHeight;
       window.dispatchEvent(new Event('resize'));
@@ -35,7 +45,7 @@
     setVisualViewport();
     requestAnimationFrame(function() { requestAnimationFrame(setVisualViewport); });
     window.addEventListener('resize', setVisualViewportDebounced);
-    window.addEventListener('orientationchange', function() { setTimeout(forceLayoutRecalc, 150); });
+    window.addEventListener('orientationchange', function() { setTimeout(function() { forceLayoutRecalc(); updateSafeBottom(); }, 300); });
     window.addEventListener('load', function() {
       setVisualViewport();
       [50, 100, 200, 350, 500, 750, 1200].forEach(function(delay) {
@@ -618,7 +628,7 @@
       left: 0;
       right: 0;
       padding-top: 0;
-      padding-bottom: min(env(safe-area-inset-bottom, 0px), 34px);
+      padding-bottom: var(--safe-bottom, 0px);
       transform: translateZ(0);
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
@@ -3019,7 +3029,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.1.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.1.3';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -3168,6 +3178,7 @@
     }
 
     hideLoadScreen();
+    updateSafeBottom();
   };
 
   // ── CONFIG ────────────────────────────────────────────────────
