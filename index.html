@@ -1596,15 +1596,6 @@
     }
     .settings-input::placeholder { color: var(--muted); }
     .settings-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
-    .settings-escape-banner {
-      padding: 12px; margin-bottom: 8px; border-radius: 10px;
-      background: rgba(224,152,104,0.25); border: 2px solid var(--accent);
-    }
-    .settings-escape-btn-full {
-      width: 100%; padding: 12px; font-size: 14px; font-weight: 600;
-      color: #1a1816; background: var(--accent); border: none;
-      border-radius: 8px; cursor: pointer;
-    }
     .settings-toggle {
       display: flex;
       align-items: center;
@@ -2663,9 +2654,6 @@
 
     <!-- Settings screen -->
     <div class="sub-screen" id="settingsScreen">
-      <div class="settings-escape-banner" id="forceLightModeBanner" style="display:none">
-        <button type="button" class="settings-escape-btn-full" onclick="forceLightMode()">Switch to light mode</button>
-      </div>
       <div class="settings-section">
         <label class="settings-toggle">
           <span>Dark mode</span>
@@ -2675,13 +2663,7 @@
       </div>
       <div class="settings-section">
         <div class="settings-label">Background</div>
-        <div class="settings-options" id="bgSchemeOptions">
-          <div class="settings-option selected" data-scheme="peach" onclick="setBgScheme('peach'); renderBgSchemeOptions();"><span class="settings-option-swatch peach"></span><span>Peach</span></div>
-          <div class="settings-option" data-scheme="lavender" onclick="setBgScheme('lavender'); renderBgSchemeOptions();"><span class="settings-option-swatch lavender"></span><span>Lavender</span></div>
-          <div class="settings-option" data-scheme="sage" onclick="setBgScheme('sage'); renderBgSchemeOptions();"><span class="settings-option-swatch sage"></span><span>Sage</span></div>
-          <div class="settings-option" data-scheme="sunset" onclick="setBgScheme('sunset'); renderBgSchemeOptions();"><span class="settings-option-swatch sunset"></span><span>Sunset</span></div>
-          <div class="settings-option" data-scheme="ocean" onclick="setBgScheme('ocean'); renderBgSchemeOptions();"><span class="settings-option-swatch ocean"></span><span>Ocean</span></div>
-        </div>
+        <div class="settings-options" id="bgSchemeOptions"></div>
       </div>
       <div class="settings-section">
         <div class="settings-label">Nickname</div>
@@ -2690,11 +2672,7 @@
       </div>
       <div class="settings-section">
         <div class="settings-label">Font Size</div>
-        <div class="settings-options" id="fontSizeOptions">
-          <div class="settings-option" onclick="setFontSize('small'); renderFontSizeOptions();">Small</div>
-          <div class="settings-option selected" onclick="setFontSize('default'); renderFontSizeOptions();">Default</div>
-          <div class="settings-option" onclick="setFontSize('large'); renderFontSizeOptions();">Large</div>
-        </div>
+        <div class="settings-options" id="fontSizeOptions"></div>
       </div>
       <div class="settings-section">
         <label class="settings-toggle">
@@ -3041,7 +3019,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.8';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.9';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -3780,7 +3758,6 @@
         list.innerHTML = '<div class="screen-loading">Could not load folder — API response invalid. Check that listFolder is wired in Apps Script doGet.</div>';
         return;
       }
-      if (data.error && typeof console !== 'undefined' && console.warn) console.warn('[Documents] API error:', data.error);
       if (!data.error && (data.folders || data.files)) {
         docsFolderCache[folderId] = data;
       }
@@ -3962,20 +3939,16 @@
     try {
       const key = PROJECTS_STORAGE_KEY + '_' + user;
       let raw = localStorage.getItem(key);
-      if (typeof console !== 'undefined' && console.log) console.log('[getProjects] key=' + key + ' raw=' + (raw ? raw.slice(0, 80) + '...' : 'null'));
       if (!raw) {
-        if (typeof console !== 'undefined' && console.log) console.log('[getProjects] before migration, checking ' + PROJECTS_STORAGE_KEY);
         raw = localStorage.getItem(PROJECTS_STORAGE_KEY);
         if (raw) {
           try {
             const migrated = JSON.parse(raw);
             if (Array.isArray(migrated) && migrated.length > 0) {
               localStorage.setItem(key, raw);
-              if (typeof console !== 'undefined' && console.log) console.log('[getProjects] migration done, copied to ' + key);
             }
           } catch (_) {}
         }
-        if (typeof console !== 'undefined' && console.log) console.log('[getProjects] after migration, raw=' + (raw ? 'present' : 'null'));
       }
       return raw ? JSON.parse(raw) : [];
     } catch (_) { return []; }
@@ -5207,19 +5180,6 @@
     applyBgScheme(localStorage.getItem('shasta_bg_' + user) || 'peach');
   }
 
-  function forceLightMode() {
-    var user = getSettingsUser();
-    localStorage.setItem('shasta_dark_' + user, '');
-    localStorage.removeItem('shasta_dark__default');
-    ALLOWED_USERS.forEach(function(e) { localStorage.removeItem('shasta_dark_' + e); });
-    document.documentElement.classList.remove('dark-mode');
-    document.documentElement.style.colorScheme = 'only light';
-    var meta = document.getElementById('themeColorMeta');
-    if (meta) meta.setAttribute('content', '#fdf0e8');
-    document.documentElement.style.setProperty('--edge-bg', 'linear-gradient(135deg, #fdf0e8 0%, #fce4d6 40%, #fad4c0 100%)');
-    location.reload();
-  }
-
   function setBgScheme(schemeId) {
     const user = getSettingsUser();
     localStorage.setItem('shasta_bg_' + user, schemeId);
@@ -5302,13 +5262,11 @@
     if (darkEl) {
       darkEl.checked = storedDark;
       darkEl.setAttribute('aria-checked', storedDark ? 'true' : 'false');
-      darkEl.onchange = function() {
+        darkEl.onchange = function() {
         var on = darkEl.checked;
         setDarkMode(on);
         storedDark = on;
         darkEl.setAttribute('aria-checked', on ? 'true' : 'false');
-        var escapeEl = document.getElementById('forceLightModeBanner');
-        if (escapeEl) escapeEl.style.display = on ? 'block' : 'none';
       };
     }
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
@@ -6132,38 +6090,6 @@
   }
 
   initDocsFileInputs();
-
-  // Sync settings options selected state on load (updates static HTML to match saved prefs)
-  (function initSettingsSelectedState() {
-    try {
-      if (typeof renderBgSchemeOptions === 'function') renderBgSchemeOptions();
-      if (typeof renderFontSizeOptions === 'function') renderFontSizeOptions();
-    } catch (e) { console.warn('Settings init:', e); }
-  })();
-
-  // Auth/API debug helper — run shastaDebug.testAuth() in browser console
-  // Also check: DevTools > Network > trigger AI/Documents > inspect response for {"error":"Unauthorized"}
-  window.shastaDebug = {
-    getUser: function() { return localStorage.getItem('shasta_user') || '(none)'; },
-    testPing: async function() {
-      const url = (API_URL || '') + '?action=ping';
-      try { const r = await fetch(url, { redirect: 'follow' }); const d = await r.json(); console.log('Ping:', d); return d; }
-      catch (e) { console.error('Ping failed:', e); return null; }
-    },
-    testWithUser: async function() {
-      const user = getApiUser();
-      const url = (API_URL || '') + '?action=ping&user=' + encodeURIComponent(user || '');
-      try { const r = await fetch(url, { redirect: 'follow' }); const d = await r.json(); console.log('Ping with user:', d); return d; }
-      catch (e) { console.error('Ping failed:', e); return null; }
-    },
-    testAuth: async function() {
-      console.log('User:', this.getUser());
-      console.log('API_URL:', API_URL);
-      console.log('ALLOWED_USERS:', ALLOWED_USERS);
-      await this.testPing();
-      await this.testWithUser();
-    }
-  };
 </script>
 </body>
 </html>
