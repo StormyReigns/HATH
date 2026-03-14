@@ -720,6 +720,7 @@
       justify-content: flex-start;
       padding-bottom: calc(32px + env(safe-area-inset-bottom));
       min-height: 0;
+      position: relative;
     }
     .app.in-project-view {
       padding-bottom: calc(4px + min(env(safe-area-inset-bottom, 0px), 40px));
@@ -1118,7 +1119,12 @@
     }
     .sub-screen.visible {
       display: flex !important;
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 5;
+      background: var(--edge-bg, linear-gradient(135deg, #fdf0e8 0%, #fce4d6 40%, #fad4c0 100%));
     }
+    html.dark-mode .sub-screen.visible { background: #1a1816; }
     .docs-header {
       display: flex;
       align-items: center;
@@ -3561,6 +3567,7 @@
 
   function renderDocsList(data) {
     const list = document.getElementById('docsList');
+    if (!list) return;
     list.innerHTML = '';
     if (data.error) {
       list.innerHTML = '<div class="screen-loading">Could not load folder. ' + escapeHtml(String(data.error).slice(0, 80)) + (String(data.error).length > 80 ? '…' : '') + '</div>';
@@ -3691,6 +3698,7 @@
 
   async function loadFolderContents(folderId, forceRefresh) {
     const list = document.getElementById('docsList');
+    if (!list) return;
     const cached = !forceRefresh && docsFolderCache[folderId];
 
     if (cached) {
@@ -4051,18 +4059,19 @@
     const inProgress = all.filter(p => !isProjectCompleted(p)).sort((a,b) => (b.modifiedAt || 0) - (a.modifiedAt || 0));
 
     const barEl = document.getElementById('projectsCompletedBar');
-    barEl.style.display = completed.length > 0 ? 'flex' : 'none';
+    if (barEl) barEl.style.display = completed.length > 0 ? 'flex' : 'none';
 
     const scrollEl = document.getElementById('projectsCompletedScroll');
     const chipHtml = completed.map(p => {
       const animateClass = newlyCompletedId && p.id === newlyCompletedId ? ' projects-completed-chip-new' : '';
       return `<span class="projects-completed-chip${animateClass}" onclick="projectsSelectCompleted('${p.id}')"><span class="projects-completed-trophy">🏆</span><span class="projects-completed-chip-title">${escapeHtml(p.title)}</span><button type="button" class="projects-completed-chip-delete" onclick="event.stopPropagation();projectsConfirmDelete('${p.id}')" aria-label="Delete" title="Delete">×</button></span>`;
     }).join('');
-    scrollEl.innerHTML = completed.length > 0 ? chipHtml : '';
+    if (scrollEl) scrollEl.innerHTML = completed.length > 0 ? chipHtml : '';
 
     setupVictoriesAutoScroll();
 
     const listEl = document.getElementById('projectsInProgressList');
+    if (!listEl) return;
     listEl.innerHTML = inProgress.map(p => {
       const d = getProjectLandingDetails(p);
       const progPct = Math.round(d.prog);
@@ -4088,7 +4097,8 @@
       </div>`;
     }).join('');
 
-    document.getElementById('projectsEmpty').style.display = inProgress.length === 0 && completed.length === 0 ? 'flex' : 'none';
+    const emptyEl = document.getElementById('projectsEmpty');
+    if (emptyEl) emptyEl.style.display = inProgress.length === 0 && completed.length === 0 ? 'flex' : 'none';
     listEl.style.display = inProgress.length === 0 ? 'none' : 'block';
   }
 
