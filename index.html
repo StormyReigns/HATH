@@ -720,8 +720,9 @@
       justify-content: flex-start;
       padding-bottom: calc(32px + env(safe-area-inset-bottom));
       min-height: 0;
-      position: relative;
     }
+    .body.chat-mode .hint-area,
+    .body.chat-mode .chat-area { display: none !important; }
     .app.in-project-view {
       padding-bottom: calc(4px + min(env(safe-area-inset-bottom, 0px), 40px));
     }
@@ -1114,17 +1115,14 @@
       flex: 1;
       flex-direction: column;
       width: 100%;
+      min-width: 0;
       overflow: hidden;
       min-height: 0;
     }
     .sub-screen.visible {
       display: flex !important;
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      z-index: 5;
-      background: var(--edge-bg, linear-gradient(135deg, #fdf0e8 0%, #fce4d6 40%, #fad4c0 100%));
+      flex: 1 1 0;
     }
-    html.dark-mode .sub-screen.visible { background: #1a1816; }
     .docs-header {
       display: flex;
       align-items: center;
@@ -5135,6 +5133,7 @@
     const user = localStorage.getItem('shasta_user');
     const current = (user && localStorage.getItem('shasta_bg_' + user)) || 'peach';
     const el = document.getElementById('bgSchemeOptions');
+    if (!el) return;
     el.innerHTML = BG_SCHEMES.map(s => `
       <div class="settings-option ${s.id === current ? 'selected' : ''}" data-scheme="${s.id}" onclick="setBgScheme('${s.id}'); renderBgSchemeOptions();">
         <span class="settings-option-swatch ${s.swatch}"></span>
@@ -5166,6 +5165,7 @@
     const user = localStorage.getItem('shasta_user');
     const current = (user && localStorage.getItem('shasta_font_' + user)) || 'default';
     const el = document.getElementById('fontSizeOptions');
+    if (!el) return;
     el.innerHTML = FONT_SIZES.map(s => `
       <div class="settings-option ${s.id === current ? 'selected' : ''}" onclick="setFontSize('${s.id}'); renderFontSizeOptions();">${s.name}</div>
     `).join('');
@@ -5173,8 +5173,10 @@
 
   function showSettingsScreen() {
     showSubScreen('settingsScreen');
-    renderBgSchemeOptions();
-    renderFontSizeOptions();
+    try {
+      renderBgSchemeOptions();
+      renderFontSizeOptions();
+    } catch (e) { console.warn('Settings render error:', e); }
     const user = localStorage.getItem('shasta_user');
     const nickEl = document.getElementById('settingsNickname');
     const dumbEl = document.getElementById('settingsDumbBlathers');
