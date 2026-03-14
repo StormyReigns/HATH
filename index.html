@@ -495,7 +495,7 @@
       100% { transform: scale(1) rotate(0deg); opacity: 1; }
     }
 
-    /* Input zone: Blathers + input bar, Blathers overlaps into input */
+    /* Input zone: Blathers + input bar — only on home, hidden when sub-screen visible */
     .input-zone {
       width: 100%;
       display: flex;
@@ -504,6 +504,7 @@
       position: relative;
       flex-shrink: 0;
     }
+    .body.chat-mode .input-zone { display: none !important; }
 
     /* Blathers overlaps the input bar, positioned just above submit area */
     .blathers-wrap {
@@ -2566,21 +2567,21 @@
     <div class="hint-area" id="hintArea">
       <div class="hint-greeting" id="greetingText"></div>
 
-      <div class="home-projects-scroller" id="homeProjectsScroller" onclick="showProjectsScreen(); closeDrawer()" role="button" tabindex="0" aria-label="View projects">
+      <div class="home-projects-scroller" id="homeProjectsScroller" onclick="closeDrawer(); showProjectsScreen()" role="button" tabindex="0" aria-label="View projects">
         <div class="home-projects-label">Projects</div>
         <div class="home-projects-scroll-wrap" id="homeProjectsScrollWrap">
           <div class="home-projects-scroll" id="homeProjectsScroll"></div>
         </div>
       </div>
 
-      <div class="upcoming-events" id="upcomingEvents" onclick="showScheduleScreen(); closeDrawer()" role="button" tabindex="0" aria-label="View schedule">
+      <div class="upcoming-events" id="upcomingEvents" onclick="closeDrawer(); showScheduleScreen()" role="button" tabindex="0" aria-label="View schedule">
         <div class="upcoming-events-label">Upcoming</div>
         <div class="upcoming-events-list" id="upcomingEventsList"></div>
       </div>
 
       <div class="matt-note" id="mattNote"></div>
 
-      <div class="recent-uploads" id="recentUploads" onclick="showDocsScreen(); closeDrawer()" role="button" tabindex="0" aria-label="View documents">
+      <div class="recent-uploads" id="recentUploads" onclick="closeDrawer(); showDocsScreen()" role="button" tabindex="0" aria-label="View documents">
         <div class="recent-uploads-label">Recent Uploads</div>
         <div class="recent-uploads-list" id="recentUploadsList"></div>
       </div>
@@ -2666,9 +2667,9 @@
     <!-- Projects screen -->
     <div class="sub-screen" id="projectsScreen">
       <div class="projects-landing" id="projectsLanding">
-      <div class="projects-header">
-        <h2 class="projects-title">Projects</h2>
-      </div>
+        <div class="projects-header">
+          <h2 class="projects-title">Projects</h2>
+        </div>
         <div class="projects-completed-bar" id="projectsCompletedBar">
           <div class="projects-completed-header">🏆 Victories</div>
           <div class="projects-completed-scroll-viewport" id="projectsCompletedViewport">
@@ -2846,13 +2847,13 @@
     <img class="drawer-header-icon" src="https://stormyreigns.github.io/HATH/SleepTokenIcon.png" alt="">
   </div>
   <nav class="drawer-nav">
-    <div class="drawer-item active" onclick="goHome(); closeDrawer()"><span class="drawer-icon">⌂</span> Home</div>
-    <div class="drawer-item" onclick="showProjectsScreen(); closeDrawer()"><span class="drawer-icon">📋</span> Projects</div>
-    <div class="drawer-item" onclick="showDocumentsScreen(); closeDrawer()"><span class="drawer-icon">📂</span> Documents</div>
+    <div class="drawer-item active" onclick="closeDrawer(); goHome()"><span class="drawer-icon">⌂</span> Home</div>
+    <div class="drawer-item" onclick="closeDrawer(); showProjectsScreen()"><span class="drawer-icon">📋</span> Projects</div>
+    <div class="drawer-item" onclick="closeDrawer(); showDocumentsScreen()"><span class="drawer-icon">📂</span> Documents</div>
     <div class="drawer-item"><span class="drawer-icon">💰</span> Finances</div>
     <div class="drawer-item"><span class="drawer-icon">🔧</span> Maintenance</div>
-    <div class="drawer-item" onclick="showScheduleScreen(); closeDrawer()"><span class="drawer-icon">📅</span> Schedule</div>
-    <div class="drawer-item" onclick="showSettingsScreen(); closeDrawer()"><span class="drawer-icon">⚙️</span> Settings</div>
+    <div class="drawer-item" onclick="closeDrawer(); showScheduleScreen()"><span class="drawer-icon">📅</span> Schedule</div>
+    <div class="drawer-item" onclick="closeDrawer(); showSettingsScreen()"><span class="drawer-icon">⚙️</span> Settings</div>
   </nav>
   <div class="drawer-footer">Built for your home</div>
   <div class="drawer-blathers" id="drawerBlathersWrap">
@@ -4011,7 +4012,7 @@
       const d = getProjectLandingDetails(p);
       const progPct = Math.round(d.prog);
       const phaseInfo = d.currentPhaseName ? escapeHtml(d.currentPhaseName) : (d.phaseLabel || '');
-      return `<span class="home-project-chip" onclick="event.stopPropagation(); showProjectsScreen(); projectsSelectProject('${p.id}'); closeDrawer();"><div class="home-project-chip-top"><span class="home-project-chip-title">${escapeHtml(p.title)}</span><span class="home-project-chip-pct">${progPct}%</span></div>${phaseInfo ? `<span class="home-project-chip-phase">${phaseInfo}</span>` : ''}<div class="home-project-chip-bar"><div class="home-project-chip-fill" style="width:${progPct}%"></div></div></span>`;
+      return `<span class="home-project-chip" onclick="event.stopPropagation(); closeDrawer(); showProjectsScreen(); projectsSelectProject('${p.id}');"><div class="home-project-chip-top"><span class="home-project-chip-title">${escapeHtml(p.title)}</span><span class="home-project-chip-pct">${progPct}%</span></div>${phaseInfo ? `<span class="home-project-chip-phase">${phaseInfo}</span>` : ''}<div class="home-project-chip-bar"><div class="home-project-chip-fill" style="width:${progPct}%"></div></div></span>`;
     }).join('');
   }
 
@@ -4021,9 +4022,12 @@
     document.getElementById('projectsLanding').style.display = 'flex';
     document.getElementById('projectsView').style.display = 'none';
     document.getElementById('app').classList.remove('in-project-view');
-    renderProjectsLanding();
+    requestAnimationFrame(function() {
+      requestAnimationFrame(renderProjectsLanding);
+    });
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
-    document.querySelector('.drawer-item:nth-child(2)').classList.add('active');
+    const projectsItem = document.querySelector('.drawer-item:nth-child(2)');
+    if (projectsItem) projectsItem.classList.add('active');
   }
 
   function renderProjectsLanding(newlyCompletedId) {
@@ -5150,20 +5154,27 @@
     const nickEl = document.getElementById('settingsNickname');
     const dumbEl = document.getElementById('settingsDumbBlathers');
     const darkEl = document.getElementById('settingsDarkMode');
-    if (nickEl) nickEl.value = (user && localStorage.getItem('shasta_nickname_' + user)) || '';
-    if (dumbEl) dumbEl.checked = !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true');
-    if (darkEl) darkEl.checked = isDarkMode();
-    nickEl.oninput = () => {
-      if (user) localStorage.setItem('shasta_nickname_' + user, nickEl.value.trim());
-    };
-    dumbEl.onchange = () => {
-      if (user) localStorage.setItem('shasta_dumb_' + user, dumbEl.checked ? 'true' : '');
-    };
-    darkEl.onchange = () => {
-      setDarkMode(darkEl.checked);
-    };
+    if (nickEl) {
+      nickEl.value = (user && localStorage.getItem('shasta_nickname_' + user)) || '';
+      nickEl.oninput = () => {
+        if (user) localStorage.setItem('shasta_nickname_' + user, nickEl.value.trim());
+      };
+    }
+    if (dumbEl) {
+      dumbEl.checked = !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true');
+      dumbEl.onchange = () => {
+        if (user) localStorage.setItem('shasta_dumb_' + user, dumbEl.checked ? 'true' : '');
+      };
+    }
+    if (darkEl) {
+      darkEl.checked = isDarkMode();
+      darkEl.onchange = () => {
+        setDarkMode(darkEl.checked);
+      };
+    }
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
-    document.querySelector('.drawer-item:nth-child(7)').classList.add('active');
+    const settingsItem = document.querySelector('.drawer-item:nth-child(7)');
+    if (settingsItem) settingsItem.classList.add('active');
   }
 
   const SCHEDULE_FILTER_KEYWORDS = {
