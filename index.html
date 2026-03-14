@@ -3041,7 +3041,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.6';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.7';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -3052,9 +3052,9 @@
     const email   = payload.email?.toLowerCase();
 
     if (ALLOWED_USERS.includes(email)) {
-      // Remember this user for 30 days
       localStorage.setItem('shasta_user', email);
       localStorage.setItem('shasta_auth_exp', Date.now() + (30 * 24 * 60 * 60 * 1000));
+      window._shastaCurrentUser = email;
       launchApp(email);
     } else {
       document.getElementById('loginDenied').style.display = 'block';
@@ -3072,6 +3072,7 @@
   }
 
   function launchApp(email) {
+    window._shastaCurrentUser = email;
     document.getElementById('loginScreen').style.display  = 'none';
     document.getElementById('appScreen').style.display    = 'block';
     const vEl = document.getElementById('versionLabel');
@@ -3194,10 +3195,11 @@
   };
 
   // ── CONFIG ────────────────────────────────────────────────────
+  // Must match Apps Script deployment URL (Deploy > Manage deployments > copy URL after security update)
   const API_URL = 'https://script.google.com/macros/s/AKfycbwiyPjO_QvpYAPMfo2BPQ_OSzPqwgrvHiQZhFPF33DPfpacf6QkHRjjf8e1rQSZ8E7_Ag/exec';
   const AI_URL  = 'https://script.google.com/macros/s/AKfycbwiyPjO_QvpYAPMfo2BPQ_OSzPqwgrvHiQZhFPF33DPfpacf6QkHRjjf8e1rQSZ8E7_Ag/exec';
 
-  function getApiUser() { return localStorage.getItem('shasta_user') || ''; }
+  function getApiUser() { return window._shastaCurrentUser || localStorage.getItem('shasta_user') || ''; }
   function apiUrlWithUser(base, extraParams) {
     const u = getApiUser();
     const sep = base.indexOf('?') >= 0 ? '&' : '?';
@@ -3780,6 +3782,7 @@
         list.innerHTML = '<div class="screen-loading">Could not load folder — API response invalid. Check that listFolder is wired in Apps Script doGet.</div>';
         return;
       }
+      if (data.error && typeof console !== 'undefined' && console.warn) console.warn('[Documents] API error:', data.error);
       if (!data.error && (data.folders || data.files)) {
         docsFolderCache[folderId] = data;
       }
@@ -3832,6 +3835,12 @@
 
   function showDocumentsScreen() {
     showSubScreen('documentsScreen');
+    var user = window._shastaCurrentUser || localStorage.getItem('shasta_user');
+    if (!user) {
+      var list = document.getElementById('docsList');
+      if (list) list.innerHTML = '<div class="screen-loading">Please sign in to view documents.</div>';
+      return;
+    }
     docsBreadcrumb = [{ id: DOCS_FOLDER_ID, name: 'ShastApp Docs' }];
     renderDocsBreadcrumb();
     loadFolderContents(DOCS_FOLDER_ID);
@@ -3950,11 +3959,12 @@
   function hapticDoublePulse() { try { if (navigator.vibrate) navigator.vibrate([18, 50, 18]); } catch (_) {} }
 
   function getProjects() {
-    const user = localStorage.getItem('shasta_user');
+    const user = window._shastaCurrentUser || localStorage.getItem('shasta_user');
     if (!user) return [];
     try {
       const key = PROJECTS_STORAGE_KEY + '_' + user;
       let raw = localStorage.getItem(key);
+      if (typeof console !== 'undefined' && console.log) console.log('[getProjects] key=' + key + ' raw=' + (raw ? raw.slice(0, 80) + '...' : 'null'));
       if (!raw) {
         raw = localStorage.getItem(PROJECTS_STORAGE_KEY);
         if (raw) {
@@ -3971,7 +3981,7 @@
   }
 
   function saveProjects(arr) {
-    const user = localStorage.getItem('shasta_user');
+    const user = window._shastaCurrentUser || localStorage.getItem('shasta_user');
     if (!user) return;
     localStorage.setItem(PROJECTS_STORAGE_KEY + '_' + user, JSON.stringify(arr));
   }
@@ -5258,7 +5268,7 @@
   }
 
   function getSettingsUser() {
-    return localStorage.getItem('shasta_user') || '_default';
+    return window._shastaCurrentUser || localStorage.getItem('shasta_user') || '';
   }
 
   function showSettingsScreen() {
@@ -5314,7 +5324,7 @@
   const CALENDARS_STORAGE_KEY = 'shasta_calendars';
 
   function getEnabledCalendars() {
-    const user = localStorage.getItem('shasta_user');
+    const user = window._shastaCurrentUser || localStorage.getItem('shasta_user');
     if (!user) return null;
     try {
       const raw = localStorage.getItem(CALENDARS_STORAGE_KEY + '_' + user);
@@ -5323,7 +5333,7 @@
   }
 
   function setEnabledCalendars(ids) {
-    const user = localStorage.getItem('shasta_user');
+    const user = window._shastaCurrentUser || localStorage.getItem('shasta_user');
     if (user) localStorage.setItem(CALENDARS_STORAGE_KEY + '_' + user, JSON.stringify(ids));
   }
 
@@ -6129,22 +6139,24 @@
   })();
 
   // Auth/API debug helper — run shastaDebug.testAuth() in browser console
+  // Also check: DevTools > Network > trigger AI/Documents > inspect response for {"error":"Unauthorized"}
   window.shastaDebug = {
-    getUser: function() { return localStorage.getItem('shasta_user') || '(none)'; },
+    getUser: function() { return (window._shastaCurrentUser || localStorage.getItem('shasta_user') || '(none)'); },
     testPing: async function() {
       const url = (API_URL || '') + '?action=ping';
       try { const r = await fetch(url, { redirect: 'follow' }); const d = await r.json(); console.log('Ping:', d); return d; }
       catch (e) { console.error('Ping failed:', e); return null; }
     },
     testWithUser: async function() {
-      const user = localStorage.getItem('shasta_user');
+      const user = getApiUser();
       const url = (API_URL || '') + '?action=ping&user=' + encodeURIComponent(user || '');
       try { const r = await fetch(url, { redirect: 'follow' }); const d = await r.json(); console.log('Ping with user:', d); return d; }
       catch (e) { console.error('Ping failed:', e); return null; }
     },
     testAuth: async function() {
-      console.log('shasta_user:', this.getUser());
-      console.log('ALLOWED_USERS (must match):', ALLOWED_USERS);
+      console.log('User:', this.getUser());
+      console.log('API_URL:', API_URL);
+      console.log('ALLOWED_USERS:', ALLOWED_USERS);
       await this.testPing();
       await this.testWithUser();
     }
