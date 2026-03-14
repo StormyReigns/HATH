@@ -3054,7 +3054,6 @@
     if (ALLOWED_USERS.includes(email)) {
       localStorage.setItem('shasta_user', email);
       localStorage.setItem('shasta_auth_exp', Date.now() + (30 * 24 * 60 * 60 * 1000));
-      window._shastaCurrentUser = email;
       launchApp(email);
     } else {
       document.getElementById('loginDenied').style.display = 'block';
@@ -3072,7 +3071,6 @@
   }
 
   function launchApp(email) {
-    window._shastaCurrentUser = email;
     document.getElementById('loginScreen').style.display  = 'none';
     document.getElementById('appScreen').style.display    = 'block';
     const vEl = document.getElementById('versionLabel');
@@ -3199,7 +3197,7 @@
   const API_URL = 'https://script.google.com/macros/s/AKfycbwiyPjO_QvpYAPMfo2BPQ_OSzPqwgrvHiQZhFPF33DPfpacf6QkHRjjf8e1rQSZ8E7_Ag/exec';
   const AI_URL  = 'https://script.google.com/macros/s/AKfycbwiyPjO_QvpYAPMfo2BPQ_OSzPqwgrvHiQZhFPF33DPfpacf6QkHRjjf8e1rQSZ8E7_Ag/exec';
 
-  function getApiUser() { return window._shastaCurrentUser || localStorage.getItem('shasta_user') || ''; }
+  function getApiUser() { return localStorage.getItem('shasta_user') || ''; }
   function apiUrlWithUser(base, extraParams) {
     const u = getApiUser();
     const sep = base.indexOf('?') >= 0 ? '&' : '?';
@@ -3835,7 +3833,7 @@
 
   function showDocumentsScreen() {
     showSubScreen('documentsScreen');
-    var user = window._shastaCurrentUser || localStorage.getItem('shasta_user');
+    var user = localStorage.getItem('shasta_user');
     if (!user) {
       var list = document.getElementById('docsList');
       if (list) list.innerHTML = '<div class="screen-loading">Please sign in to view documents.</div>';
@@ -3959,7 +3957,7 @@
   function hapticDoublePulse() { try { if (navigator.vibrate) navigator.vibrate([18, 50, 18]); } catch (_) {} }
 
   function getProjects() {
-    const user = window._shastaCurrentUser || localStorage.getItem('shasta_user');
+    const user = localStorage.getItem('shasta_user');
     if (!user) return [];
     try {
       const key = PROJECTS_STORAGE_KEY + '_' + user;
@@ -3984,7 +3982,7 @@
   }
 
   function saveProjects(arr) {
-    const user = window._shastaCurrentUser || localStorage.getItem('shasta_user');
+    const user = localStorage.getItem('shasta_user');
     if (!user) return;
     localStorage.setItem(PROJECTS_STORAGE_KEY + '_' + user, JSON.stringify(arr));
   }
@@ -5271,7 +5269,7 @@
   }
 
   function getSettingsUser() {
-    return window._shastaCurrentUser || localStorage.getItem('shasta_user') || '';
+    return localStorage.getItem('shasta_user') || '_default';
   }
 
   function showSettingsScreen() {
@@ -5329,7 +5327,7 @@
   const CALENDARS_STORAGE_KEY = 'shasta_calendars';
 
   function getEnabledCalendars() {
-    const user = window._shastaCurrentUser || localStorage.getItem('shasta_user');
+    const user = localStorage.getItem('shasta_user');
     if (!user) return null;
     try {
       const raw = localStorage.getItem(CALENDARS_STORAGE_KEY + '_' + user);
@@ -5338,7 +5336,7 @@
   }
 
   function setEnabledCalendars(ids) {
-    const user = window._shastaCurrentUser || localStorage.getItem('shasta_user');
+    const user = localStorage.getItem('shasta_user');
     if (user) localStorage.setItem(CALENDARS_STORAGE_KEY + '_' + user, JSON.stringify(ids));
   }
 
@@ -6146,7 +6144,7 @@
   // Auth/API debug helper — run shastaDebug.testAuth() in browser console
   // Also check: DevTools > Network > trigger AI/Documents > inspect response for {"error":"Unauthorized"}
   window.shastaDebug = {
-    getUser: function() { return (window._shastaCurrentUser || localStorage.getItem('shasta_user') || '(none)'); },
+    getUser: function() { return localStorage.getItem('shasta_user') || '(none)'; },
     testPing: async function() {
       const url = (API_URL || '') + '?action=ping';
       try { const r = await fetch(url, { redirect: 'follow' }); const d = await r.json(); console.log('Ping:', d); return d; }
