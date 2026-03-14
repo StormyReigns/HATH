@@ -2663,8 +2663,8 @@
 
     <!-- Settings screen -->
     <div class="sub-screen" id="settingsScreen">
-      <div class="settings-escape-banner" id="forceLightModeBanner" style="display:none">
-        <button type="button" class="settings-escape-btn-full" onclick="forceLightMode()">Force light mode (refresh)</button>
+      <div class="settings-escape-banner">
+        <button type="button" class="settings-escape-btn-full" onclick="forceLightMode()">Switch to light mode</button>
       </div>
       <div class="settings-section">
         <label class="settings-toggle">
@@ -3041,7 +3041,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.5';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.6';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -5296,12 +5296,8 @@
         setDarkMode(on);
         storedDark = on;
         darkEl.setAttribute('aria-checked', on ? 'true' : 'false');
-        var escapeEl = document.getElementById('forceLightModeBanner');
-        if (escapeEl) escapeEl.style.display = on ? 'block' : 'none';
       };
     }
-    var escapeEl = document.getElementById('forceLightModeBanner');
-    if (escapeEl) escapeEl.style.display = isDarkMode() ? 'block' : 'none';
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
     const settingsItem = document.querySelector('.drawer-item:nth-child(7)');
     if (settingsItem) settingsItem.classList.add('active');
