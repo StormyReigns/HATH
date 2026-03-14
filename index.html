@@ -3534,11 +3534,11 @@
     if (screenId === 'projectsScreen') {
       document.getElementById('projectsLanding').style.display = 'flex';
       document.getElementById('projectsView').style.display = 'none';
-      document.getElementById('app').classList.remove('in-project-view');
+      document.querySelector('.app').classList.remove('in-project-view');
       projectsViewing = null;
       renderProjectsLanding();
     } else {
-      document.getElementById('app').classList.remove('in-project-view');
+      document.querySelector('.app').classList.remove('in-project-view');
     }
     document.getElementById('inputZone').style.display = 'none';
     document.getElementById('updatedAt').style.display = 'none';
@@ -4127,7 +4127,7 @@
     const view = document.getElementById('projectsView');
     if (landing) landing.style.display = 'flex';
     if (view) view.style.display = 'none';
-    document.getElementById('app').classList.remove('in-project-view');
+    document.querySelector('.app').classList.remove('in-project-view');
     renderProjectsLanding();
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
     const projectsItem = document.querySelector('.drawer-item:nth-child(2)');
@@ -4259,7 +4259,7 @@
     if (firstIncomplete >= 0) projectsCurrentPhaseIndex = firstIncomplete;
     document.getElementById('projectsLanding').style.display = 'none';
     document.getElementById('projectsView').style.display = 'flex';
-    document.getElementById('app').classList.add('in-project-view');
+    document.querySelector('.app').classList.add('in-project-view');
     renderProjectsView();
     updateScreenAddFabs();
   }
@@ -4268,7 +4268,7 @@
     projectsViewing = null;
     document.getElementById('projectsLanding').style.display = 'flex';
     document.getElementById('projectsView').style.display = 'none';
-    document.getElementById('app').classList.remove('in-project-view');
+    document.querySelector('.app').classList.remove('in-project-view');
     renderProjectsLanding();
     updateScreenAddFabs();
   }
@@ -4300,7 +4300,7 @@
       projectsViewing = null;
       document.getElementById('projectsLanding').style.display = 'flex';
       document.getElementById('projectsView').style.display = 'none';
-      document.getElementById('app').classList.remove('in-project-view');
+      document.querySelector('.app').classList.remove('in-project-view');
       renderProjectsLanding();
     } else {
       renderProjectsLanding();
