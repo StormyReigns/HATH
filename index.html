@@ -1606,9 +1606,17 @@
       border-radius: 6px;
       background: rgba(255,255,255,0.8);
     }
+    .settings-toggle input[type="checkbox"]:checked {
+      background: var(--accent) !important;
+      border-color: var(--accent);
+    }
     html.dark-mode .settings-toggle input[type="checkbox"] {
       border-color: rgba(255,255,255,0.25);
       background: rgba(45,40,38,0.9);
+    }
+    html.dark-mode .settings-toggle input[type="checkbox"]:checked {
+      background: var(--accent) !important;
+      border-color: var(--accent);
     }
 
     /* Font size schemes — use zoom to scale all content */
@@ -3919,7 +3927,19 @@
     const user = localStorage.getItem('shasta_user');
     if (!user) return [];
     try {
-      const raw = localStorage.getItem(PROJECTS_STORAGE_KEY + '_' + user);
+      const key = PROJECTS_STORAGE_KEY + '_' + user;
+      let raw = localStorage.getItem(key);
+      if (!raw) {
+        raw = localStorage.getItem(PROJECTS_STORAGE_KEY);
+        if (raw) {
+          try {
+            const migrated = JSON.parse(raw);
+            if (Array.isArray(migrated) && migrated.length > 0) {
+              localStorage.setItem(key, raw);
+            }
+          } catch (_) {}
+        }
+      }
       return raw ? JSON.parse(raw) : [];
     } catch (_) { return []; }
   }
@@ -5202,11 +5222,11 @@
 
   function showSettingsScreen() {
     showSubScreen('settingsScreen');
+    const user = getSettingsUser();
     try {
       renderBgSchemeOptions();
       renderFontSizeOptions();
     } catch (e) { console.warn('Settings render error:', e); }
-    const user = getSettingsUser();
     const nickEl = document.getElementById('settingsNickname');
     const dumbEl = document.getElementById('settingsDumbBlathers');
     const darkEl = document.getElementById('settingsDarkMode');
@@ -5223,9 +5243,15 @@
       };
     }
     if (darkEl) {
-      darkEl.checked = isDarkMode();
+      const inDark = isDarkMode();
+      darkEl.checked = inDark;
+      darkEl.setAttribute('aria-checked', inDark ? 'true' : 'false');
+      if (inDark && localStorage.getItem('shasta_dark_' + user) !== 'true') {
+        localStorage.setItem('shasta_dark_' + user, 'true');
+      }
       darkEl.onchange = () => {
         setDarkMode(darkEl.checked);
+        darkEl.setAttribute('aria-checked', darkEl.checked ? 'true' : 'false');
       };
     }
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
