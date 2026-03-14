@@ -1595,6 +1595,11 @@
     }
     .settings-input::placeholder { color: var(--muted); }
     .settings-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .settings-escape { margin-top: 8px; }
+    .settings-escape-btn {
+      font-size: 12px; color: var(--accent); background: none; border: none;
+      cursor: pointer; padding: 4px 0; text-decoration: underline;
+    }
     .settings-toggle {
       display: flex;
       align-items: center;
@@ -2659,6 +2664,9 @@
           <input type="checkbox" id="settingsDarkMode">
         </label>
         <div class="settings-hint">Use a dark theme across the app</div>
+        <div class="settings-escape" id="forceLightModeLink" style="display:none">
+          <button type="button" class="settings-escape-btn" onclick="forceLightMode()">Stuck in dark? Force light mode</button>
+        </div>
       </div>
       <div class="settings-section">
         <div class="settings-label">Background</div>
@@ -3028,7 +3036,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.3';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -5181,6 +5189,12 @@
     applyBgScheme(localStorage.getItem('shasta_bg_' + user) || 'peach');
   }
 
+  function forceLightMode() {
+    setDarkMode(false);
+    var el = document.getElementById('forceLightModeLink');
+    if (el) el.style.display = 'none';
+  }
+
   function setBgScheme(schemeId) {
     const user = getSettingsUser();
     localStorage.setItem('shasta_bg_' + user, schemeId);
@@ -5236,6 +5250,11 @@
   function showSettingsScreen() {
     showSubScreen('settingsScreen');
     const user = getSettingsUser();
+    var storedDark = localStorage.getItem('shasta_dark_' + user) === 'true';
+    if (storedDark !== isDarkMode()) {
+      applyDarkMode(storedDark);
+      applyBgScheme(localStorage.getItem('shasta_bg_' + user) || 'peach');
+    }
     try {
       renderBgSchemeOptions();
       renderFontSizeOptions();
@@ -5256,17 +5275,19 @@
       };
     }
     if (darkEl) {
-      const inDark = isDarkMode();
-      darkEl.checked = inDark;
-      darkEl.setAttribute('aria-checked', inDark ? 'true' : 'false');
-      if (inDark && localStorage.getItem('shasta_dark_' + user) !== 'true') {
-        localStorage.setItem('shasta_dark_' + user, 'true');
-      }
-      darkEl.onchange = () => {
-        setDarkMode(darkEl.checked);
-        darkEl.setAttribute('aria-checked', darkEl.checked ? 'true' : 'false');
+      darkEl.checked = storedDark;
+      darkEl.setAttribute('aria-checked', storedDark ? 'true' : 'false');
+      darkEl.onchange = function() {
+        var on = darkEl.checked;
+        setDarkMode(on);
+        storedDark = on;
+        darkEl.setAttribute('aria-checked', on ? 'true' : 'false');
+        var escapeEl = document.getElementById('forceLightModeLink');
+        if (escapeEl) escapeEl.style.display = on ? 'block' : 'none';
       };
     }
+    var escapeEl = document.getElementById('forceLightModeLink');
+    if (escapeEl) escapeEl.style.display = isDarkMode() ? 'block' : 'none';
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
     const settingsItem = document.querySelector('.drawer-item:nth-child(7)');
     if (settingsItem) settingsItem.classList.add('active');
