@@ -579,9 +579,7 @@
       top: 0; left: 50%;
       transform: translateX(-50%);
       width: 100%; max-width: 420px;
-      min-height: 100vh;
-      min-height: -webkit-fill-available;
-      height: calc(var(--vh, 1vh) * 100);
+      bottom: 0;
       padding-bottom: calc(32px + env(safe-area-inset-bottom));
       z-index: 1;
       display: flex; flex-direction: column;
@@ -639,7 +637,9 @@
       flex-shrink: 0;
     }
     @media all and (display-mode: standalone) {
-      .app-bottom-bar { padding-bottom: min(env(safe-area-inset-bottom, 0px), 34px); }
+      /* max() pins the padding at ≥34px even in landscape (where env() drops to 0–21px),
+         so the bar height never shifts when the phone rotates. */
+      .app-bottom-bar { padding-bottom: max(env(safe-area-inset-bottom, 0px), 34px); }
     }
     html.dark-mode .app-bottom-bar {
       background: #1a1816;
@@ -690,23 +690,23 @@
     .bottom-bar-hamburger span:nth-child(2) { width: 65%; }
     .bottom-bar-hamburger span:nth-child(3) { width: 82%; }
     .bottom-bar-home {
-      width: 80px;
-      height: 80px;
+      width: 52px;
+      height: 52px;
       background: transparent;
       color: var(--accent);
-      font-size: 40px;
+      font-size: 28px;
       line-height: 1;
     }
     .bottom-bar-home:hover { background: rgba(192,122,74,0.15); }
     .bottom-bar-blathers {
-      width: 63px;
-      height: 63px;
-      min-width: 63px;
-      min-height: 63px;
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      min-height: 44px;
     }
     .bottom-bar-blathers img {
-      width: 63px;
-      height: 63px;
+      width: 44px;
+      height: 44px;
       object-fit: contain;
     }
 
@@ -3032,7 +3032,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.1.4';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.1.5';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
