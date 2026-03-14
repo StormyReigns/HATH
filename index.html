@@ -504,7 +504,11 @@
       position: relative;
       flex-shrink: 0;
     }
-    .body.chat-mode .input-zone { display: none !important; }
+    /* Hide Blathers input when any sub-screen is visible (direct sibling selector) */
+    #documentsScreen.visible ~ .input-zone,
+    #settingsScreen.visible ~ .input-zone,
+    #scheduleScreen.visible ~ .input-zone,
+    #projectsScreen.visible ~ .input-zone { display: none !important; }
 
     /* Blathers overlaps the input bar, positioned just above submit area */
     .blathers-wrap {
@@ -1063,6 +1067,7 @@
       display: flex; align-items: center; gap: 13px;
       padding: 12px 26px; font-size: 14px; font-weight: 400;
       color: var(--text2); cursor: pointer; transition: color 0.12s;
+      touch-action: manipulation;
     }
     .drawer-item.active { color: var(--text); font-weight: 500; }
     .drawer-icon { font-size: 16px; width: 20px; text-align: center; opacity: 0.7; }
@@ -1104,14 +1109,15 @@
 
     /* ── DOCUMENTS SCREEN ── */
     .sub-screen {
-      display: none;
+      display: none !important;
       flex: 1;
       flex-direction: column;
       width: 100%;
       overflow: hidden;
+      min-height: 0;
     }
     .sub-screen.visible {
-      display: flex;
+      display: flex !important;
     }
     .docs-header {
       display: flex;
@@ -1538,7 +1544,8 @@
     .schedule-mini-cal-day.today.has-events::after { background: var(--text); }
 
     /* Settings screen */
-    #settingsScreen { padding: 8px 0 24px; overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; min-height: 0; }
+    #settingsScreen { padding: 8px 0 24px; overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    #settingsScreen.visible { display: flex !important; }
     .settings-section { padding: 16px 0; border-bottom: 1px solid rgba(0,0,0,0.06); }
     .settings-section:last-child { border-bottom: none; }
     .settings-label { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 12px; }
@@ -1816,6 +1823,7 @@
       text-transform: uppercase; letter-spacing: 0.06em;
       padding: 0 4px 8px;
     }
+    #projectsInProgressList { flex: 1; min-height: 120px; overflow-y: auto; }
     .projects-empty {
       flex: 1;
       display: flex; align-items: center; justify-content: center;
@@ -3363,8 +3371,10 @@
     }
   }
   function closeDrawer() {
-    document.getElementById('drawer').classList.remove('open');
-    document.getElementById('overlay').classList.remove('open');
+    const drawer = document.getElementById('drawer');
+    const overlay = document.getElementById('overlay');
+    if (drawer) drawer.classList.remove('open');
+    if (overlay) overlay.classList.remove('open');
     document.body.classList.remove('drawer-open');
     setDrawerBlathers('sleep');
   }
@@ -3424,6 +3434,8 @@
 
   // ── NAVIGATION ────────────────────────────────────────────────
   function goHome() {
+    closeDrawer();
+    setTimeout(closeDrawer, 50);
     document.getElementById('chatArea').style.display = 'none';
     document.getElementById('hintArea').style.display = 'flex';
     const wb = document.getElementById('wellbeing');
@@ -3448,6 +3460,8 @@
   }
 
   function showSubScreen(screenId) {
+    closeDrawer();
+    setTimeout(closeDrawer, 50);
     document.getElementById('hintArea').style.display = 'none';
     document.getElementById('chatArea').style.display = 'none';
     const wb = document.getElementById('wellbeing');
@@ -3982,7 +3996,7 @@
 
   function openRecentDoc(url) {
     if (url) window.open(url, '_blank');
-    else { showDocsScreen(); closeDrawer(); }
+    else { closeDrawer(); showDocsScreen(); }
   }
 
   function formatRecentDate(s) {
@@ -4017,14 +4031,15 @@
   }
 
   function showProjectsScreen() {
+    closeDrawer();
     showSubScreen('projectsScreen');
     projectsViewing = null;
-    document.getElementById('projectsLanding').style.display = 'flex';
-    document.getElementById('projectsView').style.display = 'none';
+    const landing = document.getElementById('projectsLanding');
+    const view = document.getElementById('projectsView');
+    if (landing) landing.style.display = 'flex';
+    if (view) view.style.display = 'none';
     document.getElementById('app').classList.remove('in-project-view');
-    requestAnimationFrame(function() {
-      requestAnimationFrame(renderProjectsLanding);
-    });
+    renderProjectsLanding();
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
     const projectsItem = document.querySelector('.drawer-item:nth-child(2)');
     if (projectsItem) projectsItem.classList.add('active');
