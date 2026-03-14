@@ -2663,7 +2663,7 @@
 
     <!-- Settings screen -->
     <div class="sub-screen" id="settingsScreen">
-      <div class="settings-escape-banner">
+      <div class="settings-escape-banner" id="forceLightModeBanner" style="display:none">
         <button type="button" class="settings-escape-btn-full" onclick="forceLightMode()">Switch to light mode</button>
       </div>
       <div class="settings-section">
@@ -3041,7 +3041,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.7';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.8';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -3966,15 +3966,18 @@
       let raw = localStorage.getItem(key);
       if (typeof console !== 'undefined' && console.log) console.log('[getProjects] key=' + key + ' raw=' + (raw ? raw.slice(0, 80) + '...' : 'null'));
       if (!raw) {
+        if (typeof console !== 'undefined' && console.log) console.log('[getProjects] before migration, checking ' + PROJECTS_STORAGE_KEY);
         raw = localStorage.getItem(PROJECTS_STORAGE_KEY);
         if (raw) {
           try {
             const migrated = JSON.parse(raw);
             if (Array.isArray(migrated) && migrated.length > 0) {
               localStorage.setItem(key, raw);
+              if (typeof console !== 'undefined' && console.log) console.log('[getProjects] migration done, copied to ' + key);
             }
           } catch (_) {}
         }
+        if (typeof console !== 'undefined' && console.log) console.log('[getProjects] after migration, raw=' + (raw ? 'present' : 'null'));
       }
       return raw ? JSON.parse(raw) : [];
     } catch (_) { return []; }
@@ -5306,6 +5309,8 @@
         setDarkMode(on);
         storedDark = on;
         darkEl.setAttribute('aria-checked', on ? 'true' : 'false');
+        var escapeEl = document.getElementById('forceLightModeBanner');
+        if (escapeEl) escapeEl.style.display = on ? 'block' : 'none';
       };
     }
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
