@@ -5,17 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
   <script>
     function setVh() {
-      var h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+      var vvh = (window.visualViewport && window.visualViewport.height) || 0;
+      var iwh = window.innerHeight || 0;
+      // In standalone PWA, iOS reports visualViewport.height as SVH (small viewport)
+      // on first load instead of the full LVH. Taking the max ensures we get the
+      // real full-screen height and avoid the app being rendered shorter than the screen.
+      var isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+      var h = isStandalone ? Math.max(vvh, iwh) : (vvh || iwh);
       if (h > 0) document.documentElement.style.setProperty('--vh', (h * 0.01) + 'px');
-    }
-    function updateSafeBottom() {
-      var testEl = document.createElement('div');
-      testEl.style.cssText = 'position:fixed;bottom:0;left:0;width:1px;height:env(safe-area-inset-bottom,0px);pointer-events:none;opacity:0;';
-      document.body.appendChild(testEl);
-      var measured = testEl.getBoundingClientRect().height || 0;
-      document.body.removeChild(testEl);
-      var capped = Math.min(measured, 34);
-      document.documentElement.style.setProperty('--safe-bottom', capped + 'px');
     }
     function setVisualViewport() {
       var vv = window.visualViewport;
@@ -37,7 +34,6 @@
       });
     }
     function forceLayoutRecalc() {
-      updateSafeBottom();
       setVisualViewport();
       document.body.offsetHeight;
       window.dispatchEvent(new Event('resize'));
@@ -45,7 +41,7 @@
     setVisualViewport();
     requestAnimationFrame(function() { requestAnimationFrame(setVisualViewport); });
     window.addEventListener('resize', setVisualViewportDebounced);
-    window.addEventListener('orientationchange', function() { setTimeout(function() { forceLayoutRecalc(); updateSafeBottom(); }, 300); });
+    window.addEventListener('orientationchange', function() { setTimeout(forceLayoutRecalc, 300); });
     window.addEventListener('load', function() {
       setVisualViewport();
       [50, 100, 200, 350, 500, 750, 1200].forEach(function(delay) {
@@ -621,14 +617,18 @@
     }
     .topbar-left, .topbar-right { width: 34px; }
 
-    /* Bottom bar — anchored to layout viewport bottom (stable; avoids tilt/resize jump) */
+    /* Bottom bar — anchored to layout viewport bottom.
+       In browser mode, position:fixed bottom:0 lands at the visual-viewport bottom
+       (above the Safari tab bar), so no safe-area padding is needed there.
+       In standalone PWA mode the bar sits at the physical screen bottom, so we
+       clear the home-indicator with env(safe-area-inset-bottom). */
     .app-bottom-bar {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
       padding-top: 0;
-      padding-bottom: var(--safe-bottom, 0px);
+      padding-bottom: 0;
       transform: translateZ(0);
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
@@ -637,6 +637,9 @@
       box-shadow: 0 -4px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.4);
       z-index: 80;
       flex-shrink: 0;
+    }
+    @media all and (display-mode: standalone) {
+      .app-bottom-bar { padding-bottom: min(env(safe-area-inset-bottom, 0px), 34px); }
     }
     html.dark-mode .app-bottom-bar {
       background: #1a1816;
@@ -3178,7 +3181,6 @@
     }
 
     hideLoadScreen();
-    updateSafeBottom();
   };
 
   // ── CONFIG ────────────────────────────────────────────────────
