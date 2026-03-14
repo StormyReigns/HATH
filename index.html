@@ -598,10 +598,15 @@
     .hamburger span:nth-child(2) { width: 65%; }
     .hamburger span:nth-child(3) { width: 82%; }
 
+    .topbar-brand { display: flex; flex-direction: column; align-items: center; gap: 0; }
     .wordmark {
       font-family: 'Playfair Display', serif;
       font-size: 21px; letter-spacing: 0.12em;
       color: var(--text); font-weight: 400;
+    }
+    .version-label {
+      font-size: 9px; letter-spacing: 0.08em;
+      color: var(--muted); margin-top: -2px; font-weight: 400;
     }
     .topbar-left, .topbar-right { width: 34px; }
 
@@ -2587,7 +2592,10 @@
 <div class="app">
   <div class="topbar">
     <div class="topbar-left"></div>
-    <div class="wordmark" onclick="goHome()" style="cursor:pointer">ShastApp</div>
+    <div class="topbar-brand" onclick="goHome()" style="cursor:pointer">
+      <div class="wordmark">ShastApp</div>
+      <div class="version-label" id="versionLabel"></div>
+    </div>
     <div class="topbar-right"></div>
   </div>
 
@@ -3019,6 +3027,9 @@
 </div>
 
 <script>
+  // ── VERSION ────────────────────────────────────────────────────
+  const SHASTAPP_VERSION = '1.2';  // Bump this when you deploy changes.
+
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
   const ALLOWED_USERS = ['whiskerwallmatt@gmail.com', 'jessicafisher407@gmail.com'];
@@ -3050,6 +3061,8 @@
   function launchApp(email) {
     document.getElementById('loginScreen').style.display  = 'none';
     document.getElementById('appScreen').style.display    = 'block';
+    const vEl = document.getElementById('versionLabel');
+    if (vEl) vEl.textContent = 'v' + SHASTAPP_VERSION;
     document.getElementById('greetingText').innerHTML = getRandomGreeting();
     loadData();
     setupKeyboardHandling();
