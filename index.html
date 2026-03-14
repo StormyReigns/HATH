@@ -12,7 +12,8 @@
       var safeBottom = 0;
       try {
         var testEl = document.createElement('div');
-        testEl.style.paddingBottom = 'env(safe-area-inset-bottom)';
+        // position:fixed isolates the element from body layout so env() reflects the actual viewport inset
+        testEl.style.cssText = 'position:fixed;bottom:0;left:0;width:0;height:0;padding-bottom:env(safe-area-inset-bottom);visibility:hidden;pointer-events:none;';
         document.body.appendChild(testEl);
         safeBottom = parseInt(window.getComputedStyle(testEl).paddingBottom) || 0;
         document.body.removeChild(testEl);
@@ -2732,7 +2733,7 @@
         <div class="projects-in-progress-label">In progress</div>
         <div class="screen-list" id="projectsInProgressList"></div>
         <div class="projects-empty" id="projectsEmpty">No projects yet. Tap + to create one.</div>
-        <img class="projects-linkmagic" src="https://stormyreigns.github.io/HATH/LinkMagic.png" alt="">
+        <img class="projects-linkmagic" src="https://stormyreigns.github.io/HATH/WWScroll.png" alt="">
         <button type="button" class="screen-add-fab" id="projectsAddFab" onclick="openCreateProjectModal()" title="Create project" aria-label="Create project">+</button>
       </div>
       <div class="projects-view" id="projectsView" style="display:none">
@@ -3031,7 +3032,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.2';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -3183,6 +3184,7 @@
 
     [100, 300, 600, 1000].forEach(function(delay) {
       setTimeout(function() {
+        setSafeAreaBottom(); // re-probe after viewport has had time to settle
         var bar = document.getElementById('appBottomBar');
         if (bar) {
           bar.style.paddingBottom = '';
