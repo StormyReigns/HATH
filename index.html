@@ -1598,7 +1598,18 @@
       cursor: pointer;
     }
     .settings-toggle span:first-child { font-size: 14px; color: var(--text); }
-    .settings-toggle input[type="checkbox"] { width: 44px; height: 24px; accent-color: var(--accent); }
+    .settings-toggle input[type="checkbox"] {
+      width: 44px; height: 24px; min-width: 44px; min-height: 24px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      border: 2px solid rgba(0,0,0,0.15);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.8);
+    }
+    html.dark-mode .settings-toggle input[type="checkbox"] {
+      border-color: rgba(255,255,255,0.25);
+      background: rgba(45,40,38,0.9);
+    }
 
     /* Font size schemes — use zoom to scale all content */
     html.font-small .app-screen,
@@ -2635,7 +2646,13 @@
       </div>
       <div class="settings-section">
         <div class="settings-label">Background</div>
-        <div class="settings-options" id="bgSchemeOptions"></div>
+        <div class="settings-options" id="bgSchemeOptions">
+          <div class="settings-option selected" data-scheme="peach" onclick="setBgScheme('peach'); renderBgSchemeOptions();"><span class="settings-option-swatch peach"></span><span>Peach</span></div>
+          <div class="settings-option" data-scheme="lavender" onclick="setBgScheme('lavender'); renderBgSchemeOptions();"><span class="settings-option-swatch lavender"></span><span>Lavender</span></div>
+          <div class="settings-option" data-scheme="sage" onclick="setBgScheme('sage'); renderBgSchemeOptions();"><span class="settings-option-swatch sage"></span><span>Sage</span></div>
+          <div class="settings-option" data-scheme="sunset" onclick="setBgScheme('sunset'); renderBgSchemeOptions();"><span class="settings-option-swatch sunset"></span><span>Sunset</span></div>
+          <div class="settings-option" data-scheme="ocean" onclick="setBgScheme('ocean'); renderBgSchemeOptions();"><span class="settings-option-swatch ocean"></span><span>Ocean</span></div>
+        </div>
       </div>
       <div class="settings-section">
         <div class="settings-label">Nickname</div>
@@ -2644,7 +2661,11 @@
       </div>
       <div class="settings-section">
         <div class="settings-label">Font Size</div>
-        <div class="settings-options" id="fontSizeOptions"></div>
+        <div class="settings-options" id="fontSizeOptions">
+          <div class="settings-option" onclick="setFontSize('small'); renderFontSizeOptions();">Small</div>
+          <div class="settings-option selected" onclick="setFontSize('default'); renderFontSizeOptions();">Default</div>
+          <div class="settings-option" onclick="setFontSize('large'); renderFontSizeOptions();">Large</div>
+        </div>
       </div>
       <div class="settings-section">
         <label class="settings-toggle">
@@ -6028,6 +6049,36 @@
   }
 
   initDocsFileInputs();
+
+  // Sync settings options selected state on load (updates static HTML to match saved prefs)
+  (function initSettingsSelectedState() {
+    try {
+      if (typeof renderBgSchemeOptions === 'function') renderBgSchemeOptions();
+      if (typeof renderFontSizeOptions === 'function') renderFontSizeOptions();
+    } catch (e) { console.warn('Settings init:', e); }
+  })();
+
+  // Auth/API debug helper — run shastaDebug.testAuth() in browser console
+  window.shastaDebug = {
+    getUser: function() { return localStorage.getItem('shasta_user') || '(none)'; },
+    testPing: async function() {
+      const url = (API_URL || '') + '?action=ping';
+      try { const r = await fetch(url, { redirect: 'follow' }); const d = await r.json(); console.log('Ping:', d); return d; }
+      catch (e) { console.error('Ping failed:', e); return null; }
+    },
+    testWithUser: async function() {
+      const user = localStorage.getItem('shasta_user');
+      const url = (API_URL || '') + '?action=ping&user=' + encodeURIComponent(user || '');
+      try { const r = await fetch(url, { redirect: 'follow' }); const d = await r.json(); console.log('Ping with user:', d); return d; }
+      catch (e) { console.error('Ping failed:', e); return null; }
+    },
+    testAuth: async function() {
+      console.log('shasta_user:', this.getUser());
+      console.log('ALLOWED_USERS (must match):', ALLOWED_USERS);
+      await this.testPing();
+      await this.testWithUser();
+    }
+  };
 </script>
 </body>
 </html>
