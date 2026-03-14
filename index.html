@@ -8,6 +8,17 @@
       var h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
       if (h > 0) document.documentElement.style.setProperty('--vh', (h * 0.01) + 'px');
     }
+    function setSafeAreaBottom() {
+      var safeBottom = 0;
+      try {
+        var testEl = document.createElement('div');
+        testEl.style.paddingBottom = 'env(safe-area-inset-bottom)';
+        document.body.appendChild(testEl);
+        safeBottom = parseInt(window.getComputedStyle(testEl).paddingBottom) || 0;
+        document.body.removeChild(testEl);
+      } catch(_) {}
+      document.documentElement.style.setProperty('--safe-bottom', safeBottom + 'px');
+    }
     function setVisualViewport() {
       var vv = window.visualViewport;
       if (vv) {
@@ -17,6 +28,7 @@
         var h = window.innerHeight;
         if (h > 0) document.documentElement.style.setProperty('--vvh', h + 'px');
       }
+      setSafeAreaBottom();
       setVh();
     }
     var vvRaf = 0;
@@ -618,7 +630,7 @@
       left: 0;
       right: 0;
       padding-top: 0;
-      padding-bottom: max(0, min(env(safe-area-inset-bottom, 0px), 40px));
+      padding-bottom: min(var(--safe-bottom, 0px), 40px);
       transform: translateZ(0);
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
@@ -3019,7 +3031,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.9';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -3168,6 +3180,16 @@
     }
 
     hideLoadScreen();
+
+    [100, 300, 600, 1000].forEach(function(delay) {
+      setTimeout(function() {
+        var bar = document.getElementById('appBottomBar');
+        if (bar) {
+          bar.style.paddingBottom = '';
+          bar.offsetHeight; // force reflow
+        }
+      }, delay);
+    });
   };
 
   // ── CONFIG ────────────────────────────────────────────────────
