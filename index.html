@@ -3033,7 +3033,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.2.4';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.2.5';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -5296,17 +5296,36 @@
     civic: ['vote', 'voting', 'election', 'primary', 'ballot', 'polling', 'civic', 'registration', 'early voting']
   };
 
-  // McLean County, IL — key civic/election dates
-  // Source: Illinois State Board of Elections + McLean County Clerk
+  // McLean County, IL — key civic/election dates through 2028 presidential cycle
+  // Sources: IL State Board of Elections (elections.il.gov) + McLean County Clerk
   const CIVIC_IL_EVENTS = [
-    { title: 'Last Day: Early Voting — IL Primary',    date: '2026-03-16', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: 'Illinois Primary Election Day',          date: '2026-03-17', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: 'Voter Registration Deadline — General',  date: '2026-10-06', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
-    { title: 'Early Voting Opens — IL General',        date: '2026-10-19', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: 'Last Day: Early Voting — IL General',    date: '2026-11-02', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: 'Illinois General Election Day',          date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: 'IL Consolidated Primary Election',       date: '2027-02-23', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: 'IL Consolidated Election Day',           date: '2027-04-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    // ── 2026 Primary ──────────────────────────────────────────────
+    { title: 'Last Day: Early Voting — IL Primary',          date: '2026-03-16', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: '🗳️ Illinois Primary Election Day',             date: '2026-03-17', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    // ── 2026 General ──────────────────────────────────────────────
+    { title: 'Voter Registration Deadline — General',        date: '2026-10-06', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
+    { title: 'Early Voting Opens — IL General Election',     date: '2026-10-19', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Mail Ballot Request Deadline — General',       date: '2026-10-29', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Last Day: Early Voting — IL General',          date: '2026-11-02', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: '🗳️ Illinois General Election Day',             date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    // ── 2027 Consolidated Primary ─────────────────────────────────
+    { title: 'Voter Registration Deadline — Consol. Primary', date: '2027-01-26', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
+    { title: 'Last Day: Early Voting — Consol. Primary',     date: '2027-02-22', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: '🗳️ IL Consolidated Primary Election',          date: '2027-02-23', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    // ── 2027 Consolidated Election ────────────────────────────────
+    { title: 'Voter Registration Deadline — Consol. Election', date: '2027-03-09', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
+    { title: 'Last Day: Early Voting — Consol. Election',    date: '2027-04-05', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: '🗳️ IL Consolidated Election Day',              date: '2027-04-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    // ── 2028 Presidential Primary ─────────────────────────────────
+    { title: 'Voter Registration Deadline — Pres. Primary',  date: '2028-02-22', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
+    { title: 'Early Voting Opens — Presidential Primary',    date: '2028-02-10', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Last Day: Early Voting — Pres. Primary',       date: '2028-03-20', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: '🗳️ Illinois Presidential Primary',             date: '2028-03-21', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    // ── 2028 Presidential General ─────────────────────────────────
+    { title: 'Voter Registration Deadline — Pres. General',  date: '2028-10-10', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
+    { title: 'Early Voting Opens — Presidential General',    date: '2028-09-28', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Last Day: Early Voting — Pres. General',       date: '2028-11-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: '🗳️ Presidential General Election',             date: '2028-11-07', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
   ];
 
   function getCivicEvents() {
