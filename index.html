@@ -1448,6 +1448,16 @@
     }
     .schedule-event:hover, .schedule-event:active { background: rgba(192,122,74,0.04); }
     .schedule-event.starred { background: rgba(192,122,74,0.06); }
+    .schedule-event.civic {
+      background: rgba(42,91,168,0.06);
+      box-shadow: inset 3px 0 0 #2a5ba8;
+      padding-left: 10px;
+      border-radius: 0 6px 6px 0;
+    }
+    .schedule-event.civic .schedule-event-title { font-weight: 400; color: #1e4a96; }
+    .schedule-event.civic .schedule-event-dot { box-shadow: 0 0 5px rgba(42,91,168,0.6); }
+    html.dark-mode .schedule-event.civic { background: rgba(42,91,168,0.12); box-shadow: inset 3px 0 0 #5a8fd8; }
+    html.dark-mode .schedule-event.civic .schedule-event-title { color: #8ab4f8; }
     .schedule-event-dot {
       flex-shrink: 0; width: 10px; height: 10px; border-radius: 50%;
     }
@@ -1455,6 +1465,7 @@
     .schedule-event-dot.matt { background: #4a7ac4; }
     .schedule-event-dot.jessica { background: #c47ab8; }
     .schedule-event-dot.holidays { background: #c9a227; }
+    .schedule-event-dot.civic { background: #2a5ba8; }
     .schedule-event-time {
       flex-shrink: 0; font-size: 12px; color: var(--muted);
       font-family: 'Playfair Display', serif; min-width: 52px;
@@ -1472,6 +1483,7 @@
     .schedule-event-badge.medical { background: rgba(180,80,80,0.2); color: #a04040; }
     .schedule-event-badge.pets { background: rgba(120,160,80,0.2); color: #5a8a30; }
     .schedule-event-badge.home { background: rgba(160,120,60,0.2); color: #8a6a30; }
+    .schedule-event-badge.civic { background: rgba(42,91,168,0.15); color: #2a5ba8; }
     .schedule-event-star {
       flex-shrink: 0; min-width: 44px; min-height: 44px;
       width: 36px; height: 36px;
@@ -3021,7 +3033,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.2.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.2.4';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -5280,8 +5292,30 @@
     finance: ['finance', 'financial', 'bill', 'pay', 'payment', 'due', 'insurance', 'tax', 'rent', 'mortgage'],
     medical: ['hospital', 'doctor', 'dr', 'medical', 'dentist', 'appointment', 'clinic', 'prescription'],
     pets: ['vet', 'grooming', 'gonzo', 'shasta', 'taquito', 'pet'],
-    home: ['repair', 'maintenance', 'inspection', 'plumber', 'electrician', 'cleaner']
+    home: ['repair', 'maintenance', 'inspection', 'plumber', 'electrician', 'cleaner'],
+    civic: ['vote', 'voting', 'election', 'primary', 'ballot', 'polling', 'civic', 'registration', 'early voting']
   };
+
+  // McLean County, IL — key civic/election dates
+  // Source: Illinois State Board of Elections + McLean County Clerk
+  const CIVIC_IL_EVENTS = [
+    { title: 'Last Day: Early Voting — IL Primary',    date: '2026-03-16', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Illinois Primary Election Day',          date: '2026-03-17', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Voter Registration Deadline — General',  date: '2026-10-06', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
+    { title: 'Early Voting Opens — IL General',        date: '2026-10-19', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Last Day: Early Voting — IL General',    date: '2026-11-02', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Illinois General Election Day',          date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'IL Consolidated Primary Election',       date: '2027-02-23', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'IL Consolidated Election Day',           date: '2027-04-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+  ];
+
+  function getCivicEvents() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return CIVIC_IL_EVENTS
+      .map(ev => ({ ...ev, start: ev.date + 'T12:00:00' }))
+      .filter(ev => new Date(ev.start) >= today);
+  }
 
   const STARRED_STORAGE_KEY = 'shasta_starred_events';
   const CALENDARS_STORAGE_KEY = 'shasta_calendars';
@@ -5345,6 +5379,7 @@
     const chips = [
       { id: 'all', label: 'All' },
       { id: 'starred', label: 'Starred' },
+      { id: 'civic', label: '🗳️ Civic' },
       { id: 'finance', label: 'Finance' },
       { id: 'medical', label: 'Medical' },
       { id: 'pets', label: 'Pets' },
@@ -5406,10 +5441,10 @@
 
       events.forEach(ev => {
         const div = document.createElement('div');
-        div.className = 'schedule-event' + (isEventStarred(ev) ? ' starred' : '');
+        div.className = 'schedule-event' + (isEventStarred(ev) ? ' starred' : '') + (ev.calendar === 'civic' ? ' civic' : '');
         div.dataset.dateKey = key;
         const cal = (ev.calendar || 'shared').toLowerCase();
-        const time = ev.start ? formatEventTime(ev.start) : '';
+        const time = (ev.start && !ev.isAllDay) ? formatEventTime(ev.start) : '';
         const title = (ev.title || ev.summary || 'Event').trim();
         const cat = getEventCategory(ev);
         const badge = cat ? `<span class="schedule-event-badge ${cat}">${cat}</span>` : '';
@@ -5417,7 +5452,7 @@
         const starSvg = isEventStarred(ev)
           ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
           : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
-        const canEdit = ev.calendar && !['holidays'].includes(ev.calendar.toLowerCase());
+        const canEdit = ev.calendar && !['holidays', 'civic'].includes(ev.calendar.toLowerCase());
         const editBtn = canEdit ? '<div class="schedule-event-edit" onclick="event.stopPropagation(); openEventModalForRow(this)" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>' : '';
         div.innerHTML = `
           <span class="schedule-event-dot ${cal}"></span>
@@ -5741,16 +5776,18 @@
       const res = await fetch(url, { redirect: 'follow' });
       const data = await res.json();
       if (data.error || !data.events || data.events.length === 0) {
-        scheduleEvents = [];
-        list.innerHTML = '<div class="screen-loading">No upcoming events.</div>';
+        scheduleEvents = getCivicEvents();
+        if (scheduleEvents.length === 0) list.innerHTML = '<div class="screen-loading">No upcoming events.</div>';
+        else renderScheduleList();
         renderScheduleChips();
         return;
       }
-      scheduleEvents = data.events;
+      scheduleEvents = [...data.events, ...getCivicEvents()];
       renderScheduleList();
     } catch (err) {
-      scheduleEvents = [];
-      list.innerHTML = '<div class="screen-loading">Could not load schedule.</div>';
+      scheduleEvents = getCivicEvents();
+      if (scheduleEvents.length === 0) list.innerHTML = '<div class="screen-loading">Could not load schedule.</div>';
+      else renderScheduleList();
       renderScheduleChips();
     }
   }
