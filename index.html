@@ -1132,25 +1132,17 @@
 
     @keyframes drawerIconWiggle {
       0%   { transform: rotate(0deg)   scale(1); }
-      4%   { transform: rotate(-18deg) scale(1.18); }
-      8%   { transform: rotate(18deg)  scale(1.18); }
-      12%  { transform: rotate(-15deg) scale(1.1); }
-      16%  { transform: rotate(15deg)  scale(1.1); }
-      21%  { transform: rotate(-12deg) scale(1.05); }
-      26%  { transform: rotate(12deg)  scale(1.05); }
-      31%  { transform: rotate(-9deg); }
-      36%  { transform: rotate(9deg); }
-      42%  { transform: rotate(-6deg); }
-      48%  { transform: rotate(6deg); }
-      56%  { transform: rotate(-3deg); }
-      64%  { transform: rotate(3deg); }
-      74%  { transform: rotate(-1.5deg); }
-      84%  { transform: rotate(1.5deg); }
+      12%  { transform: rotate(-10deg) scale(1.08); }
+      28%  { transform: rotate(9deg)   scale(1.06); }
+      44%  { transform: rotate(-7deg)  scale(1.03); }
+      59%  { transform: rotate(5deg); }
+      73%  { transform: rotate(-3deg); }
+      86%  { transform: rotate(1.5deg); }
       100% { transform: rotate(0deg)   scale(1); }
     }
     .drawer-icon-svg.wiggling,
     .drawer-icon-img.wiggling {
-      animation: drawerIconWiggle 0.75s cubic-bezier(0.36,0.07,0.19,0.97) forwards;
+      animation: drawerIconWiggle 0.75s ease-in-out forwards;
       transform-origin: center center;
     }
     /* Prevent the item slide-right from fighting the icon wiggle */
@@ -1315,6 +1307,13 @@
       padding: 6px 10px;
     }
     .screen-item-edit-btn.rename:hover { color: var(--accent); background: transparent; }
+    .screen-item-edit-btn.move-item {
+      width: auto; height: auto;
+      font-size: 13px; font-weight: 500;
+      padding: 6px 10px;
+      color: var(--text2);
+    }
+    .screen-item-edit-btn.move-item:hover { color: var(--accent); background: transparent; }
     .screen-item-checkbox {
       width: 22px;
       height: 22px;
@@ -1343,6 +1342,16 @@
       border-radius: 6px;
     }
     .docs-selection-clear:hover { background: rgba(0,0,0,0.06); }
+    .docs-selection-move {
+      font-size: 13px;
+      padding: 6px 14px;
+      border: none;
+      background: rgba(192,122,74,0.2);
+      color: var(--text);
+      cursor: pointer;
+      border-radius: 6px;
+    }
+    .docs-selection-move:hover { background: rgba(192,122,74,0.35); }
     .docs-selection-delete {
       font-size: 13px;
       padding: 6px 14px;
@@ -2848,6 +2857,38 @@
       background-position: right 10px center;
       cursor: pointer;
     }
+    .upload-folder-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 5px;
+      margin-top: 2px;
+    }
+    .action-sheet-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-align: center;
+      padding: 14px 20px 6px;
+    }
+    .docs-move-sheet-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      font-size: 16px;
+      color: var(--text);
+      cursor: pointer;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      transition: background 0.12s;
+    }
+    .docs-move-sheet-option:active { background: rgba(0,0,0,0.06); }
+    html.dark-mode .docs-move-sheet-option { border-top-color: rgba(255,255,255,0.06); }
+    html.dark-mode .docs-move-sheet-option:active { background: rgba(255,255,255,0.06); }
     .upload-ocr-section {
       margin-top: 12px;
       padding-top: 12px;
@@ -3030,6 +3071,7 @@
       <div class="docs-selection-bar" id="docsSelectionBar" style="display:none">
         <span class="docs-selection-count" id="docsSelectionCount">0 selected</span>
         <button type="button" class="docs-selection-clear" onclick="clearDocsSelection()">Clear</button>
+        <button type="button" class="docs-selection-move" onclick="openDocsMoveSheet()">Move</button>
         <button type="button" class="docs-selection-delete" onclick="deleteSelectedDocs()">Delete</button>
       </div>
       <div class="screen-list" id="docsList"></div>
@@ -3357,6 +3399,7 @@
   <div class="paste-modal" onclick="event.stopPropagation()">
     <h3>Name this file</h3>
     <input type="text" class="paste-filename" id="uploadNameInput" placeholder="Document title">
+    <div class="upload-folder-label">Save to</div>
     <select class="upload-folder-select" id="uploadFolderSelect"></select>
     <div class="upload-ocr-section" id="uploadOcrSection" style="display:none">
       <div class="upload-ocr-status" id="uploadOcrStatus">Extracting text…</div>
@@ -3377,6 +3420,7 @@
   <div class="paste-modal" onclick="event.stopPropagation()">
     <h3>Paste Text</h3>
     <input type="text" class="paste-filename" id="pasteFilename" placeholder="Document title">
+    <div class="upload-folder-label">Save to</div>
     <select class="upload-folder-select" id="pasteFolderSelect"></select>
     <textarea class="paste-content" id="pasteContent" placeholder="Paste your text here…"></textarea>
     <div class="paste-modal-actions">
@@ -3392,12 +3436,22 @@
     <h3>Save Link</h3>
     <input type="url" class="paste-filename" id="saveLinkUrl" placeholder="Paste URL…" autocomplete="off" autocorrect="off" spellcheck="false">
     <input type="text" class="paste-filename" id="saveLinkName" placeholder="Name (optional — we'll auto-detect)">
+    <div class="upload-folder-label">Save to</div>
     <select class="upload-folder-select" id="saveLinkFolderSelect"></select>
     <div class="upload-ocr-status" id="saveLinkStatus" style="display:none"></div>
     <div class="paste-modal-actions">
       <button type="button" class="paste-cancel-btn" onclick="closeSaveLinkModal()">Cancel</button>
       <button type="button" class="paste-save-btn" id="saveLinkBtn" onclick="confirmSaveLink()">Save</button>
     </div>
+  </div>
+</div>
+
+<!-- Docs Move Sheet -->
+<div class="action-sheet-overlay" id="docsMoveSheet" onclick="closeDocsMoveSheet(event)">
+  <div class="action-sheet" onclick="event.stopPropagation()">
+    <div class="action-sheet-title">Move to…</div>
+    <div id="docsMoveSheetOptions"></div>
+    <div class="action-sheet-option" style="color:var(--muted);justify-content:center" onclick="closeDocsMoveSheet()">Cancel</div>
   </div>
 </div>
 
@@ -3450,7 +3504,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.5.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.5.2';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -4123,11 +4177,12 @@
       const selected = docsSelectedItems.has(key);
       div.className = 'screen-item' + (selected ? ' selected' : '');
       if (docsEditMode) {
-        div.innerHTML = `<input type="checkbox" class="screen-item-checkbox" ${selected ? 'checked' : ''} aria-label="Select"><span class="screen-item-icon">📁</span><span class="screen-item-name">${escapeHtml(f.name)}</span><div class="screen-item-edit-actions"><button type="button" class="screen-item-edit-btn rename" title="Rename" aria-label="Rename">Edit</button><button type="button" class="screen-item-edit-btn delete" title="Delete" aria-label="Delete">🗑</button></div>`;
+        div.innerHTML = `<input type="checkbox" class="screen-item-checkbox" ${selected ? 'checked' : ''} aria-label="Select"><span class="screen-item-icon">📁</span><span class="screen-item-name">${escapeHtml(f.name)}</span><div class="screen-item-edit-actions"><button type="button" class="screen-item-edit-btn rename" title="Rename" aria-label="Rename">Edit</button><button type="button" class="screen-item-edit-btn move-item" title="Move" aria-label="Move">Move</button><button type="button" class="screen-item-edit-btn delete" title="Delete" aria-label="Delete">🗑</button></div>`;
         const cb = div.querySelector('.screen-item-checkbox');
         cb.onclick = (e) => { e.stopPropagation(); toggleDocsSelection('folder', f.id); };
         div.onclick = (e) => { if (!e.target.closest('.screen-item-edit-btn') && !e.target.closest('.screen-item-checkbox')) toggleDocsSelection('folder', f.id); };
         div.querySelector('.screen-item-edit-btn.rename').onclick = (e) => { e.stopPropagation(); openDocsRenameModal('folder', f.id, f.name); };
+        div.querySelector('.screen-item-edit-btn.move-item').onclick = (e) => { e.stopPropagation(); openDocsMoveSheet('folder', f.id); };
         div.querySelector('.screen-item-edit-btn.delete').onclick = (e) => { e.stopPropagation(); openDocsDeleteModal('folder', f.id, f.name); };
       } else {
         div.innerHTML = `<span class="screen-item-icon">📁</span><span class="screen-item-name">${escapeHtml(f.name)}</span>`;
@@ -4144,11 +4199,12 @@
       const fileIcon = isLink ? '🔗' : '📄';
       const displayName = isLink ? getBaseName(f.name.replace(/ \(link\)$/, '')) : getBaseName(f.name);
       if (docsEditMode) {
-        div.innerHTML = `<input type="checkbox" class="screen-item-checkbox" ${selected ? 'checked' : ''} aria-label="Select"><span class="screen-item-icon">${fileIcon}</span><span class="screen-item-name">${escapeHtml(displayName)}</span><div class="screen-item-edit-actions"><button type="button" class="screen-item-edit-btn rename" title="Rename" aria-label="Rename">Edit</button><button type="button" class="screen-item-edit-btn delete" title="Delete" aria-label="Delete">🗑</button></div>`;
+        div.innerHTML = `<input type="checkbox" class="screen-item-checkbox" ${selected ? 'checked' : ''} aria-label="Select"><span class="screen-item-icon">${fileIcon}</span><span class="screen-item-name">${escapeHtml(displayName)}</span><div class="screen-item-edit-actions"><button type="button" class="screen-item-edit-btn rename" title="Rename" aria-label="Rename">Edit</button><button type="button" class="screen-item-edit-btn move-item" title="Move" aria-label="Move">Move</button><button type="button" class="screen-item-edit-btn delete" title="Delete" aria-label="Delete">🗑</button></div>`;
         const cb = div.querySelector('.screen-item-checkbox');
         cb.onclick = (e) => { e.stopPropagation(); toggleDocsSelection('file', f.id); };
         div.onclick = (e) => { if (!e.target.closest('.screen-item-edit-btn') && !e.target.closest('.screen-item-checkbox')) toggleDocsSelection('file', f.id); };
         div.querySelector('.screen-item-edit-btn.rename').onclick = (e) => { e.stopPropagation(); openDocsRenameModal('file', f.id, f.name); };
+        div.querySelector('.screen-item-edit-btn.move-item').onclick = (e) => { e.stopPropagation(); openDocsMoveSheet('file', f.id); };
         div.querySelector('.screen-item-edit-btn.delete').onclick = (e) => { e.stopPropagation(); openDocsDeleteModal('file', f.id, f.name); };
       } else {
         div.innerHTML = `<span class="screen-item-icon">${fileIcon}</span><span class="screen-item-name">${escapeHtml(displayName)}</span>`;
@@ -5558,6 +5614,105 @@
     } catch (err) {
       showDocsLoading(false);
       showDocsToast('Delete failed: ' + (err.message || 'Network error'), true);
+    }
+  }
+
+  // ── MOVE ──────────────────────────────────────────────────────────
+  let docsMoveTargetItems = [];
+
+  function openDocsMoveSheet(singleType, singleId) {
+    // Called either from selection bar (no args) or per-item button
+    if (singleType && singleId) {
+      docsMoveTargetItems = [{ type: singleType, id: singleId }];
+    } else {
+      docsMoveTargetItems = [];
+      docsSelectedItems.forEach(key => {
+        const [type, id] = key.split(':');
+        docsMoveTargetItems.push({ type, id });
+      });
+    }
+    if (docsMoveTargetItems.length === 0) return;
+
+    // Populate the folder list from cache
+    const optionsEl = document.getElementById('docsMoveSheetOptions');
+    optionsEl.innerHTML = '';
+    const rootFolders = Object.values(docsFolderCache)
+      .filter(d => d && d.folders)
+      .flatMap(d => d.folders)
+      .filter((f, i, arr) => arr.findIndex(x => x.id === f.id) === i); // dedupe
+
+    // Also include root itself if we have a root folder ID concept
+    const currentFolderId = getCurrentDocsFolderId();
+
+    // Build list: root-level folders
+    let folders = [];
+    if (docsFolderCache[DOCS_FOLDER_ID] && docsFolderCache[DOCS_FOLDER_ID].folders) {
+      folders = docsFolderCache[DOCS_FOLDER_ID].folders;
+    } else if (rootFolders.length > 0) {
+      folders = rootFolders;
+    }
+
+    // Add root as a destination
+    const rootOpt = document.createElement('div');
+    rootOpt.className = 'docs-move-sheet-option';
+    rootOpt.innerHTML = '📁 <span>Root</span>';
+    rootOpt.onclick = () => confirmDocsMove(DOCS_FOLDER_ID);
+    optionsEl.appendChild(rootOpt);
+
+    folders.forEach(f => {
+      if (f.id === currentFolderId && docsMoveTargetItems.every(item => item.type === 'file')) return; // skip current folder for file-only moves
+      const opt = document.createElement('div');
+      opt.className = 'docs-move-sheet-option';
+      opt.innerHTML = '📁 <span>' + escapeHtml(f.name) + '</span>';
+      opt.onclick = () => confirmDocsMove(f.id);
+      optionsEl.appendChild(opt);
+    });
+
+    if (optionsEl.children.length === 0) {
+      optionsEl.innerHTML = '<div style="padding:16px 20px;color:var(--muted);font-size:14px">No folders available</div>';
+    }
+
+    document.getElementById('docsMoveSheet').classList.add('open');
+  }
+
+  function closeDocsMoveSheet(ev) {
+    if (ev && ev.target !== ev.currentTarget && ev.type === 'click') return;
+    document.getElementById('docsMoveSheet').classList.remove('open');
+    docsMoveTargetItems = [];
+  }
+
+  async function confirmDocsMove(toFolderId) {
+    closeDocsMoveSheet();
+    if (docsMoveTargetItems.length === 0) return;
+    const fromFolderId = getCurrentDocsFolderId();
+    showDocsLoading(true);
+    try {
+      const results = await Promise.all(docsMoveTargetItems.map(({ type, id }) =>
+        fetch(API_URL, {
+          method: 'POST',
+          redirect: 'follow',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ action: 'move', user: getApiUser(), type, fileId: id, fromFolderId, toFolderId })
+        }).then(r => r.text()).then(raw => {
+          try { return JSON.parse(raw); } catch (_) { return { error: 'Invalid response' }; }
+        })
+      ));
+      showDocsLoading(false);
+      const firstError = results.find(r => r && r.error);
+      if (firstError) {
+        showDocsToast('Move failed: ' + (firstError.error || 'Unknown error'), true);
+        return;
+      }
+      const n = docsMoveTargetItems.length;
+      showDocsToast(n === 1 ? 'Moved' : n + ' items moved');
+      // Invalidate both source and destination cache
+      delete docsFolderCache[fromFolderId];
+      delete docsFolderCache[toFolderId];
+      clearDocsSelection();
+      loadFolderContents(fromFolderId, true);
+    } catch (err) {
+      showDocsLoading(false);
+      showDocsToast('Move failed: ' + (err.message || 'Network error'), true);
     }
   }
 
