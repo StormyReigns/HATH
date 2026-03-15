@@ -75,7 +75,14 @@
       --muted:  #b8a99e;
       --accent: #c07a4a;
       --vvh: 100vh;
+      --drawer-bg: linear-gradient(170deg, #fdf8f4 0%, #f6ead8 100%);
+      --drawer-border: rgba(192,122,74,0.12);
     }
+    html.card-scheme-peach    { --drawer-bg: linear-gradient(170deg, #fdf8f4 0%, #f6ead8 100%); --drawer-border: rgba(192,122,74,0.12); }
+    html.card-scheme-lavender { --drawer-bg: linear-gradient(170deg, #f8f5fd 0%, #ede5f5 100%); --drawer-border: rgba(140,110,200,0.15); }
+    html.card-scheme-sage     { --drawer-bg: linear-gradient(170deg, #f5faf8 0%, #e4f0ea 100%); --drawer-border: rgba(80,160,120,0.15); }
+    html.card-scheme-sunset   { --drawer-bg: linear-gradient(170deg, #fdf8f2 0%, #f6e8d4 100%); --drawer-border: rgba(200,140,80,0.15); }
+    html.card-scheme-ocean    { --drawer-bg: linear-gradient(170deg, #f2f8fd 0%, #d8ecf8 100%); --drawer-border: rgba(60,140,200,0.15); }
 
     html {
       color-scheme: only light;
@@ -1021,8 +1028,8 @@
     .drawer {
       position: fixed; top: 0; left: 0; bottom: 0;
       width: 72%; max-width: 280px;
-      background: linear-gradient(170deg, #fdf8f4 0%, #f6ead8 100%);
-      border-right: 1px solid rgba(192,122,74,0.12);
+      background: var(--drawer-bg);
+      border-right: 1px solid var(--drawer-border);
       box-shadow: 8px 0 48px rgba(70,40,10,0.22);
       transform: translateX(-100%);
       transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
@@ -1061,7 +1068,7 @@
       align-items: center;
       justify-content: space-between;
       padding: 0 26px 22px;
-      border-bottom: 1px solid rgba(192,122,74,0.15);
+      border-bottom: 1px solid var(--drawer-border);
       gap: 16px;
     }
     .drawer-header-text { flex: 1; min-width: 0; }
@@ -1108,9 +1115,17 @@
     .drawer-item:hover .drawer-icon-svg,
     .drawer-item:active .drawer-icon-svg,
     .drawer-item.active .drawer-icon-svg { opacity: 1; }
+    .drawer-icon-img {
+      width: 22px; height: 22px; flex-shrink: 0;
+      object-fit: contain; image-rendering: pixelated;
+      opacity: 0.75; transition: opacity 0.15s;
+    }
+    .drawer-item:hover .drawer-icon-img,
+    .drawer-item:active .drawer-icon-img,
+    .drawer-item.active .drawer-icon-img { opacity: 1; }
     .drawer-footer {
       padding: 14px 26px;
-      border-top: 1px solid rgba(192,122,74,0.12);
+      border-top: 1px solid var(--drawer-border);
       font-size: 10px; color: var(--muted);
       font-style: italic; letter-spacing: 0.05em;
     }
@@ -2954,7 +2969,7 @@
       Home
     </div>
     <div class="drawer-item" onclick="closeDrawer(); showProjectsScreen()">
-      <svg class="drawer-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v13a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+      <img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/WWChest1.png" alt="">
       Projects
     </div>
     <div class="drawer-item" onclick="closeDrawer(); showDocumentsScreen()">
@@ -3101,7 +3116,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.2.8';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.2.9';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
