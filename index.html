@@ -2074,8 +2074,11 @@
       border: 2px solid rgba(0,0,0,0.12);
       display: flex; flex-direction: column;
       min-height: 140px;
+      max-height: calc(var(--vh, 1vh) * 52);
       flex-shrink: 0;
       backdrop-filter: blur(8px);
+      position: relative;
+      overflow: hidden;
     }
     html.card-scheme-peach .projects-phase-card { background: rgba(252,232,232,0.35); border-color: rgba(220,180,190,0.6); }
     html.card-scheme-lavender .projects-phase-card { background: rgba(232,229,245,0.35); border-color: rgba(180,170,220,0.6); }
@@ -2083,6 +2086,134 @@
     html.card-scheme-sunset .projects-phase-card { background: rgba(252,238,224,0.35); border-color: rgba(220,190,160,0.6); }
     html.card-scheme-ocean .projects-phase-card { background: rgba(224,238,248,0.35); border-color: rgba(150,190,230,0.6); }
     .projects-phase-card-single { flex: 0 0 100%; min-width: 100%; }
+
+    /* ── Scrollable card body ── */
+    .phase-card-body {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
+      scrollbar-width: none;
+    }
+    .phase-card-body::-webkit-scrollbar { display: none; }
+
+    .phase-card-footer {
+      flex-shrink: 0;
+      padding-top: 6px;
+    }
+
+    /* ── Page-peel corner ── */
+    .phase-peel-corner {
+      position: absolute;
+      top: 0; right: 0;
+      width: 32px; height: 32px;
+      cursor: pointer;
+      z-index: 10;
+      transition: width 0.3s cubic-bezier(0.4,0,0.2,1),
+                  height 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    /* Shadow on the card surface under the lifted corner */
+    .phase-peel-corner::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 100%; height: 100%;
+      background: linear-gradient(225deg, rgba(0,0,0,0.18) 0%, transparent 72%);
+      clip-path: polygon(100% 0, 100% 100%, 0 0);
+    }
+    /* The folded-back parchment flap */
+    .phase-peel-corner::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 100%; height: 100%;
+      background: linear-gradient(225deg, #f5e6c4 0%, #e8d4a2 55%, #cdb27a 100%);
+      clip-path: polygon(100% 0, 100% 100%, 0 0);
+      box-shadow: -2px 2px 6px rgba(0,0,0,0.22);
+      transition: box-shadow 0.2s ease;
+    }
+    .phase-peel-corner:hover::after,
+    .phase-peel-corner:active::after {
+      box-shadow: -3px 3px 10px rgba(0,0,0,0.32);
+    }
+    /* Peel grows when notes panel is open */
+    .projects-phase-card.notes-open .phase-peel-corner {
+      width: 46px; height: 46px;
+    }
+    .projects-phase-card.notes-open .phase-peel-corner::after {
+      box-shadow: -4px 4px 12px rgba(0,0,0,0.35);
+    }
+    /* Tiny dot on badge when notes have been saved */
+    .phase-notes-dot {
+      display: inline-block;
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin-left: 5px;
+      vertical-align: middle;
+      opacity: 0.75;
+      flex-shrink: 0;
+    }
+
+    /* ── Notes overlay panel ── */
+    .phase-notes-panel {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(248, 238, 208, 0.97);
+      border-radius: 12px;
+      padding: 50px 14px 16px;
+      display: flex; flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      /* Unfurl from the top-right corner */
+      clip-path: polygon(100% 0, 100% 0, 100% 0, 100% 0);
+      transition: clip-path 0.38s cubic-bezier(0.4,0,0.2,1),
+                  opacity 0.22s ease;
+      z-index: 8;
+    }
+    .projects-phase-card.notes-open .phase-notes-panel {
+      opacity: 1;
+      pointer-events: auto;
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    }
+    .phase-notes-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: rgba(100,60,15,0.55);
+      margin-bottom: 8px;
+      font-family: inherit;
+    }
+    .phase-notes-input {
+      display: block;
+      flex: 1;
+      width: 100%;
+      box-sizing: border-box;
+      resize: none;
+      background: rgba(252, 244, 220, 0.85);
+      border: 1.5px solid rgba(180,135,65,0.35);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-family: 'Playfair Display', serif;
+      font-size: 13px;
+      font-style: italic;
+      color: #4a2c10;
+      line-height: 1.55;
+      letter-spacing: 0.01em;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    .phase-notes-input::placeholder {
+      color: rgba(120,70,20,0.42);
+      font-style: italic;
+    }
+    .phase-notes-input:focus {
+      border-color: rgba(192,122,74,0.55);
+      background: rgba(255,248,228,0.95);
+    }
+
     .phase-badge {
       font-size: 11px; color: var(--muted);
       text-transform: uppercase; letter-spacing: 0.06em;
@@ -2476,6 +2607,23 @@
       touch-action: pan-y pinch-zoom;
     }
     html.dark-mode .projects-phase-card { background: rgba(45,40,38,0.6); border-color: rgba(255,255,255,0.08); }
+    html.dark-mode .phase-peel-corner::after {
+      background: linear-gradient(225deg, #4a3620 0%, #382a14 55%, #28200e 100%);
+    }
+    html.dark-mode .phase-notes-panel {
+      background: rgba(40,30,18,0.97);
+    }
+    html.dark-mode .phase-notes-input {
+      background: rgba(55,42,22,0.9);
+      border-color: rgba(200,145,70,0.28);
+      color: #d4a870;
+    }
+    html.dark-mode .phase-notes-input::placeholder { color: rgba(200,145,70,0.38); }
+    html.dark-mode .phase-notes-input:focus {
+      border-color: rgba(210,150,80,0.5);
+      background: rgba(65,50,26,0.95);
+    }
+    html.dark-mode .phase-notes-label { color: rgba(200,150,80,0.5); }
     html.dark-mode .phase-quote {
       color: #c49870;
       text-shadow: 0 1px 0 rgba(0,0,0,0.35), 0 -1px 0 rgba(220,160,90,0.1);
@@ -3222,7 +3370,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.3.5';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.3.6';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -3651,6 +3799,48 @@
     } else {
       if (fn) fn();
     }
+  }
+
+  // ── PHASE NOTES ───────────────────────────────────────────────
+  function togglePhaseNotes(peelEl, idx) {
+    const card = peelEl.closest('.projects-phase-card');
+    if (!card) return;
+    const isOpening = !card.classList.contains('notes-open');
+    card.classList.toggle('notes-open');
+    if (isOpening) {
+      const ta = card.querySelector('.phase-notes-input');
+      if (ta) setTimeout(function() { ta.focus(); }, 360);
+    }
+  }
+
+  function savePhaseNote(textarea, idx) {
+    const p = projectsViewing;
+    if (!p || !p.phases || !p.phases[idx]) return;
+    p.phases[idx].notes = textarea.value;
+    // Update the indicator dot without re-rendering the whole card
+    const card = textarea.closest('.projects-phase-card');
+    if (card) {
+      const badge = card.querySelector('.phase-badge');
+      if (badge) {
+        let dot = badge.querySelector('.phase-notes-dot');
+        if (textarea.value && !dot) {
+          dot = document.createElement('span');
+          dot.className = 'phase-notes-dot';
+          badge.appendChild(dot);
+        } else if (!textarea.value && dot) {
+          dot.remove();
+        }
+      }
+    }
+    // Persist to localStorage
+    const user = localStorage.getItem('shasta_user');
+    if (!user) return;
+    const key = PROJECTS_STORAGE_KEY + '_' + user;
+    try {
+      const all = JSON.parse(localStorage.getItem(key)) || [];
+      const projIdx = all.findIndex(function(x) { return x.id === p.id; });
+      if (projIdx >= 0) { all[projIdx] = p; localStorage.setItem(key, JSON.stringify(all)); }
+    } catch(e) {}
   }
 
   // ── INPUT ─────────────────────────────────────────────────────
@@ -4572,15 +4762,25 @@
       progressHtml = `<div class="phase-progress-wrap"><div class="phase-progress-bar"><div class="phase-progress-fill${completeClass}" style="width:${pct}%"></div></div></div>`;
     }
     const phaseLabel = (phasesLength || 1) > 1 ? `Phase ${idx + 1} of ${phasesLength || 1}` : `Phase ${idx + 1}`;
+    const notesDot = ph.notes ? `<span class="phase-notes-dot"></span>` : '';
     return `<div class="projects-phase-card" data-phase-idx="${idx}">
-      <div class="phase-badge">${phaseLabel}</div>
+      <div class="phase-peel-corner" onclick="togglePhaseNotes(this, ${idx})" title="Notes"></div>
+      <div class="phase-notes-panel">
+        <div class="phase-notes-label">Notes</div>
+        <textarea class="phase-notes-input" placeholder="Adventure notes…" oninput="savePhaseNote(this, ${idx})">${escapeHtml(ph.notes || '')}</textarea>
+      </div>
+      <div class="phase-badge">${phaseLabel}${notesDot}</div>
       <h3 class="phase-title">${escapeHtml(ph.title || 'Untitled phase')}</h3>
-      <p class="phase-desc" style="display:${ph.description ? 'block' : 'none'}">${escapeHtml(ph.description || '')}</p>
-      ${checklistBlock}
-      ${completeBtnBlock}
-      ${undoBlock}
-      ${timelineHtml}
-      ${progressHtml}
+      <div class="phase-card-body">
+        <p class="phase-desc" style="display:${ph.description ? 'block' : 'none'}">${escapeHtml(ph.description || '')}</p>
+        ${checklistBlock}
+      </div>
+      <div class="phase-card-footer">
+        ${completeBtnBlock}
+        ${undoBlock}
+        ${timelineHtml}
+        ${progressHtml}
+      </div>
     </div>`;
   }
 
