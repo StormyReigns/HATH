@@ -5682,12 +5682,14 @@
   }
 
   async function confirmDocsMove(toFolderId) {
+    // Capture items BEFORE closing the sheet (closeDocsMoveSheet clears the array)
+    const itemsToMove = docsMoveTargetItems.slice();
     closeDocsMoveSheet();
-    if (docsMoveTargetItems.length === 0) return;
+    if (itemsToMove.length === 0) return;
     const fromFolderId = getCurrentDocsFolderId();
     showDocsLoading(true);
     try {
-      const results = await Promise.all(docsMoveTargetItems.map(({ type, id }) =>
+      const results = await Promise.all(itemsToMove.map(({ type, id }) =>
         fetch(API_URL, {
           method: 'POST',
           redirect: 'follow',
@@ -5703,7 +5705,7 @@
         showDocsToast('Move failed: ' + (firstError.error || 'Unknown error'), true);
         return;
       }
-      const n = docsMoveTargetItems.length;
+      const n = itemsToMove.length;
       showDocsToast(n === 1 ? 'Moved' : n + ' items moved');
       // Invalidate both source and destination cache
       delete docsFolderCache[fromFolderId];
