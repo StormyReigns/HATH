@@ -2099,9 +2099,7 @@
       flex: 1;
       min-height: 0;
       overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
-      touch-action: pan-y;
+      overscroll-behavior-y: contain;
       scrollbar-width: none;
     }
     .phase-card-body::-webkit-scrollbar { display: none; }
@@ -2179,13 +2177,13 @@
       transform-origin: top right;
       transition: transform 0.32s cubic-bezier(0.34, 1.38, 0.64, 1),
                   opacity 0.18s ease;
-      will-change: transform, opacity;
       z-index: 8;
     }
     .projects-phase-card.notes-open .phase-notes-panel {
       opacity: 1;
       pointer-events: auto;
       transform: scale(1);
+      will-change: transform, opacity;
     }
     .phase-notes-label {
       font-size: 11px;
@@ -3398,7 +3396,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.4.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.4.3';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -5227,15 +5225,12 @@
     if (!select) return;
     const rootData = docsFolderCache[DOCS_FOLDER_ID];
     const folders = (rootData && rootData.folders) || [];
-    // Pre-select the current folder only if exactly one level deep
     const currentId = getCurrentDocsFolderId();
-    const inSubfolder = docsBreadcrumb.length === 2;
     select.innerHTML = '<option value="">— Root —</option>' +
       folders.map(function(f) {
-        const sel = (inSubfolder && f.id === currentId) ? ' selected' : '';
+        const sel = f.id === currentId ? ' selected' : '';
         return `<option value="${escapeHtml(f.id)}"${sel}>${escapeHtml(f.name)}</option>`;
       }).join('');
-    // Hide the select entirely if there are no folders to choose from
     select.style.display = folders.length > 0 ? 'block' : 'none';
   }
 
