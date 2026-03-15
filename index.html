@@ -1375,6 +1375,169 @@
     .screen-footer a:active { opacity: 0.8; }
     .screen-loading { text-align: center; padding: 24px; color: var(--muted); font-size: 13px; }
 
+    /* ── Recipes screen ─────────────────────────────────────── */
+    #recipesScreen { flex-direction: column; padding: 0; overflow: hidden; }
+    .recipes-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 16px 6px; flex-shrink: 0;
+    }
+    .recipes-title { font-size: 20px; font-weight: 700; color: var(--text); flex: 1; }
+    .recipes-refresh-btn {
+      background: none; border: none; padding: 6px; cursor: pointer;
+      color: var(--muted); display: flex; align-items: center;
+    }
+    .recipes-refresh-btn svg { width: 18px; height: 18px; }
+    .recipes-search-wrap { padding: 0 16px 8px; flex-shrink: 0; position: relative; }
+    .recipes-search {
+      width: 100%; padding: 10px 14px 10px 38px;
+      font-size: 15px; font-family: inherit;
+      border: 1.5px solid rgba(0,0,0,0.1); border-radius: 10px;
+      background: rgba(255,255,255,0.7); color: var(--text); outline: none;
+      box-sizing: border-box;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: 12px center;
+    }
+    .recipes-search:focus { border-color: var(--accent); }
+    .recipes-source-chips {
+      display: flex; gap: 8px; padding: 0 16px 12px;
+      overflow-x: auto; flex-shrink: 0; scrollbar-width: none;
+    }
+    .recipes-source-chips::-webkit-scrollbar { display: none; }
+    .recipes-source-chip {
+      padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;
+      border: 1.5px solid rgba(0,0,0,0.1); background: transparent;
+      color: var(--text2); cursor: pointer; white-space: nowrap;
+      transition: all 0.15s; font-family: inherit;
+    }
+    .recipes-source-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .recipes-carousel-wrap { flex: 1; overflow: hidden; position: relative; min-height: 0; }
+    .recipes-carousel {
+      display: flex; gap: 16px; padding: 4px 16px 24px;
+      overflow-x: auto; scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
+      scrollbar-width: none; height: 100%; align-items: flex-start;
+      box-sizing: border-box;
+    }
+    .recipes-carousel::-webkit-scrollbar { display: none; }
+    .recipe-card {
+      flex: 0 0 82%; min-width: 0; scroll-snap-align: center;
+      background: #fdf8f1; border-radius: 16px;
+      box-shadow: 0 3px 16px rgba(0,0,0,0.1); overflow: hidden;
+      cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+      display: flex; flex-direction: column;
+    }
+    .recipe-card:active { transform: scale(0.97); box-shadow: 0 1px 8px rgba(0,0,0,0.1); }
+    .recipe-card-image-wrap {
+      width: 100%; height: 180px;
+      background: linear-gradient(135deg, #e8d5b0 0%, #c9a06a 100%);
+      position: relative; overflow: hidden; flex-shrink: 0;
+    }
+    .recipe-card-image-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    .recipe-card-image-placeholder {
+      width: 100%; height: 100%; display: flex;
+      align-items: center; justify-content: center; font-size: 56px; opacity: 0.45;
+    }
+    .recipe-card-body { padding: 14px 16px 18px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+    .recipe-card-source {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 3px 8px; border-radius: 6px; align-self: flex-start;
+      background: rgba(192,122,74,0.15); color: var(--accent);
+    }
+    .recipe-card-source.hf { background: rgba(0,169,91,0.13); color: #00a05a; }
+    .recipe-card-name { font-size: 19px; font-weight: 700; color: var(--text); line-height: 1.3; }
+    /* Recipe list (search results) */
+    .recipes-list-wrap {
+      flex: 1; overflow-y: auto; padding: 0 16px;
+      overscroll-behavior-y: contain; display: none;
+    }
+    .recipe-list-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 0; border-bottom: 1px solid rgba(0,0,0,0.07); cursor: pointer;
+    }
+    .recipe-list-item:active { opacity: 0.65; }
+    .recipe-list-icon {
+      width: 48px; height: 48px; border-radius: 10px;
+      background: linear-gradient(135deg, #e8d5b0, #c9a06a);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; flex-shrink: 0; overflow: hidden;
+    }
+    .recipe-list-icon img { width: 100%; height: 100%; object-fit: cover; }
+    .recipe-list-info { flex: 1; min-width: 0; }
+    .recipe-list-name { font-size: 15px; font-weight: 600; color: var(--text); }
+    .recipe-list-source { font-size: 12px; color: var(--text2); margin-top: 2px; }
+    /* Recipe detail overlay */
+    .recipe-detail {
+      position: absolute; inset: 0;
+      background: #fdf8f1; z-index: 60;
+      display: flex; flex-direction: column;
+      transform: translateX(105%);
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); overflow: hidden;
+    }
+    .recipe-detail.open { transform: translateX(0); }
+    .recipe-detail-topbar {
+      display: flex; align-items: center; gap: 8px; padding: 14px 16px 12px;
+      flex-shrink: 0; border-bottom: 1px solid rgba(0,0,0,0.07);
+    }
+    .recipe-detail-back {
+      background: none; border: none; font-size: 24px;
+      color: var(--accent); cursor: pointer; padding: 2px 8px 2px 0; line-height: 1;
+    }
+    .recipe-detail-topname {
+      font-size: 16px; font-weight: 700; color: var(--text);
+      flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    }
+    .recipe-detail-scroll { flex: 1; overflow-y: auto; overscroll-behavior-y: contain; }
+    .recipe-detail-image {
+      width: 100%; height: 230px; background: linear-gradient(135deg, #e8d5b0, #c9a06a);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 72px; color: rgba(0,0,0,0.2); flex-shrink: 0; overflow: hidden;
+    }
+    .recipe-detail-image img { width: 100%; height: 100%; object-fit: cover; }
+    .recipe-detail-content { padding: 20px 18px 44px; }
+    .recipe-detail-name { font-size: 24px; font-weight: 800; color: var(--text); line-height: 1.25; margin-bottom: 8px; }
+    .recipe-detail-meta { font-size: 13px; color: var(--text2); margin-bottom: 14px; display: flex; gap: 14px; flex-wrap: wrap; }
+    .recipe-detail-section-title {
+      font-size: 11px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.09em; color: var(--accent); margin: 22px 0 10px;
+    }
+    .recipe-ingredient {
+      display: flex; align-items: baseline; gap: 8px;
+      padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.05);
+      font-size: 15px; color: var(--text); line-height: 1.4;
+    }
+    .recipe-ingredient::before { content: '•'; color: var(--accent); font-weight: 700; flex-shrink: 0; }
+    .recipe-step {
+      display: flex; gap: 12px; padding: 10px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      font-size: 15px; color: var(--text); line-height: 1.5;
+    }
+    .recipe-step-num {
+      width: 26px; height: 26px; min-width: 26px; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; margin-top: 1px;
+    }
+    .recipe-raw-text { font-size: 14px; color: var(--text2); line-height: 1.75; white-space: pre-wrap; }
+    .recipes-empty-state {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: var(--muted); gap: 10px; padding: 40px 20px; text-align: center;
+    }
+    .recipes-empty-state-icon { font-size: 52px; opacity: 0.45; }
+    .recipes-loading { display: flex; align-items: center; justify-content: center; min-height: 120px; color: var(--muted); font-size: 14px; }
+    /* Dark mode — recipes */
+    html.dark-mode .recipe-card { background: #252220; }
+    html.dark-mode .recipe-card-image-wrap,
+    html.dark-mode .recipe-list-icon,
+    html.dark-mode .recipe-detail-image { background: linear-gradient(135deg, #3a2e20, #2a1e10); }
+    html.dark-mode .recipe-list-item { border-bottom-color: rgba(255,255,255,0.07); }
+    html.dark-mode .recipe-ingredient,
+    html.dark-mode .recipe-step { border-bottom-color: rgba(255,255,255,0.06); }
+    html.dark-mode .recipe-detail { background: #1a1714; }
+    html.dark-mode .recipe-detail-topbar { border-bottom-color: rgba(255,255,255,0.08); }
+    html.dark-mode .recipes-search { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.12); }
+    html.dark-mode .recipes-source-chip { border-color: rgba(255,255,255,0.13); }
+
     /* Schedule screen */
     #scheduleScreen { flex-direction: column; padding: 4px 0 6px; }
     .schedule-header {
@@ -3080,6 +3243,32 @@
     <input type="file" id="docsFileScan" accept="image/*" capture="environment" style="display:none">
     <input type="file" id="docsFileUpload" style="display:none">
 
+    <!-- Recipes screen -->
+    <div class="sub-screen" id="recipesScreen">
+      <div class="recipes-header">
+        <span class="recipes-title">Recipes</span>
+        <button type="button" class="recipes-refresh-btn" onclick="loadRecipesData()" title="Refresh">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </button>
+      </div>
+      <div class="recipes-search-wrap">
+        <input type="search" class="recipes-search" id="recipesSearchInput" placeholder="Search recipes…" autocomplete="off" oninput="onRecipesSearch(this.value)">
+      </div>
+      <div class="recipes-source-chips" id="recipeSourceChips"></div>
+      <div class="recipes-carousel-wrap" id="recipesCarouselWrap">
+        <div class="recipes-carousel" id="recipesCarousel"></div>
+      </div>
+      <div class="recipes-list-wrap" id="recipesListWrap"></div>
+      <!-- Recipe detail slide-in -->
+      <div class="recipe-detail" id="recipeDetail">
+        <div class="recipe-detail-topbar">
+          <button type="button" class="recipe-detail-back" onclick="closeRecipeDetail()">‹</button>
+          <span class="recipe-detail-topname" id="recipeDetailTopName"></span>
+        </div>
+        <div class="recipe-detail-scroll" id="recipeDetailScroll"></div>
+      </div>
+    </div>
+
     <!-- Settings screen -->
     <div class="sub-screen" id="settingsScreen">
       <div class="settings-section">
@@ -3334,6 +3523,10 @@
       <svg class="drawer-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
       Documents
     </div>
+    <div class="drawer-item" data-screen="recipes" onclick="drawerNavTap(this, ()=>{ closeDrawer(); showRecipesScreen(); })">
+      <svg class="drawer-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3z"/></svg>
+      Recipes
+    </div>
     <div class="drawer-item" onclick="drawerNavTap(this)">
       <svg class="drawer-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
       Finances
@@ -3504,7 +3697,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.5.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.6.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -4068,6 +4261,7 @@
     document.getElementById('projectsScreen').classList.remove('visible');
     document.getElementById('scheduleScreen').classList.remove('visible');
     document.getElementById('settingsScreen').classList.remove('visible');
+    document.getElementById('recipesScreen').classList.remove('visible');
     document.getElementById(screenId).classList.add('visible');
     if (screenId === 'projectsScreen') {
       document.getElementById('projectsLanding').style.display = 'flex';
@@ -6968,6 +7162,313 @@
   }
 
   initDocsFileInputs();
+
+  // ── RECIPES ────────────────────────────────────────────────────────
+  const IMAGE_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif']);
+  const RECIPES_FOLDER_NAME = 'Recipes';
+  const HF_FOLDER_NAME = 'HelloFresh';
+
+  const recipesState = {
+    all: [], filtered: [], activeSource: 'all', searching: false,
+    loaded: false, loading: false,
+  };
+
+  function showRecipesScreen() {
+    showSubScreen('recipesScreen');
+    document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
+    const recipeBtn = document.querySelector('.drawer-item[data-screen="recipes"]');
+    if (recipeBtn) recipeBtn.classList.add('active');
+    if (!recipesState.loaded && !recipesState.loading) loadRecipesData();
+  }
+
+  async function loadRecipesData() {
+    if (recipesState.loading) return;
+    recipesState.loading = true;
+    recipesState.loaded = false;
+
+    const carouselWrap = document.getElementById('recipesCarouselWrap');
+    const listWrap = document.getElementById('recipesListWrap');
+    carouselWrap.style.display = '';
+    listWrap.style.display = 'none';
+    document.getElementById('recipesCarousel').innerHTML = '<div class="recipes-loading">Loading recipes…</div>';
+    document.getElementById('recipeSourceChips').innerHTML = '';
+
+    try {
+      if (!docsFolderCache[DOCS_FOLDER_ID]) await fetchFolderIntoCache(DOCS_FOLDER_ID);
+      const rootData = docsFolderCache[DOCS_FOLDER_ID];
+      const recFolder = (rootData && rootData.folders || []).find(f => f.name === RECIPES_FOLDER_NAME);
+      if (!recFolder) {
+        document.getElementById('recipesCarousel').innerHTML = '<div class="recipes-loading">No "Recipes" folder found in Documents.</div>';
+        recipesState.loading = false;
+        return;
+      }
+
+      if (!docsFolderCache[recFolder.id]) await fetchFolderIntoCache(recFolder.id);
+      const recData = docsFolderCache[recFolder.id] || { folders: [], files: [] };
+
+      // Load HelloFresh subfolder
+      const hfFolder = (recData.folders || []).find(f => f.name === HF_FOLDER_NAME);
+      let hfFiles = [];
+      if (hfFolder) {
+        if (!docsFolderCache[hfFolder.id]) await fetchFolderIntoCache(hfFolder.id);
+        hfFiles = (docsFolderCache[hfFolder.id] || {}).files || [];
+      }
+
+      // Load other subfolders (excluding HelloFresh)
+      const otherFolders = (recData.folders || []).filter(f => f.name !== HF_FOLDER_NAME);
+      for (const f of otherFolders) {
+        if (!docsFolderCache[f.id]) await fetchFolderIntoCache(f.id);
+      }
+
+      const recipes = [];
+
+      // Root-level recipe docs
+      (recData.files || []).filter(f => !isRecipeImageFile(f.name)).forEach(f => {
+        recipes.push({ id: f.id, name: getBaseName(f.name), docId: f.id, imageId: null, source: 'other', sourceLabel: 'Recipe', url: f.url });
+      });
+
+      // HelloFresh recipes: pair images + docs by base name
+      if (hfFiles.length > 0) {
+        const hfImages = hfFiles.filter(f => isRecipeImageFile(f.name));
+        const hfDocs   = hfFiles.filter(f => !isRecipeImageFile(f.name));
+        const usedImgIds = new Set();
+        hfDocs.forEach(doc => {
+          const baseName = getBaseName(doc.name);
+          const img = hfImages.find(i => getBaseName(i.name).toLowerCase() === baseName.toLowerCase());
+          if (img) usedImgIds.add(img.id);
+          recipes.push({ id: doc.id, name: baseName, docId: doc.id, imageId: img ? img.id : null, source: 'hellofresh', sourceLabel: 'HelloFresh', url: doc.url });
+        });
+        // Images without a matching doc (shouldn't happen much, but handle gracefully)
+        hfImages.filter(i => !usedImgIds.has(i.id)).forEach(img => {
+          recipes.push({ id: img.id, name: getBaseName(img.name), docId: null, imageId: img.id, source: 'hellofresh', sourceLabel: 'HelloFresh', url: img.url });
+        });
+      }
+
+      // Other subfolders
+      otherFolders.forEach(folder => {
+        const data = docsFolderCache[folder.id] || { files: [] };
+        (data.files || []).filter(f => !isRecipeImageFile(f.name)).forEach(f => {
+          recipes.push({ id: f.id, name: getBaseName(f.name), docId: f.id, imageId: null, source: folder.name.toLowerCase().replace(/\s+/g, '_'), sourceLabel: folder.name, url: f.url });
+        });
+      });
+
+      recipes.sort((a, b) => a.name.localeCompare(b.name));
+      recipesState.all = recipes;
+      recipesState.filtered = recipes;
+      recipesState.activeSource = 'all';
+      recipesState.searching = false;
+      recipesState.loaded = true;
+
+      renderRecipeSourceChips();
+      renderRecipesView();
+    } catch (err) {
+      document.getElementById('recipesCarousel').innerHTML = '<div class="recipes-loading">Could not load recipes: ' + escapeHtml(err.message) + '</div>';
+    }
+    recipesState.loading = false;
+  }
+
+  async function fetchFolderIntoCache(folderId) {
+    const url = apiUrlWithUser(API_URL, '&action=listFolder&folder=' + encodeURIComponent(folderId));
+    const res = await fetch(url, { redirect: 'follow' });
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch(_) { data = { error: 'Invalid JSON' }; }
+    if (!data.error) docsFolderCache[folderId] = data;
+    return data;
+  }
+
+  function isRecipeImageFile(name) {
+    const dot = name.lastIndexOf('.');
+    if (dot < 0) return false;
+    return IMAGE_EXTS.has(name.slice(dot).toLowerCase());
+  }
+
+  function renderRecipeSourceChips() {
+    const el = document.getElementById('recipeSourceChips');
+    const usedSources = [...new Set(recipesState.all.map(r => r.source))];
+    const allSources = ['all', ...usedSources];
+    const labels = { all: 'All', hellofresh: 'HelloFresh', other: 'Other' };
+    el.innerHTML = '';
+    allSources.forEach(s => {
+      if (s !== 'all' && !recipesState.all.some(r => r.source === s)) return;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'recipes-source-chip' + (s === recipesState.activeSource ? ' active' : '');
+      btn.textContent = labels[s] || s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      btn.onclick = () => {
+        recipesState.activeSource = s;
+        const q = document.getElementById('recipesSearchInput').value;
+        applyRecipesFilter(q, s);
+        renderRecipeSourceChips();
+      };
+      el.appendChild(btn);
+    });
+  }
+
+  function onRecipesSearch(query) {
+    applyRecipesFilter(query, recipesState.activeSource);
+  }
+
+  function applyRecipesFilter(query, source) {
+    let list = recipesState.all;
+    if (source && source !== 'all') list = list.filter(r => r.source === source);
+    const q = (query || '').trim().toLowerCase();
+    if (q) list = list.filter(r => r.name.toLowerCase().includes(q));
+    recipesState.filtered = list;
+    recipesState.searching = !!q;
+    renderRecipesView();
+  }
+
+  function renderRecipesView() {
+    const carouselWrap = document.getElementById('recipesCarouselWrap');
+    const listWrap = document.getElementById('recipesListWrap');
+    const carousel = document.getElementById('recipesCarousel');
+
+    if (recipesState.filtered.length === 0) {
+      carouselWrap.style.display = '';
+      listWrap.style.display = 'none';
+      carousel.innerHTML = '<div class="recipes-empty-state"><div class="recipes-empty-state-icon">🍽️</div><div>No recipes found</div></div>';
+      return;
+    }
+
+    if (recipesState.searching) {
+      carouselWrap.style.display = 'none';
+      listWrap.style.display = 'block';
+      listWrap.innerHTML = '';
+      recipesState.filtered.forEach(r => {
+        const item = document.createElement('div');
+        item.className = 'recipe-list-item';
+        const imgContent = r.imageId
+          ? `<img src="https://drive.google.com/thumbnail?id=${r.imageId}&sz=w100" onerror="this.parentNode.innerHTML='🍽️'" alt="">`
+          : '🍽️';
+        item.innerHTML = `<div class="recipe-list-icon">${imgContent}</div><div class="recipe-list-info"><div class="recipe-list-name">${escapeHtml(r.name)}</div><div class="recipe-list-source">${escapeHtml(r.sourceLabel)}</div></div>`;
+        item.onclick = () => openRecipeDetail(r);
+        listWrap.appendChild(item);
+      });
+    } else {
+      carouselWrap.style.display = '';
+      listWrap.style.display = 'none';
+      carousel.innerHTML = '';
+      recipesState.filtered.forEach(r => {
+        const card = document.createElement('div');
+        card.className = 'recipe-card';
+        const hfClass = r.source === 'hellofresh' ? ' hf' : '';
+        const imgHtml = r.imageId
+          ? `<img src="https://drive.google.com/thumbnail?id=${r.imageId}&sz=w400" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt=""><div class="recipe-card-image-placeholder" style="display:none">🍽️</div>`
+          : `<div class="recipe-card-image-placeholder">🍽️</div>`;
+        card.innerHTML = `<div class="recipe-card-image-wrap">${imgHtml}</div><div class="recipe-card-body"><span class="recipe-card-source${hfClass}">${escapeHtml(r.sourceLabel)}</span><div class="recipe-card-name">${escapeHtml(r.name)}</div></div>`;
+        card.onclick = () => openRecipeDetail(r);
+        carousel.appendChild(card);
+      });
+    }
+  }
+
+  async function openRecipeDetail(recipe) {
+    const detail = document.getElementById('recipeDetail');
+    const scroll = document.getElementById('recipeDetailScroll');
+    document.getElementById('recipeDetailTopName').textContent = recipe.name;
+
+    const hfClass = recipe.source === 'hellofresh' ? ' hf' : '';
+    scroll.innerHTML = `
+      <div class="recipe-detail-image" id="recipeDetailImgWrap"><span style="font-size:64px;opacity:0.2">🍽️</span></div>
+      <div class="recipe-detail-content">
+        <div class="recipe-detail-name">${escapeHtml(recipe.name)}</div>
+        <div class="recipe-detail-meta"><span class="recipe-card-source${hfClass}">${escapeHtml(recipe.sourceLabel)}</span></div>
+        <div id="recipeDetailBody"><div class="recipes-loading">Loading…</div></div>
+      </div>`;
+
+    // Try loading image immediately
+    if (recipe.imageId) {
+      const imgWrap = document.getElementById('recipeDetailImgWrap');
+      const img = document.createElement('img');
+      img.src = 'https://drive.google.com/thumbnail?id=' + recipe.imageId + '&sz=w800';
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover';
+      img.onerror = () => { imgWrap.innerHTML = '<span style="font-size:64px;opacity:0.2">🍽️</span>'; };
+      imgWrap.innerHTML = '';
+      imgWrap.appendChild(img);
+    }
+
+    detail.classList.add('open');
+
+    if (!recipe.docId) {
+      document.getElementById('recipeDetailBody').innerHTML = '<p style="padding:4px 0;color:var(--muted);font-size:14px">No text content for this recipe.</p>';
+      return;
+    }
+
+    try {
+      const url = apiUrlWithUser(API_URL, '&action=getDocContent&docId=' + encodeURIComponent(recipe.docId));
+      const res = await fetch(url, { redirect: 'follow' });
+      const raw = await res.text();
+      let data;
+      try { data = JSON.parse(raw); } catch(_) { data = { error: 'Invalid response' }; }
+      if (data.error) {
+        document.getElementById('recipeDetailBody').innerHTML = `<p style="color:#c05050;font-size:14px">Could not load: ${escapeHtml(data.error)}</p>`;
+        return;
+      }
+      const parsed = parseRecipeContent(data.text || '');
+      document.getElementById('recipeDetailBody').innerHTML = renderParsedRecipe(parsed);
+    } catch(err) {
+      document.getElementById('recipeDetailBody').innerHTML = `<p style="color:#c05050;font-size:14px">Error: ${escapeHtml(err.message)}</p>`;
+    }
+  }
+
+  function closeRecipeDetail() {
+    document.getElementById('recipeDetail').classList.remove('open');
+  }
+
+  function parseRecipeContent(text) {
+    const lines = text.split('\n').map(l => l.trim());
+    const result = { name: '', description: '', time: '', serves: '', ingredients: [], instructions: [], isStructured: false, raw: text };
+    let section = 'header';
+
+    for (const line of lines) {
+      if (!line) continue;
+      if (/^ingredients?:?\s*$/i.test(line)) { section = 'ingredients'; continue; }
+      if (/^(instructions?|steps?|directions?|method|how to (make|cook|prepare)):?\s*$/i.test(line)) { section = 'instructions'; continue; }
+      if (/^(notes?|tips?|nutritional?):?\s*$/i.test(line)) { section = 'notes'; continue; }
+
+      if (section === 'header') {
+        if (/^name:\s*/i.test(line)) result.name = line.replace(/^name:\s*/i, '');
+        else if (/^description:\s*/i.test(line)) result.description = line.replace(/^description:\s*/i, '');
+        else if (/^(total\s*)?time:\s*/i.test(line)) result.time = line.replace(/^[^:]+:\s*/i, '');
+        else if (/^(serves?|yield|servings?):\s*/i.test(line)) result.serves = line.replace(/^[^:]+:\s*/i, '');
+      } else if (section === 'ingredients') {
+        const ing = line.replace(/^[-•*]\s*/, '').trim();
+        if (ing) result.ingredients.push(ing);
+      } else if (section === 'instructions') {
+        const step = line.replace(/^\d+[.)]\s*/, '').trim();
+        if (step) result.instructions.push(step);
+      }
+    }
+    result.isStructured = result.ingredients.length > 0 || result.instructions.length > 0;
+    return result;
+  }
+
+  function renderParsedRecipe(parsed) {
+    if (!parsed.isStructured) {
+      return `<div class="recipe-raw-text">${escapeHtml(parsed.raw).replace(/\n/g, '<br>')}</div>`;
+    }
+    let html = '';
+    if (parsed.description) {
+      html += `<p style="font-size:14px;color:var(--text2);line-height:1.6;margin:0 0 10px">${escapeHtml(parsed.description)}</p>`;
+    }
+    const meta = [parsed.time && '⏱ ' + parsed.time, parsed.serves && '🍽️ Serves ' + parsed.serves].filter(Boolean);
+    if (meta.length) {
+      html += `<div class="recipe-detail-meta">${meta.map(m => `<span>${escapeHtml(m)}</span>`).join('')}</div>`;
+    }
+    if (parsed.ingredients.length > 0) {
+      html += `<div class="recipe-detail-section-title">Ingredients</div>`;
+      html += parsed.ingredients.map(i => `<div class="recipe-ingredient"><span>${escapeHtml(i)}</span></div>`).join('');
+    }
+    if (parsed.instructions.length > 0) {
+      html += `<div class="recipe-detail-section-title">Instructions</div>`;
+      html += parsed.instructions.map((s, i) =>
+        `<div class="recipe-step"><div class="recipe-step-num">${i + 1}</div><div>${escapeHtml(s)}</div></div>`
+      ).join('');
+    }
+    return html;
+  }
+
 </script>
 </body>
 </html>
