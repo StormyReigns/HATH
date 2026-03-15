@@ -322,6 +322,7 @@
     html.dark-mode .schedule-mini-cal-title { color: var(--text); }
     html.dark-mode .paste-modal .paste-filename,
     html.dark-mode .paste-modal .paste-content,
+    html.dark-mode .paste-modal .upload-folder-select,
     html.dark-mode .event-date-input,
     html.dark-mode .event-time-input,
     html.dark-mode .event-calendar-select {
@@ -2794,6 +2795,23 @@
       color: var(--text);
     }
     .paste-modal .paste-content::placeholder { color: var(--muted); }
+    .paste-modal .upload-folder-select {
+      width: 100%;
+      padding: 10px 36px 10px 12px;
+      font-size: 15px;
+      font-family: inherit;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      color: var(--text);
+      background: #fff;
+      -webkit-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      cursor: pointer;
+    }
     .upload-ocr-section {
       margin-top: 12px;
       padding-top: 12px;
@@ -3301,7 +3319,8 @@
 <div class="paste-modal-overlay" id="uploadNameModal" onclick="closeUploadNameModal(event)">
   <div class="paste-modal" onclick="event.stopPropagation()">
     <h3>Name this file</h3>
-    <input type="text" class="paste-filename" id="uploadNameInput" placeholder="Filename">
+    <input type="text" class="paste-filename" id="uploadNameInput" placeholder="Document title">
+    <select class="upload-folder-select" id="uploadFolderSelect"></select>
     <div class="upload-ocr-section" id="uploadOcrSection" style="display:none">
       <div class="upload-ocr-status" id="uploadOcrStatus">Extracting text…</div>
       <label class="upload-ocr-checkbox" id="uploadOcrCheckboxWrap" style="display:none">
@@ -3320,7 +3339,8 @@
 <div class="paste-modal-overlay" id="pasteModal" onclick="closePasteModal(event)">
   <div class="paste-modal" onclick="event.stopPropagation()">
     <h3>Paste Text</h3>
-    <input type="text" class="paste-filename" id="pasteFilename" placeholder="Filename (e.g. note.txt)">
+    <input type="text" class="paste-filename" id="pasteFilename" placeholder="Document title">
+    <select class="upload-folder-select" id="pasteFolderSelect"></select>
     <textarea class="paste-content" id="pasteContent" placeholder="Paste your text here…"></textarea>
     <div class="paste-modal-actions">
       <button type="button" class="paste-cancel-btn" onclick="closePasteModal()">Cancel</button>
@@ -3378,7 +3398,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.4.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.4.1';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -4069,14 +4089,14 @@
       const selected = docsSelectedItems.has(key);
       div.className = 'screen-item' + (selected ? ' selected' : '');
       if (docsEditMode) {
-        div.innerHTML = `<input type="checkbox" class="screen-item-checkbox" ${selected ? 'checked' : ''} aria-label="Select"><span class="screen-item-icon">📄</span><span class="screen-item-name">${escapeHtml(f.name)}</span><div class="screen-item-edit-actions"><button type="button" class="screen-item-edit-btn rename" title="Rename" aria-label="Rename">Edit</button><button type="button" class="screen-item-edit-btn delete" title="Delete" aria-label="Delete">🗑</button></div>`;
+        div.innerHTML = `<input type="checkbox" class="screen-item-checkbox" ${selected ? 'checked' : ''} aria-label="Select"><span class="screen-item-icon">📄</span><span class="screen-item-name">${escapeHtml(getBaseName(f.name))}</span><div class="screen-item-edit-actions"><button type="button" class="screen-item-edit-btn rename" title="Rename" aria-label="Rename">Edit</button><button type="button" class="screen-item-edit-btn delete" title="Delete" aria-label="Delete">🗑</button></div>`;
         const cb = div.querySelector('.screen-item-checkbox');
         cb.onclick = (e) => { e.stopPropagation(); toggleDocsSelection('file', f.id); };
         div.onclick = (e) => { if (!e.target.closest('.screen-item-edit-btn') && !e.target.closest('.screen-item-checkbox')) toggleDocsSelection('file', f.id); };
         div.querySelector('.screen-item-edit-btn.rename').onclick = (e) => { e.stopPropagation(); openDocsRenameModal('file', f.id, f.name); };
         div.querySelector('.screen-item-edit-btn.delete').onclick = (e) => { e.stopPropagation(); openDocsDeleteModal('file', f.id, f.name); };
       } else {
-        div.innerHTML = `<span class="screen-item-icon">📄</span><span class="screen-item-name">${escapeHtml(f.name)}</span>`;
+        div.innerHTML = `<span class="screen-item-icon">📄</span><span class="screen-item-name">${escapeHtml(getBaseName(f.name))}</span>`;
         div.onclick = () => { if (f.url) window.open(f.url, '_blank'); };
       }
       list.appendChild(div);
@@ -5202,6 +5222,28 @@
     document.getElementById('docsFileScan').click();
   }
 
+  function populateUploadFolderSelect(selectId) {
+    const select = document.getElementById(selectId);
+    if (!select) return;
+    const rootData = docsFolderCache[DOCS_FOLDER_ID];
+    const folders = (rootData && rootData.folders) || [];
+    // Pre-select the current folder only if exactly one level deep
+    const currentId = getCurrentDocsFolderId();
+    const inSubfolder = docsBreadcrumb.length === 2;
+    select.innerHTML = '<option value="">— Root —</option>' +
+      folders.map(function(f) {
+        const sel = (inSubfolder && f.id === currentId) ? ' selected' : '';
+        return `<option value="${escapeHtml(f.id)}"${sel}>${escapeHtml(f.name)}</option>`;
+      }).join('');
+    // Hide the select entirely if there are no folders to choose from
+    select.style.display = folders.length > 0 ? 'block' : 'none';
+  }
+
+  function getSelectedUploadFolderId(selectId) {
+    const select = document.getElementById(selectId);
+    return (select && select.value) ? select.value : DOCS_FOLDER_ID;
+  }
+
   function triggerDocsUpload() {
     closeDocsAddMenu();
     document.getElementById('docsFileUpload').value = '';
@@ -5212,6 +5254,7 @@
     closeDocsAddMenu();
     document.getElementById('pasteFilename').value = '';
     document.getElementById('pasteContent').value = '';
+    populateUploadFolderSelect('pasteFolderSelect');
     document.getElementById('pasteModal').classList.add('open');
   }
 
@@ -5224,7 +5267,7 @@
     const filename = document.getElementById('pasteFilename').value.trim();
     const text = document.getElementById('pasteContent').value.trim();
     if (!filename) {
-      showDocsToast('Please enter a filename.', true);
+      showDocsToast('Please enter a document title.', true);
       return;
     }
     if (!text) {
@@ -5232,7 +5275,8 @@
       return;
     }
     const name = filename.includes('.') ? filename : filename + '.txt';
-    doDocsCreateDoc(text, name);
+    const folderId = getSelectedUploadFolderId('pasteFolderSelect');
+    doDocsCreateDoc(text, name, folderId);
   }
 
   function showDocsLoading(show) {
@@ -5249,8 +5293,8 @@
     window._docsToastTimer = setTimeout(() => el.classList.remove('visible'), 2800);
   }
 
-  async function doDocsUpload(base64, filename, mimeType) {
-    const folderId = getCurrentDocsFolderId();
+  async function doDocsUpload(base64, filename, mimeType, folderId) {
+    folderId = folderId || getCurrentDocsFolderId();
     showDocsLoading(true);
     try {
       const res = await fetch(API_URL, {
@@ -5286,8 +5330,8 @@
     }
   }
 
-  async function doDocsCreateDoc(text, filename) {
-    const folderId = getCurrentDocsFolderId();
+  async function doDocsCreateDoc(text, filename, folderId) {
+    folderId = folderId || getCurrentDocsFolderId();
     closePasteModal();
     showDocsLoading(true);
     try {
@@ -5462,12 +5506,13 @@
     const base64 = pendingUpload.base64;
     const mimeType = pendingUpload.mimeType;
     const ocrText = pendingUpload.ocrText || '';
+    const folderId = getSelectedUploadFolderId('uploadFolderSelect');
     closeUploadNameModal();
     if (createSearchableDoc) {
       const docName = base + ' (text)';
-      doDocsUploadImageAndText(base64, filename, mimeType, ocrText, docName);
+      doDocsUploadImageAndText(base64, filename, mimeType, ocrText, docName, folderId);
     } else {
-      doDocsUpload(base64, filename, mimeType);
+      doDocsUpload(base64, filename, mimeType, folderId);
     }
   }
 
@@ -5486,6 +5531,7 @@
     } else {
       ocrSection.style.display = 'none';
     }
+    populateUploadFolderSelect('uploadFolderSelect');
     document.getElementById('uploadNameModal').classList.add('open');
     input.focus();
     if (isImage && file) {
@@ -5509,8 +5555,8 @@
     }
   }
 
-  async function doDocsUploadImageAndText(base64, imageFilename, mimeType, ocrText, docName) {
-    const folderId = getCurrentDocsFolderId();
+  async function doDocsUploadImageAndText(base64, imageFilename, mimeType, ocrText, docName, folderId) {
+    folderId = folderId || getCurrentDocsFolderId();
     showDocsLoading(true);
     try {
       const [uploadRes, docRes] = await Promise.all([
