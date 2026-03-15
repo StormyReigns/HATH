@@ -1481,7 +1481,8 @@
     }
     .recipe-detail.open { transform: translateX(0); }
     .recipe-detail-topbar {
-      display: flex; align-items: center; gap: 8px; padding: 14px 16px 12px;
+      display: flex; align-items: center; gap: 8px;
+      padding: max(env(safe-area-inset-top), 14px) 16px 12px;
       flex-shrink: 0; border-bottom: 1px solid rgba(0,0,0,0.07);
     }
     .recipe-detail-back {
@@ -1531,16 +1532,7 @@
     }
     .recipes-empty-state-icon { font-size: 52px; opacity: 0.45; }
     .recipes-loading { display: flex; align-items: center; justify-content: center; min-height: 120px; color: var(--muted); font-size: 14px; }
-    .recipes-add-fab {
-      position: absolute; bottom: 24px; right: 20px;
-      width: 52px; height: 52px; border-radius: 50%;
-      background: var(--accent); color: #fff; border: none;
-      font-size: 28px; line-height: 1; cursor: pointer;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 10;
-    }
-    .recipes-add-fab:active { transform: scale(0.93); }
+    /* recipes FAB uses the shared .screen-add-fab system */
     /* Dark mode — recipes */
     html.dark-mode .recipe-card { background: #252220; }
     html.dark-mode .recipe-card-image-wrap,
@@ -3275,7 +3267,7 @@
         <div class="recipes-carousel" id="recipesCarousel"></div>
       </div>
       <div class="recipes-list-wrap" id="recipesListWrap"></div>
-      <button type="button" class="recipes-add-fab" onclick="openRecipesAddMenu()" title="Add recipe" aria-label="Add recipe">+</button>
+      <button type="button" class="screen-add-fab" id="recipesAddFab" onclick="openRecipesAddMenu()" title="Add recipe" aria-label="Add recipe">+</button>
       <!-- Recipe detail slide-in -->
       <div class="recipe-detail" id="recipeDetail">
         <div class="recipe-detail-topbar">
@@ -3724,7 +3716,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.6.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.6.2';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -4320,15 +4312,18 @@
   }
 
   function updateScreenAddFabs() {
-    const onDocs = document.getElementById('documentsScreen').classList.contains('visible');
+    const onDocs     = document.getElementById('documentsScreen').classList.contains('visible');
     const onProjects = document.getElementById('projectsScreen').classList.contains('visible');
     const onSchedule = document.getElementById('scheduleScreen').classList.contains('visible');
-    const docsAdd = document.getElementById('docsAddFab');
+    const onRecipes  = document.getElementById('recipesScreen').classList.contains('visible');
+    const docsAdd     = document.getElementById('docsAddFab');
     const projectsAdd = document.getElementById('projectsAddFab');
     const scheduleAdd = document.getElementById('scheduleAddFab');
-    if (docsAdd) docsAdd.classList.toggle('visible', onDocs);
+    const recipesAdd  = document.getElementById('recipesAddFab');
+    if (docsAdd)     docsAdd.classList.toggle('visible', onDocs);
     if (projectsAdd) projectsAdd.classList.toggle('visible', onProjects);
     if (scheduleAdd) scheduleAdd.classList.toggle('visible', onSchedule);
+    if (recipesAdd)  recipesAdd.classList.toggle('visible', onRecipes);
   }
 
   let docsBreadcrumb = [{ id: DOCS_FOLDER_ID, name: 'ShastApp Docs' }];
@@ -7204,6 +7199,7 @@
 
   function showRecipesScreen() {
     showSubScreen('recipesScreen');
+    updateScreenAddFabs();
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
     const recipeBtn = document.querySelector('.drawer-item[data-screen="recipes"]');
     if (recipeBtn) recipeBtn.classList.add('active');
