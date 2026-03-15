@@ -579,7 +579,9 @@
       top: 0; left: 50%;
       transform: translateX(-50%);
       width: 100%; max-width: 420px;
-      bottom: 0;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      height: calc(var(--vh, 1vh) * 100);
       padding-bottom: calc(32px + env(safe-area-inset-bottom));
       z-index: 1;
       display: flex; flex-direction: column;
@@ -3033,7 +3035,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.1.6';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.1.7';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
