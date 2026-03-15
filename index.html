@@ -3716,7 +3716,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.6.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.6.4';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -7247,34 +7247,34 @@
 
       const recipes = [];
 
-      // Root-level recipe docs
-      (recData.files || []).filter(f => !isRecipeImageFile(f.name)).forEach(f => {
-        recipes.push({ id: f.id, name: getBaseName(f.name), docId: f.id, imageId: null, source: 'other', sourceLabel: 'Recipe', url: f.url });
-      });
-
-      // HelloFresh recipes: pair images + docs by base name
-      if (hfFiles.length > 0) {
-        const hfImages = hfFiles.filter(f => isRecipeImageFile(f.name));
-        const hfDocs   = hfFiles.filter(f => !isRecipeImageFile(f.name));
+      // Pair files from any folder: images + docs with matching base names merge into one recipe
+      function pairFolderFiles(files, source, sourceLabel) {
+        const images = files.filter(f => isRecipeImageFile(f.name));
+        const docs   = files.filter(f => !isRecipeImageFile(f.name));
         const usedImgIds = new Set();
-        hfDocs.forEach(doc => {
-          const baseName = getBaseName(doc.name);
-          const img = hfImages.find(i => getBaseName(i.name).toLowerCase() === baseName.toLowerCase());
+        docs.forEach(doc => {
+          const base = getBaseName(doc.name).toLowerCase();
+          const img  = images.find(i => getBaseName(i.name).toLowerCase() === base);
           if (img) usedImgIds.add(img.id);
-          recipes.push({ id: doc.id, name: baseName, docId: doc.id, imageId: img ? img.id : null, source: 'hellofresh', sourceLabel: 'HelloFresh', url: doc.url });
+          recipes.push({ id: doc.id, name: getBaseName(doc.name), docId: doc.id, imageId: img ? img.id : null, source, sourceLabel, url: doc.url });
         });
-        // Images without a matching doc (shouldn't happen much, but handle gracefully)
-        hfImages.filter(i => !usedImgIds.has(i.id)).forEach(img => {
-          recipes.push({ id: img.id, name: getBaseName(img.name), docId: null, imageId: img.id, source: 'hellofresh', sourceLabel: 'HelloFresh', url: img.url });
+        // Images with no matching doc still appear (image-only entry)
+        images.filter(i => !usedImgIds.has(i.id)).forEach(img => {
+          recipes.push({ id: img.id, name: getBaseName(img.name), docId: null, imageId: img.id, source, sourceLabel, url: img.url });
         });
       }
+
+      // Root-level files in Recipes folder
+      pairFolderFiles(recData.files || [], 'other', 'Recipe');
+
+      // HelloFresh subfolder
+      if (hfFiles.length > 0) pairFolderFiles(hfFiles, 'hellofresh', 'HelloFresh');
 
       // Other subfolders
       otherFolders.forEach(folder => {
         const data = docsFolderCache[folder.id] || { files: [] };
-        (data.files || []).filter(f => !isRecipeImageFile(f.name)).forEach(f => {
-          recipes.push({ id: f.id, name: getBaseName(f.name), docId: f.id, imageId: null, source: folder.name.toLowerCase().replace(/\s+/g, '_'), sourceLabel: folder.name, url: f.url });
-        });
+        const source = folder.name.toLowerCase().replace(/\s+/g, '_');
+        pairFolderFiles(data.files || [], source, folder.name);
       });
 
       recipes.sort((a, b) => a.name.localeCompare(b.name));
@@ -7414,19 +7414,24 @@
       tasks.push(
         fetch(apiUrlWithUser(API_URL, '&action=getDocContent&docId=' + encodeURIComponent(recipe.docId)), { redirect: 'follow' })
           .then(r => r.text())
-          .then(raw => { try { return JSON.parse(raw); } catch(_) { return { error: 'Invalid response' }; } })
+          .then(raw => {
+            try { return JSON.parse(raw); }
+            catch(_) { return { error: 'Non-JSON response: ' + raw.slice(0, 120) }; }
+          })
           .then(data => {
             const bodyEl = document.getElementById('recipeDetailBody');
             if (!bodyEl) return;
             if (data.error) {
-              bodyEl.innerHTML = `<p style="color:#c05050;font-size:14px">Could not load: ${escapeHtml(data.error)}</p>`;
+              bodyEl.innerHTML = `<div style="color:#c05050;font-size:13px;padding:8px 0;white-space:pre-wrap">Error loading recipe:\n${escapeHtml(data.error)}</div>`;
+            } else if (!data.text || !data.text.trim()) {
+              bodyEl.innerHTML = '<p style="color:var(--muted);font-size:14px">This file appears to be empty.</p>';
             } else {
-              bodyEl.innerHTML = renderParsedRecipe(parseRecipeContent(data.text || ''));
+              bodyEl.innerHTML = renderParsedRecipe(parseRecipeContent(data.text));
             }
           })
           .catch(err => {
             const bodyEl = document.getElementById('recipeDetailBody');
-            if (bodyEl) bodyEl.innerHTML = `<p style="color:#c05050;font-size:14px">Error: ${escapeHtml(err.message)}</p>`;
+            if (bodyEl) bodyEl.innerHTML = `<div style="color:#c05050;font-size:13px;padding:8px 0">Network error: ${escapeHtml(err.message)}</div>`;
           })
       );
     } else {
