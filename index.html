@@ -1762,6 +1762,13 @@
     .screen-add-fab:active { transform: translateX(-50%) scale(0.95); }
     html.dark-mode .screen-add-fab { background: var(--accent); box-shadow: 0 4px 16px rgba(192,122,74,0.35); }
 
+    @keyframes mapFloat {
+      0%   { transform: translateY(0px)   rotate(0deg); }
+      30%  { transform: translateY(-11px) rotate(0.7deg); }
+      58%  { transform: translateY(-6px)  rotate(-0.5deg); }
+      80%  { transform: translateY(-9px)  rotate(0.3deg); }
+      100% { transform: translateY(0px)   rotate(0deg); }
+    }
     .projects-linkmagic {
       position: fixed;
       right: 8px;
@@ -1773,6 +1780,8 @@
       object-position: bottom right;
       z-index: 65;
       pointer-events: none;
+      transform-origin: center 85%;
+      animation: mapFloat 6s ease-in-out infinite;
     }
 
     /* ── PROJECTS SCREEN ── */
@@ -2153,25 +2162,69 @@
       box-shadow: 0 0 16px rgba(42,111,181,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
     }
     .phase-quote {
-      margin-top: 12px; padding-top: 10px;
-      border-top: 1px solid rgba(0,0,0,0.06);
+      position: relative;
+      margin-top: 12px;
+      padding: 10px 6px 2px 22px;
       font-family: 'Playfair Display', serif;
       font-size: 12px; font-style: italic;
-      color: var(--text2);
-      line-height: 1.5;
+      color: #5c3a1a;
+      line-height: 1.55;
       text-align: left;
+      letter-spacing: 0.02em;
+      text-shadow: 0 1px 0 rgba(255,240,220,0.8), 0 -1px 0 rgba(80,40,10,0.1);
+      opacity: 0.9;
+    }
+    .phase-quote::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, rgba(192,122,74,0.35) 0%, rgba(192,122,74,0.18) 70%, transparent 100%);
+    }
+    .phase-quote::after {
+      content: '\201C';
+      position: absolute;
+      left: 3px; top: 5px;
+      font-family: 'Playfair Display', serif;
+      font-size: 26px; line-height: 1;
+      font-style: normal; font-weight: 700;
+      color: rgba(192,122,74,0.42);
+      pointer-events: none;
     }
     .projects-korl-quote {
+      position: relative;
       flex-shrink: 0;
-      padding: 8px 16px 6px;
-      margin-top: 8px;
+      padding: 16px 18px 10px 30px;
+      margin-top: 10px;
       font-family: 'Playfair Display', serif;
-      font-size: 14px; font-style: italic; font-weight: 500;
-      color: var(--text);
-      line-height: 1.5;
+      font-size: 14.5px; font-style: italic; font-weight: 500;
+      color: #4a2c10;
+      line-height: 1.65;
       text-align: left;
-      border-top: 2px solid rgba(192,122,74,0.25);
-      letter-spacing: 0.02em;
+      letter-spacing: 0.028em;
+      text-shadow: 0 1px 0 rgba(255,242,225,0.95), 0 -1px 0 rgba(80,40,10,0.14);
+      opacity: 0.93;
+    }
+    /* worn gradient divider — thicker centre, fading to edges */
+    .projects-korl-quote::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 14px; right: 14px; height: 1px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(192,122,74,0.55) 22%,
+        rgba(192,122,74,0.38) 78%,
+        transparent 100%);
+    }
+    /* large decorative opening quote mark */
+    .projects-korl-quote::after {
+      content: '\201C';
+      position: absolute;
+      left: 11px; top: 10px;
+      font-family: 'Playfair Display', serif;
+      font-size: 42px; line-height: 1;
+      font-style: normal; font-weight: 700;
+      color: rgba(192,122,74,0.42);
+      pointer-events: none;
     }
     .projects-ocean-strip {
       flex-shrink: 0;
@@ -2423,8 +2476,28 @@
       touch-action: pan-y pinch-zoom;
     }
     html.dark-mode .projects-phase-card { background: rgba(45,40,38,0.6); border-color: rgba(255,255,255,0.08); }
-    html.dark-mode .phase-quote { border-top-color: rgba(255,255,255,0.1); }
-    html.dark-mode .projects-korl-quote { border-top-color: rgba(224,152,104,0.3); color: var(--text); }
+    html.dark-mode .phase-quote {
+      color: #c49870;
+      text-shadow: 0 1px 0 rgba(0,0,0,0.35), 0 -1px 0 rgba(220,160,90,0.1);
+      opacity: 0.85;
+    }
+    html.dark-mode .phase-quote::before {
+      background: linear-gradient(90deg, rgba(200,140,80,0.3) 0%, rgba(200,140,80,0.15) 70%, transparent 100%);
+    }
+    html.dark-mode .phase-quote::after { color: rgba(210,140,70,0.38); }
+    html.dark-mode .projects-korl-quote {
+      color: #d4a87a;
+      text-shadow: 0 1px 0 rgba(0,0,0,0.4), 0 -1px 0 rgba(220,160,90,0.1);
+      opacity: 0.9;
+    }
+    html.dark-mode .projects-korl-quote::before {
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(210,140,70,0.45) 22%,
+        rgba(210,140,70,0.28) 78%,
+        transparent 100%);
+    }
+    html.dark-mode .projects-korl-quote::after { color: rgba(210,140,70,0.38); }
     html.dark-mode .projects-list-item { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); }
     html.dark-mode .projects-list-item .projects-list-card-title { color: var(--text); }
     html.dark-mode .projects-list-item .projects-list-card-desc { color: var(--text2); }
@@ -3149,7 +3222,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.3.3';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.3.5';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -3526,6 +3599,18 @@
   loadData(); // called by auth on login
 
   // ── DRAWER ────────────────────────────────────────────────────
+  let blathersWakeTimer = null;
+
+  function blathersWakeSequence() {
+    // Show alert/awake pose on the main screen, then drift back to sleep after 5s
+    if (blathersWakeTimer) clearTimeout(blathersWakeTimer);
+    setBlathers('uncertain');
+    blathersWakeTimer = setTimeout(function() {
+      setBlathers('sleep');
+      blathersWakeTimer = null;
+    }, 5000);
+  }
+
   function toggleDrawer() {
     const wasOpen = document.getElementById('drawer').classList.contains('open');
     document.getElementById('drawer').classList.toggle('open');
@@ -3533,7 +3618,10 @@
     if (wasOpen) {
       document.body.classList.remove('drawer-open');
       setDrawerBlathers('sleep');
+      blathersWakeSequence();
     } else {
+      // Cancel any pending wake-to-sleep timer when drawer re-opens
+      if (blathersWakeTimer) { clearTimeout(blathersWakeTimer); blathersWakeTimer = null; }
       document.body.classList.add('drawer-open');
       setDrawerBlathers('startled');
     }
@@ -3545,6 +3633,7 @@
     if (overlay) overlay.classList.remove('open');
     document.body.classList.remove('drawer-open');
     setDrawerBlathers('sleep');
+    blathersWakeSequence();
   }
 
   function drawerNavTap(el, fn) {
