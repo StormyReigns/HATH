@@ -7,11 +7,13 @@
     function setVh() {
       var vvh = (window.visualViewport && window.visualViewport.height) || 0;
       var iwh = window.innerHeight || 0;
-      // iOS reports visualViewport.height as SVH (small viewport) on first load even
-      // when there is no browser toolbar (home-screen launch). window.innerHeight is
-      // not affected by that bug, so taking the max always gives the true LVH.
-      // In regular browser mode both values are equal, so max() is harmless there.
-      var h = Math.max(vvh, iwh);
+      var sh  = (window.screen && window.screen.height) || 0;
+      // When launched from the iOS home-screen icon, navigator.standalone === true.
+      // In that mode both visualViewport.height AND innerHeight report the wrong SVH
+      // on first paint and never self-correct without a device tilt (iOS bug).
+      // window.screen.height is the physical screen height for the current orientation
+      // and is immune to that bug. In regular Safari-tab mode we use Max(vvh,iwh).
+      var h = (navigator.standalone && sh > 0) ? sh : Math.max(vvh, iwh);
       if (h > 0) document.documentElement.style.setProperty('--vh', (h * 0.01) + 'px');
     }
     function setVisualViewport() {
@@ -3026,7 +3028,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.1.8';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.1.9';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
