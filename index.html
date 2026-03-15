@@ -1308,6 +1308,12 @@
     .screen-item-edit-btn svg { width: 18px; height: 18px; }
     .screen-item-edit-btn:hover { background: rgba(0,0,0,0.06); color: var(--text2); }
     .screen-item-edit-btn.delete:hover { color: #c05050; }
+    .screen-item-edit-btn.rename {
+      width: auto; height: auto;
+      font-size: 13px; font-weight: 500;
+      padding: 6px 10px;
+    }
+    .screen-item-edit-btn.rename:hover { color: var(--accent); background: transparent; }
     .screen-item-checkbox {
       width: 22px;
       height: 22px;
@@ -1588,14 +1594,15 @@
     .schedule-event-bell:hover, .schedule-event-bell:active { opacity: 1; transform: scale(1.15); }
     .schedule-event-bell svg { width: 17px; height: 17px; }
     .schedule-event-edit {
-      flex-shrink: 0; min-width: 44px; min-height: 44px;
-      width: 36px; height: 36px;
-      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 13px; font-weight: 500;
+      padding: 4px 8px;
+      border: none; background: transparent;
       color: var(--muted); cursor: pointer;
+      border-radius: 6px;
       transition: color 0.15s;
     }
     .schedule-event-edit:hover, .schedule-event-edit:active { color: var(--accent); }
-    .schedule-event-edit svg { width: 18px; height: 18px; }
     .schedule-date-header {
       font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
       text-transform: uppercase; color: var(--muted);
@@ -1856,7 +1863,7 @@
     }
     .projects-completed-chip:hover { transform: scale(1.03); box-shadow: 0 6px 20px rgba(180,130,50,0.35), inset 0 1px 0 rgba(255,255,255,0.8); }
     .projects-completed-chip:active { transform: scale(0.98); }
-    .projects-completed-trophy { font-size: 1.3em; line-height: 1; flex-shrink: 0; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15)); }
+    .projects-completed-trophy { width: 1.3em; height: 1.3em; flex-shrink: 0; object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15)); vertical-align: middle; }
     .projects-completed-chip-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .projects-completed-chip-delete {
       width: 24px; height: 24px;
@@ -1990,14 +1997,13 @@
     .projects-back-btn:active { background: rgba(0,0,0,0.06); }
     .projects-edit-btn {
       flex-shrink: 0;
-      width: 40px; height: 40px;
+      font-size: 13px; font-weight: 500;
+      padding: 6px 10px;
       border: none; background: transparent;
       color: var(--text2);
-      cursor: pointer; border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border-radius: 6px;
     }
-    .projects-edit-btn svg { width: 18px; height: 18px; }
-    .projects-edit-btn:active { background: rgba(0,0,0,0.06); }
+    .projects-edit-btn:hover, .projects-edit-btn:active { color: var(--accent); }
     .projects-view-title-wrap {
       flex: 1;
       min-width: 0;
@@ -3038,7 +3044,7 @@
           <h2 class="projects-title">Projects</h2>
         </div>
         <div class="projects-completed-bar" id="projectsCompletedBar">
-          <div class="projects-completed-header">🏆 Victories</div>
+          <div class="projects-completed-header"><img src="https://stormyreigns.github.io/HATH/Triforce.webp" alt="" class="projects-completed-trophy"> Victories</div>
           <div class="projects-completed-scroll-viewport" id="projectsCompletedViewport">
             <div class="projects-completed-scroll" id="projectsCompletedScroll"></div>
           </div>
@@ -3056,7 +3062,7 @@
             <h2 class="projects-view-title" id="projectsViewTitle"></h2>
             <button type="button" class="projects-undo-btn" id="projectsUndoBtn" onclick="projectsUndoProjectCompletion()" style="display:none">Undo completion</button>
           </div>
-          <button type="button" class="projects-edit-btn" onclick="openCreateProjectModal(projectsViewing && projectsViewing.id)" aria-label="Edit" title="Edit project"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button type="button" class="projects-edit-btn" onclick="openCreateProjectModal(projectsViewing && projectsViewing.id)" aria-label="Edit" title="Edit project">Edit</button>
         </div>
         <div class="projects-phase-cards-wrap">
           <div class="projects-phase-cards" id="projectsPhaseCards"></div>
@@ -3372,7 +3378,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.3.8';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.4.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -4045,7 +4051,7 @@
       const selected = docsSelectedItems.has(key);
       div.className = 'screen-item' + (selected ? ' selected' : '');
       if (docsEditMode) {
-        div.innerHTML = `<input type="checkbox" class="screen-item-checkbox" ${selected ? 'checked' : ''} aria-label="Select"><span class="screen-item-icon">📁</span><span class="screen-item-name">${escapeHtml(f.name)}</span><div class="screen-item-edit-actions"><button type="button" class="screen-item-edit-btn rename" title="Rename" aria-label="Rename"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button type="button" class="screen-item-edit-btn delete" title="Delete" aria-label="Delete">🗑</button></div>`;
+        div.innerHTML = `<input type="checkbox" class="screen-item-checkbox" ${selected ? 'checked' : ''} aria-label="Select"><span class="screen-item-icon">📁</span><span class="screen-item-name">${escapeHtml(f.name)}</span><div class="screen-item-edit-actions"><button type="button" class="screen-item-edit-btn rename" title="Rename" aria-label="Rename">Edit</button><button type="button" class="screen-item-edit-btn delete" title="Delete" aria-label="Delete">🗑</button></div>`;
         const cb = div.querySelector('.screen-item-checkbox');
         cb.onclick = (e) => { e.stopPropagation(); toggleDocsSelection('folder', f.id); };
         div.onclick = (e) => { if (!e.target.closest('.screen-item-edit-btn') && !e.target.closest('.screen-item-checkbox')) toggleDocsSelection('folder', f.id); };
@@ -4063,7 +4069,7 @@
       const selected = docsSelectedItems.has(key);
       div.className = 'screen-item' + (selected ? ' selected' : '');
       if (docsEditMode) {
-        div.innerHTML = `<input type="checkbox" class="screen-item-checkbox" ${selected ? 'checked' : ''} aria-label="Select"><span class="screen-item-icon">📄</span><span class="screen-item-name">${escapeHtml(f.name)}</span><div class="screen-item-edit-actions"><button type="button" class="screen-item-edit-btn rename" title="Rename" aria-label="Rename"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button type="button" class="screen-item-edit-btn delete" title="Delete" aria-label="Delete">🗑</button></div>`;
+        div.innerHTML = `<input type="checkbox" class="screen-item-checkbox" ${selected ? 'checked' : ''} aria-label="Select"><span class="screen-item-icon">📄</span><span class="screen-item-name">${escapeHtml(f.name)}</span><div class="screen-item-edit-actions"><button type="button" class="screen-item-edit-btn rename" title="Rename" aria-label="Rename">Edit</button><button type="button" class="screen-item-edit-btn delete" title="Delete" aria-label="Delete">🗑</button></div>`;
         const cb = div.querySelector('.screen-item-checkbox');
         cb.onclick = (e) => { e.stopPropagation(); toggleDocsSelection('file', f.id); };
         div.onclick = (e) => { if (!e.target.closest('.screen-item-edit-btn') && !e.target.closest('.screen-item-checkbox')) toggleDocsSelection('file', f.id); };
@@ -4546,7 +4552,7 @@
     const scrollEl = document.getElementById('projectsCompletedScroll');
     const chipHtml = completed.map(p => {
       const animateClass = newlyCompletedId && p.id === newlyCompletedId ? ' projects-completed-chip-new' : '';
-      return `<span class="projects-completed-chip${animateClass}" onclick="projectsSelectCompleted('${p.id}')"><span class="projects-completed-trophy">🏆</span><span class="projects-completed-chip-title">${escapeHtml(p.title)}</span><button type="button" class="projects-completed-chip-delete" onclick="event.stopPropagation();projectsConfirmDelete('${p.id}')" aria-label="Delete" title="Delete">×</button></span>`;
+      return `<span class="projects-completed-chip${animateClass}" onclick="projectsSelectCompleted('${p.id}')"><img src="https://stormyreigns.github.io/HATH/Triforce.webp" alt="" class="projects-completed-trophy"><span class="projects-completed-chip-title">${escapeHtml(p.title)}</span><button type="button" class="projects-completed-chip-delete" onclick="event.stopPropagation();projectsConfirmDelete('${p.id}')" aria-label="Delete" title="Delete">×</button></span>`;
     }).join('');
     if (scrollEl) scrollEl.innerHTML = completed.length > 0 ? chipHtml : '';
 
@@ -5896,7 +5902,7 @@
           ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
           : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
         const canEdit = ev.calendar && !['holidays', 'civic'].includes(ev.calendar.toLowerCase());
-        const editBtn = canEdit ? '<div class="schedule-event-edit" onclick="event.stopPropagation(); openEventModalForRow(this)" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>' : '';
+        const editBtn = canEdit ? '<button type="button" class="schedule-event-edit" onclick="event.stopPropagation(); openEventModalForRow(this)" title="Edit">Edit</button>' : '';
         const bellBtn = ev.calendar === 'civic'
           ? `<div class="schedule-event-bell" onclick="event.stopPropagation(); addEventToCalendar(this.closest('.schedule-event')._eventData)" title="Add to Calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>`
           : '';
