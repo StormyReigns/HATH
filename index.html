@@ -1093,14 +1093,19 @@
       padding: 12px 20px 12px 24px;
       font-size: 14px; font-weight: 400;
       color: var(--text2); cursor: pointer;
-      transition: color 0.15s, background 0.15s;
+      transition: color 0.15s, background 0.15s, transform 0.12s cubic-bezier(0.2,0,0.2,1);
       touch-action: manipulation;
       margin: 2px 14px 2px 0;
       border-radius: 0 12px 12px 0;
     }
-    .drawer-item:hover, .drawer-item:active {
+    .drawer-item:hover {
       background: rgba(192,122,74,0.09);
       color: var(--text);
+    }
+    .drawer-item:active {
+      background: rgba(192,122,74,0.16);
+      color: var(--text);
+      transform: translateX(5px);
     }
     .drawer-item.active {
       background: rgba(192,122,74,0.16);
@@ -3116,7 +3121,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.2.9';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.3.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
