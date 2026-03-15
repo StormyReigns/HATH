@@ -1150,7 +1150,7 @@
     }
     .drawer-icon-svg.wiggling,
     .drawer-icon-img.wiggling {
-      animation: drawerIconWiggle 1.25s cubic-bezier(0.36,0.07,0.19,0.97) forwards;
+      animation: drawerIconWiggle 0.75s cubic-bezier(0.36,0.07,0.19,0.97) forwards;
       transform-origin: center center;
     }
     /* Prevent the item slide-right from fighting the icon wiggle */
@@ -2107,6 +2107,44 @@
     .phase-card-footer {
       flex-shrink: 0;
       padding-top: 6px;
+    }
+
+    /* ── Body scroll hint ── */
+    .phase-scroll-hint {
+      flex-shrink: 0;
+      height: 0;
+      position: relative;
+      overflow: visible;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 6;
+    }
+    /* Soft gradient fade masking the bottom of the body content */
+    .phase-scroll-hint::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 38px;
+      background: linear-gradient(to bottom, transparent, rgba(248,244,238,0.94));
+    }
+    /* Small chevron arrow */
+    .phase-scroll-hint::after {
+      content: '';
+      position: absolute;
+      bottom: 10px; left: 50%;
+      width: 9px; height: 9px;
+      margin-left: -4.5px;
+      border-right: 1.5px solid rgba(100,65,20,0.32);
+      border-bottom: 1.5px solid rgba(100,65,20,0.32);
+      transform: rotate(45deg);
+    }
+    .phase-scroll-hint.visible { opacity: 1; }
+    html.dark-mode .phase-scroll-hint::before {
+      background: linear-gradient(to bottom, transparent, rgba(45,40,38,0.94));
+    }
+    html.dark-mode .phase-scroll-hint::after {
+      border-color: rgba(200,155,90,0.32);
     }
 
     /* ── Page-peel corner ── */
@@ -3396,7 +3434,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.4.3';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.4.4';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -3819,7 +3857,7 @@
         icon.classList.remove('wiggling');
         el.classList.remove('item-wiggling');
         if (fn) fn();
-      }, 1250);
+      }, 750);
     } else if (icon) {
       // already wiggling — do nothing, let it finish
     } else {
@@ -4801,6 +4839,7 @@
         <p class="phase-desc" style="display:${ph.description ? 'block' : 'none'}">${escapeHtml(ph.description || '')}</p>
         ${checklistBlock}
       </div>
+      <div class="phase-scroll-hint" aria-hidden="true"></div>
       <div class="phase-card-footer">
         ${completeBtnBlock}
         ${undoBlock}
@@ -4851,6 +4890,20 @@
     }
 
     updateKorlQuote();
+
+    // Set up per-card vertical scroll hints
+    cardsEl.querySelectorAll('.projects-phase-card').forEach(function(card) {
+      const body = card.querySelector('.phase-card-body');
+      const hint = card.querySelector('.phase-scroll-hint');
+      if (!body || !hint) return;
+      function updateScrollHint() {
+        const overflows = body.scrollHeight > body.clientHeight + 4;
+        const atBottom = body.scrollTop + body.clientHeight >= body.scrollHeight - 4;
+        hint.classList.toggle('visible', overflows && !atBottom);
+      }
+      requestAnimationFrame(updateScrollHint);
+      body.addEventListener('scroll', updateScrollHint, { passive: true });
+    });
 
     let scrollTicking = false;
     cardsEl.onscroll = function() {
