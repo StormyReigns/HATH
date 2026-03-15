@@ -7,11 +7,11 @@
     function setVh() {
       var vvh = (window.visualViewport && window.visualViewport.height) || 0;
       var iwh = window.innerHeight || 0;
-      // In standalone PWA, iOS reports visualViewport.height as SVH (small viewport)
-      // on first load instead of the full LVH. Taking the max ensures we get the
-      // real full-screen height and avoid the app being rendered shorter than the screen.
-      var isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-      var h = isStandalone ? Math.max(vvh, iwh) : (vvh || iwh);
+      // iOS reports visualViewport.height as SVH (small viewport) on first load even
+      // when there is no browser toolbar (home-screen launch). window.innerHeight is
+      // not affected by that bug, so taking the max always gives the true LVH.
+      // In regular browser mode both values are equal, so max() is harmless there.
+      var h = Math.max(vvh, iwh);
       if (h > 0) document.documentElement.style.setProperty('--vh', (h * 0.01) + 'px');
     }
     function setVisualViewport() {
@@ -617,18 +617,15 @@
     }
     .topbar-left, .topbar-right { width: 34px; }
 
-    /* Bottom bar — anchored to layout viewport bottom.
-       In browser mode, position:fixed bottom:0 lands at the visual-viewport bottom
-       (above the Safari tab bar), so no safe-area padding is needed there.
-       In standalone PWA mode the bar sits at the physical screen bottom, so we
-       clear the home-indicator with env(safe-area-inset-bottom). */
     .app-bottom-bar {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
       padding-top: 0;
-      padding-bottom: 0;
+      /* 10px clears the home-indicator gesture zone (~8px) without noticeable dead space.
+         Fixed value means bar height never changes on rotation. No env(), no media query. */
+      padding-bottom: 10px;
       transform: translateZ(0);
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
@@ -637,12 +634,6 @@
       box-shadow: 0 -4px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.4);
       z-index: 80;
       flex-shrink: 0;
-    }
-    @media all and (display-mode: standalone) {
-      /* Hard-coded 10px — enough to clear the home-indicator gesture zone (~8px from
-         screen bottom) without leaving the large dead space that env()'s 34px caused.
-         A fixed value (no env()) also means the bar never changes height on rotation. */
-      .app-bottom-bar { padding-bottom: 10px; }
     }
     html.dark-mode .app-bottom-bar {
       background: #1a1816;
@@ -3035,7 +3026,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.1.7';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.1.8';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
