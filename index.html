@@ -637,9 +637,10 @@
       flex-shrink: 0;
     }
     @media all and (display-mode: standalone) {
-      /* max() pins the padding at ≥34px even in landscape (where env() drops to 0–21px),
-         so the bar height never shifts when the phone rotates. */
-      .app-bottom-bar { padding-bottom: max(env(safe-area-inset-bottom, 0px), 34px); }
+      /* Hard-coded 10px — enough to clear the home-indicator gesture zone (~8px from
+         screen bottom) without leaving the large dead space that env()'s 34px caused.
+         A fixed value (no env()) also means the bar never changes height on rotation. */
+      .app-bottom-bar { padding-bottom: 10px; }
     }
     html.dark-mode .app-bottom-bar {
       background: #1a1816;
@@ -654,7 +655,7 @@
       justify-content: space-between;
       max-width: 420px;
       margin: 0 auto;
-      padding: 1px 32px;
+      padding: 5px 32px;
       gap: 16px;
     }
     .bottom-bar-center {
@@ -3032,7 +3033,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.1.5';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.1.6';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
