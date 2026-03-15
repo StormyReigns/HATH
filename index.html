@@ -3348,6 +3348,7 @@
     <div class="action-sheet-option" onclick="triggerDocsScan()"><span>📷</span> Scan Document</div>
     <div class="action-sheet-option" onclick="openPasteModal()"><span>📋</span> Paste Text</div>
     <div class="action-sheet-option" onclick="triggerDocsUpload()"><span>📁</span> Upload File</div>
+    <div class="action-sheet-option" onclick="openSaveLinkModal()"><span>🔗</span> Save Link</div>
   </div>
 </div>
 
@@ -3381,6 +3382,21 @@
     <div class="paste-modal-actions">
       <button type="button" class="paste-cancel-btn" onclick="closePasteModal()">Cancel</button>
       <button type="button" class="paste-save-btn" onclick="savePastedDoc()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Save Link modal -->
+<div class="paste-modal-overlay" id="saveLinkModal" onclick="closeSaveLinkModal(event)">
+  <div class="paste-modal" onclick="event.stopPropagation()">
+    <h3>Save Link</h3>
+    <input type="url" class="paste-filename" id="saveLinkUrl" placeholder="Paste URL…" autocomplete="off" autocorrect="off" spellcheck="false">
+    <input type="text" class="paste-filename" id="saveLinkName" placeholder="Name (optional — we'll auto-detect)">
+    <select class="upload-folder-select" id="saveLinkFolderSelect"></select>
+    <div class="upload-ocr-status" id="saveLinkStatus" style="display:none"></div>
+    <div class="paste-modal-actions">
+      <button type="button" class="paste-cancel-btn" onclick="closeSaveLinkModal()">Cancel</button>
+      <button type="button" class="paste-save-btn" id="saveLinkBtn" onclick="confirmSaveLink()">Save</button>
     </div>
   </div>
 </div>
@@ -3434,7 +3450,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.4.4';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.5.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -3949,7 +3965,7 @@
         scrollFocusedIntoView();
       });
     }
-    [document.getElementById('pasteFilename'), document.getElementById('pasteContent'), document.getElementById('uploadNameInput')].forEach(el => {
+    [document.getElementById('pasteFilename'), document.getElementById('pasteContent'), document.getElementById('uploadNameInput'), document.getElementById('saveLinkUrl'), document.getElementById('saveLinkName')].forEach(el => {
       if (el) el.addEventListener('focus', scrollFocusedIntoView);
     });
     if (window.visualViewport) {
@@ -4124,15 +4140,18 @@
       const key = docsSelectionKey('file', f.id);
       const selected = docsSelectedItems.has(key);
       div.className = 'screen-item' + (selected ? ' selected' : '');
+      const isLink = f.name.endsWith(' (link).txt');
+      const fileIcon = isLink ? '🔗' : '📄';
+      const displayName = isLink ? getBaseName(f.name.replace(/ \(link\)$/, '')) : getBaseName(f.name);
       if (docsEditMode) {
-        div.innerHTML = `<input type="checkbox" class="screen-item-checkbox" ${selected ? 'checked' : ''} aria-label="Select"><span class="screen-item-icon">📄</span><span class="screen-item-name">${escapeHtml(getBaseName(f.name))}</span><div class="screen-item-edit-actions"><button type="button" class="screen-item-edit-btn rename" title="Rename" aria-label="Rename">Edit</button><button type="button" class="screen-item-edit-btn delete" title="Delete" aria-label="Delete">🗑</button></div>`;
+        div.innerHTML = `<input type="checkbox" class="screen-item-checkbox" ${selected ? 'checked' : ''} aria-label="Select"><span class="screen-item-icon">${fileIcon}</span><span class="screen-item-name">${escapeHtml(displayName)}</span><div class="screen-item-edit-actions"><button type="button" class="screen-item-edit-btn rename" title="Rename" aria-label="Rename">Edit</button><button type="button" class="screen-item-edit-btn delete" title="Delete" aria-label="Delete">🗑</button></div>`;
         const cb = div.querySelector('.screen-item-checkbox');
         cb.onclick = (e) => { e.stopPropagation(); toggleDocsSelection('file', f.id); };
         div.onclick = (e) => { if (!e.target.closest('.screen-item-edit-btn') && !e.target.closest('.screen-item-checkbox')) toggleDocsSelection('file', f.id); };
         div.querySelector('.screen-item-edit-btn.rename').onclick = (e) => { e.stopPropagation(); openDocsRenameModal('file', f.id, f.name); };
         div.querySelector('.screen-item-edit-btn.delete').onclick = (e) => { e.stopPropagation(); openDocsDeleteModal('file', f.id, f.name); };
       } else {
-        div.innerHTML = `<span class="screen-item-icon">📄</span><span class="screen-item-name">${escapeHtml(getBaseName(f.name))}</span>`;
+        div.innerHTML = `<span class="screen-item-icon">${fileIcon}</span><span class="screen-item-name">${escapeHtml(displayName)}</span>`;
         div.onclick = () => { if (f.url) window.open(f.url, '_blank'); };
       }
       list.appendChild(div);
@@ -5309,6 +5328,68 @@
   function closePasteModal(ev) {
     if (ev && ev.target !== ev.currentTarget && ev.type === 'click') return;
     document.getElementById('pasteModal').classList.remove('open');
+  }
+
+  function openSaveLinkModal() {
+    closeDocsAddMenu();
+    document.getElementById('saveLinkUrl').value = '';
+    document.getElementById('saveLinkName').value = '';
+    document.getElementById('saveLinkStatus').style.display = 'none';
+    document.getElementById('saveLinkStatus').textContent = '';
+    document.getElementById('saveLinkBtn').disabled = false;
+    populateUploadFolderSelect('saveLinkFolderSelect');
+    document.getElementById('saveLinkModal').classList.add('open');
+    setTimeout(function() { document.getElementById('saveLinkUrl').focus(); }, 300);
+  }
+
+  function closeSaveLinkModal(ev) {
+    if (ev && ev.target !== ev.currentTarget && ev.type === 'click') return;
+    document.getElementById('saveLinkModal').classList.remove('open');
+  }
+
+  async function confirmSaveLink() {
+    const url  = document.getElementById('saveLinkUrl').value.trim();
+    const name = document.getElementById('saveLinkName').value.trim();
+    if (!url) { showDocsToast('Please paste a URL.', true); return; }
+
+    const statusEl = document.getElementById('saveLinkStatus');
+    const btn = document.getElementById('saveLinkBtn');
+    statusEl.textContent = 'Fetching page…';
+    statusEl.style.display = 'block';
+    btn.disabled = true;
+
+    const folderId = getSelectedUploadFolderId('saveLinkFolderSelect');
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'saveLinkDoc', user: getApiUser(), folderId, url, name })
+      });
+      const raw = await res.text();
+      let data;
+      try { data = JSON.parse(raw); } catch (_) {
+        showDocsToast('Save failed: invalid response', true);
+        btn.disabled = false;
+        statusEl.style.display = 'none';
+        return;
+      }
+      if (data.error) {
+        showDocsToast('Save failed: ' + data.error, true);
+        btn.disabled = false;
+        statusEl.textContent = '';
+        statusEl.style.display = 'none';
+        return;
+      }
+      showDocsToast('Saved: ' + (data.docName || name || 'Link'));
+      delete docsFolderCache[folderId];
+      loadFolderContents(folderId, true);
+      closeSaveLinkModal();
+    } catch (err) {
+      showDocsToast('Save failed: ' + (err.message || 'Network error'), true);
+      btn.disabled = false;
+      statusEl.style.display = 'none';
+    }
   }
 
   function savePastedDoc() {
