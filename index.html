@@ -3716,7 +3716,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.6.6';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.6.7';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -7247,45 +7247,49 @@
 
       const recipes = [];
 
-      // Pair files from any folder: images + docs with matching base names merge into one recipe
+      // Strip (text) / (link) suffixes and file extension to get the true recipe name
+      function normalizeRecipeName(rawName) {
+        let base = getBaseName(rawName);
+        base = base.replace(/\s*\(text\)\s*$/i, '').trim();
+        base = base.replace(/\s*\(link\)\s*$/i, '').trim();
+        return base;
+      }
+
+      // Pair all file variants with the same normalized name into a single recipe entry
       function pairFolderFiles(files, source, sourceLabel) {
-        const images = files.filter(f => isRecipeImageFile(f.name));
-        const docs   = files.filter(f => !isRecipeImageFile(f.name));
-        console.log(`[Recipes] ${sourceLabel} — ${files.length} total files: ${images.length} images, ${docs.length} docs`);
-        console.log(`[Recipes] ${sourceLabel} image names:`, images.map(f => f.name));
-        console.log(`[Recipes] ${sourceLabel} doc names:`, docs.map(f => f.name));
-        const usedImgIds = new Set();
-        docs.forEach(doc => {
-          const base = getBaseName(doc.name).toLowerCase();
-          const img  = images.find(i => getBaseName(i.name).toLowerCase() === base);
-          if (img) {
-            usedImgIds.add(img.id);
-            console.log(`[Recipes] PAIRED: "${doc.name}" + "${img.name}"`);
+        const groups = {};
+        files.forEach(f => {
+          const norm = normalizeRecipeName(f.name);
+          if (!groups[norm]) groups[norm] = { name: norm, img: null, doc: null, linkFile: null };
+          const g = groups[norm];
+          if (isRecipeImageFile(f.name)) {
+            g.img = f;
+          } else if (/\(link\)\.txt$/i.test(f.name)) {
+            g.linkFile = f;
           } else {
-            console.log(`[Recipes] doc only (no image match): "${doc.name}" (base="${base}")`);
+            // Prefer the (text) variant as the canonical doc; fall back to any other doc
+            if (!g.doc || /\(text\)$/i.test(f.name)) g.doc = f;
           }
-          recipes.push({ id: doc.id, name: getBaseName(doc.name), docId: doc.id, imageId: img ? img.id : null, source, sourceLabel, url: doc.url });
         });
-        images.filter(i => !usedImgIds.has(i.id)).forEach(img => {
-          console.log(`[Recipes] image only (no doc match): "${img.name}"`);
-          recipes.push({ id: img.id, name: getBaseName(img.name), docId: null, imageId: img.id, source, sourceLabel, url: img.url });
+
+        Object.values(groups).forEach(g => {
+          if (!g.img && !g.doc && !g.linkFile) return;
+          const primary = g.doc || g.img || g.linkFile;
+          recipes.push({
+            id: primary.id,
+            name: g.name,
+            docId: g.doc ? g.doc.id : (g.linkFile ? g.linkFile.id : null),
+            imageId: g.img ? g.img.id : null,
+            source, sourceLabel,
+            url: primary.url,
+          });
         });
       }
 
-      // ── Temporary diagnostic: show raw file names in the UI ──────
-      const diagLines = [];
-      diagLines.push(`Root files (${(recData.files||[]).length}): ${(recData.files||[]).map(f=>f.name).join(' | ') || '(none)'}`);
-      diagLines.push(`HF files (${hfFiles.length}): ${hfFiles.map(f=>f.name).join(' | ') || '(none)'}`);
-      document.getElementById('recipesCarousel').innerHTML =
-        `<div style="padding:12px 16px;font-size:12px;color:var(--text2);white-space:pre-wrap;word-break:break-all">${diagLines.map(l=>escapeHtml(l)).join('\n\n')}</div>`;
-      // ─────────────────────────────────────────────────────────────
-
       // Root-level files in Recipes folder
-      console.log('[Recipes] Root files:', (recData.files || []).map(f => f.name));
       pairFolderFiles(recData.files || [], 'other', 'Recipe');
 
       // HelloFresh subfolder
-      console.log('[Recipes] HelloFresh files:', hfFiles.map(f => f.name));
       if (hfFiles.length > 0) pairFolderFiles(hfFiles, 'hellofresh', 'HelloFresh');
 
       // Other subfolders
