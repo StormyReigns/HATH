@@ -1545,6 +1545,44 @@
     html.dark-mode .recipe-detail-topbar { border-bottom-color: rgba(255,255,255,0.08); }
     html.dark-mode .recipes-search { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.12); }
     html.dark-mode .recipes-source-chip { border-color: rgba(255,255,255,0.13); }
+    /* Thumbnail lazy-load fade */
+    .recipe-card-image-wrap img, .recipe-list-icon img { opacity: 0; transition: opacity 0.4s ease; }
+    /* Tappable detail image */
+    .recipe-detail-image { position: relative; }
+    .recipe-detail-image img { opacity: 0; transition: opacity 0.35s ease; }
+    .recipe-detail-image.has-photo { cursor: pointer; }
+    .recipe-detail-image.has-photo::after {
+      content: '⤢'; position: absolute; bottom: 8px; right: 10px;
+      font-size: 18px; color: rgba(255,255,255,0.7);
+      background: rgba(0,0,0,0.3); border-radius: 6px; padding: 2px 5px;
+      pointer-events: none; line-height: 1.4;
+    }
+    /* View original link */
+    .recipe-original-link {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 13px; font-weight: 600; color: var(--accent);
+      background: rgba(192,122,74,0.1); border-radius: 8px;
+      padding: 6px 12px; margin-top: 4px; cursor: pointer;
+      text-decoration: none; border: none; font-family: inherit;
+    }
+    .recipe-original-link:active { opacity: 0.6; }
+    /* Image lightbox */
+    #recipeImgLightbox {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0.93);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.22s ease;
+    }
+    #recipeImgLightbox.open { opacity: 1; pointer-events: all; }
+    #recipeImgLightboxImg { max-width: 100vw; max-height: 100vh; object-fit: contain; display: block; }
+    #recipeImgLightboxClose {
+      position: absolute; top: max(env(safe-area-inset-top), 14px); right: 16px;
+      background: rgba(255,255,255,0.15); border: none; color: #fff;
+      font-size: 20px; width: 38px; height: 38px; border-radius: 50%;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-family: inherit;
+    }
 
     /* Schedule screen */
     #scheduleScreen { flex-direction: column; padding: 4px 0 6px; }
@@ -3278,6 +3316,12 @@
       </div>
     </div>
 
+    <!-- Recipe image lightbox -->
+    <div id="recipeImgLightbox" onclick="closeRecipeImgLightbox()">
+      <img id="recipeImgLightboxImg" alt="">
+      <button type="button" id="recipeImgLightboxClose" onclick="closeRecipeImgLightbox()">✕</button>
+    </div>
+
     <!-- Settings screen -->
     <div class="sub-screen" id="settingsScreen">
       <div class="settings-section">
@@ -3660,10 +3704,10 @@
 <!-- Recipes Add Sheet -->
 <div class="action-sheet-overlay" id="recipesAddSheet" onclick="closeRecipesAddMenu(event)">
   <div class="action-sheet" onclick="event.stopPropagation()">
-    <div class="action-sheet-title">Add Recipe</div>
-    <div class="action-sheet-option" onclick="closeRecipesAddMenu(); openRecipeSaveLinkModal()"><span>🔗</span> Save from URL</div>
-    <div class="action-sheet-option" onclick="closeRecipesAddMenu(); openRecipePasteModal()"><span>📋</span> Paste text</div>
-    <div class="action-sheet-option" style="color:var(--muted);justify-content:center" onclick="closeRecipesAddMenu()">Cancel</div>
+    <div class="action-sheet-option" onclick="triggerRecipesScan()"><span>📷</span> Scan Document</div>
+    <div class="action-sheet-option" onclick="openRecipePasteModal()"><span>📋</span> Paste Text</div>
+    <div class="action-sheet-option" onclick="triggerRecipesUpload()"><span>📁</span> Upload File</div>
+    <div class="action-sheet-option" onclick="openRecipeSaveLinkModal()"><span>🔗</span> Save Link</div>
   </div>
 </div>
 
@@ -3716,7 +3760,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.6.7';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.6.9';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -5726,6 +5770,7 @@
       showDocsToast('Saved: ' + (data.fileName || filename));
       delete docsFolderCache[folderId];
       loadFolderContents(folderId, true);
+      recipesState.loaded = false;
     } catch (err) {
       showDocsLoading(false);
       showDocsToast('Upload failed: ' + (err.message || 'Network error'), true);
@@ -6036,6 +6081,12 @@
       ocrSection.style.display = 'none';
     }
     populateUploadFolderSelect('uploadFolderSelect');
+    if (window._recipeUploadPending) {
+      window._recipeUploadPending = false;
+      const sel = document.getElementById('uploadFolderSelect');
+      const recipesFolderId = getRecipesFolderId();
+      if (sel) { for (const opt of sel.options) { if (opt.value === recipesFolderId) { opt.selected = true; break; } } }
+    }
     document.getElementById('uploadNameModal').classList.add('open');
     input.focus();
     if (isImage && file) {
@@ -6090,6 +6141,7 @@
       showDocsToast('Saved image and searchable doc');
       delete docsFolderCache[folderId];
       loadFolderContents(folderId, true);
+      recipesState.loaded = false;
     } catch (err) {
       showDocsLoading(false);
       showDocsToast('Upload failed: ' + (err.message || 'Network error'), true);
@@ -7278,8 +7330,9 @@
           recipes.push({
             id: primary.id,
             name: g.name,
-            docId: g.doc ? g.doc.id : (g.linkFile ? g.linkFile.id : null),
+            docId: g.doc ? g.doc.id : null,
             imageId: g.img ? g.img.id : null,
+            linkFileId: g.linkFile ? g.linkFile.id : null,
             source, sourceLabel,
             url: primary.url,
           });
@@ -7370,6 +7423,22 @@
     return (name || '?').trim().charAt(0).toUpperCase();
   }
 
+  function loadThumbnailInto(imageId, containerEl) {
+    fetch(apiUrlWithUser(API_URL, '&action=getFileThumbnail&fileId=' + encodeURIComponent(imageId)), { redirect: 'follow' })
+      .then(r => r.text())
+      .then(raw => { try { return JSON.parse(raw); } catch(_) { return { error: '' }; } })
+      .then(data => {
+        if (!data || data.error || !containerEl.isConnected) return;
+        const img = document.createElement('img');
+        img.alt = '';
+        img.src = 'data:' + data.mimeType + ';base64,' + data.base64;
+        containerEl.innerHTML = '';
+        containerEl.appendChild(img);
+        requestAnimationFrame(() => { img.style.opacity = '1'; });
+      })
+      .catch(() => {});
+  }
+
   function renderRecipesView() {
     const carouselWrap = document.getElementById('recipesCarouselWrap');
     const listWrap = document.getElementById('recipesListWrap');
@@ -7390,9 +7459,17 @@
         const item = document.createElement('div');
         item.className = 'recipe-list-item';
         const hfListClass = r.source === 'hellofresh' ? ' hf-card' : '';
-        item.innerHTML = `<div class="recipe-list-icon${hfListClass}"><span style="font-size:20px;font-weight:800;color:rgba(255,255,255,0.45)">${recipeMonogram(r.name)}</span></div><div class="recipe-list-info"><div class="recipe-list-name">${escapeHtml(r.name)}</div><div class="recipe-list-source">${escapeHtml(r.sourceLabel)}</div></div>`;
+        const iconEl = document.createElement('div');
+        iconEl.className = 'recipe-list-icon' + hfListClass;
+        iconEl.innerHTML = `<span style="font-size:20px;font-weight:800;color:rgba(255,255,255,0.45)">${recipeMonogram(r.name)}</span>`;
+        const infoEl = document.createElement('div');
+        infoEl.className = 'recipe-list-info';
+        infoEl.innerHTML = `<div class="recipe-list-name">${escapeHtml(r.name)}</div><div class="recipe-list-source">${escapeHtml(r.sourceLabel)}</div>`;
+        item.appendChild(iconEl);
+        item.appendChild(infoEl);
         item.onclick = () => openRecipeDetail(r);
         listWrap.appendChild(item);
+        if (r.imageId) loadThumbnailInto(r.imageId, iconEl);
       });
     } else {
       carouselWrap.style.display = '';
@@ -7403,9 +7480,17 @@
         card.className = 'recipe-card';
         const hfClass = r.source === 'hellofresh' ? ' hf' : '';
         const hfCardClass = r.source === 'hellofresh' ? ' hf-card' : '';
-        card.innerHTML = `<div class="recipe-card-image-wrap${hfCardClass}"><div class="recipe-card-monogram">${recipeMonogram(r.name)}</div></div><div class="recipe-card-body"><span class="recipe-card-source${hfClass}">${escapeHtml(r.sourceLabel)}</span><div class="recipe-card-name">${escapeHtml(r.name)}</div></div>`;
+        const imgWrap = document.createElement('div');
+        imgWrap.className = 'recipe-card-image-wrap' + hfCardClass;
+        imgWrap.innerHTML = `<div class="recipe-card-monogram">${recipeMonogram(r.name)}</div>`;
+        const body = document.createElement('div');
+        body.className = 'recipe-card-body';
+        body.innerHTML = `<span class="recipe-card-source${hfClass}">${escapeHtml(r.sourceLabel)}</span><div class="recipe-card-name">${escapeHtml(r.name)}</div>`;
+        card.appendChild(imgWrap);
+        card.appendChild(body);
         card.onclick = () => openRecipeDetail(r);
         carousel.appendChild(card);
+        if (r.imageId) loadThumbnailInto(r.imageId, imgWrap);
       });
     }
   }
@@ -7423,7 +7508,7 @@
       </div>
       <div class="recipe-detail-content">
         <div class="recipe-detail-name">${escapeHtml(recipe.name)}</div>
-        <div class="recipe-detail-meta"><span class="recipe-card-source${hfClass}">${escapeHtml(recipe.sourceLabel)}</span></div>
+        <div class="recipe-detail-meta" id="recipeDetailMeta"><span class="recipe-card-source${hfClass}">${escapeHtml(recipe.sourceLabel)}</span></div>
         <div id="recipeDetailBody"><div class="recipes-loading">Loading…</div></div>
       </div>`;
 
@@ -7468,10 +7553,37 @@
           .then(data => {
             const imgWrap = document.getElementById('recipeDetailImgWrap');
             if (!imgWrap || data.error) return;
+            const imgSrc = 'data:' + data.mimeType + ';base64,' + data.base64;
             const img = document.createElement('img');
-            img.src = 'data:' + data.mimeType + ';base64,' + data.base64;
+            img.alt = '';
+            img.src = imgSrc;
             imgWrap.innerHTML = '';
             imgWrap.appendChild(img);
+            requestAnimationFrame(() => { img.style.opacity = '1'; });
+            imgWrap.classList.add('has-photo');
+            imgWrap.onclick = () => openRecipeImgLightbox(imgSrc);
+          })
+          .catch(() => {})
+      );
+    }
+
+    if (recipe.linkFileId) {
+      tasks.push(
+        fetch(apiUrlWithUser(API_URL, '&action=getDocContent&docId=' + encodeURIComponent(recipe.linkFileId)), { redirect: 'follow' })
+          .then(r => r.text())
+          .then(raw => { try { return JSON.parse(raw); } catch(_) { return { error: '' }; } })
+          .then(data => {
+            if (!data || data.error) return;
+            const urlText = (data.text || '').trim();
+            if (!urlText.startsWith('http')) return;
+            const meta = document.getElementById('recipeDetailMeta');
+            if (!meta) return;
+            const linkBtn = document.createElement('button');
+            linkBtn.type = 'button';
+            linkBtn.className = 'recipe-original-link';
+            linkBtn.textContent = '🔗 View original';
+            linkBtn.onclick = () => window.open(urlText, '_blank');
+            meta.appendChild(linkBtn);
           })
           .catch(() => {})
       );
@@ -7482,6 +7594,16 @@
 
   function closeRecipeDetail() {
     document.getElementById('recipeDetail').classList.remove('open');
+  }
+
+  function openRecipeImgLightbox(src) {
+    const lb = document.getElementById('recipeImgLightbox');
+    document.getElementById('recipeImgLightboxImg').src = src;
+    lb.classList.add('open');
+  }
+
+  function closeRecipeImgLightbox() {
+    document.getElementById('recipeImgLightbox').classList.remove('open');
   }
 
   // ── Recipes FAB / add sheet ─────────────────────────────────────
@@ -7499,6 +7621,20 @@
     if (!rootData) return DOCS_FOLDER_ID;
     const folder = (rootData.folders || []).find(f => f.name === RECIPES_FOLDER_NAME);
     return folder ? folder.id : DOCS_FOLDER_ID;
+  }
+
+  function triggerRecipesScan() {
+    closeRecipesAddMenu();
+    window._recipeUploadPending = true;
+    document.getElementById('docsFileScan').value = '';
+    document.getElementById('docsFileScan').click();
+  }
+
+  function triggerRecipesUpload() {
+    closeRecipesAddMenu();
+    window._recipeUploadPending = true;
+    document.getElementById('docsFileUpload').value = '';
+    document.getElementById('docsFileUpload').click();
   }
 
   function openRecipeSaveLinkModal() {
