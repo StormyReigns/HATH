@@ -3533,7 +3533,7 @@
       Documents
     </div>
     <div class="drawer-item" data-screen="recipes" onclick="drawerNavTap(this, ()=>{ closeDrawer(); showRecipesScreen(); })">
-      <svg class="drawer-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3z"/></svg>
+      <img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/HKChefsKnife.png" alt="">
       Recipes
     </div>
     <div class="drawer-item" onclick="drawerNavTap(this)">
@@ -3716,7 +3716,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.6.4';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.6.5';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -7188,7 +7188,7 @@
   initDocsFileInputs();
 
   // ── RECIPES ────────────────────────────────────────────────────────
-  const IMAGE_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif']);
+  const IMAGE_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.heic', '.heif', '.bmp', '.tiff', '.tif']);
   const RECIPES_FOLDER_NAME = 'Recipes';
   const HF_FOLDER_NAME = 'HelloFresh';
 
@@ -7251,23 +7251,33 @@
       function pairFolderFiles(files, source, sourceLabel) {
         const images = files.filter(f => isRecipeImageFile(f.name));
         const docs   = files.filter(f => !isRecipeImageFile(f.name));
+        console.log(`[Recipes] ${sourceLabel} — ${files.length} total files: ${images.length} images, ${docs.length} docs`);
+        console.log(`[Recipes] ${sourceLabel} image names:`, images.map(f => f.name));
+        console.log(`[Recipes] ${sourceLabel} doc names:`, docs.map(f => f.name));
         const usedImgIds = new Set();
         docs.forEach(doc => {
           const base = getBaseName(doc.name).toLowerCase();
           const img  = images.find(i => getBaseName(i.name).toLowerCase() === base);
-          if (img) usedImgIds.add(img.id);
+          if (img) {
+            usedImgIds.add(img.id);
+            console.log(`[Recipes] PAIRED: "${doc.name}" + "${img.name}"`);
+          } else {
+            console.log(`[Recipes] doc only (no image match): "${doc.name}" (base="${base}")`);
+          }
           recipes.push({ id: doc.id, name: getBaseName(doc.name), docId: doc.id, imageId: img ? img.id : null, source, sourceLabel, url: doc.url });
         });
-        // Images with no matching doc still appear (image-only entry)
         images.filter(i => !usedImgIds.has(i.id)).forEach(img => {
+          console.log(`[Recipes] image only (no doc match): "${img.name}"`);
           recipes.push({ id: img.id, name: getBaseName(img.name), docId: null, imageId: img.id, source, sourceLabel, url: img.url });
         });
       }
 
       // Root-level files in Recipes folder
+      console.log('[Recipes] Root files:', (recData.files || []).map(f => f.name));
       pairFolderFiles(recData.files || [], 'other', 'Recipe');
 
       // HelloFresh subfolder
+      console.log('[Recipes] HelloFresh files:', hfFiles.map(f => f.name));
       if (hfFiles.length > 0) pairFolderFiles(hfFiles, 'hellofresh', 'HelloFresh');
 
       // Other subfolders
