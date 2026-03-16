@@ -1493,6 +1493,22 @@
       font-size: 16px; font-weight: 700; color: var(--text);
       flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
     }
+    .recipe-detail-edit-btn {
+      background: none; border: none; font-size: 14px; font-weight: 600;
+      color: var(--accent); padding: 4px 6px; cursor: pointer; font-family: inherit;
+      flex-shrink: 0;
+    }
+    .recipe-detail-edit-btn:active { opacity: 0.6; }
+    .recipe-detail-edit-btn:disabled { opacity: 0.4; }
+    .recipe-edit-textarea {
+      width: 100%; min-height: 280px; box-sizing: border-box;
+      border: 1.5px solid rgba(192,122,74,0.3); border-radius: 10px;
+      padding: 12px 14px; font-size: 14px; line-height: 1.75;
+      font-family: inherit; color: var(--text); background: transparent;
+      resize: vertical; margin-top: 4px; outline: none;
+    }
+    .recipe-edit-textarea:focus { border-color: var(--accent); }
+    html.dark-mode .recipe-edit-textarea { border-color: rgba(192,122,74,0.4); }
     .recipe-detail-scroll { flex: 1; overflow-y: auto; overscroll-behavior-y: contain; }
     .recipe-detail-image {
       width: 100%; height: 230px; background: linear-gradient(135deg, #e8d5b0, #c9a06a);
@@ -3309,8 +3325,9 @@
       <!-- Recipe detail slide-in -->
       <div class="recipe-detail" id="recipeDetail">
         <div class="recipe-detail-topbar">
-          <button type="button" class="recipe-detail-back" onclick="closeRecipeDetail()">‹</button>
+          <button type="button" class="recipe-detail-back" id="recipeDetailBackBtn" onclick="recipeDetailHandleBack()">‹</button>
           <span class="recipe-detail-topname" id="recipeDetailTopName"></span>
+          <button type="button" class="recipe-detail-edit-btn" id="recipeDetailEditBtn" style="display:none" onclick="toggleRecipeEdit()">Edit</button>
         </div>
         <div class="recipe-detail-scroll" id="recipeDetailScroll"></div>
       </div>
@@ -3760,7 +3777,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.6.9';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.7.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -7500,6 +7517,20 @@
     const scroll = document.getElementById('recipeDetailScroll');
     document.getElementById('recipeDetailTopName').textContent = recipe.name;
 
+    // Reset edit state
+    window._recipeEditMode = false;
+    window._recipeDetailRawText = '';
+    window._recipeDetailCurrentDocId = recipe.docId || null;
+    const editBtn = document.getElementById('recipeDetailEditBtn');
+    const backBtn = document.getElementById('recipeDetailBackBtn');
+    if (editBtn) {
+      editBtn.style.display = recipe.docId ? '' : 'none';
+      editBtn.textContent = 'Edit';
+      editBtn.disabled = false;
+      editBtn.onclick = toggleRecipeEdit;
+    }
+    if (backBtn) { backBtn.textContent = '‹'; }
+
     const hfClass = recipe.source === 'hellofresh' ? ' hf' : '';
     const hfCardClass = recipe.source === 'hellofresh' ? ' hf-card' : '';
     scroll.innerHTML = `
@@ -7533,6 +7564,7 @@
             } else if (!data.text || !data.text.trim()) {
               bodyEl.innerHTML = '<p style="color:var(--muted);font-size:14px">This file appears to be empty.</p>';
             } else {
+              window._recipeDetailRawText = data.text;
               bodyEl.innerHTML = renderParsedRecipe(parseRecipeContent(data.text));
             }
           })
@@ -7593,7 +7625,75 @@
   }
 
   function closeRecipeDetail() {
+    window._recipeEditMode = false;
     document.getElementById('recipeDetail').classList.remove('open');
+  }
+
+  function recipeDetailHandleBack() {
+    if (window._recipeEditMode) {
+      toggleRecipeEdit(true);
+    } else {
+      closeRecipeDetail();
+    }
+  }
+
+  function toggleRecipeEdit(cancel) {
+    const editBtn = document.getElementById('recipeDetailEditBtn');
+    const backBtn = document.getElementById('recipeDetailBackBtn');
+    const body = document.getElementById('recipeDetailBody');
+    if (!body) return;
+
+    if (!window._recipeEditMode) {
+      window._recipeEditMode = true;
+      editBtn.textContent = 'Save';
+      editBtn.onclick = saveRecipeEdit;
+      backBtn.textContent = 'Cancel';
+      const ta = document.createElement('textarea');
+      ta.className = 'recipe-edit-textarea';
+      ta.id = 'recipeEditTextarea';
+      ta.value = window._recipeDetailRawText || '';
+      body.innerHTML = '';
+      body.appendChild(ta);
+      ta.focus();
+    } else {
+      window._recipeEditMode = false;
+      editBtn.textContent = 'Edit';
+      editBtn.onclick = toggleRecipeEdit;
+      backBtn.textContent = '‹';
+      body.innerHTML = renderParsedRecipe(parseRecipeContent(window._recipeDetailRawText || ''));
+    }
+  }
+
+  async function saveRecipeEdit() {
+    const ta = document.getElementById('recipeEditTextarea');
+    if (!ta || !window._recipeDetailCurrentDocId) return;
+    const newText = ta.value;
+    const editBtn = document.getElementById('recipeDetailEditBtn');
+    const backBtn = document.getElementById('recipeDetailBackBtn');
+    editBtn.disabled = true;
+    editBtn.textContent = 'Saving…';
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'updateDoc', user: getApiUser(), docId: window._recipeDetailCurrentDocId, text: newText })
+      });
+      const data = JSON.parse(await res.text());
+      if (data.error) throw new Error(data.error);
+      window._recipeDetailRawText = newText;
+      window._recipeEditMode = false;
+      editBtn.disabled = false;
+      editBtn.textContent = 'Edit';
+      editBtn.onclick = toggleRecipeEdit;
+      backBtn.textContent = '‹';
+      const body = document.getElementById('recipeDetailBody');
+      if (body) body.innerHTML = renderParsedRecipe(parseRecipeContent(newText));
+    } catch (err) {
+      editBtn.disabled = false;
+      editBtn.textContent = 'Save';
+      showDocsToast('Save failed: ' + (err.message || 'Error'), true);
+    }
   }
 
   function openRecipeImgLightbox(src) {
