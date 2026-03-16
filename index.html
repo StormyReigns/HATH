@@ -1376,63 +1376,27 @@
     .screen-loading { text-align: center; padding: 24px; color: var(--muted); font-size: 13px; }
 
     /* ── Recipes screen — Hell's Kitchen theme ──────────────── */
-    #recipesScreen { flex-direction: column; padding: 0; overflow: hidden; background: #060400; }
+    #recipesScreen { flex-direction: column; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; overflow: hidden; background: #060400; }
 
-    /* Header */
-    .hk-recipes-header {
-      display: flex; align-items: center; gap: 10px;
-      padding: 14px 16px 10px; flex-shrink: 0;
-      background: #060400; position: relative; overflow: hidden; min-height: 64px;
+    /* The Pass bar — top of screen */
+    .hk-pass-bar {
+      flex-shrink: 0; height: 36px; background: #1e1200;
+      border-top: 2px solid transparent;
+      border-image: linear-gradient(90deg, transparent, #ff4400, #ff8800, #ff4400, transparent) 1;
+      border-bottom: 2px solid #4a3008;
+      display: flex; align-items: center; padding: 0 10px; position: relative;
     }
-    .hk-header-flames {
-      position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+    .hk-pass-bar-logo {
+      width: 28px; height: 28px; border-radius: 4px; object-fit: cover; flex-shrink: 0;
+      box-shadow: 0 0 10px rgba(255,51,0,0.7), 0 0 24px rgba(255,80,0,0.35);
     }
-    .hk-header-flames svg {
-      position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
-    }
-    @keyframes hkFlame1 {
-      0%, 100% { transform: translateY(0); opacity: 0.7; }
-      50% { transform: translateY(-7px); opacity: 1; }
-    }
-    @keyframes hkFlame2 {
-      0%, 100% { transform: translateY(0); opacity: 0.5; }
-      50% { transform: translateY(-11px); opacity: 0.8; }
-    }
-    @keyframes hkFlame3 {
-      0%, 100% { transform: translateY(0); opacity: 0.3; }
-      50% { transform: translateY(-5px); opacity: 0.55; }
-    }
-    .hk-flame-path1 { animation: hkFlame1 2s ease-in-out -1s infinite; }
-    .hk-flame-path2 { animation: hkFlame2 3s ease-in-out -0.8s infinite; }
-    .hk-flame-path3 { animation: hkFlame3 2.5s ease-in-out -1.5s infinite; }
-    .hk-header-icon {
-      width: 40px; height: 40px; border-radius: 6px; border: 1px solid #ff3300;
-      flex-shrink: 0; position: relative; z-index: 1; object-fit: cover;
-    }
-    .hk-header-text {
-      flex: 1; display: flex; flex-direction: column; gap: 1px;
-      position: relative; z-index: 1;
-    }
-    .hk-header-title {
-      font-family: 'Arial Black', Arial, sans-serif; font-weight: 900; font-size: 24px;
-      color: #fff; text-transform: uppercase; line-height: 1;
-    }
-    .hk-header-subtitle {
-      font-size: 9px; color: #663322; letter-spacing: 0.18em; text-transform: uppercase;
-    }
+    .hk-pass-bar-center { flex: 1; display: flex; justify-content: center; }
+    .hk-pass-bar-text { font-size: 8px; text-transform: uppercase; letter-spacing: 0.12em; color: #6a4a18; }
     .recipes-refresh-btn {
       background: none; border: none; padding: 6px; cursor: pointer;
-      color: #3a2010; display: flex; align-items: center; position: relative; z-index: 1;
+      color: #3a2010; display: flex; align-items: center; flex-shrink: 0;
     }
     .recipes-refresh-btn svg { width: 18px; height: 18px; }
-
-    /* The Pass bar */
-    .hk-pass-bar {
-      flex-shrink: 0; height: 28px; background: #1e1200;
-      border-top: 2px solid #4a3008; border-bottom: 2px solid #4a3008;
-      display: flex; align-items: center; justify-content: center; position: relative;
-    }
-    .hk-pass-bar-text { font-size: 8px; text-transform: uppercase; letter-spacing: 0.12em; color: #6a4a18; }
     .hk-pass-rail-line {
       position: absolute; bottom: -2px; left: 0; right: 0; height: 2px;
       background: linear-gradient(90deg, transparent, #8a6020, #d4a040, #f0c060, #d4a040, #8a6020, transparent);
@@ -3416,25 +3380,14 @@
 
     <!-- Recipes screen — Hell's Kitchen theme -->
     <div class="sub-screen" id="recipesScreen">
-      <div class="hk-recipes-header recipes-header">
-        <div class="hk-header-flames" aria-hidden="true">
-          <svg viewBox="0 0 400 64" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-            <path class="hk-flame-path1" d="M0,64 C30,44 70,18 110,28 C150,38 170,8 210,18 C250,28 270,4 310,14 C350,24 375,40 400,28 L400,64 Z" fill="#ff4400" opacity="0.45"/>
-            <path class="hk-flame-path2" d="M0,64 C50,38 90,52 140,38 C190,24 210,48 260,33 C310,18 345,44 400,36 L400,64 Z" fill="#ff8800" opacity="0.3"/>
-            <path class="hk-flame-path3" d="M0,64 C40,50 90,58 130,50 C170,42 210,54 250,47 C290,40 340,54 400,50 L400,64 Z" fill="#ffcc00" opacity="0.18"/>
-          </svg>
-        </div>
-        <img class="hk-header-icon" src="https://stormyreigns.github.io/HATH/HK.png" alt="Hell's Kitchen" width="40" height="40">
-        <div class="hk-header-text">
-          <span class="hk-header-title">Hell's Kitchen</span>
-          <span class="hk-header-subtitle">Jessica's Cookbook</span>
+      <div class="hk-pass-bar">
+        <img class="hk-pass-bar-logo" src="https://stormyreigns.github.io/HATH/HK.png" alt="Hell's Kitchen" width="28" height="28">
+        <div class="hk-pass-bar-center">
+          <span class="hk-pass-bar-text">— The Pass —</span>
         </div>
         <button type="button" class="recipes-refresh-btn" onclick="loadRecipesData()" title="Refresh">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         </button>
-      </div>
-      <div class="hk-pass-bar">
-        <span class="hk-pass-bar-text">— The Pass —</span>
         <div class="hk-pass-rail-line"></div>
       </div>
       <div class="hk-ticket-wheel" id="recipeSourceChips"></div>
@@ -3915,7 +3868,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.6.4';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.6.6';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
