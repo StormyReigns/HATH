@@ -18,14 +18,18 @@
     }
     function setVisualViewport() {
       var vv = window.visualViewport;
-      if (vv) {
-        var h = vv.height;
-        if (h > 0) document.documentElement.style.setProperty('--vvh', h + 'px');
+      var sh = (window.screen && window.screen.height) || 0;
+      var iwh = window.innerHeight || 0;
+      var vvh = vv ? vv.height : iwh;
+      if (vvh > 0) document.documentElement.style.setProperty('--vvh', vvh + 'px');
+      // When keyboard opens, visualViewport shrinks. Use vv height so .app shrinks and input stays visible.
+      var fullH = (navigator.standalone && sh > 0) ? sh : Math.max(vvh, iwh);
+      var keyboardOpen = fullH > 0 && vvh < fullH * 0.82;
+      if (keyboardOpen && vvh > 0) {
+        document.documentElement.style.setProperty('--vh', (vvh * 0.01) + 'px');
       } else {
-        var h = window.innerHeight;
-        if (h > 0) document.documentElement.style.setProperty('--vvh', h + 'px');
+        setVh();
       }
-      setVh();
     }
     var vvRaf = 0;
     function setVisualViewportDebounced() {
@@ -530,7 +534,8 @@
     #documentsScreen.visible ~ .input-zone,
     #settingsScreen.visible ~ .input-zone,
     #scheduleScreen.visible ~ .input-zone,
-    #projectsScreen.visible ~ .input-zone { display: none !important; }
+    #projectsScreen.visible ~ .input-zone,
+    #recipesScreen.visible ~ .input-zone { display: none !important; }
 
     /* Blathers overlaps the input bar, positioned just above submit area */
     .blathers-wrap {
@@ -736,8 +741,8 @@
       padding-bottom: calc(32px + env(safe-area-inset-bottom));
       min-height: 0;
     }
-    .body.chat-mode .hint-area,
-    .body.chat-mode .chat-area { display: none !important; }
+    .body.chat-mode .hint-area { display: none !important; }
+    .body:has(.sub-screen.visible) .chat-area { display: none !important; }
     .app.in-project-view {
       padding-bottom: calc(4px + min(env(safe-area-inset-bottom, 0px), 40px));
     }
@@ -2483,6 +2488,7 @@
       letter-spacing: 0.01em;
       outline: none;
       -webkit-appearance: none;
+      appearance: none;
     }
     .phase-notes-input::placeholder {
       color: rgba(120,70,20,0.42);
@@ -3777,7 +3783,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.7.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.7.1';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -4274,13 +4280,13 @@
     const el = document.activeElement;
     if (!el || !['INPUT', 'TEXTAREA'].includes(el.tagName)) return;
     const scroll = () => {
-      el.scrollIntoView({ block: 'center', behavior: 'smooth', inline: 'nearest' });
+      el.scrollIntoView({ block: 'end', behavior: 'smooth', inline: 'nearest' });
     };
     requestAnimationFrame(() => {
       scroll();
-      setTimeout(scroll, 150);
-      setTimeout(scroll, 350);
-      setTimeout(scroll, 550);
+      setTimeout(scroll, 100);
+      setTimeout(scroll, 250);
+      setTimeout(scroll, 450);
     });
   }
 
