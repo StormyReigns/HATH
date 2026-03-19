@@ -1407,17 +1407,24 @@
     .civics-zone-a {
       flex-shrink: 0; margin-bottom: 12px;
     }
-    .civics-event-banner {
-      display: block; padding: 14px 16px; border-radius: 12px;
-      background: rgba(42,91,168,0.06); box-shadow: inset 3px 0 0 #2a5ba8;
-      cursor: pointer; text-decoration: none; color: inherit;
-      transition: background 0.15s;
+    .civics-carousel { overflow: hidden; border-radius: 14px; width: 100%; touch-action: pan-y; }
+    .civics-carousel-track { display: flex; transition: transform 0.28s ease; will-change: transform; }
+    .civics-carousel-slide {
+      min-width: 100%;
+      background: rgba(42,91,168,0.08);
+      border-left: 3px solid #2a5ba8;
+      border-radius: 14px;
+      padding: 14px 16px;
+      box-sizing: border-box;
     }
-    .civics-event-banner:hover, .civics-event-banner:active { background: rgba(42,91,168,0.12); }
-    .civics-event-banner-title { font-weight: 500; color: #1e4a96; font-size: 15px; }
-    .civics-event-banner-meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
-    html.dark-mode .civics-event-banner { background: rgba(42,91,168,0.12); }
-    html.dark-mode .civics-event-banner .civics-event-banner-title { color: #8ab4f8; }
+    .civics-slide-title { font-weight: 600; color: #1e4a96; font-size: 15px; }
+    .civics-slide-days { font-size: 12px; color: var(--muted); margin: 2px 0 10px; }
+    .civics-slide-dates { display: flex; flex-direction: column; gap: 5px; }
+    .civics-slide-date-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--text2); }
+    .civics-slide-date-row--election { color: var(--text); font-weight: 500; }
+    .civics-slide-date-val { color: var(--text); font-size: 13px; }
+    html.dark-mode .civics-carousel-slide { background: rgba(42,91,168,0.12); border-left-color: #5a8fd8; }
+    html.dark-mode .civics-slide-title { color: #8ab4f8; }
     .civics-empty-card {
       background: #fdf8f1; border-radius: 12px;
       border: 1px solid rgba(0,0,0,0.06);
@@ -3500,7 +3507,11 @@
         </button>
       </div>
       <div class="civics-content">
-        <div class="civics-zone-a" id="civicsZoneA"></div>
+        <div class="civics-zone-a" id="civicsZoneA">
+          <div class="civics-carousel" id="civicsCarousel">
+            <div class="civics-carousel-track" id="civicsCarouselTrack"></div>
+          </div>
+        </div>
         <div class="civics-zone-b" id="civicsZoneB"></div>
         <div class="civics-zone-c-wrap">
           <div class="civics-zone-c" id="civicsZoneC"></div>
@@ -3919,7 +3930,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.8.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.8.3';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -6541,6 +6552,30 @@
     return upcoming.length ? upcoming[0] : null;
   }
 
+  function getCivicElectionGroups() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const allEvents = CIVIC_IL_EVENTS.map(ev => ({ ...ev, start: ev.date + 'T12:00:00' }));
+    const electionEvents = allEvents.filter(ev => (ev.title || '').includes('🗳️')).sort((a, b) => a.date.localeCompare(b.date));
+    const groups = [];
+    let prevElectionDate = null;
+    for (const election of electionEvents) {
+      const electionDate = new Date(election.start);
+      electionDate.setHours(0, 0, 0, 0);
+      if (electionDate < today) { prevElectionDate = electionDate; continue; }
+      const prev = prevElectionDate || new Date(0);
+      const supporting = allEvents.filter(ev => {
+        if ((ev.title || '').includes('🗳️')) return false;
+        const d = new Date(ev.date + 'T12:00:00');
+        d.setHours(0, 0, 0, 0);
+        return d > prev && d <= electionDate;
+      }).sort((a, b) => a.date.localeCompare(b.date));
+      groups.push({ electionEvent: election, supportingEvents: supporting });
+      prevElectionDate = electionDate;
+    }
+    return groups;
+  }
+
   function getNextElectionEvent() {
     const upcoming = getCivicEvents();
     return upcoming.find(ev => (ev.title || '').includes('🗳️')) || null;
@@ -6639,26 +6674,88 @@
     }
   }
 
+  let civicsCarouselIndex = 0;
+
+  function renderCivicsCarousel() {
+    const track = document.getElementById('civicsCarouselTrack');
+    const carousel = document.getElementById('civicsCarousel');
+    if (!track || !carousel) return;
+
+    const groups = getCivicElectionGroups();
+    if (groups.length === 0) {
+      carousel.style.display = 'none';
+      return;
+    }
+    carousel.style.display = '';
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    track.innerHTML = groups.map(function(g) {
+      const election = g.electionEvent;
+      const electionDate = new Date(election.date + 'T12:00:00');
+      electionDate.setHours(0, 0, 0, 0);
+      const days = Math.ceil((electionDate - today) / (24 * 60 * 60 * 1000));
+      const daysText = days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : days + ' days';
+      const titleClean = (election.title || '').replace(/🗳️\s*/g, '').trim();
+
+      const allRows = g.supportingEvents.concat([election]);
+      allRows.sort((a, b) => a.date.localeCompare(b.date));
+
+      const dateRows = allRows.map(function(ev) {
+        const isElection = (ev.title || '').includes('🗳️');
+        const label = isElection ? '🗳️ Election Day' : (ev.title || '').replace(/🗳️\s*/g, '').trim();
+        const d = new Date(ev.date + 'T12:00:00');
+        const val = isElection ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return '<div class="civics-slide-date-row' + (isElection ? ' civics-slide-date-row--election' : '') + '">' +
+          '<span class="civics-slide-date-label">' + escapeHtml(label) + '</span>' +
+          '<span class="civics-slide-date-val">' + escapeHtml(val) + '</span></div>';
+      }).join('');
+
+      return '<div class="civics-carousel-slide">' +
+        '<div class="civics-slide-title">' + escapeHtml(titleClean) + '</div>' +
+        '<div class="civics-slide-days">' + escapeHtml(daysText) + '</div>' +
+        '<div class="civics-slide-dates">' + dateRows + '</div></div>';
+    }).join('');
+
+    civicsCarouselIndex = 0;
+    track.style.transform = 'translateX(0)';
+
+    carousel._civicsGroups = groups;
+    carousel._civicsTrack = track;
+    setupCivicsCarouselSwipe();
+  }
+
+  function setupCivicsCarouselSwipe() {
+    const carousel = document.getElementById('civicsCarousel');
+    const track = document.getElementById('civicsCarouselTrack');
+    if (!carousel || !track || !carousel._civicsGroups) return;
+
+    let startX = 0;
+    carousel.ontouchstart = function(e) {
+      startX = e.touches[0].clientX;
+    };
+    carousel.ontouchend = function(e) {
+      const endX = e.changedTouches[0].clientX;
+      const delta = startX - endX;
+      const groups = carousel._civicsGroups;
+      if (delta > 40 && civicsCarouselIndex < groups.length - 1) {
+        civicsCarouselIndex++;
+        track.style.transform = 'translateX(-' + (civicsCarouselIndex * 100) + '%)';
+      } else if (delta < -40 && civicsCarouselIndex > 0) {
+        civicsCarouselIndex--;
+        track.style.transform = 'translateX(-' + (civicsCarouselIndex * 100) + '%)';
+      }
+    };
+  }
+
   function renderCivicsScreen() {
     const zoneA = document.getElementById('civicsZoneA');
     const zoneB = document.getElementById('civicsZoneB');
     const zoneC = document.getElementById('civicsZoneC');
     if (!zoneA || !zoneB || !zoneC) return;
 
-    const nextEv = getNextCivicEvent();
-    if (nextEv) {
-      const d = new Date(nextEv.date + 'T12:00:00');
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      d.setHours(0, 0, 0, 0);
-      const days = Math.ceil((d - today) / (24 * 60 * 60 * 1000));
-      const daysText = days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : days + ' days';
-      zoneA.innerHTML = '<a class="civics-event-banner" href="' + escapeHtml(nextEv.url || '#') + '" target="_blank" rel="noopener">' +
-        '<div class="civics-event-banner-title">' + escapeHtml(nextEv.title) + '</div>' +
-        '<div class="civics-event-banner-meta">' + daysText + ' · ' + escapeHtml(getCivicEventDescription(nextEv)) + '</div></a>';
-    } else {
-      zoneA.innerHTML = '';
-    }
+    renderCivicsCarousel();
 
     const nextElection = getNextElectionEvent();
     const cache = civicsSheetCache || { elections: [], candidates: [] };
