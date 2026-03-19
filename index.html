@@ -1134,6 +1134,13 @@
     .drawer-item:hover .drawer-icon-img,
     .drawer-item:active .drawer-icon-img,
     .drawer-item.active .drawer-icon-img { opacity: 1; }
+    .drawer-icon-emoji {
+      font-size: 20px; line-height: 1; flex-shrink: 0;
+      opacity: 0.85; transition: opacity 0.15s;
+    }
+    .drawer-item:hover .drawer-icon-emoji,
+    .drawer-item:active .drawer-icon-emoji,
+    .drawer-item.active .drawer-icon-emoji { opacity: 1; }
 
     @keyframes drawerIconWiggle {
       0%   { transform: rotate(0deg)   scale(1); }
@@ -1379,6 +1386,103 @@
     }
     .screen-footer a:active { opacity: 0.8; }
     .screen-loading { text-align: center; padding: 24px; color: var(--muted); font-size: 13px; }
+
+    /* ── Civics screen ───────────────────────────────────────── */
+    #civicsScreen { flex-direction: column; padding: 0; overflow: hidden; }
+    .civics-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 16px 6px; flex-shrink: 0;
+    }
+    .civics-title { font-size: 20px; font-weight: 700; color: var(--text); flex: 1; }
+    .civics-refresh-btn {
+      background: none; border: none; padding: 6px; cursor: pointer;
+      color: var(--muted); display: flex; align-items: center;
+    }
+    .civics-refresh-btn:hover, .civics-refresh-btn:active { color: var(--accent); }
+    .civics-refresh-btn svg { width: 18px; height: 18px; }
+    .civics-content {
+      flex: 1; overflow-y: auto; display: flex; flex-direction: column;
+      padding: 0 16px 24px; -webkit-overflow-scrolling: touch;
+    }
+    .civics-zone-a {
+      flex-shrink: 0; margin-bottom: 12px;
+    }
+    .civics-event-banner {
+      display: block; padding: 14px 16px; border-radius: 12px;
+      background: rgba(42,91,168,0.06); box-shadow: inset 3px 0 0 #2a5ba8;
+      cursor: pointer; text-decoration: none; color: inherit;
+      transition: background 0.15s;
+    }
+    .civics-event-banner:hover, .civics-event-banner:active { background: rgba(42,91,168,0.12); }
+    .civics-event-banner-title { font-weight: 500; color: #1e4a96; font-size: 15px; }
+    .civics-event-banner-meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    html.dark-mode .civics-event-banner { background: rgba(42,91,168,0.12); }
+    html.dark-mode .civics-event-banner .civics-event-banner-title { color: #8ab4f8; }
+    .civics-zone-b {
+      flex-shrink: 0; margin-bottom: 16px;
+    }
+    .civics-quick-card {
+      background: #fdf8f1; border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.06);
+      padding: 14px 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    .civics-quick-election { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+    .civics-quick-polling {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--accent); margin-bottom: 12px;
+      text-decoration: none; border-bottom: 1px solid rgba(192,122,74,0.3);
+    }
+    .civics-quick-polling:active { opacity: 0.8; }
+    .civics-quick-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .civics-party-chip {
+      font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 20px;
+    }
+    .civics-party-chip.dem { background: rgba(59,130,246,0.15); color: #3b82f6; }
+    .civics-party-chip.rep { background: rgba(239,68,68,0.15); color: #ef4444; }
+    .civics-party-chip.other { background: rgba(107,114,128,0.15); color: #6b7280; }
+    .civics-zone-c-wrap { flex: 1; min-height: 0; overflow-y: auto; }
+    .civics-zone-c { padding-bottom: 24px; }
+    .civics-card {
+      background: #fdf8f1; border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.06);
+      padding: 14px 16px; margin-bottom: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      cursor: pointer; transition: background 0.15s;
+    }
+    .civics-card:active { background: rgba(192,122,74,0.04); }
+    .civics-card.expanded { padding-bottom: 18px; }
+    .civics-card-header { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+    .civics-card-name { font-size: 16px; font-weight: 600; color: var(--text); flex: 1; min-width: 0; }
+    .civics-card-office { font-size: 13px; color: var(--text2); width: 100%; margin-top: 2px; }
+    .civics-card-links {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
+      align-items: center;
+    }
+    .civics-link-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 12px; padding: 5px 10px; border-radius: 8px;
+      background: rgba(192,122,74,0.1); color: var(--accent);
+      border: none; cursor: pointer; text-decoration: none;
+      font-family: inherit; transition: background 0.15s;
+    }
+    .civics-link-btn:hover, .civics-link-btn:active { background: rgba(192,122,74,0.2); }
+    .civics-link-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .civics-card-notes { margin-top: 12px; }
+    .civics-card-notes-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px; }
+    .civics-card-notes textarea {
+      width: 100%; min-height: 80px; box-sizing: border-box;
+      border: 1.5px solid rgba(192,122,74,0.3); border-radius: 10px;
+      padding: 10px 12px; font-size: 14px; line-height: 1.5;
+      font-family: inherit; color: var(--text); background: transparent;
+      resize: vertical; outline: none;
+    }
+    .civics-card-notes textarea:focus { border-color: var(--accent); }
+    .civics-measure-desc { font-size: 14px; color: var(--text2); line-height: 1.5; margin-top: 8px; }
+    .civics-empty { text-align: center; padding: 32px 20px; color: var(--muted); font-size: 14px; }
+    .civics-loading { padding: 24px; text-align: center; color: var(--muted); font-size: 14px; }
+    html.dark-mode .civics-quick-card,
+    html.dark-mode .civics-card { background: #252220; border-color: rgba(255,255,255,0.06); }
+    html.dark-mode .civics-card-notes textarea { border-color: rgba(192,122,74,0.4); }
 
     /* ── Recipes screen ─────────────────────────────────────── */
     #recipesScreen { flex-direction: column; padding: 0; overflow: hidden; }
@@ -3376,6 +3480,23 @@
       </div>
     </div>
 
+    <!-- Civics screen -->
+    <div class="sub-screen" id="civicsScreen">
+      <div class="civics-header">
+        <h2 class="civics-title">Civics</h2>
+        <button type="button" class="civics-refresh-btn" onclick="loadCivicsData(true)" title="Refresh" aria-label="Refresh">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </button>
+      </div>
+      <div class="civics-content">
+        <div class="civics-zone-a" id="civicsZoneA"></div>
+        <div class="civics-zone-b" id="civicsZoneB"></div>
+        <div class="civics-zone-c-wrap">
+          <div class="civics-zone-c" id="civicsZoneC"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Schedule screen -->
     <div class="sub-screen" id="scheduleScreen">
       <div class="schedule-header">
@@ -3614,6 +3735,10 @@
     <div class="drawer-item" onclick="drawerNavTap(this, ()=>{ closeDrawer(); showScheduleScreen(); })">
       <svg class="drawer-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       Schedule
+    </div>
+    <div class="drawer-item" data-screen="civics" onclick="drawerNavTap(this, ()=>{ closeDrawer(); showCivicsScreen(); })">
+      <span class="drawer-icon-emoji">🗳️</span>
+      Civics
     </div>
     <div class="drawer-item" onclick="drawerNavTap(this, ()=>{ closeDrawer(); showSettingsScreen(); })">
       <svg class="drawer-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="12" y1="18" x2="20" y2="18"/><circle cx="6" cy="12" r="2"/><circle cx="10" cy="18" r="2"/></svg>
@@ -4198,7 +4323,7 @@
   }
 
   function drawerNavTap(el, fn) {
-    const icon = el.querySelector('.drawer-icon-svg, .drawer-icon-img');
+    const icon = el.querySelector('.drawer-icon-svg, .drawer-icon-img, .drawer-icon-emoji');
     if (icon && !icon.classList.contains('wiggling')) {
       el.classList.add('item-wiggling');
       icon.classList.add('wiggling');
@@ -4320,6 +4445,7 @@
     document.getElementById('documentsScreen').classList.remove('visible');
     document.getElementById('projectsScreen').classList.remove('visible');
     document.getElementById('scheduleScreen').classList.remove('visible');
+    document.getElementById('civicsScreen').classList.remove('visible');
     document.getElementById('settingsScreen').classList.remove('visible');
     document.getElementById('inputZone').style.display = 'flex';
     document.getElementById('updatedAt').style.display = '';
@@ -4346,6 +4472,7 @@
     document.getElementById('documentsScreen').classList.remove('visible');
     document.getElementById('projectsScreen').classList.remove('visible');
     document.getElementById('scheduleScreen').classList.remove('visible');
+    document.getElementById('civicsScreen').classList.remove('visible');
     document.getElementById('settingsScreen').classList.remove('visible');
     document.getElementById('recipesScreen').classList.remove('visible');
     document.getElementById(screenId).classList.add('visible');
@@ -6339,7 +6466,7 @@
       };
     }
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
-    const settingsItem = document.querySelector('.drawer-item:nth-child(7)');
+    const settingsItem = document.querySelector('.drawer-item:nth-child(9)');
     if (settingsItem) settingsItem.classList.add('active');
   }
 
@@ -6389,6 +6516,243 @@
     return CIVIC_IL_EVENTS
       .map(ev => ({ ...ev, start: ev.date + 'T12:00:00' }))
       .filter(ev => new Date(ev.start) >= today);
+  }
+
+  // ── CIVICS SCREEN ─────────────────────────────────────────────────
+  let civicsSheetCache = null;
+  const CIVICS_CACHE_KEY = 'shasta_civics_cache';
+  const CIVICS_CACHE_TTL = 6 * 60 * 60 * 1000;
+  const CIVICS_NOTES_KEY = 'shasta_civics_notes';
+  const POLLING_URL = 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections';
+
+  function getNextCivicEvent() {
+    const upcoming = getCivicEvents();
+    return upcoming.length ? upcoming[0] : null;
+  }
+
+  function getNextElectionEvent() {
+    const upcoming = getCivicEvents();
+    return upcoming.find(ev => (ev.title || '').includes('🗳️')) || null;
+  }
+
+  function getCivicEventDescription(ev) {
+    const t = (ev.title || '').toLowerCase();
+    if (t.includes('primary')) return 'Primary election for federal and state offices';
+    if (t.includes('general')) return 'General election for federal, state, and local offices';
+    if (t.includes('consolidated')) return 'Consolidated election for local offices';
+    if (t.includes('presidential')) return 'Presidential primary or general election';
+    if (t.includes('early voting')) return 'Last day to vote early in person';
+    if (t.includes('registration')) return 'Last day to register to vote';
+    if (t.includes('mail ballot')) return 'Deadline to request a mail ballot';
+    return 'Civic event';
+  }
+
+  function getPartyClass(party) {
+    const p = (party || '').toLowerCase();
+    if (p.includes('democrat') || p.includes('dem')) return 'dem';
+    if (p.includes('republican') || p.includes('rep')) return 'rep';
+    return 'other';
+  }
+
+  function getCivicsNotes(candidateId) {
+    try {
+      const raw = localStorage.getItem(CIVICS_NOTES_KEY);
+      const obj = raw ? JSON.parse(raw) : {};
+      return obj[candidateId] || '';
+    } catch (_) { return ''; }
+  }
+
+  function setCivicsNotes(candidateId, text) {
+    try {
+      const raw = localStorage.getItem(CIVICS_NOTES_KEY);
+      const obj = raw ? JSON.parse(raw) : {};
+      obj[candidateId] = text || '';
+      localStorage.setItem(CIVICS_NOTES_KEY, JSON.stringify(obj));
+    } catch (_) {}
+  }
+
+  function ballotpediaUrl(name) {
+    const slug = (name || '').replace(/\s+/g, '_').replace(/[^\w_\-]/g, '');
+    return 'https://ballotpedia.org/' + (slug || 'Ballotpedia');
+  }
+
+  function openSecretsUrl(name) {
+    return 'https://www.opensecrets.org/search?q=' + encodeURIComponent(name || '') + '&type=politicians';
+  }
+
+  function fecUrl(name) {
+    return 'https://www.fec.gov/data/candidates/?q=' + encodeURIComponent(name || '');
+  }
+
+  function newsUrl(name) {
+    return 'https://news.google.com/search?q=' + encodeURIComponent((name || '') + ' Illinois');
+  }
+
+  function showCivicsScreen() {
+    showSubScreen('civicsScreen');
+    document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
+    const civicsBtn = document.querySelector('.drawer-item[data-screen="civics"]');
+    if (civicsBtn) civicsBtn.classList.add('active');
+    loadCivicsData(false);
+  }
+
+  async function loadCivicsData(forceRefresh) {
+    if (!forceRefresh) {
+      try {
+        const raw = localStorage.getItem(CIVICS_CACHE_KEY);
+        if (raw) {
+          const { ts, data } = JSON.parse(raw);
+          if (Date.now() - ts < CIVICS_CACHE_TTL) {
+            civicsSheetCache = data;
+            renderCivicsScreen();
+            return;
+          }
+        }
+      } catch (_) {}
+    }
+
+    const zoneC = document.getElementById('civicsZoneC');
+    if (zoneC) zoneC.innerHTML = '<div class="civics-loading">Loading…</div>';
+
+    try {
+      const user = localStorage.getItem('shasta_user');
+      const res = await fetch(apiUrlWithUser(API_URL, '&action=getCivicsData&user=' + encodeURIComponent(user)), { redirect: 'follow' });
+      const data = await res.json();
+      civicsSheetCache = data;
+      localStorage.setItem(CIVICS_CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
+      renderCivicsScreen();
+      showDocsToast('Civics data updated');
+    } catch (err) {
+      if (zoneC) zoneC.innerHTML = '<div class="civics-empty">Could not load civics data. ' + escapeHtml(err.message || 'Network error') + '</div>';
+      showDocsToast('Failed to load civics data', true);
+    }
+  }
+
+  function renderCivicsScreen() {
+    const zoneA = document.getElementById('civicsZoneA');
+    const zoneB = document.getElementById('civicsZoneB');
+    const zoneC = document.getElementById('civicsZoneC');
+    if (!zoneA || !zoneB || !zoneC) return;
+
+    const nextEv = getNextCivicEvent();
+    if (nextEv) {
+      const d = new Date(nextEv.date + 'T12:00:00');
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      d.setHours(0, 0, 0, 0);
+      const days = Math.ceil((d - today) / (24 * 60 * 60 * 1000));
+      const daysText = days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : days + ' days';
+      zoneA.innerHTML = '<a class="civics-event-banner" href="' + escapeHtml(nextEv.url || '#') + '" target="_blank" rel="noopener">' +
+        '<div class="civics-event-banner-title">' + escapeHtml(nextEv.title) + '</div>' +
+        '<div class="civics-event-banner-meta">' + daysText + ' · ' + escapeHtml(getCivicEventDescription(nextEv)) + '</div></a>';
+    } else {
+      zoneA.innerHTML = '';
+    }
+
+    const nextElection = getNextElectionEvent();
+    const cache = civicsSheetCache || { elections: [], candidates: [] };
+    const elections = cache.elections || [];
+    const candidates = cache.candidates || [];
+
+    const nextElectionDate = nextElection ? String(nextElection.date || '').slice(0, 10) : null;
+    const normDate = d => String(d || '').slice(0, 10);
+    const sheetElection = elections.find(e => normDate(e.date) === nextElectionDate) || elections[0];
+    const electionId = sheetElection ? (sheetElection.election_id || sheetElection.date) : nextElectionDate;
+    const nextCandidates = electionId ? candidates.filter(c => (c.election_id || c.electionId) === electionId) : candidates;
+
+    const electionName = (sheetElection && sheetElection.name) || (nextElection && nextElection.title) || 'Next election';
+    const electionType = (sheetElection && sheetElection.type) || (nextElection && nextElection.title) || '';
+    let electionDate = (sheetElection && sheetElection.date) || (nextElection && nextElection.date) || '';
+    if (electionDate && typeof electionDate === 'string' && electionDate.length > 10) electionDate = electionDate.slice(0, 10);
+
+    let typeLabel = electionType;
+    if (electionType) typeLabel = electionType.charAt(0).toUpperCase() + electionType.slice(1);
+
+    zoneB.innerHTML = '<div class="civics-quick-card">' +
+      '<div class="civics-quick-election">' + escapeHtml(electionDate ? new Date(electionDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' — ' + escapeHtml(typeLabel) : 'Next election') + '</div>' +
+      '<a class="civics-quick-polling" href="' + escapeHtml(POLLING_URL) + '" target="_blank" rel="noopener">Find my polling place</a>' +
+      '<div class="civics-quick-chips">' + nextCandidates.filter(c => (c.type || 'candidate') !== 'measure').map(c => {
+        const cls = getPartyClass(c.party);
+        return '<span class="civics-party-chip ' + cls + '">' + escapeHtml(c.name || '') + '</span>';
+      }).join('') + '</div></div>';
+
+    if (!nextElection && nextCandidates.length === 0) {
+      zoneC.innerHTML = '<div class="civics-empty">No upcoming election data. Check back closer to the next election.</div>';
+      return;
+    }
+
+    if (nextCandidates.length === 0) {
+      zoneC.innerHTML = '<div class="civics-empty">No candidates or measures yet. Add data to the Civics sheet.</div>';
+      return;
+    }
+
+    zoneC.innerHTML = nextCandidates.map(c => renderCivicsCard(c)).join('');
+    zoneC.querySelectorAll('.civics-card').forEach((card, i) => {
+      const c = nextCandidates[i];
+      if ((c.type || '').toLowerCase() === 'measure') return;
+      const notesEl = card.querySelector('.civics-card-notes');
+      card.onclick = (e) => {
+        if (e.target.closest('.civics-link-btn') || e.target.closest('textarea')) return;
+        const isExp = card.classList.toggle('expanded');
+        if (notesEl) notesEl.style.display = isExp ? 'block' : 'none';
+      };
+      const ta = card.querySelector('.civics-card-notes textarea');
+      if (ta) {
+        ta.value = getCivicsNotes(c.candidate_id || c.candidateId || c.name);
+        ta.oninput = () => setCivicsNotes(c.candidate_id || c.candidateId || c.name, ta.value);
+      }
+    });
+  }
+
+  function renderCivicsCard(c) {
+    const isMeasure = (c.type || '').toLowerCase() === 'measure';
+    const cid = c.candidate_id || c.candidateId || c.name || '';
+    const name = c.name || 'Ballot measure';
+    const office = c.office || '';
+    const party = c.party || '';
+    const level = (c.level || '').toLowerCase();
+    const expanded = '';
+
+    if (isMeasure) {
+      const desc = c.description || '';
+      const learnUrl = c.learn_more_url || c.learnMoreUrl || '';
+      return '<div class="civics-card" data-id="' + escapeHtml(cid) + '">' +
+        '<div class="civics-card-header">' +
+        '<span class="civics-card-name">' + escapeHtml(name) + '</span></div>' +
+        (desc ? '<div class="civics-measure-desc">' + escapeHtml(desc) + '</div>' : '') +
+        (learnUrl ? '<div class="civics-card-links"><a class="civics-link-btn" href="' + escapeHtml(learnUrl) + '" target="_blank" rel="noopener">Learn more</a></div>' : '') +
+        '</div>';
+    }
+
+    const partyCls = getPartyClass(party);
+    const partyChip = '<span class="civics-party-chip ' + partyCls + '">' + escapeHtml(party || 'Nonpartisan') + '</span>';
+
+    const nameUnderscore = (name || '').replace(/\s+/g, '_');
+    const links = [
+      ['Integrity Index', 'https://integrityindex.us/explore'],
+      ['Ballotpedia', ballotpediaUrl(name)],
+      ['OpenSecrets', openSecretsUrl(name)],
+      ['FEC', fecUrl(name)],
+      ['News', newsUrl(name)]
+    ];
+    if (level === 'state') {
+      links.splice(4, 0, ['IL Legislature', 'https://ilga.gov']);
+    }
+
+    const linkIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+    const linkRow = links.map(([label, url]) =>
+      '<a class="civics-link-btn" href="' + escapeHtml(url) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + linkIcon + escapeHtml(label) + '</a>'
+    ).join('');
+
+    return '<div class="civics-card" data-id="' + escapeHtml(cid) + '">' +
+      '<div class="civics-card-header">' +
+      '<span class="civics-card-name">' + escapeHtml(name) + '</span>' + partyChip + '</div>' +
+      (office ? '<div class="civics-card-office">' + escapeHtml(office) + '</div>' : '') +
+      '<div class="civics-card-links">' + linkRow + '</div>' +
+      '<div class="civics-card-notes" style="display:none">' +
+      '<div class="civics-card-notes-label">Notes</div>' +
+      '<textarea class="recipe-edit-textarea" placeholder="Your notes…"></textarea></div>' +
+      '</div>';
   }
 
   const STARRED_STORAGE_KEY = 'shasta_starred_events';
