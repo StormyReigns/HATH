@@ -1418,6 +1418,18 @@
     .civics-event-banner-meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
     html.dark-mode .civics-event-banner { background: rgba(42,91,168,0.12); }
     html.dark-mode .civics-event-banner .civics-event-banner-title { color: #8ab4f8; }
+    .civics-upcoming-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 12px 0 6px; }
+    .civics-upcoming-list { display: flex; flex-direction: column; gap: 6px; }
+    .civics-upcoming-item {
+      display: block; padding: 10px 12px; border-radius: 10px;
+      background: rgba(42,91,168,0.04); border-left: 3px solid rgba(42,91,168,0.4);
+      text-decoration: none; color: inherit; transition: background 0.15s;
+    }
+    .civics-upcoming-item:hover, .civics-upcoming-item:active { background: rgba(42,91,168,0.08); }
+    .civics-upcoming-item-title { font-size: 14px; font-weight: 500; color: #1e4a96; }
+    .civics-upcoming-item-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    html.dark-mode .civics-upcoming-item { background: rgba(42,91,168,0.08); border-left-color: rgba(90,143,216,0.5); }
+    html.dark-mode .civics-upcoming-item-title { color: #8ab4f8; }
     .civics-zone-b {
       flex-shrink: 0; margin-bottom: 16px;
     }
@@ -3908,7 +3920,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.7.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.8.1';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -6482,32 +6494,32 @@
   // Sources: IL State Board of Elections (elections.il.gov) + McLean County Clerk
   const CIVIC_IL_EVENTS = [
     // ── 2026 Primary ──────────────────────────────────────────────
-    { title: 'Last Day: Early Voting — IL Primary',          date: '2026-03-16', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: '🗳️ Illinois Primary Election Day',             date: '2026-03-17', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Last Day: Early Voting — IL Primary',          date: '2026-03-16', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/government/elected-officials/county-clerk/elections' },
+    { title: '🗳️ Illinois Primary Election Day',             date: '2026-03-17', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/government/elected-officials/county-clerk/elections' },
     // ── 2026 General ──────────────────────────────────────────────
     { title: 'Voter Registration Deadline — General',        date: '2026-10-06', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
-    { title: 'Early Voting Opens — IL General Election',     date: '2026-10-19', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: 'Mail Ballot Request Deadline — General',       date: '2026-10-29', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: 'Last Day: Early Voting — IL General',          date: '2026-11-02', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: '🗳️ Illinois General Election Day',             date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Early Voting Opens — IL General Election',     date: '2026-10-19', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Mail Ballot Request Deadline — General',       date: '2026-10-29', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Last Day: Early Voting — IL General',          date: '2026-11-02', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/government/elected-officials/county-clerk/elections' },
+    { title: '🗳️ Illinois General Election Day',             date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/government/elected-officials/county-clerk/elections' },
     // ── 2027 Consolidated Primary ─────────────────────────────────
     { title: 'Voter Registration Deadline — Consol. Primary', date: '2027-01-26', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
-    { title: 'Last Day: Early Voting — Consol. Primary',     date: '2027-02-22', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: '🗳️ IL Consolidated Primary Election',          date: '2027-02-23', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Last Day: Early Voting — Consol. Primary',     date: '2027-02-22', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/government/elected-officials/county-clerk/elections' },
+    { title: '🗳️ IL Consolidated Primary Election',          date: '2027-02-23', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/government/elected-officials/county-clerk/elections' },
     // ── 2027 Consolidated Election ────────────────────────────────
     { title: 'Voter Registration Deadline — Consol. Election', date: '2027-03-09', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
-    { title: 'Last Day: Early Voting — Consol. Election',    date: '2027-04-05', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: '🗳️ IL Consolidated Election Day',              date: '2027-04-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Last Day: Early Voting — Consol. Election',    date: '2027-04-05', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/government/elected-officials/county-clerk/elections' },
+    { title: '🗳️ IL Consolidated Election Day',              date: '2027-04-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/government/elected-officials/county-clerk/elections' },
     // ── 2028 Presidential Primary ─────────────────────────────────
     { title: 'Voter Registration Deadline — Pres. Primary',  date: '2028-02-22', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
-    { title: 'Early Voting Opens — Presidential Primary',    date: '2028-02-10', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: 'Last Day: Early Voting — Pres. Primary',       date: '2028-03-20', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: '🗳️ Illinois Presidential Primary',             date: '2028-03-21', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Early Voting Opens — Presidential Primary',    date: '2028-02-10', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Last Day: Early Voting — Pres. Primary',       date: '2028-03-20', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/government/elected-officials/county-clerk/elections' },
+    { title: '🗳️ Illinois Presidential Primary',             date: '2028-03-21', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/government/elected-officials/county-clerk/elections' },
     // ── 2028 Presidential General ─────────────────────────────────
     { title: 'Voter Registration Deadline — Pres. General',  date: '2028-10-10', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
-    { title: 'Early Voting Opens — Presidential General',    date: '2028-09-28', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: 'Last Day: Early Voting — Pres. General',       date: '2028-11-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: '🗳️ Presidential General Election',             date: '2028-11-07', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Early Voting Opens — Presidential General',    date: '2028-09-28', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Last Day: Early Voting — Pres. General',       date: '2028-11-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/government/elected-officials/county-clerk/elections' },
+    { title: '🗳️ Presidential General Election',             date: '2028-11-07', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/government/elected-officials/county-clerk/elections' },
   ];
 
   function getCivicEvents() {
@@ -6523,11 +6535,17 @@
   const CIVICS_CACHE_KEY = 'shasta_civics_cache';
   const CIVICS_CACHE_TTL = 6 * 60 * 60 * 1000;
   const CIVICS_NOTES_KEY = 'shasta_civics_notes';
-  const POLLING_URL = 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections';
+  const POLLING_URL = 'https://www.mcleancountyil.gov/government/elected-officials/county-clerk/elections';
+
+  const CIVICS_UPCOMING_LIMIT = 10;
 
   function getNextCivicEvent() {
     const upcoming = getCivicEvents();
     return upcoming.length ? upcoming[0] : null;
+  }
+
+  function getUpcomingCivicEvents(limit) {
+    return getCivicEvents().slice(0, limit || CIVICS_UPCOMING_LIMIT);
   }
 
   function getNextElectionEvent() {
@@ -6634,17 +6652,33 @@
     const zoneC = document.getElementById('civicsZoneC');
     if (!zoneA || !zoneB || !zoneC) return;
 
-    const nextEv = getNextCivicEvent();
-    if (nextEv) {
+    const upcoming = getUpcomingCivicEvents();
+    if (upcoming.length > 0) {
+      const nextEv = upcoming[0];
       const d = new Date(nextEv.date + 'T12:00:00');
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       d.setHours(0, 0, 0, 0);
       const days = Math.ceil((d - today) / (24 * 60 * 60 * 1000));
       const daysText = days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : days + ' days';
-      zoneA.innerHTML = '<a class="civics-event-banner" href="' + escapeHtml(nextEv.url || '#') + '" target="_blank" rel="noopener">' +
+      let html = '<a class="civics-event-banner" href="' + escapeHtml(nextEv.url || '#') + '" target="_blank" rel="noopener">' +
         '<div class="civics-event-banner-title">' + escapeHtml(nextEv.title) + '</div>' +
         '<div class="civics-event-banner-meta">' + daysText + ' · ' + escapeHtml(getCivicEventDescription(nextEv)) + '</div></a>';
+      if (upcoming.length > 1) {
+        html += '<div class="civics-upcoming-label">Upcoming</div><div class="civics-upcoming-list">';
+        upcoming.slice(1).forEach(function(ev) {
+          const evDate = new Date(ev.date + 'T12:00:00');
+          evDate.setHours(0, 0, 0, 0);
+          const evDays = Math.ceil((evDate - today) / (24 * 60 * 60 * 1000));
+          const evDaysText = evDays === 0 ? 'Today' : evDays === 1 ? 'Tomorrow' : evDays + ' days';
+          const dateStr = evDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          html += '<a class="civics-upcoming-item" href="' + escapeHtml(ev.url || '#') + '" target="_blank" rel="noopener">' +
+            '<div class="civics-upcoming-item-title">' + escapeHtml(ev.title) + '</div>' +
+            '<div class="civics-upcoming-item-meta">' + evDaysText + ' · ' + escapeHtml(dateStr) + '</div></a>';
+        });
+        html += '</div>';
+      }
+      zoneA.innerHTML = html;
     } else {
       zoneA.innerHTML = '';
     }
