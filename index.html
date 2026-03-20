@@ -1529,7 +1529,7 @@
     .civics-party-chip.dem { background: rgba(59,130,246,0.15); color: #3b82f6; }
     .civics-party-chip.rep { background: rgba(239,68,68,0.15); color: #ef4444; }
     .civics-party-chip.other { background: rgba(107,114,128,0.15); color: #6b7280; }
-    .civics-zone-c-wrap { flex: 1; min-height: 0; overflow-y: auto; }
+    .civics-zone-c-wrap { flex-shrink: 0; overflow: visible; }
     .civics-zone-c { padding-bottom: 24px; }
     .civics-card {
       background: #fdf8f1; border-radius: 12px;
@@ -4037,7 +4037,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.9.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.9.1';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -7034,6 +7034,7 @@
       const user = localStorage.getItem('shasta_user');
       const civicsSources = getCivicsSources().filter(s => s.enabled);
       const body = {
+        action: 'civics',
         message: prompt,
         user: getApiUser(),
         history: [],
@@ -8025,6 +8026,7 @@
       const user = localStorage.getItem('shasta_user');
       const civicsSources = getCivicsSources().filter(s => s.enabled);
       const body = {
+        action: 'civics',
         message: text,
         user: getApiUser(),
         history: [],
