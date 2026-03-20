@@ -1407,7 +1407,22 @@
     .civics-zone-a {
       flex-shrink: 0; margin-bottom: 12px;
     }
+    .civics-carousel-wrap { position: relative; width: 100%; }
     .civics-carousel { overflow: hidden; border-radius: 14px; width: 100%; touch-action: pan-y; }
+    .civics-carousel-edge {
+      position: absolute; top: 0; bottom: 0; width: 28px;
+      pointer-events: none; opacity: 0.6; z-index: 1;
+    }
+    .civics-carousel-edge--right { right: 0; background: linear-gradient(to left, rgba(42,91,168,0.15), transparent); }
+    .civics-carousel-edge--left { left: 0; background: linear-gradient(to right, rgba(42,91,168,0.15), transparent); }
+    .civics-carousel-hint {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      margin-top: 8px; font-size: 11px; color: var(--muted);
+      letter-spacing: 0.04em; opacity: 0.9;
+      transition: opacity 0.5s ease;
+    }
+    .civics-carousel-hint.hidden { opacity: 0; pointer-events: none; }
+    .civics-carousel-hint svg { width: 14px; height: 14px; opacity: 0.8; }
     .civics-carousel-track { display: flex; transition: transform 0.28s ease; will-change: transform; }
     .civics-carousel-slide {
       min-width: 100%;
@@ -1425,6 +1440,8 @@
     .civics-slide-date-val { color: var(--text); font-size: 13px; }
     html.dark-mode .civics-carousel-slide { background: rgba(42,91,168,0.12); border-left-color: #5a8fd8; }
     html.dark-mode .civics-slide-title { color: #8ab4f8; }
+    html.dark-mode .civics-carousel-edge--right { background: linear-gradient(to left, rgba(42,91,168,0.25), transparent); }
+    html.dark-mode .civics-carousel-edge--left { background: linear-gradient(to right, rgba(42,91,168,0.25), transparent); }
     .civics-empty-card {
       background: #fdf8f1; border-radius: 12px;
       border: 1px solid rgba(0,0,0,0.06);
@@ -3527,8 +3544,16 @@
       </div>
       <div class="civics-content">
         <div class="civics-zone-a" id="civicsZoneA">
-          <div class="civics-carousel" id="civicsCarousel">
-            <div class="civics-carousel-track" id="civicsCarouselTrack"></div>
+          <div class="civics-carousel-wrap">
+            <div class="civics-carousel-edge civics-carousel-edge--left" id="civicsCarouselEdgeLeft" style="display:none"></div>
+            <div class="civics-carousel-edge civics-carousel-edge--right" id="civicsCarouselEdgeRight"></div>
+            <div class="civics-carousel" id="civicsCarousel">
+              <div class="civics-carousel-track" id="civicsCarouselTrack"></div>
+            </div>
+          </div>
+          <div class="civics-carousel-hint" id="civicsCarouselHint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+            Swipe for more
           </div>
         </div>
         <div class="civics-zone-b" id="civicsZoneB"></div>
@@ -3949,7 +3974,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.8.4';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.8.6';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -6571,30 +6596,6 @@
     return upcoming.length ? upcoming[0] : null;
   }
 
-  function getCivicElectionGroups() {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const allEvents = CIVIC_IL_EVENTS.map(ev => ({ ...ev, start: ev.date + 'T12:00:00' }));
-    const electionEvents = allEvents.filter(ev => (ev.title || '').includes('🗳️')).sort((a, b) => a.date.localeCompare(b.date));
-    const groups = [];
-    let prevElectionDate = null;
-    for (const election of electionEvents) {
-      const electionDate = new Date(election.start);
-      electionDate.setHours(0, 0, 0, 0);
-      if (electionDate < today) { prevElectionDate = electionDate; continue; }
-      const prev = prevElectionDate || new Date(0);
-      const supporting = allEvents.filter(ev => {
-        if ((ev.title || '').includes('🗳️')) return false;
-        const d = new Date(ev.date + 'T12:00:00');
-        d.setHours(0, 0, 0, 0);
-        return d > prev && d <= electionDate;
-      }).sort((a, b) => a.date.localeCompare(b.date));
-      groups.push({ electionEvent: election, supportingEvents: supporting });
-      prevElectionDate = electionDate;
-    }
-    return groups;
-  }
-
   function getNextElectionEvent() {
     const upcoming = getCivicEvents();
     return upcoming.find(ev => (ev.title || '').includes('🗳️')) || null;
@@ -6696,12 +6697,11 @@
   let civicsCurrentSlide = 0;
   let civicsElectionGroups = [];
 
-  function renderCivicsCarousel() {
+  function renderCivicsCarousel(groups) {
     const track = document.getElementById('civicsCarouselTrack');
     const carousel = document.getElementById('civicsCarousel');
     if (!track || !carousel) return;
 
-    const groups = getCivicElectionGroups();
     if (groups.length === 0) {
       carousel.style.display = 'none';
       return;
@@ -6739,15 +6739,32 @@
     }).join('');
 
     civicsCurrentSlide = 0;
-    civicsElectionGroups = groups;
     track.style.transform = 'translateX(0)';
 
     carousel._civicsGroups = groups;
     carousel._civicsTrack = track;
     setupCivicsCarouselSwipe();
+    updateCivicsCarouselEdges();
 
-    renderCivicsZoneB(0);
-    renderCivicsZoneC(0);
+    const hint = document.getElementById('civicsCarouselHint');
+    if (hint) {
+      hint.classList.remove('hidden');
+      if (groups.length <= 1) hint.style.display = 'none';
+      else {
+        hint.style.display = 'flex';
+        setTimeout(function() { if (hint && !hint.classList.contains('hidden')) hint.classList.add('hidden'); }, 4000);
+      }
+    }
+
+    renderCivicsZoneBC(0);
+  }
+
+  function updateCivicsCarouselEdges() {
+    const left = document.getElementById('civicsCarouselEdgeLeft');
+    const right = document.getElementById('civicsCarouselEdgeRight');
+    const n = civicsElectionGroups.length;
+    if (left) left.style.display = civicsCurrentSlide > 0 ? 'block' : 'none';
+    if (right) right.style.display = n > 1 && civicsCurrentSlide < n - 1 ? 'block' : 'none';
   }
 
   function setupCivicsCarouselSwipe() {
@@ -6766,34 +6783,40 @@
       if (delta > 40 && civicsCurrentSlide < groups.length - 1) {
         civicsCurrentSlide++;
         track.style.transform = 'translateX(-' + (civicsCurrentSlide * 100) + '%)';
-        renderCivicsZoneB(civicsCurrentSlide);
-        renderCivicsZoneC(civicsCurrentSlide);
+        document.getElementById('civicsCarouselHint') && document.getElementById('civicsCarouselHint').classList.add('hidden');
+        updateCivicsCarouselEdges();
+        renderCivicsZoneBC(civicsCurrentSlide);
       } else if (delta < -40 && civicsCurrentSlide > 0) {
         civicsCurrentSlide--;
         track.style.transform = 'translateX(-' + (civicsCurrentSlide * 100) + '%)';
-        renderCivicsZoneB(civicsCurrentSlide);
-        renderCivicsZoneC(civicsCurrentSlide);
+        document.getElementById('civicsCarouselHint') && document.getElementById('civicsCarouselHint').classList.add('hidden');
+        updateCivicsCarouselEdges();
+        renderCivicsZoneBC(civicsCurrentSlide);
       }
     };
   }
 
-  function renderCivicsZoneB(slideIndex) {
+  function renderCivicsZoneBC(slideIndex) {
     const zoneB = document.getElementById('civicsZoneB');
-    if (!zoneB) return;
+    const zoneC = document.getElementById('civicsZoneC');
+    if (!zoneB || !zoneC) return;
 
-    const refElection = civicsElectionGroups[slideIndex] ? civicsElectionGroups[slideIndex].electionEvent : null;
+    const group = civicsElectionGroups[slideIndex];
+    const elEv = group ? group.electionEvent : null;
+
     const cache = civicsSheetCache || { elections: [], candidates: [] };
     const elections = cache.elections || [];
     const candidates = cache.candidates || [];
 
-    const nextElectionDate = refElection ? String(refElection.date || '').slice(0, 10) : null;
+    const nextElectionDate = elEv ? String(elEv.date || '').slice(0, 10) : null;
     const normDate = d => String(d || '').slice(0, 10);
     const sheetElection = elections.find(e => normDate(e.date) === nextElectionDate) || elections[0];
     const electionId = sheetElection ? (sheetElection.election_id || sheetElection.date) : nextElectionDate;
     const nextCandidates = electionId ? candidates.filter(c => (c.election_id || c.electionId) === electionId) : candidates;
 
-    const electionType = (sheetElection && sheetElection.type) || (refElection && refElection.title) || '';
-    let electionDate = (sheetElection && sheetElection.date) || (refElection && refElection.date) || '';
+    const electionName = (sheetElection && sheetElection.name) || (elEv && (elEv.title || '').replace(/🗳️\s*/g, '').trim()) || 'upcoming election';
+    const electionType = (sheetElection && sheetElection.type) || (elEv && elEv.title) || '';
+    let electionDate = (sheetElection && sheetElection.date) || (elEv && elEv.date) || '';
     if (electionDate && typeof electionDate === 'string' && electionDate.length > 10) electionDate = electionDate.slice(0, 10);
 
     let typeLabel = electionType;
@@ -6809,26 +6832,8 @@
       '<div class="civics-quick-election">' + escapeHtml(electionDate ? new Date(electionDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' — ' + escapeHtml(typeLabel) : 'Next election') + '</div>' +
       '<a class="civics-quick-polling" href="' + escapeHtml(POLLING_URL) + '" target="_blank" rel="noopener">Find my polling place</a>' +
       '<div class="civics-quick-chips">' + candidateChips + '</div></div>';
-  }
 
-  function renderCivicsZoneC(slideIndex) {
-    const zoneC = document.getElementById('civicsZoneC');
-    if (!zoneC) return;
-
-    const refElection = civicsElectionGroups[slideIndex] ? civicsElectionGroups[slideIndex].electionEvent : null;
-    const cache = civicsSheetCache || { elections: [], candidates: [] };
-    const elections = cache.elections || [];
-    const candidates = cache.candidates || [];
-
-    const nextElectionDate = refElection ? String(refElection.date || '').slice(0, 10) : null;
-    const normDate = d => String(d || '').slice(0, 10);
-    const sheetElection = elections.find(e => normDate(e.date) === nextElectionDate) || elections[0];
-    const electionId = sheetElection ? (sheetElection.election_id || sheetElection.date) : nextElectionDate;
-    const nextCandidates = electionId ? candidates.filter(c => (c.election_id || c.electionId) === electionId) : candidates;
-
-    const electionName = (sheetElection && sheetElection.name) || (refElection && (refElection.title || '').replace(/🗳️\s*/g, '').trim()) || 'upcoming election';
-
-    if (!refElection && nextCandidates.length === 0) {
+    if (!elEv && nextCandidates.length === 0) {
       zoneC.innerHTML = '<div class="civics-empty-card">' +
         '<div class="civics-empty-card-title">No upcoming election data</div>' +
         '<div class="civics-empty-card-text">Check back closer to the next election.</div></div>';
@@ -6837,13 +6842,10 @@
 
     if (nextCandidates.length === 0) {
       zoneC.innerHTML = '<div class="civics-empty-card">' +
-        '<div class="civics-empty-card-title">Populate the Civics sheet</div>' +
-        '<div class="civics-empty-card-text">Before each election, add data to the Google Sheet named "Civics" in the same Drive as this app. The app reads from two tabs:</div>' +
-        '<div class="civics-empty-card-columns">' +
-        '<strong>Elections:</strong> election_id, name, date, type, description<br>' +
-        '<strong>Candidates:</strong> election_id, candidate_id, name, office, party, level, type, description, learn_more_url' +
-        '</div>' +
-        '<div class="civics-empty-card-text">Match election_id in both tabs to link candidates to elections. Use type="measure" for ballot measures.</div></div>';
+        '<div class="civics-empty-card-title">No candidate data yet</div>' +
+        '<div class="civics-empty-card-text">Tap "Ask Blathers" on any candidate card once added, or ask Blathers directly about this election.</div>' +
+        '<button type="button" class="civics-ask-blathers-btn" style="margin-top:12px" onclick="civicsAskBlathersAboutElection()">' +
+        '🦉 Ask Blathers about this election</button></div>';
       return;
     }
 
@@ -6864,23 +6866,31 @@
         ta.value = getCivicsNotes(c.candidate_id || c.candidateId || c.name);
         ta.oninput = () => setCivicsNotes(c.candidate_id || c.candidateId || c.name, ta.value);
       }
-      const askBtn = card.querySelector('.civics-ask-blathers-btn');
-      if (askBtn) {
-        askBtn.onclick = (e) => {
-          e.stopPropagation();
-          document.querySelectorAll('.civics-card.expanded').forEach(el => el.classList.remove('expanded'));
-          document.querySelectorAll('.civics-card-notes').forEach(el => { if (el) el.style.display = 'none'; });
-          document.querySelectorAll('.civics-card-links-expanded').forEach(el => { if (el) el.style.display = 'none'; });
-          openBlatherBookPanel();
-          const prompt = 'Please give me a brief, neutral summary of ' + (c.name || '') + ' who is running for ' + (c.office || 'office') + ' in the ' + electionName + '. Cover: their background, who funds them if known, their voting record or public positions if they\'ve held office, and anything notable the news has covered. Cite sources where possible and keep it factual.';
-          setTimeout(function() {
-            const inp = document.getElementById('blatherbookInput');
-            if (inp) { inp.value = prompt; inp.style.height = 'auto'; }
-            sendBlatherBookMessage();
-          }, 50);
-        };
-      }
     });
+  }
+
+  function civicsAskBlathersAboutElection() {
+    const group = civicsElectionGroups[civicsCurrentSlide];
+    const elEv = group ? group.electionEvent : null;
+    const name = elEv ? elEv.title.replace(/[\u{1F000}-\u{1FFFF}]|[\u2600-\u27FF]/gu, '').trim() : 'the upcoming Illinois election';
+    const elDate = elEv ? new Date(elEv.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '';
+    const prompt = 'Please give me a neutral overview of ' + name + (elDate ? ' on ' + elDate : '') + '. What offices are on the ballot in McLean County, IL? Who are the key candidates and what should I know about them going in?';
+    openBlatherBookPanel();
+    setTimeout(function() {
+      const inp = document.getElementById('blatherbookInput');
+      if (inp) { inp.value = prompt; autoResizeBlatherbook(inp); }
+      handleBlatherBookSendOrStop();
+    }, 300);
+  }
+
+  function civicsAskBlathersAboutCandidate(name, office, electionName) {
+    const prompt = 'Please give me a brief, neutral summary of ' + (name || '') + ' who is running for ' + (office || 'office') + ' in the ' + (electionName || 'upcoming Illinois election') + '. Cover their background, who funds them if known, their voting record or public positions if they\'ve held office, and anything notable the news has covered. Keep it factual.';
+    openBlatherBookPanel();
+    setTimeout(function() {
+      const inp = document.getElementById('blatherbookInput');
+      if (inp) { inp.value = prompt; autoResizeBlatherbook(inp); }
+      handleBlatherBookSendOrStop();
+    }, 300);
   }
 
   function renderCivicsScreen() {
@@ -6889,11 +6899,31 @@
     const zoneC = document.getElementById('civicsZoneC');
     if (!zoneA || !zoneB || !zoneC) return;
 
-    renderCivicsCarousel();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const allUpcoming = getCivicEvents();
+
+    const electionDays = allUpcoming.filter(ev => (ev.title || '').includes('🗳️'));
+
+    civicsElectionGroups = electionDays.map(function(elEv) {
+      const elDate = new Date(elEv.date + 'T12:00:00');
+      const elYear = elDate.getFullYear();
+      const elMonth = elDate.getMonth();
+      const supporting = allUpcoming.filter(function(ev) {
+        if (ev === elEv) return false;
+        if ((ev.title || '').includes('🗳️')) return false;
+        const d = new Date(ev.date + 'T12:00:00');
+        return d.getFullYear() === elYear && d.getMonth() === elMonth;
+      }).sort((a, b) => new Date(a.date) - new Date(b.date));
+      return { electionEvent: elEv, supportingEvents: supporting };
+    });
+
+    civicsCurrentSlide = 0;
+
+    renderCivicsCarousel(civicsElectionGroups);
 
     if (civicsElectionGroups.length === 0) {
-      renderCivicsZoneB(0);
-      renderCivicsZoneC(0);
+      renderCivicsZoneBC(0);
     }
   }
 
@@ -6920,7 +6950,7 @@
     const partyChip = '<span class="civics-party-chip ' + partyCls + '">' + escapeHtml(party || 'Nonpartisan') + '</span>';
 
     const ballotpediaLink = '<a class="civics-link-btn" href="' + escapeHtml(ballotpediaUrl(name)) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔍 Find on Ballotpedia</a>';
-    const askBlathersBtn = '<button type="button" class="civics-ask-blathers-btn">🦉 Ask Blathers</button>';
+    const askBlathersBtn = '<button type="button" class="civics-ask-blathers-btn" onclick="event.stopPropagation(); civicsAskBlathersAboutCandidate(' + JSON.stringify(name) + ',' + JSON.stringify(office) + ',' + JSON.stringify(electionName) + ')">🦉 Ask Blathers</button>';
 
     const links = [
       ['Integrity Index', 'https://integrityindex.us/explore'],
