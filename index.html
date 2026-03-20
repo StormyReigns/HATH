@@ -1415,20 +1415,37 @@
     }
     .civics-carousel-edge--right { right: 0; background: linear-gradient(to left, rgba(42,91,168,0.15), transparent); }
     .civics-carousel-edge--left { left: 0; background: linear-gradient(to right, rgba(42,91,168,0.15), transparent); }
+    .civics-carousel-indicator {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      margin-top: 12px; padding: 4px 0;
+    }
+    .civics-carousel-dots {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .civics-carousel-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: rgba(42,91,168,0.25); transition: all 0.3s ease;
+    }
+    .civics-carousel-dot.active {
+      width: 18px; border-radius: 3px;
+      background: rgba(42,91,168,0.6);
+    }
+    html.dark-mode .civics-carousel-dot { background: rgba(90,143,216,0.25); }
+    html.dark-mode .civics-carousel-dot.active { background: rgba(90,143,216,0.7); }
     .civics-carousel-hint {
       display: flex; align-items: center; justify-content: center; gap: 6px;
-      margin-top: 8px; font-size: 11px; color: var(--muted);
-      letter-spacing: 0.04em; opacity: 0.9;
-      transition: opacity 0.5s ease;
+      font-size: 11px; color: var(--muted);
+      letter-spacing: 0.05em;
+      opacity: 0.85; transition: opacity 0.6s ease;
     }
     .civics-carousel-hint.hidden { opacity: 0; pointer-events: none; }
     .civics-carousel-hint svg {
-      width: 14px; height: 14px; opacity: 0.8;
-      animation: civics-swipe-hint 2s ease-in-out infinite;
+      width: 14px; height: 14px; opacity: 0.9;
+      animation: civics-swipe-hint 2.5s ease-in-out infinite;
     }
     @keyframes civics-swipe-hint {
       0%, 100% { transform: translateX(0); opacity: 0.8; }
-      50% { transform: translateX(3px); opacity: 1; }
+      50% { transform: translateX(4px); opacity: 1; }
     }
     .civics-carousel-track { display: flex; transition: transform 0.28s ease; will-change: transform; }
     .civics-carousel-slide {
@@ -3627,9 +3644,12 @@
               <div class="civics-carousel-track" id="civicsCarouselTrack"></div>
             </div>
           </div>
-          <div class="civics-carousel-hint" id="civicsCarouselHint">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
-            Swipe for more
+          <div class="civics-carousel-indicator" id="civicsCarouselIndicator">
+            <div class="civics-carousel-dots" id="civicsCarouselDots"></div>
+            <div class="civics-carousel-hint" id="civicsCarouselHint">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+              Swipe to explore
+            </div>
           </div>
         </div>
         <div class="civics-zone-b" id="civicsZoneB"></div>
@@ -4050,7 +4070,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.0.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.0.2';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -6572,7 +6592,7 @@
 
   const CIVICS_SOURCES_KEY = 'shasta_civics_sources';
   const CIVICS_DEFAULT_SOURCES = [
-    { label: 'McLean County Clerk', url: 'https://www.mcleancountyil.gov/elections', enabled: true },
+    { label: 'McLean County Clerk', url: 'https://www.mcleancountyil.gov/1593/2026-Elections', enabled: true },
     { label: 'IL State Board of Elections', url: 'https://www.elections.il.gov', enabled: true },
     { label: 'Integrity Index', url: 'https://integrityindex.us/explore', enabled: true },
     { label: 'IL Voter Guide (League of Women Voters)', url: 'https://illinoisvoterguide.org', enabled: true },
@@ -6584,10 +6604,11 @@
       const raw = localStorage.getItem(CIVICS_SOURCES_KEY);
       let sources = raw ? JSON.parse(raw) : CIVICS_DEFAULT_SOURCES.map(s => ({...s}));
       const oldMcLean = 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections';
-      const newMcLean = 'https://www.mcleancountyil.gov/elections';
-      const changed = sources.some(s => s.url === oldMcLean);
+      const oldMcLean2 = 'https://www.mcleancountyil.gov/elections';
+      const newMcLean = 'https://www.mcleancountyil.gov/1593/2026-Elections';
+      const changed = sources.some(s => s.url === oldMcLean || s.url === oldMcLean2);
       if (changed) {
-        sources = sources.map(s => s.url === oldMcLean ? { ...s, url: newMcLean } : s);
+        sources = sources.map(s => (s.url === oldMcLean || s.url === oldMcLean2) ? { ...s, url: newMcLean } : s);
         saveCivicsSources(sources);
       }
       return sources;
@@ -6737,32 +6758,32 @@
   // Sources: IL State Board of Elections (elections.il.gov) + McLean County Clerk
   const CIVIC_IL_EVENTS = [
     // ── 2026 Primary ──────────────────────────────────────────────
-    { title: 'Last Day: Early Voting — IL Primary',          date: '2026-03-16', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
-    { title: '🗳️ Illinois Primary Election Day',             date: '2026-03-17', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
+    { title: 'Last Day: Early Voting — IL Primary',          date: '2026-03-16', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
+    { title: '🗳️ Illinois Primary Election Day',             date: '2026-03-17', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
     // ── 2026 General ──────────────────────────────────────────────
     { title: 'Voter Registration Deadline — General',        date: '2026-10-06', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
-    { title: 'Early Voting Opens — IL General Election',     date: '2026-10-19', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
-    { title: 'Mail Ballot Request Deadline — General',       date: '2026-10-29', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
-    { title: 'Last Day: Early Voting — IL General',          date: '2026-11-02', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
-    { title: '🗳️ Illinois General Election Day',             date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
+    { title: 'Early Voting Opens — IL General Election',     date: '2026-10-19', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
+    { title: 'Mail Ballot Request Deadline — General',       date: '2026-10-29', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
+    { title: 'Last Day: Early Voting — IL General',          date: '2026-11-02', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
+    { title: '🗳️ Illinois General Election Day',             date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
     // ── 2027 Consolidated Primary ─────────────────────────────────
     { title: 'Voter Registration Deadline — Consol. Primary', date: '2027-01-26', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
-    { title: 'Last Day: Early Voting — Consol. Primary',     date: '2027-02-22', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
-    { title: '🗳️ IL Consolidated Primary Election',          date: '2027-02-23', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
+    { title: 'Last Day: Early Voting — Consol. Primary',     date: '2027-02-22', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
+    { title: '🗳️ IL Consolidated Primary Election',          date: '2027-02-23', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
     // ── 2027 Consolidated Election ────────────────────────────────
     { title: 'Voter Registration Deadline — Consol. Election', date: '2027-03-09', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
-    { title: 'Last Day: Early Voting — Consol. Election',    date: '2027-04-05', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
-    { title: '🗳️ IL Consolidated Election Day',              date: '2027-04-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
+    { title: 'Last Day: Early Voting — Consol. Election',    date: '2027-04-05', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
+    { title: '🗳️ IL Consolidated Election Day',              date: '2027-04-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
     // ── 2028 Presidential Primary ─────────────────────────────────
     { title: 'Voter Registration Deadline — Pres. Primary',  date: '2028-02-22', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
-    { title: 'Early Voting Opens — Presidential Primary',    date: '2028-02-10', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
-    { title: 'Last Day: Early Voting — Pres. Primary',       date: '2028-03-20', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
-    { title: '🗳️ Illinois Presidential Primary',             date: '2028-03-21', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
+    { title: 'Early Voting Opens — Presidential Primary',    date: '2028-02-10', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
+    { title: 'Last Day: Early Voting — Pres. Primary',       date: '2028-03-20', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
+    { title: '🗳️ Illinois Presidential Primary',             date: '2028-03-21', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
     // ── 2028 Presidential General ─────────────────────────────────
     { title: 'Voter Registration Deadline — Pres. General',  date: '2028-10-10', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
-    { title: 'Early Voting Opens — Presidential General',    date: '2028-09-28', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
-    { title: 'Last Day: Early Voting — Pres. General',       date: '2028-11-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
-    { title: '🗳️ Presidential General Election',             date: '2028-11-07', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
+    { title: 'Early Voting Opens — Presidential General',    date: '2028-09-28', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
+    { title: 'Last Day: Early Voting — Pres. General',       date: '2028-11-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
+    { title: '🗳️ Presidential General Election',             date: '2028-11-07', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
   ];
 
   function getCivicEvents() {
@@ -6778,7 +6799,7 @@
   const CIVICS_CANDIDATE_CACHE_KEY = 'shasta_civics_candidates';
   const CIVICS_CANDIDATE_CACHE_TTL = 24 * 60 * 60 * 1000;
   const CIVICS_NOTES_KEY = 'shasta_civics_notes';
-  const POLLING_URL = 'https://www.mcleancountyil.gov/elections';
+  const POLLING_URL = 'https://www.mcleancountyil.gov/1593/2026-Elections';
 
   function getNextCivicEvent() {
     const upcoming = getCivicEvents();
@@ -6937,13 +6958,22 @@
     setupCivicsCarouselSwipe();
     updateCivicsCarouselEdges();
 
+    const indicator = document.getElementById('civicsCarouselIndicator');
+    const dotsEl = document.getElementById('civicsCarouselDots');
     const hint = document.getElementById('civicsCarouselHint');
-    if (hint) {
-      hint.classList.remove('hidden');
-      if (groups.length <= 1) hint.style.display = 'none';
-      else {
-        hint.style.display = 'flex';
-        setTimeout(function() { if (hint && !hint.classList.contains('hidden')) hint.classList.add('hidden'); }, 4000);
+    if (indicator) {
+      if (groups.length <= 1) {
+        indicator.style.display = 'none';
+      } else {
+        indicator.style.display = 'flex';
+        if (dotsEl) {
+          dotsEl.innerHTML = groups.map((_, i) => '<div class="civics-carousel-dot' + (i === 0 ? ' active' : '') + '" data-index="' + i + '"></div>').join('');
+        }
+        if (hint) {
+          hint.classList.remove('hidden');
+          hint.style.display = 'flex';
+          setTimeout(function() { if (hint && !hint.classList.contains('hidden')) hint.classList.add('hidden'); }, 8000);
+        }
       }
     }
 
@@ -6956,6 +6986,9 @@
     const n = civicsElectionGroups.length;
     if (left) left.style.display = civicsCurrentSlide > 0 ? 'block' : 'none';
     if (right) right.style.display = n > 1 && civicsCurrentSlide < n - 1 ? 'block' : 'none';
+    document.querySelectorAll('.civics-carousel-dot').forEach((dot, i) => {
+      dot.classList.toggle('active', i === civicsCurrentSlide);
+    });
   }
 
   function setupCivicsCarouselSwipe() {
@@ -7130,8 +7163,9 @@
   }
 
   async function civicsAskBlathersAboutCandidate(btn) {
-    const name = btn.getAttribute('data-name') || '';
-    const office = btn.getAttribute('data-office') || '';
+    const name = (btn.getAttribute('data-name') || '').trim();
+    const office = (btn.getAttribute('data-office') || '').trim();
+    if (!name) return;
     const card = btn.closest('.civics-card');
     const researchEl = card && card.querySelector('.civics-card-research');
     if (!researchEl) return;
