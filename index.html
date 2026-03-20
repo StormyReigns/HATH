@@ -1460,6 +1460,17 @@
     .civics-empty-card-columns { font-size: 13px; color: var(--text2); line-height: 1.6; font-family: monospace; background: rgba(0,0,0,0.04); padding: 12px; border-radius: 8px; margin-top: 8px; }
     html.dark-mode .civics-empty-card { background: #252220; border-color: rgba(255,255,255,0.06); }
     html.dark-mode .civics-empty-card-columns { background: rgba(255,255,255,0.06); }
+    /* Inline Ask Blathers (no box, directly on page) */
+    .civics-ask-inline {
+      padding: 24px 0 32px; text-align: left;
+    }
+    .civics-ask-inline-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+    .civics-ask-inline-text { font-size: 14px; color: var(--text2); line-height: 1.55; margin-bottom: 16px; }
+    .civics-ask-inline-response:not(:empty) {
+      margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(0,0,0,0.06);
+    }
+    html.dark-mode .civics-ask-inline-response:not(:empty) { border-top-color: rgba(255,255,255,0.08); }
+    .civics-ask-inline .bubble { max-width: 100%; }
     .civics-zone-b {
       flex-shrink: 0; margin-bottom: 16px;
     }
@@ -6841,18 +6852,19 @@
       '<div class="civics-quick-chips">' + candidateChips + '</div></div>';
 
     if (!elEv && nextCandidates.length === 0) {
-      zoneC.innerHTML = '<div class="civics-empty-card">' +
-        '<div class="civics-empty-card-title">No upcoming election data</div>' +
-        '<div class="civics-empty-card-text">Check back closer to the next election.</div></div>';
+      zoneC.innerHTML = '<div class="civics-ask-inline">' +
+        '<div class="civics-ask-inline-title">No upcoming election data</div>' +
+        '<div class="civics-ask-inline-text">Check back closer to the next election.</div></div>';
       return;
     }
 
     if (nextCandidates.length === 0) {
-      zoneC.innerHTML = '<div class="civics-empty-card">' +
-        '<div class="civics-empty-card-title">No candidate data yet</div>' +
-        '<div class="civics-empty-card-text">Tap "Ask Blathers" on any candidate card once added, or ask Blathers directly about this election.</div>' +
-        '<button type="button" class="civics-ask-blathers-btn" style="margin-top:12px" onclick="civicsAskBlathersAboutElection()">' +
-        '🦉 Ask Blathers about this election</button></div>';
+      zoneC.innerHTML = '<div class="civics-ask-inline">' +
+        '<div class="civics-ask-inline-title">No candidate data yet</div>' +
+        '<div class="civics-ask-inline-text">Ask Blathers about this election to get an overview of offices, candidates, and what to know.</div>' +
+        '<button type="button" class="civics-ask-blathers-btn" id="civicsAskElectionBtn" onclick="civicsAskBlathersAboutElectionInline()">' +
+        '🦉 Ask Blathers about this election</button>' +
+        '<div class="civics-ask-inline-response" id="civicsAskInlineResponse"></div></div>';
       return;
     }
 
@@ -6888,6 +6900,64 @@
       if (inp) { inp.value = prompt; autoResizeBlatherbook(inp); }
       handleBlatherBookSendOrStop();
     }, 300);
+  }
+
+  async function civicsAskBlathersAboutElectionInline() {
+    const group = civicsElectionGroups[civicsCurrentSlide];
+    const elEv = group ? group.electionEvent : null;
+    const name = elEv ? elEv.title.replace(/[\u{1F000}-\u{1FFFF}]|[\u2600-\u27FF]/gu, '').trim() : 'the upcoming Illinois election';
+    const elDate = elEv ? new Date(elEv.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '';
+    const prompt = 'Please give me a neutral overview of ' + name + (elDate ? ' on ' + elDate : '') + '. What offices are on the ballot in McLean County, IL? Who are the key candidates and what should I know about them going in?';
+
+    const btn = document.getElementById('civicsAskElectionBtn');
+    const respEl = document.getElementById('civicsAskInlineResponse');
+    if (!respEl) return;
+    if (btn) btn.style.display = 'none';
+
+    const typing = document.createElement('div');
+    typing.className = 'typing';
+    typing.innerHTML = '<span></span><span></span><span></span>';
+    respEl.innerHTML = '';
+    respEl.appendChild(typing);
+    requestAnimationFrame(function() { respEl.scrollIntoView({ behavior: 'smooth', block: 'end' }); });
+
+    try {
+      const user = localStorage.getItem('shasta_user');
+      const body = {
+        message: prompt,
+        user: getApiUser(),
+        history: [],
+        nickname: getDisplayName(),
+        dumbMode: !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true')
+      };
+      const res = await fetch(AI_URL, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(body)
+      });
+      const raw = await res.text();
+      let data;
+      try { data = JSON.parse(raw); } catch (_) { throw new Error('Invalid response from server'); }
+      typing.remove();
+      const reply = data.reply || friendlyBlathersError(data.error);
+      const b = document.createElement('div');
+      b.className = 'bubble hath';
+      b.innerHTML = String(reply)
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/`(.*?)`/g, '<code>$1</code>')
+        .replace(/\n/g, '<br>');
+      respEl.appendChild(b);
+      requestAnimationFrame(function() { respEl.scrollIntoView({ behavior: 'smooth', block: 'end' }); });
+    } catch (err) {
+      typing.remove();
+      const b = document.createElement('div');
+      b.className = 'bubble hath';
+      b.textContent = friendlyBlathersError(err);
+      respEl.appendChild(b);
+      requestAnimationFrame(function() { respEl.scrollIntoView({ behavior: 'smooth', block: 'end' }); });
+    }
   }
 
   function civicsAskBlathersAboutCandidate(name, office, electionName) {
