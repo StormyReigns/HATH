@@ -1400,7 +1400,6 @@
     }
     .civics-refresh-btn:hover, .civics-refresh-btn:active { color: var(--accent); }
     .civics-refresh-btn svg { width: 18px; height: 18px; }
-    .civics-refresh-btn .civics-get-candidates-label { font-size: 12px; margin-left: 4px; }
     .civics-content {
       flex: 1; overflow-y: auto; display: flex; flex-direction: column;
       padding: 0 16px 24px; -webkit-overflow-scrolling: touch;
@@ -1419,6 +1418,17 @@
     .civics-carousel-indicator {
       display: flex; align-items: center; justify-content: center; gap: 12px;
       margin-top: 12px; padding: 4px 0;
+    }
+    .civics-carousel-indicator--fixed {
+      position: fixed; left: 0; right: 0; bottom: 70px;
+      margin: 0; padding: 10px 16px;
+      z-index: 50;
+      background: linear-gradient(to top, var(--edge-bg, #fdf0e8) 60%, transparent);
+      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+      pointer-events: none;
+    }
+    html.dark-mode .civics-carousel-indicator--fixed {
+      background: linear-gradient(to top, #1a1816 60%, transparent);
     }
     .civics-carousel-dots {
       display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -1484,6 +1494,19 @@
     }
     .civics-ask-inline-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
     .civics-ask-inline-text { font-size: 14px; color: var(--text2); line-height: 1.55; margin-bottom: 16px; }
+    .civics-get-candidates-inline {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 20px; font-size: 13px;
+      background: rgba(42,91,168,0.12); color: #1e4a96;
+      border: 1px solid rgba(42,91,168,0.25); cursor: pointer;
+      font-family: inherit; margin-right: 8px; margin-bottom: 8px;
+    }
+    .civics-get-candidates-inline svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .civics-get-candidates-inline:active { background: rgba(42,91,168,0.22); }
+    html.dark-mode .civics-get-candidates-inline {
+      background: rgba(90,143,216,0.15); color: #8ab4f8;
+      border-color: rgba(90,143,216,0.3);
+    }
     .civics-ask-inline-response:not(:empty) {
       margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(0,0,0,0.06);
     }
@@ -3643,10 +3666,6 @@
         <button type="button" class="civics-refresh-btn" onclick="refreshCivicsCarousel()" title="Refresh carousel" aria-label="Refresh carousel">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         </button>
-        <button type="button" class="civics-refresh-btn" onclick="loadCivicsCandidates(true)" title="Get candidates" aria-label="Get candidates">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-          <span class="civics-get-candidates-label">Get Candidates</span>
-        </button>
       </div>
       <div class="civics-content">
         <div class="civics-zone-a" id="civicsZoneA">
@@ -3655,13 +3674,6 @@
             <div class="civics-carousel-edge civics-carousel-edge--right" id="civicsCarouselEdgeRight"></div>
             <div class="civics-carousel" id="civicsCarousel">
               <div class="civics-carousel-track" id="civicsCarouselTrack"></div>
-            </div>
-          </div>
-          <div class="civics-carousel-indicator" id="civicsCarouselIndicator">
-            <div class="civics-carousel-dots" id="civicsCarouselDots"></div>
-            <div class="civics-carousel-hint" id="civicsCarouselHint">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
-              Swipe to explore
             </div>
           </div>
         </div>
@@ -3682,6 +3694,13 @@
               <button type="button" class="civics-source-add-btn" onclick="addManualCandidate()">Add</button>
             </div>
           </div>
+        </div>
+      </div>
+      <div class="civics-carousel-indicator civics-carousel-indicator--fixed" id="civicsCarouselIndicator">
+        <div class="civics-carousel-dots" id="civicsCarouselDots"></div>
+        <div class="civics-carousel-hint" id="civicsCarouselHint">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+          Swipe to explore
         </div>
       </div>
     </div>
@@ -4097,7 +4116,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.0.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.0.3';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -6875,7 +6894,7 @@
   }
 
   function ballotpediaUrl(name) {
-    const slug = (name || '').replace(/\s+/g, '_').replace(/[^\w_\-]/g, '');
+    const slug = (name || '').replace(/\s+/g, '_').replace(/[^\w_\-\.]/g, '');
     return 'https://ballotpedia.org/' + (slug || 'Ballotpedia');
   }
 
@@ -7139,6 +7158,9 @@
       zoneC.innerHTML = '<div class="civics-ask-inline">' +
         '<div class="civics-ask-inline-title">No candidate data yet</div>' +
         '<div class="civics-ask-inline-text">Ask Blathers about this election to get an overview of offices, candidates, and what to know.</div>' +
+        '<button type="button" class="civics-refresh-btn civics-get-candidates-inline" onclick="loadCivicsCandidates(true)" title="Get candidates" aria-label="Get candidates">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>' +
+        '<span>Get Candidates</span></button>' +
         '<button type="button" class="civics-ask-blathers-btn" id="civicsAskElectionBtn" onclick="civicsAskBlathersAboutElectionInline()">' +
         '🦉 Ask Blathers about this election</button>' +
         '<div class="civics-ask-inline-response" id="civicsAskInlineResponse"></div></div>';
