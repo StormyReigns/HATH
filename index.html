@@ -1400,6 +1400,7 @@
     }
     .civics-refresh-btn:hover, .civics-refresh-btn:active { color: var(--accent); }
     .civics-refresh-btn svg { width: 18px; height: 18px; }
+    .civics-refresh-btn .civics-get-candidates-label { font-size: 12px; margin-left: 4px; }
     .civics-content {
       flex: 1; overflow-y: auto; display: flex; flex-direction: column;
       padding: 0 16px 24px; -webkit-overflow-scrolling: touch;
@@ -1559,6 +1560,14 @@
     .civics-party-chip.other { background: rgba(107,114,128,0.15); color: #6b7280; }
     .civics-zone-c-wrap { flex-shrink: 0; overflow: visible; }
     .civics-zone-c { padding-bottom: 24px; }
+    .civics-manual-add { margin: 16px 0 8px; padding: 0 16px; }
+    .civics-manual-add-toggle {
+      background: none; border: none; color: var(--accent); font-size: 13px;
+      cursor: pointer; padding: 4px 0;
+    }
+    .civics-manual-add-form {
+      display: flex; flex-direction: column; gap: 8px; margin-top: 10px;
+    }
     .civics-card {
       background: #fdf8f1; border-radius: 12px;
       border: 1px solid rgba(0,0,0,0.06);
@@ -3631,8 +3640,12 @@
     <div class="sub-screen" id="civicsScreen">
       <div class="civics-header">
         <h2 class="civics-title">Civics</h2>
-        <button type="button" class="civics-refresh-btn" onclick="loadCivicsCandidates(true)" title="Refresh" aria-label="Refresh">
+        <button type="button" class="civics-refresh-btn" onclick="refreshCivicsCarousel()" title="Refresh carousel" aria-label="Refresh carousel">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </button>
+        <button type="button" class="civics-refresh-btn" onclick="loadCivicsCandidates(true)" title="Get candidates" aria-label="Get candidates">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          <span class="civics-get-candidates-label">Get Candidates</span>
         </button>
       </div>
       <div class="civics-content">
@@ -3655,6 +3668,20 @@
         <div class="civics-zone-b" id="civicsZoneB"></div>
         <div class="civics-zone-c-wrap">
           <div class="civics-zone-c" id="civicsZoneC"></div>
+          <div class="civics-manual-add" id="civicsManualAdd">
+            <button type="button" class="civics-manual-add-toggle" onclick="toggleCivicsManualAdd()">+ Add candidate manually</button>
+            <div class="civics-manual-add-form" id="civicsManualAddForm" style="display:none">
+              <input type="text" class="settings-input" id="civicsManualName" placeholder="Full name">
+              <input type="text" class="settings-input" id="civicsManualOffice" placeholder="Office (e.g. U.S. House District 16)">
+              <select class="settings-input" id="civicsManualParty">
+                <option value="Democrat">Democrat</option>
+                <option value="Republican">Republican</option>
+                <option value="Independent">Independent</option>
+                <option value="Nonpartisan">Nonpartisan</option>
+              </select>
+              <button type="button" class="civics-source-add-btn" onclick="addManualCandidate()">Add</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -6872,6 +6899,44 @@
     loadCivicsCandidates(false);
   }
 
+  function refreshCivicsCarousel() {
+    renderCivicsScreen();
+  }
+
+  function toggleCivicsManualAdd() {
+    const form = document.getElementById('civicsManualAddForm');
+    if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function addManualCandidate() {
+    const name = (document.getElementById('civicsManualName').value || '').trim();
+    const office = (document.getElementById('civicsManualOffice').value || '').trim();
+    const party = document.getElementById('civicsManualParty').value || 'Nonpartisan';
+    if (!name || !office) return;
+
+    const cache = civicsCandidateCache || { candidates: [] };
+    const existing = cache.candidates || [];
+    if (existing.some(function(c) { return (c.name || '').toLowerCase() === name.toLowerCase(); })) {
+      showDocsToast('Candidate already in list');
+      return;
+    }
+    existing.push({ name: name, office: office, party: party, level: 'local', source: 'manual' });
+    civicsCandidateCache = { candidates: existing, fetchedAt: cache.fetchedAt || new Date().toISOString() };
+
+    try {
+      const raw = localStorage.getItem(CIVICS_CANDIDATE_CACHE_KEY);
+      const stored = raw ? JSON.parse(raw) : { ts: Date.now(), data: { candidates: [], fetchedAt: new Date().toISOString() } };
+      stored.data = civicsCandidateCache;
+      stored.ts = Date.now();
+      localStorage.setItem(CIVICS_CANDIDATE_CACHE_KEY, JSON.stringify(stored));
+    } catch (_) {}
+
+    document.getElementById('civicsManualName').value = '';
+    document.getElementById('civicsManualOffice').value = '';
+    renderCivicsZoneBC(civicsCurrentSlide);
+    showDocsToast('Candidate added');
+  }
+
   async function loadCivicsCandidates(forceRefresh) {
     renderCivicsScreen();
     if (!forceRefresh) {
@@ -6895,12 +6960,23 @@
       const user = localStorage.getItem('shasta_user');
       const res = await fetch(apiUrlWithUser(API_URL, '&action=getCandidatesForElection&user=' + encodeURIComponent(user)), { redirect: 'follow' });
       const data = await res.json();
-      civicsCandidateCache = data;
-      localStorage.setItem(CIVICS_CANDIDATE_CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
+      const fetched = data.candidates || [];
+      const existing = civicsCandidateCache || { candidates: [] };
+      const manualOnes = (existing.candidates || []).filter(function(c) { return c.source === 'manual'; });
+      const merged = fetched.slice();
+      manualOnes.forEach(function(m) {
+        if (!merged.some(function(c) { return (c.name || '').toLowerCase() === (m.name || '').toLowerCase(); })) {
+          merged.push(m);
+        }
+      });
+      civicsCandidateCache = { candidates: merged, fetchedAt: data.fetchedAt || new Date().toISOString() };
+      localStorage.setItem(CIVICS_CANDIDATE_CACHE_KEY, JSON.stringify({ ts: Date.now(), data: civicsCandidateCache }));
       renderCivicsScreen();
       showDocsToast('Civics data updated');
     } catch (err) {
-      civicsCandidateCache = { candidates: [], fetchedAt: new Date().toISOString() };
+      const existing = civicsCandidateCache || { candidates: [] };
+      const manualOnes = (existing.candidates || []).filter(function(c) { return c.source === 'manual'; });
+      civicsCandidateCache = { candidates: manualOnes, fetchedAt: new Date().toISOString() };
       renderCivicsScreen();
       showDocsToast('Failed to load candidates', true);
     }
