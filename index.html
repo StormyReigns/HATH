@@ -1422,7 +1422,14 @@
       transition: opacity 0.5s ease;
     }
     .civics-carousel-hint.hidden { opacity: 0; pointer-events: none; }
-    .civics-carousel-hint svg { width: 14px; height: 14px; opacity: 0.8; }
+    .civics-carousel-hint svg {
+      width: 14px; height: 14px; opacity: 0.8;
+      animation: civics-swipe-hint 2s ease-in-out infinite;
+    }
+    @keyframes civics-swipe-hint {
+      0%, 100% { transform: translateX(0); opacity: 0.8; }
+      50% { transform: translateX(3px); opacity: 1; }
+    }
     .civics-carousel-track { display: flex; transition: transform 0.28s ease; will-change: transform; }
     .civics-carousel-slide {
       min-width: 100%;
@@ -6901,20 +6908,24 @@
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const allUpcoming = getCivicEvents();
+    const allEvents = CIVIC_IL_EVENTS.map(ev => ({ ...ev, start: ev.date + 'T12:00:00' }));
+    const allUpcoming = allEvents.filter(ev => new Date(ev.start) >= today);
 
     const electionDays = allUpcoming.filter(ev => (ev.title || '').includes('🗳️'));
 
+    let prevElectionDate = null;
     civicsElectionGroups = electionDays.map(function(elEv) {
       const elDate = new Date(elEv.date + 'T12:00:00');
-      const elYear = elDate.getFullYear();
-      const elMonth = elDate.getMonth();
+      elDate.setHours(0, 0, 0, 0);
+      const prev = prevElectionDate || new Date(0);
       const supporting = allUpcoming.filter(function(ev) {
         if (ev === elEv) return false;
         if ((ev.title || '').includes('🗳️')) return false;
         const d = new Date(ev.date + 'T12:00:00');
-        return d.getFullYear() === elYear && d.getMonth() === elMonth;
-      }).sort((a, b) => new Date(a.date) - new Date(b.date));
+        d.setHours(0, 0, 0, 0);
+        return d > prev && d <= elDate;
+      }).sort((a, b) => a.date.localeCompare(b.date));
+      prevElectionDate = elDate;
       return { electionEvent: elEv, supportingEvents: supporting };
     });
 
@@ -8417,3 +8428,4 @@
 </script>
 </body>
 </html>
+                                         
