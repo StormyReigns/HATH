@@ -1479,8 +1479,19 @@
     .civics-source-info { flex: 1; min-width: 0; }
     .civics-source-label { font-size: 14px; color: var(--text); font-weight: 500; }
     .civics-source-url { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .civics-source-edit { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 0 4px; }
+    .civics-source-edit:active { color: var(--accent); }
     .civics-source-delete { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 0 4px; }
     .civics-source-delete:active { color: #e07070; }
+    .civics-source-info .civics-source-edit-label,
+    .civics-source-info .civics-source-edit-url { width: 100%; margin-bottom: 6px; }
+    .civics-source-edit-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .civics-source-save, .civics-source-cancel {
+      padding: 4px 12px; border-radius: 8px; font-size: 13px; cursor: pointer;
+      border: 1px solid rgba(192,122,74,0.3); background: rgba(192,122,74,0.1);
+      color: var(--accent); font-family: inherit;
+    }
+    .civics-source-save:active, .civics-source-cancel:active { background: rgba(192,122,74,0.2); }
     .civics-source-add-row { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
     .civics-source-add-btn {
       padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(192,122,74,0.3);
@@ -4037,7 +4048,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.9.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '1.9.3';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -6559,7 +6570,7 @@
 
   const CIVICS_SOURCES_KEY = 'shasta_civics_sources';
   const CIVICS_DEFAULT_SOURCES = [
-    { label: 'McLean County Clerk', url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections', enabled: true },
+    { label: 'McLean County Clerk', url: 'https://www.mcleancountyil.gov/elections', enabled: true },
     { label: 'IL State Board of Elections', url: 'https://www.elections.il.gov', enabled: true },
     { label: 'Integrity Index', url: 'https://integrityindex.us/explore', enabled: true },
     { label: 'IL Voter Guide (League of Women Voters)', url: 'https://illinoisvoterguide.org', enabled: true },
@@ -6569,7 +6580,15 @@
   function getCivicsSources() {
     try {
       const raw = localStorage.getItem(CIVICS_SOURCES_KEY);
-      return raw ? JSON.parse(raw) : CIVICS_DEFAULT_SOURCES.map(s => ({...s}));
+      let sources = raw ? JSON.parse(raw) : CIVICS_DEFAULT_SOURCES.map(s => ({...s}));
+      const oldMcLean = 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections';
+      const newMcLean = 'https://www.mcleancountyil.gov/elections';
+      const changed = sources.some(s => s.url === oldMcLean);
+      if (changed) {
+        sources = sources.map(s => s.url === oldMcLean ? { ...s, url: newMcLean } : s);
+        saveCivicsSources(sources);
+      }
+      return sources;
     } catch (_) { return CIVICS_DEFAULT_SOURCES.map(s => ({...s})); }
   }
 
@@ -6586,7 +6605,7 @@
       return;
     }
     list.innerHTML = sources.map((s, i) => `
-      <div class="civics-source-row">
+      <div class="civics-source-row" data-index="${i}">
         <label class="civics-source-toggle">
           <input type="checkbox" ${s.enabled ? 'checked' : ''} onchange="toggleCivicsSource(${i}, this.checked)">
           <span class="civics-source-toggle-track"></span>
@@ -6595,9 +6614,46 @@
           <div class="civics-source-label">${escapeHtml(s.label)}</div>
           <div class="civics-source-url">${escapeHtml(s.url)}</div>
         </div>
+        <button type="button" class="civics-source-edit" onclick="editCivicsSource(${i})" title="Edit">✎</button>
         <button type="button" class="civics-source-delete" onclick="deleteCivicsSource(${i})">×</button>
       </div>
     `).join('');
+  }
+
+  function editCivicsSource(index) {
+    const sources = getCivicsSources();
+    const s = sources[index];
+    if (!s) return;
+    const row = document.querySelector('.civics-source-row[data-index="' + index + '"]');
+    if (!row) return;
+    const info = row.querySelector('.civics-source-info');
+    const editBtn = row.querySelector('.civics-source-edit');
+    const deleteBtn = row.querySelector('.civics-source-delete');
+    const toggle = row.querySelector('.civics-source-toggle');
+    const origHtml = info.innerHTML;
+    info.innerHTML = '<input type="text" class="settings-input civics-source-edit-label" value="' + escapeHtml(s.label) + '" placeholder="Label">' +
+      '<input type="text" class="settings-input civics-source-edit-url" value="' + escapeHtml(s.url) + '" placeholder="https://...">' +
+      '<div class="civics-source-edit-actions">' +
+      '<button type="button" class="civics-source-save" onclick="saveCivicsSourceEdit(' + index + ')">Save</button>' +
+      '<button type="button" class="civics-source-cancel" onclick="renderCivicsSourcesList()">Cancel</button></div>';
+    if (editBtn) editBtn.style.display = 'none';
+    if (deleteBtn) deleteBtn.style.display = 'none';
+    if (toggle) toggle.style.visibility = 'hidden';
+    row.querySelector('.civics-source-edit-label').focus();
+  }
+
+  function saveCivicsSourceEdit(index) {
+    const row = document.querySelector('.civics-source-row[data-index="' + index + '"]');
+    if (!row) return;
+    const label = (row.querySelector('.civics-source-edit-label').value || '').trim();
+    const url = (row.querySelector('.civics-source-edit-url').value || '').trim();
+    if (!label || !url) return;
+    const sources = getCivicsSources();
+    if (sources[index]) {
+      sources[index] = { ...sources[index], label, url };
+      saveCivicsSources(sources);
+    }
+    renderCivicsSourcesList();
   }
 
   function toggleCivicsSource(index, enabled) {
@@ -6679,32 +6735,32 @@
   // Sources: IL State Board of Elections (elections.il.gov) + McLean County Clerk
   const CIVIC_IL_EVENTS = [
     // ── 2026 Primary ──────────────────────────────────────────────
-    { title: 'Last Day: Early Voting — IL Primary',          date: '2026-03-16', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: '🗳️ Illinois Primary Election Day',             date: '2026-03-17', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Last Day: Early Voting — IL Primary',          date: '2026-03-16', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
+    { title: '🗳️ Illinois Primary Election Day',             date: '2026-03-17', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
     // ── 2026 General ──────────────────────────────────────────────
     { title: 'Voter Registration Deadline — General',        date: '2026-10-06', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
-    { title: 'Early Voting Opens — IL General Election',     date: '2026-10-19', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: 'Mail Ballot Request Deadline — General',       date: '2026-10-29', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: 'Last Day: Early Voting — IL General',          date: '2026-11-02', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: '🗳️ Illinois General Election Day',             date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Early Voting Opens — IL General Election',     date: '2026-10-19', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
+    { title: 'Mail Ballot Request Deadline — General',       date: '2026-10-29', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
+    { title: 'Last Day: Early Voting — IL General',          date: '2026-11-02', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
+    { title: '🗳️ Illinois General Election Day',             date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
     // ── 2027 Consolidated Primary ─────────────────────────────────
     { title: 'Voter Registration Deadline — Consol. Primary', date: '2027-01-26', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
-    { title: 'Last Day: Early Voting — Consol. Primary',     date: '2027-02-22', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: '🗳️ IL Consolidated Primary Election',          date: '2027-02-23', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Last Day: Early Voting — Consol. Primary',     date: '2027-02-22', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
+    { title: '🗳️ IL Consolidated Primary Election',          date: '2027-02-23', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
     // ── 2027 Consolidated Election ────────────────────────────────
     { title: 'Voter Registration Deadline — Consol. Election', date: '2027-03-09', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
-    { title: 'Last Day: Early Voting — Consol. Election',    date: '2027-04-05', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: '🗳️ IL Consolidated Election Day',              date: '2027-04-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Last Day: Early Voting — Consol. Election',    date: '2027-04-05', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
+    { title: '🗳️ IL Consolidated Election Day',              date: '2027-04-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
     // ── 2028 Presidential Primary ─────────────────────────────────
     { title: 'Voter Registration Deadline — Pres. Primary',  date: '2028-02-22', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
-    { title: 'Early Voting Opens — Presidential Primary',    date: '2028-02-10', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: 'Last Day: Early Voting — Pres. Primary',       date: '2028-03-20', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: '🗳️ Illinois Presidential Primary',             date: '2028-03-21', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Early Voting Opens — Presidential Primary',    date: '2028-02-10', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
+    { title: 'Last Day: Early Voting — Pres. Primary',       date: '2028-03-20', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
+    { title: '🗳️ Illinois Presidential Primary',             date: '2028-03-21', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
     // ── 2028 Presidential General ─────────────────────────────────
     { title: 'Voter Registration Deadline — Pres. General',  date: '2028-10-10', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
-    { title: 'Early Voting Opens — Presidential General',    date: '2028-09-28', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: 'Last Day: Early Voting — Pres. General',       date: '2028-11-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
-    { title: '🗳️ Presidential General Election',             date: '2028-11-07', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections' },
+    { title: 'Early Voting Opens — Presidential General',    date: '2028-09-28', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
+    { title: 'Last Day: Early Voting — Pres. General',       date: '2028-11-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
+    { title: '🗳️ Presidential General Election',             date: '2028-11-07', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/elections' },
   ];
 
   function getCivicEvents() {
@@ -6720,7 +6776,7 @@
   const CIVICS_CACHE_KEY = 'shasta_civics_cache';
   const CIVICS_CACHE_TTL = 6 * 60 * 60 * 1000;
   const CIVICS_NOTES_KEY = 'shasta_civics_notes';
-  const POLLING_URL = 'https://www.mcleancounty.gov/government/elected-officials/county-clerk/elections';
+  const POLLING_URL = 'https://www.mcleancountyil.gov/elections';
 
   function getNextCivicEvent() {
     const upcoming = getCivicEvents();
