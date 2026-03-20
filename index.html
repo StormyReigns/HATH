@@ -1586,6 +1586,8 @@
     }
     .civics-link-btn:hover, .civics-link-btn:active { background: rgba(192,122,74,0.2); }
     .civics-link-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .civics-card-research { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.06); }
+    html.dark-mode .civics-card-research { border-top-color: rgba(255,255,255,0.08); }
     .civics-card-notes { margin-top: 12px; }
     .civics-card-notes-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px; }
     .civics-card-notes textarea {
@@ -3612,7 +3614,7 @@
     <div class="sub-screen" id="civicsScreen">
       <div class="civics-header">
         <h2 class="civics-title">Civics</h2>
-        <button type="button" class="civics-refresh-btn" onclick="loadCivicsData(true)" title="Refresh" aria-label="Refresh">
+        <button type="button" class="civics-refresh-btn" onclick="loadCivicsCandidates(true)" title="Refresh" aria-label="Refresh">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         </button>
       </div>
@@ -4048,7 +4050,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '1.9.3';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.0.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -6772,9 +6774,9 @@
   }
 
   // ── CIVICS SCREEN ─────────────────────────────────────────────────
-  let civicsSheetCache = null;
-  const CIVICS_CACHE_KEY = 'shasta_civics_cache';
-  const CIVICS_CACHE_TTL = 6 * 60 * 60 * 1000;
+  let civicsCandidateCache = null;
+  const CIVICS_CANDIDATE_CACHE_KEY = 'shasta_civics_candidates';
+  const CIVICS_CANDIDATE_CACHE_TTL = 24 * 60 * 60 * 1000;
   const CIVICS_NOTES_KEY = 'shasta_civics_notes';
   const POLLING_URL = 'https://www.mcleancountyil.gov/elections';
 
@@ -6846,17 +6848,18 @@
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
     const civicsBtn = document.querySelector('.drawer-item[data-screen="civics"]');
     if (civicsBtn) civicsBtn.classList.add('active');
-    loadCivicsData(false);
+    loadCivicsCandidates(false);
   }
 
-  async function loadCivicsData(forceRefresh) {
+  async function loadCivicsCandidates(forceRefresh) {
+    renderCivicsScreen();
     if (!forceRefresh) {
       try {
-        const raw = localStorage.getItem(CIVICS_CACHE_KEY);
+        const raw = localStorage.getItem(CIVICS_CANDIDATE_CACHE_KEY);
         if (raw) {
           const { ts, data } = JSON.parse(raw);
-          if (Date.now() - ts < CIVICS_CACHE_TTL) {
-            civicsSheetCache = data;
+          if (Date.now() - ts < CIVICS_CANDIDATE_CACHE_TTL) {
+            civicsCandidateCache = data;
             renderCivicsScreen();
             return;
           }
@@ -6869,15 +6872,16 @@
 
     try {
       const user = localStorage.getItem('shasta_user');
-      const res = await fetch(apiUrlWithUser(API_URL, '&action=getCivicsData&user=' + encodeURIComponent(user)), { redirect: 'follow' });
+      const res = await fetch(apiUrlWithUser(API_URL, '&action=getCandidatesForElection&user=' + encodeURIComponent(user)), { redirect: 'follow' });
       const data = await res.json();
-      civicsSheetCache = data;
-      localStorage.setItem(CIVICS_CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
+      civicsCandidateCache = data;
+      localStorage.setItem(CIVICS_CANDIDATE_CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
       renderCivicsScreen();
       showDocsToast('Civics data updated');
     } catch (err) {
-      if (zoneC) zoneC.innerHTML = '<div class="civics-empty">Could not load civics data. ' + escapeHtml(err.message || 'Network error') + '</div>';
-      showDocsToast('Failed to load civics data', true);
+      civicsCandidateCache = { candidates: [], fetchedAt: new Date().toISOString() };
+      renderCivicsScreen();
+      showDocsToast('Failed to load candidates', true);
     }
   }
 
@@ -6991,30 +6995,25 @@
     const group = civicsElectionGroups[slideIndex];
     const elEv = group ? group.electionEvent : null;
 
-    const cache = civicsSheetCache || { elections: [], candidates: [] };
-    const elections = cache.elections || [];
+    const cache = civicsCandidateCache || { candidates: [] };
     const candidates = cache.candidates || [];
-
     const nextElectionDate = elEv ? String(elEv.date || '').slice(0, 10) : null;
-    const normDate = d => String(d || '').slice(0, 10);
-    const sheetElection = elections.find(e => normDate(e.date) === nextElectionDate) || elections[0];
-    const electionId = sheetElection ? (sheetElection.election_id || sheetElection.date) : nextElectionDate;
-    const nextCandidates = electionId ? candidates.filter(c => (c.election_id || c.electionId) === electionId) : candidates;
+    const isNov2026 = nextElectionDate === '2026-11-03';
+    const nextCandidates = isNov2026 ? candidates : [];
 
-    const electionName = (sheetElection && sheetElection.name) || (elEv && (elEv.title || '').replace(/🗳️\s*/g, '').trim()) || 'upcoming election';
-    const electionType = (sheetElection && sheetElection.type) || (elEv && elEv.title) || '';
-    let electionDate = (sheetElection && sheetElection.date) || (elEv && elEv.date) || '';
+    const electionName = (elEv && (elEv.title || '').replace(/🗳️\s*/g, '').trim()) || 'upcoming election';
+    const electionType = elEv && elEv.title || '';
+    let electionDate = elEv && elEv.date || '';
     if (electionDate && typeof electionDate === 'string' && electionDate.length > 10) electionDate = electionDate.slice(0, 10);
 
-    let typeLabel = electionType;
-    if (electionType) typeLabel = electionType.charAt(0).toUpperCase() + electionType.slice(1);
+    let typeLabel = electionType ? electionType.charAt(0).toUpperCase() + electionType.slice(1) : '';
 
-    const candidateChips = nextCandidates.filter(c => (c.type || 'candidate') !== 'measure').length > 0
-      ? nextCandidates.filter(c => (c.type || 'candidate') !== 'measure').map(c => {
+    const candidateChips = nextCandidates.length > 0
+      ? nextCandidates.map(c => {
           const cls = getPartyClass(c.party);
           return '<span class="civics-party-chip ' + cls + '">' + escapeHtml(c.name || '') + '</span>';
         }).join('')
-      : '<span class="civics-party-chip other">Add candidates to Civics sheet</span>';
+      : '<span class="civics-party-chip other">No candidates</span>';
     zoneB.innerHTML = '<div class="civics-quick-card">' +
       '<div class="civics-quick-election">' + escapeHtml(electionDate ? new Date(electionDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' — ' + escapeHtml(typeLabel) : 'Next election') + '</div>' +
       '<a class="civics-quick-polling" href="' + escapeHtml(POLLING_URL) + '" target="_blank" rel="noopener">Find my polling place</a>' +
@@ -7040,14 +7039,15 @@
     zoneC.innerHTML = nextCandidates.map(c => renderCivicsCard(c, electionName)).join('');
     zoneC.querySelectorAll('.civics-card').forEach((card, i) => {
       const c = nextCandidates[i];
-      if ((c.type || '').toLowerCase() === 'measure') return;
       const notesEl = card.querySelector('.civics-card-notes');
       const linksExpanded = card.querySelector('.civics-card-links-expanded');
+      const researchEl = card.querySelector('.civics-card-research');
       card.onclick = (e) => {
         if (e.target.closest('.civics-card-actions') || e.target.closest('.civics-link-btn') || e.target.closest('.civics-ask-blathers-btn') || e.target.closest('textarea')) return;
         const isExp = card.classList.toggle('expanded');
         if (notesEl) notesEl.style.display = isExp ? 'block' : 'none';
         if (linksExpanded) linksExpanded.style.display = isExp ? 'flex' : 'none';
+        if (researchEl && researchEl.getAttribute('data-loaded') === 'true') researchEl.style.display = isExp ? 'block' : 'none';
       };
       const ta = card.querySelector('.civics-card-notes textarea');
       if (ta) {
@@ -7129,10 +7129,46 @@
     }
   }
 
-  function civicsAskBlathersAboutCandidate(name, office, electionName) {
-    const prompt = 'Please give me a brief, neutral summary of ' + (name || '') + ' who is running for ' + (office || 'office') + ' in the ' + (electionName || 'upcoming Illinois election') + '. Cover their background, who funds them if known, their voting record or public positions if they\'ve held office, and anything notable the news has covered. Keep it factual.';
-    openBlatherBookPanel();
-    setTimeout(function() { sendCivicsBlathersMessage(prompt); }, 300);
+  async function civicsAskBlathersAboutCandidate(btn) {
+    const name = btn.getAttribute('data-name') || '';
+    const office = btn.getAttribute('data-office') || '';
+    const card = btn.closest('.civics-card');
+    const researchEl = card && card.querySelector('.civics-card-research');
+    if (!researchEl) return;
+    if (researchEl.getAttribute('data-loaded') === 'true') {
+      card.classList.add('expanded');
+      researchEl.style.display = 'block';
+      card.querySelector('.civics-card-notes').style.display = 'block';
+      card.querySelector('.civics-card-links-expanded').style.display = 'flex';
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Researching…';
+    researchEl.style.display = 'block';
+    researchEl.innerHTML = '<div class="civics-loading">Researching…</div>';
+    try {
+      const body = {
+        action: 'getCivicsResearch',
+        user: getApiUser(),
+        candidate: { name, office },
+        civicsSources: getCivicsSources().filter(s => s.enabled)
+      };
+      const res = await fetch(AI_URL, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      const reply = data.reply || '';
+      researchEl.innerHTML = isCivicsResponse(reply) ? renderCivicsResponse(reply) : '<div class="civics-research-section-body">' + String(reply).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/`(.*?)`/g, '<code>$1</code>').replace(/\n/g, '<br>') + '</div>';
+      researchEl.setAttribute('data-loaded', 'true');
+    } catch (err) {
+      researchEl.innerHTML = '<div class="civics-research-section-body" style="color:var(--muted)">' + escapeHtml(err.message || 'Research failed') + '</div>';
+    }
+    btn.disabled = false;
+    btn.textContent = '🦉 Ask Blathers';
   }
 
   function renderCivicsScreen() {
@@ -7174,32 +7210,21 @@
   }
 
   function renderCivicsCard(c, electionName) {
-    const isMeasure = (c.type || '').toLowerCase() === 'measure';
     const cid = c.candidate_id || c.candidateId || c.name || '';
-    const name = c.name || 'Ballot measure';
+    const name = c.name || '';
     const office = c.office || '';
     const party = c.party || '';
     const level = (c.level || '').toLowerCase();
-
-    if (isMeasure) {
-      const desc = c.description || '';
-      const learnUrl = c.learn_more_url || c.learnMoreUrl || '';
-      return '<div class="civics-card" data-id="' + escapeHtml(cid) + '">' +
-        '<div class="civics-card-header">' +
-        '<span class="civics-card-name">' + escapeHtml(name) + '</span></div>' +
-        (desc ? '<div class="civics-measure-desc">' + escapeHtml(desc) + '</div>' : '') +
-        (learnUrl ? '<div class="civics-card-links"><a class="civics-link-btn" href="' + escapeHtml(learnUrl) + '" target="_blank" rel="noopener">Learn more</a></div>' : '') +
-        '</div>';
-    }
 
     const partyCls = getPartyClass(party);
     const partyChip = '<span class="civics-party-chip ' + partyCls + '">' + escapeHtml(party || 'Nonpartisan') + '</span>';
 
     const ballotpediaLink = '<a class="civics-link-btn" href="' + escapeHtml(ballotpediaUrl(name)) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔍 Find on Ballotpedia</a>';
-    const askBlathersBtn = '<button type="button" class="civics-ask-blathers-btn" onclick="event.stopPropagation(); civicsAskBlathersAboutCandidate(' + JSON.stringify(name) + ',' + JSON.stringify(office) + ',' + JSON.stringify(electionName) + ')">🦉 Ask Blathers</button>';
+    const askBlathersBtn = '<button type="button" class="civics-ask-blathers-btn civics-research-btn" data-name="' + escapeHtml(name) + '" data-office="' + escapeHtml(office) + '" onclick="event.stopPropagation(); civicsAskBlathersAboutCandidate(this)">🦉 Ask Blathers</button>';
 
+    const integritySlug = (name || '').replace(/\s+/g, '-').toLowerCase().replace(/[^\w\-]/g, '') || 'explore';
     const links = [
-      ['Integrity Index', 'https://integrityindex.us/explore'],
+      ['Integrity Index', 'https://integrityindex.us/' + (integritySlug === 'explore' ? 'explore' : 'candidate/' + integritySlug)],
       ['OpenSecrets', openSecretsUrl(name)],
       ['FEC', fecUrl(name)],
       ['News', newsUrl(name)]
@@ -7218,6 +7243,7 @@
       (office ? '<div class="civics-card-office">' + escapeHtml(office) + '</div>' : '') +
       '<div class="civics-card-actions">' + ballotpediaLink + askBlathersBtn + '</div>' +
       '<div class="civics-card-links-expanded" style="display:none">' + linkRowExpanded + '</div>' +
+      '<div class="civics-card-research" data-loaded="false" style="display:none"></div>' +
       '<div class="civics-card-notes" style="display:none">' +
       '<div class="civics-card-notes-label">Notes</div>' +
       '<textarea class="recipe-edit-textarea" placeholder="Your notes…"></textarea></div>' +
