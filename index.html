@@ -608,8 +608,8 @@
       min-height: 100vh;
       min-height: -webkit-fill-available;
       height: calc(var(--vh, 1vh) * 100);
-      /* Reserve space for bottom bar (~60px) so Blathers/input stay above it */
-      padding-bottom: calc(72px + env(safe-area-inset-bottom));
+      /* Reserve space for bottom bar (~56px) + 12–16px breathing room */
+      padding-bottom: calc(68px + env(safe-area-inset-bottom));
       z-index: 1;
       display: flex; flex-direction: column;
       overflow: hidden;
@@ -656,6 +656,15 @@
     }
     html.dark-mode .scroll-fade-bottom {
       background: linear-gradient(to bottom, transparent, rgba(26,24,22,0.98));
+    }
+    /* Civics: fixed at bottom of viewport, just above bottom bar */
+    .civics-content .scroll-fade-bottom {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: calc(64px + env(safe-area-inset-bottom));
+      height: 52px;
+      margin-top: 0;
     }
     .h-scroll-faded {
       -webkit-mask-image: linear-gradient(
@@ -776,7 +785,7 @@
     .body {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: flex-end;
-      padding: 0 22px max(17px, env(safe-area-inset-bottom)); gap: 18px;
+      padding: 0 22px max(12px, env(safe-area-inset-bottom)); gap: 18px;
       min-height: fit-content;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
@@ -4214,7 +4223,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.0.15';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.0.17';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -4281,10 +4290,12 @@
           fade.className = 'scroll-fade-bottom';
           el.appendChild(fade);
         }
+        var isCivics = el.classList.contains('civics-content');
         function updateFade() {
           const fade = el.querySelector('.scroll-fade-bottom');
           if (!fade) return;
-          const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 8;
+          var threshold = isCivics ? 16 : 8;
+          var atBottom = el.scrollHeight - el.scrollTop - el.clientHeight <= threshold;
           fade.style.opacity = atBottom ? '0' : '1';
         }
         el.addEventListener('scroll', updateFade, { passive: true });
