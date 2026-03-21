@@ -1750,7 +1750,26 @@
       color: var(--muted); display: flex; align-items: center;
     }
     .recipes-refresh-btn svg { width: 18px; height: 18px; }
-    .recipes-search-wrap { padding: 0 16px 8px; flex-shrink: 0; position: relative; }
+    .recipes-filters-row {
+      display: flex; align-items: center; gap: 8px; padding: 0 16px 12px;
+      flex-shrink: 0; overflow: hidden;
+    }
+    .recipes-search-toggle {
+      width: 40px; height: 40px; flex-shrink: 0;
+      border-radius: 10px; border: 1.5px solid rgba(0,0,0,0.1);
+      background: rgba(255,255,255,0.7); color: var(--muted);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .recipes-search-toggle:hover, .recipes-search-toggle.active { border-color: var(--accent); color: var(--accent); background: rgba(192,122,74,0.08); }
+    html.dark-mode .recipes-search-toggle { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.12); }
+    html.dark-mode .recipes-search-toggle:hover, html.dark-mode .recipes-search-toggle.active { border-color: var(--accent); background: rgba(192,122,74,0.12); }
+    .recipes-search-toggle svg { width: 20px; height: 20px; }
+    .recipes-search-wrap {
+      padding: 0 16px 8px; flex-shrink: 0; max-height: 0; overflow: hidden;
+      transition: max-height 0.2s ease-out;
+    }
+    .recipes-search-wrap.open { max-height: 60px; }
     .recipes-search {
       width: 100%; padding: 10px 14px 10px 38px;
       font-size: 15px; font-family: inherit;
@@ -1762,8 +1781,8 @@
     }
     .recipes-search:focus { border-color: var(--accent); }
     .recipes-source-chips {
-      display: flex; gap: 8px; padding: 0 16px 12px;
-      overflow-x: auto; flex-shrink: 0; scrollbar-width: none;
+      display: flex; gap: 8px; flex: 1; min-width: 0;
+      overflow-x: auto; flex-shrink: 1; scrollbar-width: none;
     }
     .recipes-source-chips::-webkit-scrollbar { display: none; }
     .recipes-source-chip {
@@ -1773,32 +1792,35 @@
       transition: all 0.15s; font-family: inherit;
     }
     .recipes-source-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .recipes-carousel-wrap { flex: 1; overflow: hidden; position: relative; min-height: 0; }
+    .recipes-carousel-wrap {
+      flex: 1; overflow: hidden; position: relative; min-height: 0;
+      flex-shrink: 0; min-height: 260px; /* prevents wobble during swipe */
+    }
     .recipes-carousel {
-      display: flex; gap: 16px; padding: 4px 16px 24px;
+      display: flex; gap: 14px; padding: 4px 16px 20px;
       overflow-x: auto; scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
-      scrollbar-width: none; height: 100%; align-items: flex-start;
-      box-sizing: border-box;
+      scrollbar-width: none; height: 100%; align-items: stretch;
+      box-sizing: border-box; flex-shrink: 0;
     }
     .recipes-carousel::-webkit-scrollbar { display: none; }
     .recipe-card {
-      flex: 0 0 82%; min-width: 0; scroll-snap-align: center;
-      background: #fdf8f1; border-radius: 16px;
-      box-shadow: 0 3px 16px rgba(0,0,0,0.1); overflow: hidden;
+      flex: 0 0 75%; min-width: 0; scroll-snap-align: center;
+      background: #fdf8f1; border-radius: 14px;
+      box-shadow: 0 3px 14px rgba(0,0,0,0.08); overflow: hidden;
       cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
-      display: flex; flex-direction: column;
+      display: flex; flex-direction: column; flex-shrink: 0;
     }
     .recipe-card:active { transform: scale(0.97); box-shadow: 0 1px 8px rgba(0,0,0,0.1); }
     .recipe-card-image-wrap {
-      width: 100%; height: 180px;
+      width: 100%; height: 155px;
       background: linear-gradient(135deg, #e8d5b0 0%, #c9a06a 100%);
       position: relative; overflow: hidden; flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
     }
     .recipe-card-image-wrap img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
     .recipe-card-monogram {
-      font-size: 72px; font-weight: 800; color: rgba(255,255,255,0.35);
+      font-size: 60px; font-weight: 800; color: rgba(255,255,255,0.35);
       line-height: 1; user-select: none; letter-spacing: -2px;
     }
     .recipe-card-image-wrap.hf-card { background: linear-gradient(135deg, #d4edd9 0%, #7dc28a 100%); }
@@ -1806,14 +1828,14 @@
       width: 100%; height: 100%; display: flex;
       align-items: center; justify-content: center; font-size: 56px; opacity: 0.45;
     }
-    .recipe-card-body { padding: 14px 16px 18px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+    .recipe-card-body { padding: 10px 12px 14px; flex: 1; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
     .recipe-card-source {
       font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
       padding: 3px 8px; border-radius: 6px; align-self: flex-start;
       background: rgba(192,122,74,0.15); color: var(--accent);
     }
     .recipe-card-source.hf { background: rgba(0,169,91,0.13); color: #00a05a; }
-    .recipe-card-name { font-size: 19px; font-weight: 700; color: var(--text); line-height: 1.3; }
+    .recipe-card-name { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.3; }
     .recipe-card-cuisine { font-size: 11px; color: var(--text2); font-weight: 400; }
     .recipe-fav-star {
       position: absolute; top: 8px; right: 8px;
@@ -1985,22 +2007,22 @@
     .takeout-spots-wrap::-webkit-scrollbar { height: 4px; }
     .takeout-card {
       flex: 0 0 auto;
-      width: 140px;
-      padding: 12px 14px;
+      width: 118px;
+      padding: 10px 10px;
       background: #fff;
       border: 1px solid rgba(0,0,0,0.06);
-      border-radius: 14px;
+      border-radius: 12px;
       box-shadow: 0 1px 4px rgba(0,0,0,0.04);
     }
     html.dark-mode .takeout-card {
       background: #2a2826;
       border-color: rgba(255,255,255,0.08);
     }
-    .takeout-card-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
-    .takeout-card-cuisine { font-size: 12px; color: var(--text2); margin-bottom: 10px; }
-    .takeout-card-links { display: flex; gap: 6px; flex-wrap: wrap; }
+    .takeout-card-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+    .takeout-card-cuisine { font-size: 11px; color: var(--text2); margin-bottom: 8px; }
+    .takeout-card-links { display: flex; gap: 4px; flex-wrap: nowrap; justify-content: flex-start; }
     .takeout-link-btn {
-      width: 36px; height: 36px; border-radius: 50%;
+      width: 30px; height: 30px; min-width: 30px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       background: rgba(0,0,0,0.04); color: var(--text);
       text-decoration: none; font-size: 18px;
@@ -2009,7 +2031,7 @@
     .takeout-link-btn:hover { background: rgba(0,0,0,0.08); }
     html.dark-mode .takeout-link-btn { background: rgba(255,255,255,0.08); }
     html.dark-mode .takeout-link-btn:hover { background: rgba(255,255,255,0.14); }
-    .takeout-link-btn img { width: 22px; height: 22px; object-fit: contain; }
+    .takeout-link-btn img { width: 18px; height: 18px; object-fit: contain; }
     .takeout-manage-modal .takeout-manage-list { max-height: 50vh; overflow-y: auto; margin-bottom: 16px; }
     .takeout-manage-row {
       display: flex; align-items: center; justify-content: space-between;
@@ -3960,10 +3982,19 @@
     }
     .gj-card-remove-btn:hover { background: rgba(200,50,30,0.8); }
     .gj-entry-btn {
-      margin: 0 16px 12px; padding: 13px; border-radius: 12px;
-      background: rgba(192,122,74,0.1); border: 1.5px solid rgba(192,122,74,0.25);
-      color: var(--accent); font-size: 15px; font-weight: 700;
-      cursor: pointer; width: calc(100% - 32px); box-sizing: border-box;
+      margin: 0 16px 10px; padding: 12px 18px; border-radius: 14px;
+      background: linear-gradient(135deg, rgba(192,122,74,0.18) 0%, rgba(168,100,50,0.12) 100%);
+      border: 1.5px solid rgba(192,122,74,0.35);
+      color: var(--accent); font-size: 14px; font-weight: 700;
+      cursor: pointer; box-sizing: border-box; display: flex;
+      align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 2px 8px rgba(192,122,74,0.15);
+      transition: transform 0.12s, box-shadow 0.2s;
+    }
+    .gj-entry-btn:hover { box-shadow: 0 3px 12px rgba(192,122,74,0.22); }
+    .gj-entry-btn:active { transform: scale(0.98); }
+    .gj-entry-btn .gj-entry-icon {
+      width: 22px; height: 22px; object-fit: contain; flex-shrink: 0;
     }
     .home-gj-btn {
       border-radius: 14px; padding: 12px 16px; cursor: pointer;
@@ -4090,11 +4121,16 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         </button>
       </div>
-      <button type="button" class="gj-entry-btn" onclick="openGordonsJudgement()">🎲 Gordon's Judgement</button>
-      <div class="recipes-search-wrap">
+      <button type="button" class="gj-entry-btn" onclick="openGordonsJudgement()"><img class="gj-entry-icon" src="https://stormyreigns.github.io/HATH/HKChefKnife.png" alt=""> Gordon's Judgement</button>
+      <div class="recipes-search-wrap" id="recipesSearchWrap">
         <input type="search" class="recipes-search" id="recipesSearchInput" placeholder="Search recipes…" autocomplete="off" oninput="onRecipesSearch(this.value)">
       </div>
-      <div class="recipes-source-chips h-scroll-faded" id="recipeSourceChips"></div>
+      <div class="recipes-filters-row">
+        <button type="button" class="recipes-search-toggle" id="recipesSearchToggle" onclick="toggleRecipesSearch()" title="Search recipes" aria-label="Search recipes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        </button>
+        <div class="recipes-source-chips h-scroll-faded" id="recipeSourceChips"></div>
+      </div>
       <div class="recipes-carousel-wrap" id="recipesCarouselWrap">
         <div class="recipes-carousel h-scroll-faded" id="recipesCarousel"></div>
       </div>
@@ -4667,7 +4703,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.5.3';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.5.4';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -9270,6 +9306,16 @@
     });
   }
 
+  function toggleRecipesSearch() {
+    var wrap = document.getElementById('recipesSearchWrap');
+    var toggle = document.getElementById('recipesSearchToggle');
+    var input = document.getElementById('recipesSearchInput');
+    if (!wrap || !toggle || !input) return;
+    var isOpen = wrap.classList.toggle('open');
+    toggle.classList.toggle('active', isOpen);
+    if (isOpen) { input.focus(); } else { input.value = ''; onRecipesSearch(''); }
+  }
+
   function onRecipesSearch(query) {
     applyRecipesFilter(query, recipesState.activeSource, recipesState.activeCuisine);
   }
@@ -9286,6 +9332,9 @@
     if (q) list = list.filter(r => r.name.toLowerCase().includes(q));
     recipesState.filtered = list;
     recipesState.searching = !!q;
+    var wrap = document.getElementById('recipesSearchWrap');
+    var toggle = document.getElementById('recipesSearchToggle');
+    if (wrap && toggle && q) { wrap.classList.add('open'); toggle.classList.add('active'); }
     renderRecipesView();
   }
 
