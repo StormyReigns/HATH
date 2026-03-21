@@ -657,6 +657,23 @@
     html.dark-mode .scroll-fade-bottom {
       background: linear-gradient(to bottom, transparent, rgba(26,24,22,0.98));
     }
+    .h-scroll-faded {
+      -webkit-mask-image: linear-gradient(
+        to right,
+        transparent 0px,
+        black 20px,
+        black calc(100% - 20px),
+        transparent 100%
+      );
+      mask-image: linear-gradient(
+        to right,
+        transparent 0px,
+        black 20px,
+        black calc(100% - 20px),
+        transparent 100%
+      );
+    }
+
     .civics-content::-webkit-scrollbar,
     .screen-list::-webkit-scrollbar,
     #settingsScreen::-webkit-scrollbar { display: none; }
@@ -3611,7 +3628,7 @@
 
       <div class="home-projects-scroller" id="homeProjectsScroller" onclick="closeDrawer(); showProjectsScreen()" role="button" tabindex="0" aria-label="View projects">
         <div class="home-projects-label">Projects</div>
-        <div class="home-projects-scroll-wrap" id="homeProjectsScrollWrap">
+        <div class="home-projects-scroll-wrap h-scroll-faded" id="homeProjectsScrollWrap">
           <div class="home-projects-scroll" id="homeProjectsScroll"></div>
         </div>
       </div>
@@ -3667,9 +3684,9 @@
       <div class="recipes-search-wrap">
         <input type="search" class="recipes-search" id="recipesSearchInput" placeholder="Search recipes…" autocomplete="off" oninput="onRecipesSearch(this.value)">
       </div>
-      <div class="recipes-source-chips" id="recipeSourceChips"></div>
+      <div class="recipes-source-chips h-scroll-faded" id="recipeSourceChips"></div>
       <div class="recipes-carousel-wrap" id="recipesCarouselWrap">
-        <div class="recipes-carousel" id="recipesCarousel"></div>
+        <div class="recipes-carousel h-scroll-faded" id="recipesCarousel"></div>
       </div>
       <div class="recipes-list-wrap" id="recipesListWrap"></div>
       <button type="button" class="screen-add-fab" id="recipesAddFab" onclick="openRecipesAddMenu()" title="Add recipe" aria-label="Add recipe">+</button>
@@ -3798,7 +3815,7 @@
           </button>
         </div>
       </div>
-      <div class="schedule-chips-wrap">
+      <div class="schedule-chips-wrap h-scroll-faded">
         <div class="schedule-chips" id="scheduleChips"></div>
       </div>
       <div class="screen-list" id="scheduleList"></div>
@@ -3816,7 +3833,7 @@
         </div>
         <div class="projects-completed-bar" id="projectsCompletedBar">
           <div class="projects-completed-header"><img src="https://stormyreigns.github.io/HATH/Triforce.webp" alt="" class="projects-completed-trophy"> Victories</div>
-          <div class="projects-completed-scroll-viewport" id="projectsCompletedViewport">
+          <div class="projects-completed-scroll-viewport h-scroll-faded" id="projectsCompletedViewport">
             <div class="projects-completed-scroll" id="projectsCompletedScroll"></div>
           </div>
         </div>
@@ -3836,7 +3853,7 @@
           <button type="button" class="projects-edit-btn" onclick="openCreateProjectModal(projectsViewing && projectsViewing.id)" aria-label="Edit" title="Edit project">Edit</button>
         </div>
         <div class="projects-phase-cards-wrap">
-          <div class="projects-phase-cards" id="projectsPhaseCards"></div>
+          <div class="projects-phase-cards h-scroll-faded" id="projectsPhaseCards"></div>
           <div class="celebration-overlay celebration-phase" id="phaseCelebrationOverlay">
             <div class="celebration-content celebration-phase-content">
               <span class="celebration-icon">✓</span>
@@ -4197,7 +4214,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.0.14';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.0.15';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
