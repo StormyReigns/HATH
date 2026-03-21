@@ -4045,23 +4045,23 @@
       position: absolute;
       inset: 0;
       background: radial-gradient(
-        ellipse 70% 90% at 50% 115%,
-        rgba(255, 160, 50, 0.38) 0%,
-        rgba(255, 100, 30, 0.25) 35%,
-        rgba(255, 60, 10, 0.12) 60%,
-        transparent 75%
+        ellipse 120% 220% at 50% 180%,
+        rgba(255, 160, 50, 0.36) 0%,
+        rgba(255, 100, 30, 0.22) 25%,
+        rgba(255, 60, 10, 0.08) 50%,
+        transparent 70%
       );
       pointer-events: none;
-      animation: gjFlameReflect 2.5s ease-in-out infinite;
+      animation: gjFlameReflect 4.5s ease-in-out infinite;
       mix-blend-mode: screen;
       border-radius: inherit;
     }
     @keyframes gjFlameReflect {
-      0%   { opacity: 0.85; transform: scaleX(0.8) translateY(2px); }
-      25%  { opacity: 1;    transform: scaleX(1.15) translateY(-5px); }
-      50%  { opacity: 0.9;  transform: scaleX(0.9) translateY(-3px); }
-      75%  { opacity: 1;    transform: scaleX(1.2) translateY(-6px); }
-      100% { opacity: 0.85; transform: scaleX(0.8) translateY(2px); }
+      0%   { opacity: 0.88; transform: scaleX(0.9) translateY(1px); }
+      25%  { opacity: 1;    transform: scaleX(1.08) translateY(-2px); }
+      50%  { opacity: 0.92; transform: scaleX(0.95) translateY(-1px); }
+      75%  { opacity: 0.98; transform: scaleX(1.1) translateY(-2px); }
+      100% { opacity: 0.88; transform: scaleX(0.9) translateY(1px); }
     }
     .home-gj-btn {
       border-radius: 14px; padding: 12px 16px; cursor: pointer;
@@ -4775,7 +4775,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.5.10';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.5.11';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
