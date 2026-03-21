@@ -4260,7 +4260,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.0.24';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.0.25';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -4864,7 +4864,9 @@
     document.getElementById('projectsScreen').classList.remove('visible');
     document.getElementById('scheduleScreen').classList.remove('visible');
     document.getElementById('civicsScreen').classList.remove('visible');
+    document.getElementById('recipesScreen').classList.remove('visible');
     document.getElementById('settingsScreen').classList.remove('visible');
+    document.getElementById('recipeDetail').classList.remove('open');
     document.getElementById('inputZone').style.display = 'flex';
     document.getElementById('updatedAt').style.display = '';
     document.querySelector('.body').classList.remove('chat-mode');
