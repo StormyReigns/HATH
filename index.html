@@ -791,10 +791,10 @@
       -webkit-overflow-scrolling: touch;
     }
 
-    /* when chat is active (sub-screen visible), stretch from top and use bar padding */
+    /* when chat is active (sub-screen visible), stretch from top; minimal bottom padding — .app reserves bar space */
     .body.chat-mode {
       justify-content: flex-start;
-      padding-bottom: calc(32px + env(safe-area-inset-bottom));
+      padding-bottom: 0;
       min-height: 0;
     }
     .body.chat-mode .hint-area { display: none !important; }
@@ -4223,7 +4223,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.0.17';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.0.18';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
