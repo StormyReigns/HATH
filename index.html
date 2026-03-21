@@ -1200,6 +1200,9 @@
     .drawer-item:hover .drawer-icon-img,
     .drawer-item:active .drawer-icon-img,
     .drawer-item.active .drawer-icon-img { opacity: 1; }
+    .drawer-item[data-screen="recipes"] .drawer-icon-img {
+      filter: drop-shadow(1px 0 0 white) drop-shadow(-1px 0 0 white) drop-shadow(0 1px 0 white) drop-shadow(0 -1px 0 white) drop-shadow(0 0 6px rgba(255,255,255,0.95)) drop-shadow(0 0 12px rgba(255,255,255,0.6));
+    }
     .drawer-icon-emoji {
       font-size: 20px; line-height: 1; flex-shrink: 0;
       opacity: 0.85; transition: opacity 0.15s;
@@ -1734,7 +1737,7 @@
       display: flex; align-items: center; gap: 10px;
       padding: 14px 16px 6px; flex-shrink: 0;
     }
-    .recipes-title-icon { width: 22px; height: 22px; flex-shrink: 0; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 0 4px rgba(255,255,255,0.6)); }
+    .recipes-title-icon { width: 22px; height: 22px; flex-shrink: 0; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(1px 0 0 white) drop-shadow(-1px 0 0 white) drop-shadow(0 1px 0 white) drop-shadow(0 -1px 0 white) drop-shadow(0 0 4px rgba(255,255,255,0.6)); }
     .recipes-title { font-size: 20px; font-weight: 700; color: var(--text); flex: 1; }
     .recipes-refresh-btn {
       background: none; border: none; padding: 6px; cursor: pointer;
@@ -1805,6 +1808,32 @@
     }
     .recipe-card-source.hf { background: rgba(0,169,91,0.13); color: #00a05a; }
     .recipe-card-name { font-size: 19px; font-weight: 700; color: var(--text); line-height: 1.3; }
+    .recipe-fav-star {
+      position: absolute; top: 8px; right: 8px;
+      width: 32px; height: 32px;
+      border: none; border-radius: 50%;
+      background: rgba(0,0,0,0.25); color: rgba(255,255,255,0.9);
+      font-size: 18px; line-height: 1; padding: 0; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 3; transition: background 0.2s, color 0.2s, transform 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .recipe-fav-star:active { transform: scale(0.9); }
+    .recipe-fav-star.active { background: rgba(220,170,50,0.5); color: #f4d03f; }
+    .recipe-card-image-wrap { position: relative; }
+    .recipe-fav-star.list {
+      position: static; margin-left: auto; flex-shrink: 0;
+      background: transparent; color: var(--muted);
+      width: 36px; height: 36px; font-size: 20px;
+    }
+    .recipe-fav-star.list.active { color: #e6b422; }
+    .recipe-list-item { position: relative; }
+    .recipe-fav-star.detail {
+      position: static; margin-left: 8px;
+      background: transparent; color: var(--muted);
+      width: 36px; height: 36px; font-size: 20px;
+    }
+    .recipe-fav-star.detail.active { color: #e6b422; }
     /* Recipe list (search results) */
     .recipes-list-wrap {
       flex: 1; overflow-y: auto; padding: 0 16px;
@@ -4231,7 +4260,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.0.22';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.0.24';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -8562,9 +8591,35 @@
   const RECIPES_FOLDER_NAME = 'Recipes';
   const HF_FOLDER_NAME = 'HelloFresh';
 
+  const RECIPE_FAV_STORAGE = 'shasta_recipe_favourites';
+  function getRecipeFavourites() {
+    try {
+      const raw = localStorage.getItem(RECIPE_FAV_STORAGE);
+      if (!raw) return [];
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr : [];
+    } catch (_) { return []; }
+  }
+  function isRecipeFavourite(recipe) {
+    return recipe && getRecipeFavourites().includes(recipe.id);
+  }
+  function toggleRecipeFavourite(recipe) {
+    if (!recipe) return;
+    const ids = getRecipeFavourites();
+    const i = ids.indexOf(recipe.id);
+    if (i >= 0) ids.splice(i, 1); else ids.push(recipe.id);
+    localStorage.setItem(RECIPE_FAV_STORAGE, JSON.stringify(ids));
+    renderRecipesView();
+    const star = document.getElementById('recipeDetailFavStar');
+    if (star && window._recipeDetailCurrent && window._recipeDetailCurrent.id === recipe.id) {
+      star.classList.toggle('active', isRecipeFavourite(recipe));
+      star.textContent = isRecipeFavourite(recipe) ? '★' : '☆';
+    }
+  }
+
   const recipesState = {
-    all: [], filtered: [], activeSource: 'all', searching: false,
-    loaded: false, loading: false,
+    all: [], filtered: [], activeSource: 'all', activeFavourites: false,
+    searching: false, loaded: false, loading: false,
   };
 
   function showRecipesScreen() {
@@ -8703,20 +8758,26 @@
 
   function renderRecipeSourceChips() {
     const el = document.getElementById('recipeSourceChips');
-    const usedSources = [...new Set(recipesState.all.map(r => r.source))];
-    const allSources = ['all', ...usedSources];
-    const labels = { all: 'All', hellofresh: 'HelloFresh', other: 'Other' };
+    const usedSources = ['all', 'favourites', ...new Set(recipesState.all.map(r => r.source))];
+    const labels = { all: 'All', favourites: '★ Favourites', hellofresh: 'HelloFresh', other: 'Other' };
     el.innerHTML = '';
-    allSources.forEach(s => {
-      if (s !== 'all' && !recipesState.all.some(r => r.source === s)) return;
+    usedSources.forEach(s => {
+      if (s !== 'all' && s !== 'favourites' && !recipesState.all.some(r => r.source === s)) return;
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'recipes-source-chip' + (s === recipesState.activeSource ? ' active' : '');
+      const isFavActive = s === 'favourites' && recipesState.activeFavourites;
+      const isSourceActive = s !== 'favourites' && s === recipesState.activeSource && !recipesState.activeFavourites;
+      btn.className = 'recipes-source-chip' + (isFavActive || isSourceActive ? ' active' : '');
       btn.textContent = labels[s] || s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
       btn.onclick = () => {
-        recipesState.activeSource = s;
+        if (s === 'favourites') {
+          recipesState.activeFavourites = !recipesState.activeFavourites;
+        } else {
+          recipesState.activeSource = s;
+          recipesState.activeFavourites = false;
+        }
         const q = document.getElementById('recipesSearchInput').value;
-        applyRecipesFilter(q, s);
+        applyRecipesFilter(q, recipesState.activeSource);
         renderRecipeSourceChips();
       };
       el.appendChild(btn);
@@ -8729,6 +8790,10 @@
 
   function applyRecipesFilter(query, source) {
     let list = recipesState.all;
+    if (recipesState.activeFavourites) {
+      const favIds = getRecipeFavourites();
+      list = list.filter(r => favIds.includes(r.id));
+    }
     if (source && source !== 'all') list = list.filter(r => r.source === source);
     const q = (query || '').trim().toLowerCase();
     if (q) list = list.filter(r => r.name.toLowerCase().includes(q));
@@ -8791,8 +8856,15 @@
         const infoEl = document.createElement('div');
         infoEl.className = 'recipe-list-info';
         infoEl.innerHTML = `<div class="recipe-list-name">${escapeHtml(r.name)}</div><div class="recipe-list-source">${escapeHtml(r.sourceLabel)}</div>`;
+        const listStarBtn = document.createElement('button');
+        listStarBtn.type = 'button';
+        listStarBtn.className = 'recipe-fav-star list' + (isRecipeFavourite(r) ? ' active' : '');
+        listStarBtn.textContent = isRecipeFavourite(r) ? '★' : '☆';
+        listStarBtn.title = 'Favourite';
+        listStarBtn.onclick = (e) => { e.stopPropagation(); toggleRecipeFavourite(r); };
         item.appendChild(iconEl);
         item.appendChild(infoEl);
+        item.appendChild(listStarBtn);
         item.onclick = () => openRecipeDetail(r);
         listWrap.appendChild(item);
         if (r.imageId) {
@@ -8828,6 +8900,13 @@
         const imgWrap = document.createElement('div');
         imgWrap.className = 'recipe-card-image-wrap' + hfCardClass;
         imgWrap.innerHTML = `<div class="recipe-card-monogram">${recipeMonogram(r.name)}</div>`;
+        const starBtn = document.createElement('button');
+        starBtn.type = 'button';
+        starBtn.className = 'recipe-fav-star' + (isRecipeFavourite(r) ? ' active' : '');
+        starBtn.textContent = isRecipeFavourite(r) ? '★' : '☆';
+        starBtn.title = 'Favourite';
+        starBtn.onclick = (e) => { e.stopPropagation(); toggleRecipeFavourite(r); };
+        imgWrap.appendChild(starBtn);
         const body = document.createElement('div');
         body.className = 'recipe-card-body';
         body.innerHTML = `<span class="recipe-card-source${hfClass}">${escapeHtml(r.sourceLabel)}</span><div class="recipe-card-name">${escapeHtml(r.name)}</div>`;
@@ -8866,6 +8945,7 @@
     window._recipeEditMode = false;
     window._recipeDetailRawText = '';
     window._recipeDetailCurrentDocId = recipe.docId || null;
+    window._recipeDetailCurrent = recipe;
     const editBtn = document.getElementById('recipeDetailEditBtn');
     const backBtn = document.getElementById('recipeDetailBackBtn');
     if (editBtn) {
@@ -8884,7 +8964,10 @@
       </div>
       <div class="recipe-detail-content">
         <div class="recipe-detail-name">${escapeHtml(recipe.name)}</div>
-        <div class="recipe-detail-meta" id="recipeDetailMeta"><span class="recipe-card-source${hfClass}">${escapeHtml(recipe.sourceLabel)}</span></div>
+        <div class="recipe-detail-meta" id="recipeDetailMeta">
+          <span class="recipe-card-source${hfClass}">${escapeHtml(recipe.sourceLabel)}</span>
+          <button type="button" class="recipe-fav-star detail${isRecipeFavourite(recipe) ? ' active' : ''}" id="recipeDetailFavStar" title="Favourite" onclick="toggleRecipeFavourite(window._recipeDetailCurrent)">${isRecipeFavourite(recipe) ? '★' : '☆'}</button>
+        </div>
         <div id="recipeDetailBody"><div class="recipes-loading">Loading…</div></div>
       </div>
       <div class="scroll-fade-bottom"></div>`;
