@@ -656,7 +656,7 @@
       bottom: calc(20px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
       height: 80px;
       pointer-events: none;
-      z-index: 45;
+      z-index: 40;
       opacity: 0;
       transition: opacity 0.25s ease;
       background: linear-gradient(to top, var(--edge-bg, #fdf0e8) 40%, transparent);
@@ -3938,8 +3938,8 @@
     </div>
 
     <div class="updated-at" id="updatedAt"></div>
+    <div class="app-scroll-blur" id="appScrollBlur" aria-hidden="true"></div>
   </div>
-  <div class="app-scroll-blur" id="appScrollBlur" aria-hidden="true"></div>
 </div><!-- end .app -->
 
   <!-- Bottom bar — outside .app so fixed anchors to viewport, covers safe area -->
