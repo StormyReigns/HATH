@@ -710,6 +710,10 @@
       height: 44px;
       object-fit: contain;
     }
+    .bottom-bar-btn svg,
+    .bottom-bar-btn img {
+      filter: drop-shadow(0 0 6px rgba(255,255,255,0.7));
+    }
 
     /* ── WELLBEING ── */
     .wellbeing { text-align: center; padding: 10px 24px 0; flex-shrink: 0; }
@@ -1255,6 +1259,9 @@
       background: rgba(192,122,74,0.15);
       color: var(--accent);
     }
+    .settings-header { display: flex; align-items: center; gap: 10px; padding: 14px 0 12px; flex-shrink: 0; }
+    .settings-title-icon { width: 22px; height: 22px; flex-shrink: 0; color: var(--text); filter: drop-shadow(0 0 4px rgba(255,255,255,0.6)); }
+    .settings-title { font-size: 20px; font-weight: 700; color: var(--text); margin: 0; }
     .docs-refresh-btn:hover, .docs-refresh-btn:active { color: var(--accent); }
     .docs-refresh-btn svg { width: 18px; height: 18px; }
     .screen-breadcrumb {
@@ -1393,6 +1400,7 @@
       display: flex; align-items: center; gap: 10px;
       padding: 14px 16px 6px; flex-shrink: 0;
     }
+    .civics-title-icon { width: 22px; height: 22px; flex-shrink: 0; object-fit: contain; filter: drop-shadow(0 0 4px rgba(255,255,255,0.6)); }
     .civics-title { font-size: 20px; font-weight: 700; color: var(--text); flex: 1; }
     .civics-refresh-btn {
       background: none; border: none; padding: 6px; cursor: pointer;
@@ -1491,6 +1499,10 @@
     /* Inline Ask Blathers (no box, directly on page) */
     .civics-ask-inline {
       padding: 24px 0 32px; text-align: left;
+    }
+    .civics-empty-char {
+      display: block; width: 90px; height: auto; max-height: 120px;
+      margin: 0 auto 16px; object-fit: contain;
     }
     .civics-ask-inline-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
     .civics-ask-inline-text { font-size: 14px; color: var(--text2); line-height: 1.55; margin-bottom: 16px; }
@@ -1660,6 +1672,7 @@
       display: flex; align-items: center; gap: 10px;
       padding: 14px 16px 6px; flex-shrink: 0;
     }
+    .recipes-title-icon { width: 22px; height: 22px; flex-shrink: 0; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 0 4px rgba(255,255,255,0.6)); }
     .recipes-title { font-size: 20px; font-weight: 700; color: var(--text); flex: 1; }
     .recipes-refresh-btn {
       background: none; border: none; padding: 6px; cursor: pointer;
@@ -2307,10 +2320,10 @@
     .civics-layton {
       position: fixed;
       right: 8px;
-      bottom: calc(76px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
-      width: 80px;
+      bottom: calc(42px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
+      width: 104px;
       height: auto;
-      max-height: 100px;
+      max-height: 130px;
       object-fit: contain;
       object-position: bottom right;
       z-index: 65;
@@ -2328,9 +2341,10 @@
     }
     .projects-landing { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
     .projects-header {
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex; align-items: center; gap: 10px;
       padding: 12px 0; flex-shrink: 0;
     }
+    .projects-title-icon { width: 22px; height: 22px; flex-shrink: 0; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 0 4px rgba(255,255,255,0.6)); }
     .projects-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; color: var(--text); margin: 0; }
     .projects-completed-bar {
       flex-shrink: 0;
@@ -3579,6 +3593,7 @@
     <!-- Documents screen -->
     <div class="sub-screen" id="documentsScreen">
       <div class="docs-header">
+        <svg class="docs-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
         <div class="screen-breadcrumb" id="docsBreadcrumb"></div>
         <div class="docs-header-actions">
           <button type="button" class="docs-edit-btn" id="docsEditBtn" onclick="toggleDocsEditMode()" title="Edit mode">Edit</button>
@@ -3602,6 +3617,7 @@
     <!-- Recipes screen -->
     <div class="sub-screen" id="recipesScreen">
       <div class="recipes-header">
+        <img class="recipes-title-icon" src="https://stormyreigns.github.io/HATH/HKChefKnife.png" alt="">
         <span class="recipes-title">Recipes</span>
         <button type="button" class="recipes-refresh-btn" onclick="loadRecipesData()" title="Refresh">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
@@ -3635,6 +3651,10 @@
 
     <!-- Settings screen -->
     <div class="sub-screen" id="settingsScreen">
+      <div class="settings-header">
+        <svg class="settings-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="12" y1="18" x2="20" y2="18"/><circle cx="6" cy="12" r="2"/><circle cx="10" cy="18" r="2"/></svg>
+        <h2 class="settings-title">Settings</h2>
+      </div>
       <div class="settings-section">
         <label class="settings-toggle">
           <span>Dark mode</span>
@@ -3676,6 +3696,7 @@
     <!-- Civics screen -->
     <div class="sub-screen" id="civicsScreen">
       <div class="civics-header">
+        <img class="civics-title-icon" src="https://stormyreigns.github.io/HATH/LaytonIcon.png" alt="">
         <h2 class="civics-title">Civics</h2>
         <button type="button" class="civics-refresh-btn" onclick="refreshCivicsCarousel()" title="Refresh carousel" aria-label="Refresh carousel">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
@@ -3723,7 +3744,10 @@
     <!-- Schedule screen -->
     <div class="sub-screen" id="scheduleScreen">
       <div class="schedule-header">
-        <h2 class="schedule-title">Schedule</h2>
+        <div class="schedule-title-wrap">
+          <svg class="schedule-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <h2 class="schedule-title">Schedule</h2>
+        </div>
         <div class="schedule-header-actions">
           <button type="button" class="schedule-icon-btn" onclick="openScheduleCalendarsModal()" title="Calendars" aria-label="Manage calendars">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
@@ -3960,7 +3984,7 @@
       Schedule
     </div>
     <div class="drawer-item" data-screen="civics" onclick="drawerNavTap(this, ()=>{ closeDrawer(); showCivicsScreen(); })">
-      <span class="drawer-icon-emoji">🗳️</span>
+      <img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/LaytonIcon.png" alt="">
       Civics
     </div>
     <div class="drawer-item" onclick="drawerNavTap(this, ()=>{ closeDrawer(); showSettingsScreen(); })">
@@ -4131,7 +4155,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.0.4';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.0.7';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -6909,7 +6933,9 @@
   }
 
   function ballotpediaUrl(name) {
-    const slug = (name || '').replace(/\s+/g, '_').replace(/[^\w_\-\.]/g, '');
+    let n = (name || '').trim();
+    if (/^JB\s/i.test(n)) n = 'J.B. ' + n.slice(2).trim();
+    const slug = n.replace(/\s+/g, '_').replace(/[^\w_\-\.]/g, '');
     return 'https://ballotpedia.org/' + (slug || 'Ballotpedia');
   }
 
@@ -7164,6 +7190,7 @@
 
     if (!elEv && nextCandidates.length === 0) {
       zoneC.innerHTML = '<div class="civics-ask-inline">' +
+        '<img class="civics-empty-char" src="https://stormyreigns.github.io/HATH/LaytonHuh.png" alt="">' +
         '<div class="civics-ask-inline-title">No upcoming election data</div>' +
         '<div class="civics-ask-inline-text">Check back closer to the next election.</div></div>';
       return;
@@ -7171,6 +7198,7 @@
 
     if (nextCandidates.length === 0) {
       zoneC.innerHTML = '<div class="civics-ask-inline">' +
+        '<img class="civics-empty-char" src="https://stormyreigns.github.io/HATH/LaytonHuh.png" alt="">' +
         '<div class="civics-ask-inline-title">No candidate data yet</div>' +
         '<div class="civics-ask-inline-text">Ask Blathers about this election to get an overview of offices, candidates, and what to know.</div>' +
         '<button type="button" class="civics-refresh-btn civics-get-candidates-inline" onclick="loadCivicsCandidates(true)" title="Get candidates" aria-label="Get candidates">' +
