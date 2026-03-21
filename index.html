@@ -2003,19 +2003,6 @@
       display: flex; gap: 12px; overflow-x: auto;
       padding: 4px 0; -webkit-overflow-scrolling: touch;
     }
-    .takeout-cuisine-chips {
-      display: flex; gap: 8px; padding: 0 0 10px;
-      overflow-x: auto; flex-shrink: 0; scrollbar-width: none;
-    }
-    .takeout-cuisine-chips::-webkit-scrollbar { display: none; }
-    .takeout-cuisine-chip {
-      padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;
-      border: 1.5px solid rgba(0,0,0,0.1); background: transparent;
-      color: var(--text2); cursor: pointer; white-space: nowrap;
-      transition: all 0.15s; font-family: inherit;
-    }
-    .takeout-cuisine-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-    html.dark-mode .takeout-cuisine-chip { border-color: rgba(255,255,255,0.13); }
     .takeout-spots-wrap::-webkit-scrollbar { height: 4px; }
     .takeout-card {
       flex: 0 0 auto;
@@ -4219,7 +4206,6 @@
           <span class="takeout-title">🥡 Takeout</span>
           <button type="button" class="takeout-manage-btn" onclick="openTakeoutManage()">Manage</button>
         </div>
-        <div class="takeout-cuisine-chips h-scroll-faded" id="takeoutCuisineChips"></div>
         <div class="takeout-spots-wrap h-scroll-faded" id="takeoutSpotsWrap"></div>
       </div>
       <div class="recipes-gj-row">
@@ -4789,7 +4775,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.5.9';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.5.10';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -9351,7 +9337,8 @@
   function renderRecipeSourceChips() {
     const el = document.getElementById('recipeSourceChips');
     const usedSources = ['all', 'favourites', ...new Set(recipesState.all.map(r => r.source))];
-    const usedCuisines = [...new Set(recipesState.all.map(r => (r.cuisine || '').trim()).filter(Boolean))].sort();
+    const takeoutCuisines = (getTakeoutSpots && getTakeoutSpots()).filter(s => s.active !== false).map(s => (s.cuisine || '').trim()).filter(Boolean);
+    const usedCuisines = [...new Set([...recipesState.all.map(r => (r.cuisine || '').trim()), ...takeoutCuisines].filter(Boolean))].sort();
     const labels = { all: 'All', favourites: '★ Favourites', hellofresh: 'HelloFresh', other: 'Other' };
     el.innerHTML = '';
     usedSources.forEach(s => {
@@ -9374,6 +9361,7 @@
         const q = document.getElementById('recipesSearchInput').value;
         applyRecipesFilter(q, recipesState.activeSource, recipesState.activeCuisine);
         renderRecipeSourceChips();
+        renderTakeoutSpots();
       };
       el.appendChild(btn);
     });
@@ -9387,6 +9375,7 @@
         const q = document.getElementById('recipesSearchInput').value;
         applyRecipesFilter(q, recipesState.activeSource, recipesState.activeCuisine);
         renderRecipeSourceChips();
+        renderTakeoutSpots();
       };
       el.appendChild(btn);
     });
@@ -9422,6 +9411,7 @@
     var toggle = document.getElementById('recipesSearchToggle');
     if (wrap && toggle && q) { wrap.classList.add('open'); toggle.classList.add('active'); }
     renderRecipesView();
+    renderTakeoutSpots();
   }
 
   function recipeMonogram(name) {
@@ -10357,7 +10347,6 @@
     { name: "Panda Express", cuisine: "Chinese", doordash: null, ubereats: null, website: null }
   ];
 
-  var takeoutActiveCuisine = '';
   function takeoutGenId() { return 'to_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7); }
 
   function getTakeoutSpots() {
@@ -10385,45 +10374,23 @@
 
   function initTakeoutSpots() {
     if (localStorage.getItem(TAKEOUT_STORAGE_KEY) !== null) {
-      renderTakeoutCuisineChips();
       renderTakeoutSpots();
+      renderRecipeSourceChips();
       return;
     }
     var preload = TAKEOUT_PRELOAD.map(function(p) {
       return { id: takeoutGenId(), name: p.name, cuisine: p.cuisine || '', doordash: p.doordash, ubereats: p.ubereats, website: p.website, active: true };
     });
     saveTakeoutSpots(preload);
-    renderTakeoutCuisineChips();
     renderTakeoutSpots();
-  }
-
-  function renderTakeoutCuisineChips() {
-    var el = document.getElementById('takeoutCuisineChips');
-    if (!el) return;
-    var spots = getTakeoutSpots().filter(function(s) { return s.active !== false; });
-    var usedCuisines = [...new Set(spots.map(function(s) { return (s.cuisine || '').trim(); }).filter(Boolean))].sort();
-    el.innerHTML = '';
-    var allBtn = document.createElement('button');
-    allBtn.type = 'button';
-    allBtn.className = 'takeout-cuisine-chip' + (takeoutActiveCuisine === '' ? ' active' : '');
-    allBtn.textContent = 'All';
-    allBtn.onclick = function() { takeoutActiveCuisine = ''; renderTakeoutCuisineChips(); renderTakeoutSpots(); };
-    el.appendChild(allBtn);
-    usedCuisines.forEach(function(c) {
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'takeout-cuisine-chip' + (takeoutActiveCuisine === c ? ' active' : '');
-      btn.textContent = c;
-      btn.onclick = function() { takeoutActiveCuisine = takeoutActiveCuisine === c ? '' : c; renderTakeoutCuisineChips(); renderTakeoutSpots(); };
-      el.appendChild(btn);
-    });
+    renderRecipeSourceChips();
   }
 
   function renderTakeoutSpots() {
     var wrap = document.getElementById('takeoutSpotsWrap');
     if (!wrap) return;
     var spots = getTakeoutSpots().filter(function(s) { return s.active !== false; });
-    if (takeoutActiveCuisine) spots = spots.filter(function(s) { return (s.cuisine || '').trim() === takeoutActiveCuisine; });
+    if (recipesState && recipesState.activeCuisine) spots = spots.filter(function(s) { return (s.cuisine || '').trim() === recipesState.activeCuisine; });
     wrap.innerHTML = '';
     spots.forEach(function(s) {
       var card = document.createElement('div');
@@ -10510,16 +10477,16 @@
       spots.push(Object.assign({ id: id }, data, { active: data.active !== false }));
     }
     saveTakeoutSpots(spots);
-    renderTakeoutCuisineChips();
     renderTakeoutSpots();
+    renderRecipeSourceChips();
     openTakeoutManage();
   }
 
   function deleteTakeoutSpot(id) {
     var spots = getTakeoutSpots().filter(function(s) { return s.id !== id; });
     saveTakeoutSpots(spots);
-    renderTakeoutCuisineChips();
     renderTakeoutSpots();
+    renderRecipeSourceChips();
     var row = document.querySelector('.takeout-manage-row[data-id="' + id + '"]');
     if (row) row.remove();
     if (spots.length === 0) closeTakeoutManage();
