@@ -646,16 +646,22 @@
     .scroll-fade-bottom {
       position: sticky;
       bottom: 0;
-      left: 0;
-      right: 0;
       height: 52px;
       margin-top: -52px;
       flex-shrink: 0;
       pointer-events: none;
       background: linear-gradient(to bottom, transparent, var(--edge-bg, rgba(253,248,245,0.98)));
+      transition: opacity 0.15s ease;
     }
     html.dark-mode .scroll-fade-bottom {
       background: linear-gradient(to bottom, transparent, rgba(26,24,22,0.98));
+    }
+    .civics-content::-webkit-scrollbar,
+    .screen-list::-webkit-scrollbar,
+    .sub-screen::-webkit-scrollbar { display: none; }
+    .civics-content, .screen-list, .sub-screen {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
     }
 
     .app-bottom-bar {
@@ -1304,10 +1310,7 @@
       min-height: 0;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
     }
-    .screen-list::-webkit-scrollbar { display: none; }
     .screen-item {
       display: flex;
       align-items: center;
@@ -1435,10 +1438,7 @@
     .civics-content {
       flex: 1; overflow-y: auto; display: flex; flex-direction: column;
       padding: 0 16px 24px; -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
     }
-    .civics-content::-webkit-scrollbar { display: none; }
     .civics-zone-a {
       flex-shrink: 0; margin-bottom: 12px;
     }
@@ -2230,10 +2230,7 @@
     #settingsScreen {
       padding: 8px 0 24px; overflow-y: auto; -webkit-overflow-scrolling: touch;
       flex: 1; min-height: 0; display: flex; flex-direction: column;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
     }
-    #settingsScreen::-webkit-scrollbar { display: none; }
     #settingsScreen.visible { display: flex !important; }
     .settings-section { padding: 16px 0; border-bottom: 1px solid rgba(0,0,0,0.06); flex-shrink: 0; }
     .settings-section:last-child { border-bottom: none; }
@@ -3734,7 +3731,6 @@
           <button type="button" class="civics-source-add-btn" onclick="addCivicsSource()">Add</button>
         </div>
       </div>
-      <div class="scroll-fade-bottom"></div>
     </div>
 
     <!-- Civics screen -->
@@ -3775,7 +3771,6 @@
           </div>
         </div>
       </div>
-      <div class="scroll-fade-bottom"></div>
     </div>
     <div class="civics-carousel-indicator civics-carousel-indicator--fixed" id="civicsCarouselIndicator">
         <div class="civics-carousel-dots" id="civicsCarouselDots"></div>
@@ -4202,7 +4197,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.0.12';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.0.13';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -4238,6 +4233,7 @@
     if (vEl) vEl.textContent = 'v' + SHASTAPP_VERSION;
     document.getElementById('greetingText').innerHTML = getRandomGreeting();
     loadData();
+    initScrollFades();
     setupKeyboardHandling();
     applyDarkMode(localStorage.getItem('shasta_dark_' + email) === 'true');
     applyBgScheme(localStorage.getItem('shasta_bg_' + email) || 'peach');
@@ -4246,6 +4242,39 @@
     updateBlatherBookVisibility();
     updateBottomBarHome();
     updateScreenAddFabs();
+  }
+
+  function initScrollFades() {
+    const SCROLL_CONTAINERS = [
+      '.civics-content',
+      '#docsList',
+      '#scheduleList',
+      '.recipes-list-wrap',
+      '#projectsInProgressList',
+      '.blatherbook-messages',
+      '#settingsScreen'
+    ];
+
+    SCROLL_CONTAINERS.forEach(function(selector) {
+      const els = document.querySelectorAll(selector);
+      els.forEach(function(el) {
+        if (!el) return;
+        if (!el.querySelector('.scroll-fade-bottom')) {
+          const fade = document.createElement('div');
+          fade.className = 'scroll-fade-bottom';
+          el.appendChild(fade);
+        }
+        function updateFade() {
+          const fade = el.querySelector('.scroll-fade-bottom');
+          if (!fade) return;
+          const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 8;
+          fade.style.opacity = atBottom ? '0' : '1';
+        }
+        el.addEventListener('scroll', updateFade, { passive: true });
+        updateFade();
+        new MutationObserver(updateFade).observe(el, { childList: true, subtree: true });
+      });
+    });
   }
 
   function showOfflineScreen() {
@@ -4925,9 +4954,6 @@
     if (folders.length === 0 && files.length === 0) {
       list.innerHTML = '<div class="screen-loading">This folder is empty.</div>';
     }
-    const fade = document.createElement('div');
-    fade.className = 'scroll-fade-bottom';
-    list.appendChild(fade);
     updateDocsSelectionBar();
   }
 
@@ -5428,9 +5454,6 @@
         </div>
       </div>`;
     }).join('');
-    const fade = document.createElement('div');
-    fade.className = 'scroll-fade-bottom';
-    listEl.appendChild(fade);
 
     const emptyEl = document.getElementById('projectsEmpty');
     if (emptyEl) emptyEl.style.display = inProgress.length === 0 && completed.length === 0 ? 'flex' : 'none';
@@ -7580,9 +7603,6 @@
     const filtered = filterScheduleEvents(scheduleEvents);
     if (filtered.length === 0) {
       list.innerHTML = '<div class="screen-loading">' + (scheduleFilter === 'all' ? 'No upcoming events.' : 'No events match this filter.') + '</div>';
-      const fade = document.createElement('div');
-      fade.className = 'scroll-fade-bottom';
-      list.appendChild(fade);
       return;
     }
     const byDate = {};
@@ -7643,9 +7663,6 @@
         list.appendChild(div);
       });
     });
-    const fade = document.createElement('div');
-    fade.className = 'scroll-fade-bottom';
-    list.appendChild(fade);
   }
 
   function generateIcs(ev) {
@@ -8680,9 +8697,6 @@
         listWrap.appendChild(item);
         if (r.imageId) loadThumbnailInto(r.imageId, iconEl);
       });
-      const fade = document.createElement('div');
-      fade.className = 'scroll-fade-bottom';
-      listWrap.appendChild(fade);
     } else {
       carouselWrap.style.display = '';
       listWrap.style.display = 'none';
