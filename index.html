@@ -1200,8 +1200,8 @@
     .drawer-item:hover .drawer-icon-img,
     .drawer-item:active .drawer-icon-img,
     .drawer-item.active .drawer-icon-img { opacity: 1; }
-    .drawer-item[data-screen="recipes"] .drawer-icon-img {
-      filter: drop-shadow(1px 0 0 white) drop-shadow(-1px 0 0 white) drop-shadow(0 1px 0 white) drop-shadow(0 -1px 0 white) drop-shadow(0 0 6px rgba(255,255,255,0.95)) drop-shadow(0 0 12px rgba(255,255,255,0.6));
+    .drawer-item[data-screen="recipes"] .hk-icon-circle {
+      box-shadow: 0 0 6px rgba(255,255,255,0.95), 0 0 12px rgba(255,255,255,0.6);
     }
     .drawer-icon-emoji {
       font-size: 20px; line-height: 1; flex-shrink: 0;
@@ -1737,7 +1737,13 @@
       display: flex; align-items: center; gap: 10px;
       padding: 14px 16px 6px; flex-shrink: 0;
     }
-    .recipes-title-icon { width: 22px; height: 22px; flex-shrink: 0; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(1px 0 0 white) drop-shadow(-1px 0 0 white) drop-shadow(0 1px 0 white) drop-shadow(0 -1px 0 white) drop-shadow(0 0 4px rgba(255,255,255,0.6)); }
+    .hk-icon-circle {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; flex-shrink: 0;
+      background: white; border-radius: 50%;
+      box-shadow: 0 0 6px rgba(255,255,255,0.9), 0 0 12px rgba(255,255,255,0.5);
+    }
+    .recipes-title-icon { width: 22px; height: 22px; flex-shrink: 0; object-fit: contain; image-rendering: pixelated; }
     .recipes-title { font-size: 20px; font-weight: 700; color: var(--text); flex: 1; }
     .recipes-refresh-btn {
       background: none; border: none; padding: 6px; cursor: pointer;
@@ -3885,12 +3891,13 @@
     <!-- Recipes screen -->
     <div class="sub-screen" id="recipesScreen">
       <div class="recipes-header">
-        <img class="recipes-title-icon" src="https://stormyreigns.github.io/HATH/HK.png" alt="" loading="lazy">
+        <span class="hk-icon-circle"><img class="recipes-title-icon" src="https://stormyreigns.github.io/HATH/HK.png" alt="" loading="lazy"></span>
         <span class="recipes-title">Recipes</span>
         <button type="button" class="recipes-refresh-btn" onclick="loadRecipesData()" title="Refresh">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         </button>
       </div>
+      <button type="button" class="gj-entry-btn" onclick="openGordonsJudgement()">🎲 Gordon's Judgement</button>
       <div class="recipes-search-wrap">
         <input type="search" class="recipes-search" id="recipesSearchInput" placeholder="Search recipes…" autocomplete="off" oninput="onRecipesSearch(this.value)">
       </div>
@@ -3899,7 +3906,6 @@
         <div class="recipes-carousel h-scroll-faded" id="recipesCarousel"></div>
       </div>
       <div class="recipes-list-wrap" id="recipesListWrap"></div>
-      <button type="button" class="gj-entry-btn" onclick="openGordonsJudgement()">🎲 Gordon's Judgement</button>
       <button type="button" class="screen-add-fab" id="recipesAddFab" onclick="openRecipesAddMenu()" title="Add recipe" aria-label="Add recipe">+</button>
       <!-- Recipe detail slide-in -->
       <div class="recipe-detail" id="recipeDetail">
@@ -4238,7 +4244,7 @@
       Documents
     </div>
     <div class="drawer-item" data-screen="recipes" onclick="drawerNavTap(this, ()=>{ closeDrawer(); showRecipesScreen(); })">
-      <img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/HK.png" alt="" loading="lazy">
+      <span class="hk-icon-circle"><img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/HK.png" alt="" loading="lazy"></span>
       Recipes
     </div>
     <div class="drawer-item" onclick="drawerNavTap(this)">
@@ -4425,7 +4431,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.1.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.1.2';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
