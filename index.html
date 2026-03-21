@@ -2304,6 +2304,20 @@
       transform-origin: center 85%;
       animation: mapFloat 6s ease-in-out infinite;
     }
+    .civics-layton {
+      position: fixed;
+      right: 8px;
+      bottom: calc(76px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
+      width: 80px;
+      height: auto;
+      max-height: 100px;
+      object-fit: contain;
+      object-position: bottom right;
+      z-index: 65;
+      pointer-events: none;
+      transform-origin: center 85%;
+      animation: mapFloat 6s ease-in-out infinite;
+    }
 
     /* ── PROJECTS SCREEN ── */
     #projectsScreen.visible {
@@ -3703,6 +3717,7 @@
           Swipe to explore
         </div>
       </div>
+      <img class="civics-layton" src="https://stormyreigns.github.io/HATH/Layton1.png" alt="">
     </div>
 
     <!-- Schedule screen -->
@@ -4116,7 +4131,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.0.3';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.0.4';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
