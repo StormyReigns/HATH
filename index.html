@@ -71,6 +71,9 @@
   <link rel="apple-touch-icon" href="https://stormyreigns.github.io/HATH/ShastaApp.png">
   <title>ShastApp</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://script.google.com">
+  <link rel="preconnect" href="https://unpkg.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async></script>
   <script type="module" src="https://unpkg.com/@dotlottie/player-component@2.3.0/dist/dotlottie-player.mjs"></script>
@@ -3684,7 +3687,7 @@
     <!-- Recipes screen -->
     <div class="sub-screen" id="recipesScreen">
       <div class="recipes-header">
-        <img class="recipes-title-icon" src="https://stormyreigns.github.io/HATH/HK.png" alt="">
+        <img class="recipes-title-icon" src="https://stormyreigns.github.io/HATH/HK.png" alt="" loading="lazy">
         <span class="recipes-title">Recipes</span>
         <button type="button" class="recipes-refresh-btn" onclick="loadRecipesData()" title="Refresh">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
@@ -3763,7 +3766,7 @@
     <!-- Civics screen -->
     <div class="sub-screen" id="civicsScreen">
       <div class="civics-header">
-        <img class="civics-title-icon" src="https://stormyreigns.github.io/HATH/LaytonIcon.png" alt="">
+        <img class="civics-title-icon" src="https://stormyreigns.github.io/HATH/LaytonIcon.png" alt="" loading="lazy">
         <h2 class="civics-title">Civics</h2>
         <button type="button" class="civics-refresh-btn" onclick="refreshCivicsCarousel()" title="Refresh carousel" aria-label="Refresh carousel">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
@@ -3805,7 +3808,7 @@
           Swipe to explore
         </div>
       </div>
-      <img class="civics-layton" src="https://stormyreigns.github.io/HATH/Layton1.png" alt="">
+      <img class="civics-layton" src="https://stormyreigns.github.io/HATH/Layton1.png" alt="" loading="lazy">
     </div>
 
     <!-- Schedule screen -->
@@ -3837,11 +3840,11 @@
     <div class="sub-screen" id="projectsScreen">
       <div class="projects-landing" id="projectsLanding">
         <div class="projects-header">
-          <img class="projects-title-icon" src="https://stormyreigns.github.io/HATH/WWChest1.png" alt="">
+          <img class="projects-title-icon" src="https://stormyreigns.github.io/HATH/WWChest1.png" alt="" loading="lazy">
           <h2 class="projects-title">Projects</h2>
         </div>
         <div class="projects-completed-bar" id="projectsCompletedBar">
-          <div class="projects-completed-header"><img src="https://stormyreigns.github.io/HATH/Triforce.webp" alt="" class="projects-completed-trophy"> Victories</div>
+          <div class="projects-completed-header"><img src="https://stormyreigns.github.io/HATH/Triforce.webp" alt="" class="projects-completed-trophy" loading="lazy"> Victories</div>
           <div class="projects-completed-scroll-viewport h-scroll-faded" id="projectsCompletedViewport">
             <div class="projects-completed-scroll" id="projectsCompletedScroll"></div>
           </div>
@@ -3849,7 +3852,7 @@
         <div class="projects-in-progress-label">In progress</div>
         <div class="screen-list" id="projectsInProgressList"></div>
         <div class="projects-empty" id="projectsEmpty">No projects yet. Tap + to create one.</div>
-        <img class="projects-linkmagic" src="https://stormyreigns.github.io/HATH/WWScroll.png" alt="">
+        <img class="projects-linkmagic" src="https://stormyreigns.github.io/HATH/WWScroll.png" alt="" loading="lazy">
         <button type="button" class="screen-add-fab" id="projectsAddFab" onclick="openCreateProjectModal()" title="Create project" aria-label="Create project">+</button>
       </div>
       <div class="projects-view" id="projectsView" style="display:none">
@@ -3878,15 +3881,15 @@
             <div class="ocean-crackle"></div>
             <div class="ocean-crackle2"></div>
             <div class="ocean-darkness" id="oceanDarkness"></div>
-            <div class="ocean-boat" id="oceanBoat"><img src="https://stormyreigns.github.io/HATH/WindWakerProg-clean.png" alt="King of Red Lions"></div>
+            <div class="ocean-boat" id="oceanBoat"><img src="https://stormyreigns.github.io/HATH/WindWakerProg-clean.png" alt="King of Red Lions" loading="lazy"></div>
           </div>
-          <div class="ocean-windfall"><img src="https://stormyreigns.github.io/HATH/Windfall.png" alt="Windfall Island"></div>
+          <div class="ocean-windfall"><img src="https://stormyreigns.github.io/HATH/Windfall.png" alt="Windfall Island" loading="lazy"></div>
         </div>
         <div class="celebration-overlay celebration-project celebration-project-full" id="projectCelebrationOverlay">
           <div class="celebration-content celebration-project-content">
             <div class="celebration-quest-label">Quest Complete</div>
             <div class="celebration-title" id="celebrationProjectTitle"></div>
-            <img class="celebration-image" src="https://stormyreigns.github.io/HATH/Next%20Adventure.png" alt="Next Adventure">
+            <img class="celebration-image" src="https://stormyreigns.github.io/HATH/Next%20Adventure.png" alt="Next Adventure" loading="lazy">
             <p class="celebration-quote" id="celebrationCompleteQuote"></p>
             <button type="button" class="celebration-continue-btn" id="celebrationContinueBtn" onclick="dismissProjectCelebration()">Continue</button>
           </div>
@@ -4028,7 +4031,7 @@
       Home
     </div>
     <div class="drawer-item" onclick="drawerNavTap(this, ()=>{ closeDrawer(); showProjectsScreen(); })">
-      <img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/WWChest1.png" alt="">
+      <img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/WWChest1.png" alt="" loading="lazy">
       Projects
     </div>
     <div class="drawer-item" onclick="drawerNavTap(this, ()=>{ closeDrawer(); showDocumentsScreen(); })">
@@ -4036,7 +4039,7 @@
       Documents
     </div>
     <div class="drawer-item" data-screen="recipes" onclick="drawerNavTap(this, ()=>{ closeDrawer(); showRecipesScreen(); })">
-      <img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/HK.png" alt="">
+      <img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/HK.png" alt="" loading="lazy">
       Recipes
     </div>
     <div class="drawer-item" onclick="drawerNavTap(this)">
@@ -4223,11 +4226,13 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.0.18';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.0.19';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
   const ALLOWED_USERS = ['whiskerwallmatt@gmail.com', 'jessicafisher407@gmail.com'];
+
+  let _lastPreloadBalance = null;
 
   function handleCredentialResponse(response) {
     const payload = JSON.parse(atob(response.credential.split('.')[1]));
@@ -4236,7 +4241,7 @@
     if (ALLOWED_USERS.includes(email)) {
       localStorage.setItem('shasta_user', email);
       localStorage.setItem('shasta_auth_exp', Date.now() + (30 * 24 * 60 * 60 * 1000));
-      launchApp(email);
+      launchApp(email, _lastPreloadBalance);
     } else {
       document.getElementById('loginDenied').style.display = 'block';
     }
@@ -4252,13 +4257,13 @@
     }, PING_INTERVAL_MS);
   }
 
-  function launchApp(email) {
+  function launchApp(email, preloadedBalance) {
     document.getElementById('loginScreen').style.display  = 'none';
     document.getElementById('appScreen').style.display    = 'block';
     const vEl = document.getElementById('versionLabel');
     if (vEl) vEl.textContent = 'v' + SHASTAPP_VERSION;
     document.getElementById('greetingText').innerHTML = getRandomGreeting();
-    loadData();
+    loadData(preloadedBalance);
     initScrollFades();
     setupKeyboardHandling();
     applyDarkMode(localStorage.getItem('shasta_dark_' + email) === 'true');
@@ -4268,6 +4273,12 @@
     updateBlatherBookVisibility();
     updateBottomBarHome();
     updateScreenAddFabs();
+    ['startled', 'thinking', 'happy'].forEach(function(key) {
+      if (BLATHERS && BLATHERS[key]) {
+        const img = new Image();
+        img.src = BLATHERS[key];
+      }
+    });
   }
 
   function initScrollFades() {
@@ -4357,11 +4368,14 @@
     const tabListPromise = fetchTabList();
     const docIndexPromise = fetchDocIndex();
 
-    const [rootFolders, , tabs, docIndex] = await Promise.all([
+    const [rootFolders, balance, tabs, docIndex] = await Promise.all([
       rootPromise, balancePromise, tabListPromise, docIndexPromise, pingPromise
     ]);
     window.shastaTabs = tabs || [];
     window.shastaDocIndex = docIndex || [];
+    if (tabs && tabs.length > 0) {
+      try { sessionStorage.setItem('shasta_tabList', JSON.stringify(tabs)); } catch (_) {}
+    }
 
     if (rootFolders && rootFolders.length > 0) {
       rootFolders.forEach(f => fetchDocsFolder(f.id));
@@ -4370,6 +4384,7 @@
     const elapsed = Date.now() - start;
     const remaining = Math.max(0, LOAD_MIN_MS - elapsed);
     await new Promise(r => setTimeout(r, remaining));
+    return balance;
   }
 
   function hideLoadScreen() {
@@ -4377,7 +4392,24 @@
     if (el) el.classList.add('hidden');
   }
 
-  window.onload = async function() {
+  function initGSIWhenReady() {
+    if (typeof google !== 'undefined' && google.accounts) {
+      google.accounts.id.initialize({
+        client_id:   CLIENT_ID,
+        callback:    handleCredentialResponse,
+        auto_select: true
+      });
+      google.accounts.id.renderButton(
+        document.getElementById('googleSignInBtn'),
+        { theme: 'outline', size: 'large', shape: 'pill', text: 'signin_with' }
+      );
+      google.accounts.id.prompt();
+    } else {
+      setTimeout(initGSIWhenReady, 50);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', async function() {
     if (!navigator.onLine) {
       hideLoadScreen();
       showOfflineScreen();
@@ -4390,25 +4422,17 @@
     const savedUser = localStorage.getItem('shasta_user');
     const savedExp  = localStorage.getItem('shasta_auth_exp');
 
-    await preloadApp();
+    const preloadResult = await preloadApp();
+    _lastPreloadBalance = preloadResult;
 
     if (savedUser && savedExp && Date.now() < parseInt(savedExp)) {
-      launchApp(savedUser);
+      launchApp(savedUser, preloadResult);
     } else {
-      google.accounts.id.initialize({
-        client_id:   CLIENT_ID,
-        callback:    handleCredentialResponse,
-        auto_select: true
-      });
-      google.accounts.id.renderButton(
-        document.getElementById('googleSignInBtn'),
-        { theme: 'outline', size: 'large', shape: 'pill', text: 'signin_with' }
-      );
-      google.accounts.id.prompt();
+      initGSIWhenReady();
     }
 
     hideLoadScreen();
-  };
+  });
 
   // ── CONFIG ────────────────────────────────────────────────────
   // Must match Apps Script deployment URL (Deploy > Manage deployments > copy URL after security update)
@@ -4520,14 +4544,23 @@
   }
 
   // ── LOAD LIVE DATA ────────────────────────────────────────────
-  async function loadData() {
+  async function loadData(preloadedBalance) {
+    let data = preloadedBalance && !preloadedBalance.error ? preloadedBalance : null;
+    if (!data) {
+      try {
+        const res = await fetch(apiUrlWithUser(API_URL), { redirect: 'follow' });
+        data = await res.json();
+      } catch (err) {
+        data = null;
+      }
+    }
     try {
-      const res = await fetch(apiUrlWithUser(API_URL), { redirect: 'follow' });
-      const data = await res.json();
-
-      if (data.error) {
-        console.warn('Shasta API error:', data.error);
+      if (!data || data.error) {
+        if (data && data.error) console.warn('Shasta API error:', data.error);
         setWellbeing('OK');
+        renderHomeProjectsScroller();
+        renderRecentUploads();
+        loadCalendar();
         return;
       }
 
@@ -5450,7 +5483,7 @@
     const scrollEl = document.getElementById('projectsCompletedScroll');
     const chipHtml = completed.map(p => {
       const animateClass = newlyCompletedId && p.id === newlyCompletedId ? ' projects-completed-chip-new' : '';
-      return `<span class="projects-completed-chip${animateClass}" onclick="projectsSelectCompleted('${p.id}')"><img src="https://stormyreigns.github.io/HATH/Triforce.webp" alt="" class="projects-completed-trophy"><span class="projects-completed-chip-title">${escapeHtml(p.title)}</span><button type="button" class="projects-completed-chip-delete" onclick="event.stopPropagation();projectsConfirmDelete('${p.id}')" aria-label="Delete" title="Delete">×</button></span>`;
+      return `<span class="projects-completed-chip${animateClass}" onclick="projectsSelectCompleted('${p.id}')"><img src="https://stormyreigns.github.io/HATH/Triforce.webp" alt="" class="projects-completed-trophy" loading="lazy"><span class="projects-completed-chip-title">${escapeHtml(p.title)}</span><button type="button" class="projects-completed-chip-delete" onclick="event.stopPropagation();projectsConfirmDelete('${p.id}')" aria-label="Delete" title="Delete">×</button></span>`;
     }).join('');
     if (scrollEl) scrollEl.innerHTML = completed.length > 0 ? chipHtml : '';
 
@@ -7300,7 +7333,7 @@
 
     if (!elEv && nextCandidates.length === 0) {
       zoneC.innerHTML = '<div class="civics-ask-inline">' +
-        '<img class="civics-empty-char" src="https://stormyreigns.github.io/HATH/LaytonHuh.png" alt="">' +
+        '<img class="civics-empty-char" src="https://stormyreigns.github.io/HATH/LaytonHuh.png" alt="" loading="lazy">' +
         '<div class="civics-ask-inline-title">No upcoming election data</div>' +
         '<div class="civics-ask-inline-text">Check back closer to the next election.</div></div>';
       return;
@@ -7308,7 +7341,7 @@
 
     if (nextCandidates.length === 0) {
       zoneC.innerHTML = '<div class="civics-ask-inline">' +
-        '<img class="civics-empty-char" src="https://stormyreigns.github.io/HATH/LaytonHuh.png" alt="">' +
+        '<img class="civics-empty-char" src="https://stormyreigns.github.io/HATH/LaytonHuh.png" alt="" loading="lazy">' +
         '<div class="civics-ask-inline-title">No candidate data yet</div>' +
         '<div class="civics-ask-inline-text">Ask Blathers about this election to get an overview of offices, candidates, and what to know.</div>' +
         '<button type="button" class="civics-refresh-btn civics-get-candidates-inline" onclick="loadCivicsCandidates(true)" title="Get candidates" aria-label="Get candidates">' +
@@ -7427,6 +7460,22 @@
       card.querySelector('.civics-card-links-expanded').style.display = 'flex';
       return;
     }
+    const cacheKey = 'shasta_civics_research_' + name.replace(/\s+/g, '_').toLowerCase();
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.ts && parsed.html && (Date.now() - parsed.ts) < 7 * 24 * 60 * 60 * 1000) {
+          researchEl.innerHTML = parsed.html;
+          researchEl.setAttribute('data-loaded', 'true');
+          card.classList.add('expanded');
+          researchEl.style.display = 'block';
+          card.querySelector('.civics-card-notes').style.display = 'block';
+          card.querySelector('.civics-card-links-expanded').style.display = 'flex';
+          return;
+        }
+      }
+    } catch (_) {}
     btn.disabled = true;
     btn.textContent = 'Researching…';
     researchEl.style.display = 'block';
@@ -7447,8 +7496,12 @@
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       const reply = data.reply || '';
-      researchEl.innerHTML = isCivicsResponse(reply) ? renderCivicsResponse(reply) : '<div class="civics-research-section-body">' + String(reply).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/`(.*?)`/g, '<code>$1</code>').replace(/\n/g, '<br>') + '</div>';
+      const html = isCivicsResponse(reply) ? renderCivicsResponse(reply) : '<div class="civics-research-section-body">' + String(reply).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/`(.*?)`/g, '<code>$1</code>').replace(/\n/g, '<br>') + '</div>';
+      researchEl.innerHTML = html;
       researchEl.setAttribute('data-loaded', 'true');
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), html: html }));
+      } catch (_) {}
     } catch (err) {
       researchEl.innerHTML = '<div class="civics-research-section-body" style="color:var(--muted)">' + escapeHtml(err.message || 'Research failed') + '</div>';
     }
@@ -8147,6 +8200,12 @@
     requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
 
     try {
+      if (!window.shastaTabs || !Array.isArray(window.shastaTabs) || window.shastaTabs.length === 0) {
+        try {
+          const cached = sessionStorage.getItem('shasta_tabList');
+          if (cached) window.shastaTabs = JSON.parse(cached);
+        } catch (_) {}
+      }
       const user = localStorage.getItem('shasta_user');
       const history = conversationHistory.slice(-20);
       const matchedTabs = scoreTabsForMessage(text);
@@ -8693,6 +8752,12 @@
       .catch(() => {});
   }
 
+  function fetchThumbnail(imageId) {
+    return fetch(apiUrlWithUser(API_URL, '&action=getFileThumbnail&fileId=' + encodeURIComponent(imageId)), { redirect: 'follow' })
+      .then(r => r.text())
+      .then(raw => { try { return JSON.parse(raw); } catch(_) { return { error: '' }; } });
+  }
+
   function renderRecipesView() {
     const carouselWrap = document.getElementById('recipesCarouselWrap');
     const listWrap = document.getElementById('recipesListWrap');
@@ -8709,6 +8774,8 @@
       carouselWrap.style.display = 'none';
       listWrap.style.display = 'block';
       listWrap.innerHTML = '';
+      const thumbTasks = [];
+      const containers = [];
       recipesState.filtered.forEach(r => {
         const item = document.createElement('div');
         item.className = 'recipe-list-item';
@@ -8723,12 +8790,31 @@
         item.appendChild(infoEl);
         item.onclick = () => openRecipeDetail(r);
         listWrap.appendChild(item);
-        if (r.imageId) loadThumbnailInto(r.imageId, iconEl);
+        if (r.imageId) {
+          thumbTasks.push(fetchThumbnail(r.imageId));
+          containers.push(iconEl);
+        }
+      });
+      Promise.allSettled(thumbTasks).then(function(results) {
+        results.forEach(function(res, i) {
+          const el = containers[i];
+          if (!el || !el.isConnected) return;
+          if (res.status === 'fulfilled' && res.value && !res.value.error && res.value.base64) {
+            const img = document.createElement('img');
+            img.alt = '';
+            img.src = 'data:' + res.value.mimeType + ';base64,' + res.value.base64;
+            el.innerHTML = '';
+            el.appendChild(img);
+            requestAnimationFrame(function() { img.style.opacity = '1'; });
+          }
+        });
       });
     } else {
       carouselWrap.style.display = '';
       listWrap.style.display = 'none';
       carousel.innerHTML = '';
+      const thumbTasks = [];
+      const carouselContainers = [];
       recipesState.filtered.forEach(r => {
         const card = document.createElement('div');
         card.className = 'recipe-card';
@@ -8744,7 +8830,24 @@
         card.appendChild(body);
         card.onclick = () => openRecipeDetail(r);
         carousel.appendChild(card);
-        if (r.imageId) loadThumbnailInto(r.imageId, imgWrap);
+        if (r.imageId) {
+          thumbTasks.push(fetchThumbnail(r.imageId));
+          carouselContainers.push(imgWrap);
+        }
+      });
+      Promise.allSettled(thumbTasks).then(function(results) {
+        results.forEach(function(res, i) {
+          const el = carouselContainers[i];
+          if (!el || !el.isConnected) return;
+          if (res.status === 'fulfilled' && res.value && !res.value.error && res.value.base64) {
+            const img = document.createElement('img');
+            img.alt = '';
+            img.src = 'data:' + res.value.mimeType + ';base64,' + res.value.base64;
+            el.innerHTML = '';
+            el.appendChild(img);
+            requestAnimationFrame(function() { img.style.opacity = '1'; });
+          }
+        });
       });
     }
   }
