@@ -1814,6 +1814,7 @@
     }
     .recipe-card-source.hf { background: rgba(0,169,91,0.13); color: #00a05a; }
     .recipe-card-name { font-size: 19px; font-weight: 700; color: var(--text); line-height: 1.3; }
+    .recipe-card-cuisine { font-size: 11px; color: var(--text2); font-weight: 400; }
     .recipe-fav-star {
       position: absolute; top: 8px; right: 8px;
       width: 32px; height: 32px;
@@ -1959,6 +1960,101 @@
     .recipes-empty-state-icon { font-size: 52px; opacity: 0.45; }
     .recipes-loading { display: flex; align-items: center; justify-content: center; min-height: 120px; color: var(--muted); font-size: 14px; }
     /* recipes FAB uses the shared .screen-add-fab system */
+    /* Takeout section */
+    .takeout-section {
+      padding: 16px 20px 20px;
+      background: rgba(60,100,140,0.06);
+      margin: 0 -20px;
+    }
+    html.dark-mode .takeout-section { background: rgba(60,100,140,0.1); }
+    .takeout-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .takeout-title { font-size: 15px; font-weight: 700; color: var(--text); }
+    .takeout-manage-btn {
+      font-size: 13px; font-weight: 600; color: var(--accent);
+      background: transparent; border: none; cursor: pointer;
+      padding: 4px 8px;
+    }
+    .takeout-manage-btn:hover { opacity: 0.8; }
+    .takeout-spots-wrap {
+      display: flex; gap: 12px; overflow-x: auto;
+      padding: 4px 0; -webkit-overflow-scrolling: touch;
+    }
+    .takeout-spots-wrap::-webkit-scrollbar { height: 4px; }
+    .takeout-card {
+      flex: 0 0 auto;
+      width: 140px;
+      padding: 12px 14px;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    html.dark-mode .takeout-card {
+      background: #2a2826;
+      border-color: rgba(255,255,255,0.08);
+    }
+    .takeout-card-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+    .takeout-card-cuisine { font-size: 12px; color: var(--text2); margin-bottom: 10px; }
+    .takeout-card-links { display: flex; gap: 6px; flex-wrap: wrap; }
+    .takeout-link-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.04); color: var(--text);
+      text-decoration: none; font-size: 18px;
+      transition: background 0.2s;
+    }
+    .takeout-link-btn:hover { background: rgba(0,0,0,0.08); }
+    html.dark-mode .takeout-link-btn { background: rgba(255,255,255,0.08); }
+    html.dark-mode .takeout-link-btn:hover { background: rgba(255,255,255,0.14); }
+    .takeout-link-btn img { width: 22px; height: 22px; object-fit: contain; }
+    .takeout-manage-modal .takeout-manage-list { max-height: 50vh; overflow-y: auto; margin-bottom: 16px; }
+    .takeout-manage-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    html.dark-mode .takeout-manage-row { border-bottom-color: rgba(255,255,255,0.06); }
+    .takeout-manage-row-name { font-size: 15px; font-weight: 600; color: var(--text); flex: 1; }
+    .takeout-manage-row .takeout-edit-btn {
+      padding: 6px 12px; font-size: 13px; color: var(--accent);
+      background: transparent; border: 1px solid rgba(192,122,74,0.3);
+      border-radius: 8px; cursor: pointer;
+    }
+    .takeout-manage-row.editing .takeout-edit-btn { display: none; }
+    .takeout-edit-form {
+      display: none; flex-direction: column; gap: 10px;
+      padding: 12px 0; margin-top: 4px;
+    }
+    .takeout-manage-row.editing .takeout-edit-form { display: flex; }
+    .takeout-manage-row.editing .takeout-manage-row-name { display: none; }
+    .takeout-edit-form input, .takeout-edit-form label { font-size: 14px; }
+    .takeout-edit-form input {
+      padding: 8px 10px; border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 6px; width: 100%; color: var(--text);
+    }
+    html.dark-mode .takeout-edit-form input { border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); }
+    .takeout-edit-form .takeout-toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .takeout-edit-form .takeout-delete-btn {
+      padding: 8px; font-size: 13px; color: #c05050;
+      background: transparent; border: 1px solid rgba(192,80,80,0.3);
+      border-radius: 8px; cursor: pointer; margin-top: 4px;
+    }
+    .takeout-edit-form .takeout-save-btn {
+      padding: 8px 14px; font-size: 13px; font-weight: 600;
+      background: var(--accent); color: #fff; border: none;
+      border-radius: 8px; cursor: pointer;
+    }
+    .takeout-add-spot-btn {
+      width: 100%; padding: 12px; font-size: 14px; font-weight: 600;
+      color: var(--accent); background: rgba(192,122,74,0.1);
+      border: 1px dashed rgba(192,122,74,0.4);
+      border-radius: 10px; cursor: pointer; margin-bottom: 16px;
+    }
+    .takeout-add-spot-btn:hover { background: rgba(192,122,74,0.15); }
     /* Dark mode — recipes */
     html.dark-mode .recipe-card { background: #252220; }
     html.dark-mode .recipe-card-image-wrap,
@@ -4003,6 +4099,13 @@
         <div class="recipes-carousel h-scroll-faded" id="recipesCarousel"></div>
       </div>
       <div class="recipes-list-wrap" id="recipesListWrap"></div>
+      <div class="takeout-section" id="takeoutSection">
+        <div class="takeout-header">
+          <span class="takeout-title">🥡 Takeout</span>
+          <button type="button" class="takeout-manage-btn" onclick="openTakeoutManage()">Manage</button>
+        </div>
+        <div class="takeout-spots-wrap h-scroll-faded" id="takeoutSpotsWrap"></div>
+      </div>
       <button type="button" class="screen-add-fab" id="recipesAddFab" onclick="openRecipesAddMenu()" title="Add recipe" aria-label="Add recipe">+</button>
       <!-- Recipe detail slide-in -->
       <div class="recipe-detail" id="recipeDetail">
@@ -4012,6 +4115,18 @@
           <button type="button" class="recipe-detail-edit-btn" id="recipeDetailEditBtn" style="display:none" onclick="toggleRecipeEdit()">Edit</button>
         </div>
         <div class="recipe-detail-scroll" id="recipeDetailScroll"></div>
+      </div>
+    </div>
+
+    <!-- Takeout manage modal -->
+    <div class="paste-modal-overlay" id="takeoutManageModal" onclick="closeTakeoutManage(event)">
+      <div class="paste-modal takeout-manage-modal" id="takeoutManageModalContent" onclick="event.stopPropagation()">
+        <h3>Manage Takeout Spots</h3>
+        <div class="takeout-manage-list" id="takeoutManageList"></div>
+        <button type="button" class="takeout-add-spot-btn" onclick="takeoutAddSpot()">+ Add spot</button>
+        <div class="paste-modal-actions">
+          <button type="button" class="paste-cancel-btn" onclick="closeTakeoutManage()">Done</button>
+        </div>
       </div>
     </div>
 
@@ -4552,7 +4667,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.5.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.5.3';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -8975,6 +9090,7 @@
     const recipeBtn = document.querySelector('.drawer-item[data-screen="recipes"]');
     if (recipeBtn) recipeBtn.classList.add('active');
     if (!recipesState.loaded && !recipesState.loading) loadRecipesData();
+    initTakeoutSpots();
   }
 
   async function loadRecipesData() {
@@ -9280,7 +9396,7 @@
         imgWrap.appendChild(starBtn);
         const body = document.createElement('div');
         body.className = 'recipe-card-body';
-        body.innerHTML = `<span class="recipe-card-source${hfClass}">${escapeHtml(r.sourceLabel)}</span><div class="recipe-card-name">${escapeHtml(r.name)}</div>`;
+        body.innerHTML = `<span class="recipe-card-source${hfClass}">${escapeHtml(r.sourceLabel)}</span><div class="recipe-card-name">${escapeHtml(r.name)}</div>${r.cuisine ? '<span class="recipe-card-cuisine">' + escapeHtml(r.cuisine) + '</span>' : ''}`;
         card.appendChild(imgWrap);
         card.appendChild(body);
         card.onclick = () => openRecipeDetail(r);
@@ -10083,6 +10199,181 @@
       }
       openRecipeDetail(recipe);
     };
+  }
+
+  // ── Takeout spots ────────────────────────────────────────────────
+  const TAKEOUT_STORAGE_KEY = 'shasta_takeout_spots';
+  const TAKEOUT_PRELOAD = [
+    { name: "Avanti's Italian", cuisine: "Italian", doordash: null, ubereats: null, website: "https://www.avantis.com" },
+    { name: "Thai House", cuisine: "Thai", doordash: null, ubereats: null, website: null },
+    { name: "DESTIHL", cuisine: "American", doordash: null, ubereats: null, website: "https://www.destihl.com" },
+    { name: "Flingers Pizza Pub", cuisine: "Pizza", doordash: null, ubereats: null, website: null },
+    { name: "Tobin's Pizza", cuisine: "Pizza", doordash: null, ubereats: null, website: null },
+    { name: "Signature India", cuisine: "Indian", doordash: null, ubereats: null, website: null },
+    { name: "Kobe Japanese Steak House", cuisine: "Japanese", doordash: null, ubereats: null, website: null },
+    { name: "Buffalo Wild Wings", cuisine: "Wings", doordash: null, ubereats: null, website: null },
+    { name: "Wingstop", cuisine: "Wings", doordash: null, ubereats: null, website: null },
+    { name: "Meatheads", cuisine: "Burgers", doordash: null, ubereats: null, website: null },
+    { name: "Noodles & Company", cuisine: "Pasta", doordash: null, ubereats: null, website: null },
+    { name: "Chipotle", cuisine: "Mexican", doordash: null, ubereats: null, website: null },
+    { name: "Jimmy John's", cuisine: "Sandwiches", doordash: null, ubereats: null, website: "https://www.jimmyjohns.com" },
+    { name: "McAlister's Deli", cuisine: "Sandwiches", doordash: null, ubereats: null, website: null },
+    { name: "Pho Bowl", cuisine: "Vietnamese", doordash: null, ubereats: null, website: null },
+    { name: "Panda Express", cuisine: "Chinese", doordash: null, ubereats: null, website: null }
+  ];
+
+  function takeoutGenId() { return 'to_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7); }
+
+  function getTakeoutSpots() {
+    try {
+      var raw = localStorage.getItem(TAKEOUT_STORAGE_KEY);
+      if (!raw) return [];
+      var arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr : [];
+    } catch (_) { return []; }
+  }
+
+  function saveTakeoutSpots(arr) {
+    try { localStorage.setItem(TAKEOUT_STORAGE_KEY, JSON.stringify(arr)); } catch (_) {}
+  }
+
+  function takeoutDoordashUrl(spot) {
+    if (spot.doordash && typeof spot.doordash === 'string') return spot.doordash;
+    return 'https://www.doordash.com/search/store/' + encodeURIComponent(spot.name) + '/';
+  }
+
+  function takeoutUbereatsUrl(spot) {
+    if (spot.ubereats && typeof spot.ubereats === 'string') return spot.ubereats;
+    return 'https://www.ubereats.com/search?q=' + encodeURIComponent(spot.name);
+  }
+
+  function initTakeoutSpots() {
+    if (localStorage.getItem(TAKEOUT_STORAGE_KEY) !== null) {
+      renderTakeoutSpots();
+      return;
+    }
+    var preload = TAKEOUT_PRELOAD.map(function(p) {
+      return { id: takeoutGenId(), name: p.name, cuisine: p.cuisine || '', doordash: p.doordash, ubereats: p.ubereats, website: p.website, active: true };
+    });
+    saveTakeoutSpots(preload);
+    renderTakeoutSpots();
+  }
+
+  function renderTakeoutSpots() {
+    var wrap = document.getElementById('takeoutSpotsWrap');
+    if (!wrap) return;
+    var spots = getTakeoutSpots().filter(function(s) { return s.active !== false; });
+    wrap.innerHTML = '';
+    spots.forEach(function(s) {
+      var card = document.createElement('div');
+      card.className = 'takeout-card';
+      var ddUrl = takeoutDoordashUrl(s);
+      var ueUrl = takeoutUbereatsUrl(s);
+      var links = '<a class="takeout-link-btn takeout-doordash" href="' + escapeHtml(ddUrl) + '" target="_blank" rel="noopener"><img src="https://stormyreigns.github.io/HATH/Doordash.png" alt="DoorDash"></a><a class="takeout-link-btn takeout-ubereats" href="' + escapeHtml(ueUrl) + '" target="_blank" rel="noopener"><img src="https://stormyreigns.github.io/HATH/UberEats.png" alt="Uber Eats"></a>';
+      if (s.website) links += '<a class="takeout-link-btn takeout-website" href="' + escapeHtml(s.website) + '" target="_blank" rel="noopener">🌐</a>';
+      card.innerHTML = '<div class="takeout-card-name">' + escapeHtml(s.name) + '</div><div class="takeout-card-cuisine">' + escapeHtml(s.cuisine || '') + '</div><div class="takeout-card-links">' + links + '</div>';
+      wrap.appendChild(card);
+    });
+  }
+
+  function openTakeoutManage() {
+    var list = document.getElementById('takeoutManageList');
+    if (!list) return;
+    list.innerHTML = '';
+    var spots = getTakeoutSpots();
+    spots.forEach(function(s) {
+      var row = document.createElement('div');
+      row.className = 'takeout-manage-row';
+      row.dataset.id = s.id;
+      var nameEl = document.createElement('div');
+      nameEl.className = 'takeout-manage-row-name';
+      nameEl.textContent = s.name;
+      var editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'takeout-edit-btn';
+      editBtn.textContent = 'Edit';
+      editBtn.onclick = function() { takeoutToggleEdit(s.id); };
+      var form = document.createElement('div');
+      form.className = 'takeout-edit-form';
+      form.innerHTML = '<input type="text" class="takeout-input-name" placeholder="Name" value="' + escapeHtml(s.name) + '"><input type="text" class="takeout-input-cuisine" placeholder="Cuisine" value="' + escapeHtml(s.cuisine || '') + '"><input type="text" class="takeout-input-doordash" placeholder="DoorDash URL — leave blank to auto-generate" value="' + escapeHtml(s.doordash || '') + '"><input type="text" class="takeout-input-ubereats" placeholder="Uber Eats URL — leave blank to auto-generate" value="' + escapeHtml(s.ubereats || '') + '"><input type="text" class="takeout-input-website" placeholder="Website (optional)" value="' + escapeHtml(s.website || '') + '"><div class="takeout-toggle-row"><label>Active</label><input type="checkbox" class="takeout-input-active"' + (s.active !== false ? ' checked' : '') + '></div><button type="button" class="takeout-delete-btn" onclick="deleteTakeoutSpot(\'' + s.id.replace(/'/g, "\\'") + '\')">Delete</button><button type="button" class="takeout-save-btn" onclick="saveTakeoutSpotFromForm(\'' + s.id.replace(/'/g, "\\'") + '\')">Save</button>';
+      row.appendChild(nameEl);
+      row.appendChild(editBtn);
+      row.appendChild(form);
+      list.appendChild(row);
+    });
+    document.getElementById('takeoutManageModal').classList.add('open');
+  }
+
+  function closeTakeoutManage(ev) {
+    if (ev && ev.target !== ev.currentTarget) return;
+    document.getElementById('takeoutManageModal').classList.remove('open');
+  }
+
+  function takeoutToggleEdit(id) {
+    var row = document.querySelector('.takeout-manage-row[data-id="' + id + '"]');
+    if (!row) return;
+    row.classList.toggle('editing');
+  }
+
+  function saveTakeoutSpotFromForm(id) {
+    var row = document.querySelector('.takeout-manage-row[data-id="' + id + '"]');
+    if (!row) return;
+    var nameIn = row.querySelector('.takeout-input-name');
+    var cuisineIn = row.querySelector('.takeout-input-cuisine');
+    var doordashIn = row.querySelector('.takeout-input-doordash');
+    var ubereatsIn = row.querySelector('.takeout-input-ubereats');
+    var websiteIn = row.querySelector('.takeout-input-website');
+    var activeIn = row.querySelector('.takeout-input-active');
+    var data = {
+      name: (nameIn && nameIn.value) ? nameIn.value.trim() : '',
+      cuisine: (cuisineIn && cuisineIn.value) ? cuisineIn.value.trim() : '',
+      doordash: (doordashIn && doordashIn.value.trim()) || null,
+      ubereats: (ubereatsIn && ubereatsIn.value.trim()) || null,
+      website: (websiteIn && websiteIn.value.trim()) || null,
+      active: activeIn ? activeIn.checked : true
+    };
+    saveTakeoutSpot(id, data);
+    row.classList.remove('editing');
+  }
+
+  function saveTakeoutSpot(id, data) {
+    var spots = getTakeoutSpots();
+    var idx = spots.findIndex(function(s) { return s.id === id; });
+    if (idx >= 0) {
+      spots[idx] = Object.assign({}, spots[idx], data);
+    } else {
+      spots.push(Object.assign({ id: id }, data, { active: data.active !== false }));
+    }
+    saveTakeoutSpots(spots);
+    renderTakeoutSpots();
+    openTakeoutManage();
+  }
+
+  function deleteTakeoutSpot(id) {
+    var spots = getTakeoutSpots().filter(function(s) { return s.id !== id; });
+    saveTakeoutSpots(spots);
+    renderTakeoutSpots();
+    var row = document.querySelector('.takeout-manage-row[data-id="' + id + '"]');
+    if (row) row.remove();
+    if (spots.length === 0) closeTakeoutManage();
+  }
+
+  function takeoutAddSpot() {
+    var id = takeoutGenId();
+    var blank = { id: id, name: '', cuisine: '', doordash: null, ubereats: null, website: null, active: true };
+    saveTakeoutSpot(id, blank);
+    var list = document.getElementById('takeoutManageList');
+    if (!list) return;
+    var row = document.querySelector('.takeout-manage-row[data-id="' + id + '"]');
+    if (row) {
+      row.classList.add('editing');
+      var nameIn = row.querySelector('.takeout-input-name');
+      if (nameIn) nameIn.focus();
+    } else {
+      openTakeoutManage();
+      row = document.querySelector('.takeout-manage-row[data-id="' + id + '"]');
+      if (row) { row.classList.add('editing'); var ni = row.querySelector('.takeout-input-name'); if (ni) ni.focus(); }
+    }
   }
 
   // ── Recipes FAB / add sheet ─────────────────────────────────────
