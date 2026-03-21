@@ -3997,18 +3997,18 @@
     html.dark-mode .recipes-add-inline { box-shadow: 0 2px 8px rgba(192,122,74,0.4); }
     .gj-entry-btn {
       flex: 1; margin: 0; padding: 13px 18px; border-radius: 10px;
-      background: linear-gradient(160deg, #2a1a0e 0%, #1a0e06 100%);
+      background: linear-gradient(160deg, #5a6578 0%, #3d4856 50%, #2a3342 100%);
       border: none;
-      color: #e8c97a;
+      color: #b8c8d8;
       font-size: 14px; font-weight: 800;
       letter-spacing: 0.08em; text-transform: uppercase;
       cursor: pointer; box-sizing: border-box; display: flex;
       align-items: center; justify-content: center; gap: 10px;
       box-shadow:
-        0 1px 0 rgba(255,255,255,0.06) inset,
-        0 -1px 0 rgba(0,0,0,0.4) inset,
-        0 4px 18px rgba(0,0,0,0.35),
-        0 1px 3px rgba(0,0,0,0.5);
+        0 1px 0 rgba(255,255,255,0.12) inset,
+        0 -1px 0 rgba(0,0,0,0.3) inset,
+        0 4px 16px rgba(45,55,72,0.4),
+        0 1px 3px rgba(0,0,0,0.3);
       position: relative; overflow: hidden;
       transition: transform 0.12s, box-shadow 0.15s, filter 0.15s;
     }
@@ -4019,8 +4019,8 @@
         90deg,
         transparent 0px,
         transparent 3px,
-        rgba(255,255,255,0.015) 3px,
-        rgba(255,255,255,0.015) 4px
+        rgba(255,255,255,0.03) 3px,
+        rgba(255,255,255,0.03) 4px
       );
       pointer-events: none;
     }
@@ -4028,17 +4028,17 @@
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0; height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(232,201,122,0.3), transparent);
+      background: linear-gradient(90deg, transparent, rgba(200,220,240,0.4), transparent);
       pointer-events: none;
     }
     .gj-entry-btn:active {
       transform: scale(0.97);
-      box-shadow: 0 1px 6px rgba(0,0,0,0.4);
+      box-shadow: 0 1px 6px rgba(0,0,0,0.35);
       filter: brightness(0.92);
     }
     .gj-entry-btn .gj-entry-icon {
       width: 22px; height: 22px; object-fit: contain; flex-shrink: 0;
-      filter: brightness(0) saturate(100%) invert(80%) sepia(40%) saturate(400%) hue-rotate(5deg);
+      filter: brightness(0) saturate(100%) invert(85%) sepia(8%) saturate(300%) hue-rotate(180deg);
     }
     .gj-entry-flame {
       position: absolute;
@@ -4773,7 +4773,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.5.6';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.5.7';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
