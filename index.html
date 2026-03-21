@@ -1916,7 +1916,19 @@
     .recipe-detail-image img { width: 100%; height: 100%; object-fit: cover; }
     .recipe-detail-content { padding: 20px 18px 44px; }
     .recipe-detail-name { font-size: 24px; font-weight: 800; color: var(--text); line-height: 1.25; margin-bottom: 8px; }
-    .recipe-detail-meta { font-size: 13px; color: var(--text2); margin-bottom: 14px; display: flex; gap: 14px; flex-wrap: wrap; }
+    .recipe-detail-meta { font-size: 13px; color: var(--text2); margin-bottom: 14px; display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+    .recipe-detail-cuisine-wrap { display: inline-flex; align-items: center; gap: 6px; }
+    .recipe-detail-cuisine { font-size: 12px; color: var(--muted); }
+    .recipe-detail-cuisine-edit {
+      background: none; border: none; font-size: 12px; color: var(--muted);
+      cursor: pointer; padding: 2px 4px; opacity: 0.7;
+    }
+    .recipe-detail-cuisine-edit:hover, .recipe-detail-cuisine-edit:active { opacity: 1; color: var(--accent); }
+    .recipe-detail-cuisine-select {
+      font-size: 12px; padding: 4px 8px; border-radius: 6px;
+      border: 1px solid rgba(192,122,74,0.3); background: transparent;
+      color: var(--text); font-family: inherit;
+    }
     .recipe-detail-section-title {
       font-size: 11px; font-weight: 800; text-transform: uppercase;
       letter-spacing: 0.09em; color: var(--accent); margin: 22px 0 10px;
@@ -3501,6 +3513,14 @@
       background-position: right 10px center;
       cursor: pointer;
     }
+    .upload-folder-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+    .upload-folder-group { flex: 1; min-width: 120px; }
+    .upload-folder-group.upload-cuisine-wrap { flex: 0 0 auto; min-width: 100px; }
     .upload-folder-label {
       font-size: 11px;
       font-weight: 600;
@@ -4334,8 +4354,16 @@
   <div class="paste-modal" onclick="event.stopPropagation()">
     <h3>Name this file</h3>
     <input type="text" class="paste-filename" id="uploadNameInput" placeholder="Document title">
-    <div class="upload-folder-label">Save to</div>
-    <select class="upload-folder-select" id="uploadFolderSelect"></select>
+    <div class="upload-folder-row">
+      <div class="upload-folder-group">
+        <div class="upload-folder-label">Save to</div>
+        <select class="upload-folder-select" id="uploadFolderSelect"></select>
+      </div>
+      <div class="upload-folder-group upload-cuisine-wrap" id="uploadCuisineWrap" style="display:none">
+        <div class="upload-folder-label">Cuisine</div>
+        <select class="upload-folder-select" id="uploadCuisineSelect"></select>
+      </div>
+    </div>
     <div class="upload-ocr-section" id="uploadOcrSection" style="display:none">
       <div class="upload-ocr-status" id="uploadOcrStatus">Extracting text…</div>
       <label class="upload-ocr-checkbox" id="uploadOcrCheckboxWrap" style="display:none">
@@ -4355,8 +4383,16 @@
   <div class="paste-modal" onclick="event.stopPropagation()">
     <h3>Paste Text</h3>
     <input type="text" class="paste-filename" id="pasteFilename" placeholder="Document title">
-    <div class="upload-folder-label">Save to</div>
-    <select class="upload-folder-select" id="pasteFolderSelect"></select>
+    <div class="upload-folder-row">
+      <div class="upload-folder-group">
+        <div class="upload-folder-label">Save to</div>
+        <select class="upload-folder-select" id="pasteFolderSelect"></select>
+      </div>
+      <div class="upload-folder-group upload-cuisine-wrap" id="pasteCuisineWrap" style="display:none">
+        <div class="upload-folder-label">Cuisine</div>
+        <select class="upload-folder-select" id="pasteCuisineSelect"></select>
+      </div>
+    </div>
     <textarea class="paste-content" id="pasteContent" placeholder="Paste your text here…"></textarea>
     <div class="paste-modal-actions">
       <button type="button" class="paste-cancel-btn" onclick="closePasteModal()">Cancel</button>
@@ -4371,8 +4407,16 @@
     <h3>Save Link</h3>
     <input type="url" class="paste-filename" id="saveLinkUrl" placeholder="Paste URL…" autocomplete="off" autocorrect="off" spellcheck="false">
     <input type="text" class="paste-filename" id="saveLinkName" placeholder="Name (optional — we'll auto-detect)">
-    <div class="upload-folder-label">Save to</div>
-    <select class="upload-folder-select" id="saveLinkFolderSelect"></select>
+    <div class="upload-folder-row">
+      <div class="upload-folder-group">
+        <div class="upload-folder-label">Save to</div>
+        <select class="upload-folder-select" id="saveLinkFolderSelect"></select>
+      </div>
+      <div class="upload-folder-group upload-cuisine-wrap" id="saveLinkCuisineWrap" style="display:none">
+        <div class="upload-folder-label">Cuisine</div>
+        <select class="upload-folder-select" id="saveLinkCuisineSelect"></select>
+      </div>
+    </div>
     <div class="upload-ocr-status" id="saveLinkStatus" style="display:none"></div>
     <div class="paste-modal-actions">
       <button type="button" class="paste-cancel-btn" onclick="closeSaveLinkModal()">Cancel</button>
@@ -4449,7 +4493,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.1.5';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.2.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -6405,12 +6449,14 @@
     document.getElementById('pasteFilename').value = '';
     document.getElementById('pasteContent').value = '';
     populateUploadFolderSelect('pasteFolderSelect');
+    var w = document.getElementById('pasteCuisineWrap'); if (w) w.style.display = 'none';
     document.getElementById('pasteModal').classList.add('open');
   }
 
   function closePasteModal(ev) {
     if (ev && ev.target !== ev.currentTarget && ev.type === 'click') return;
     document.getElementById('pasteModal').classList.remove('open');
+    window._recipeAddMode = false;
   }
 
   function openSaveLinkModal() {
@@ -6421,6 +6467,7 @@
     document.getElementById('saveLinkStatus').textContent = '';
     document.getElementById('saveLinkBtn').disabled = false;
     populateUploadFolderSelect('saveLinkFolderSelect');
+    var w = document.getElementById('saveLinkCuisineWrap'); if (w) w.style.display = 'none';
     document.getElementById('saveLinkModal').classList.add('open');
     setTimeout(function() { document.getElementById('saveLinkUrl').focus(); }, 300);
   }
@@ -6428,6 +6475,7 @@
   function closeSaveLinkModal(ev) {
     if (ev && ev.target !== ev.currentTarget && ev.type === 'click') return;
     document.getElementById('saveLinkModal').classList.remove('open');
+    window._recipeAddMode = false;
   }
 
   async function confirmSaveLink() {
@@ -6442,6 +6490,7 @@
     btn.disabled = true;
 
     const folderId = getSelectedUploadFolderId('saveLinkFolderSelect');
+    var cuisine = (window._recipeAddMode && document.getElementById('saveLinkCuisineSelect')) ? (document.getElementById('saveLinkCuisineSelect').value || '') : '';
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
@@ -6464,6 +6513,7 @@
         statusEl.style.display = 'none';
         return;
       }
+      if (cuisine && (data.fileId || data.docId)) setRecipeCuisineForId(data.fileId || data.docId, cuisine);
       showDocsToast('Saved: ' + (data.docName || name || 'Link'));
       delete docsFolderCache[folderId];
       loadFolderContents(folderId, true);
@@ -6489,7 +6539,8 @@
     }
     const name = filename.includes('.') ? filename : filename + '.txt';
     const folderId = getSelectedUploadFolderId('pasteFolderSelect');
-    doDocsCreateDoc(text, name, folderId);
+    var cuisine = (window._recipeAddMode && document.getElementById('pasteCuisineSelect')) ? (document.getElementById('pasteCuisineSelect').value || '') : '';
+    doDocsCreateDoc(text, name, folderId, cuisine);
   }
 
   function showDocsLoading(show) {
@@ -6506,7 +6557,7 @@
     window._docsToastTimer = setTimeout(() => el.classList.remove('visible'), 2800);
   }
 
-  async function doDocsUpload(base64, filename, mimeType, folderId) {
+  async function doDocsUpload(base64, filename, mimeType, folderId, cuisine) {
     folderId = folderId || getCurrentDocsFolderId();
     showDocsLoading(true);
     try {
@@ -6534,6 +6585,7 @@
         showDocsToast('Upload failed: ' + (data.error || 'Unknown error'), true);
         return;
       }
+      if (cuisine && data.fileId) setRecipeCuisineForId(data.fileId, cuisine);
       showDocsToast('Saved: ' + (data.fileName || filename));
       delete docsFolderCache[folderId];
       loadFolderContents(folderId, true);
@@ -6544,7 +6596,7 @@
     }
   }
 
-  async function doDocsCreateDoc(text, filename, folderId) {
+  async function doDocsCreateDoc(text, filename, folderId, cuisine) {
     folderId = folderId || getCurrentDocsFolderId();
     closePasteModal();
     showDocsLoading(true);
@@ -6573,6 +6625,7 @@
         showDocsToast('Failed: ' + (data.error || 'Unknown error'), true);
         return;
       }
+      if (cuisine && data.fileId) setRecipeCuisineForId(data.fileId, cuisine);
       showDocsToast('Saved: ' + filename);
       delete docsFolderCache[folderId];
       loadFolderContents(folderId, true);
@@ -6754,6 +6807,7 @@
     if (ev && ev.target !== ev.currentTarget && ev.type === 'click') return;
     document.getElementById('uploadNameModal').classList.remove('open');
     pendingUpload = null;
+    window._recipeAddMode = false;
   }
 
   async function fileToJpegBase64(file, maxDim) {
@@ -6823,12 +6877,13 @@
     const mimeType = pendingUpload.mimeType;
     const ocrText = pendingUpload.ocrText || '';
     const folderId = getSelectedUploadFolderId('uploadFolderSelect');
+    var cuisine = (window._recipeAddMode && document.getElementById('uploadCuisineSelect')) ? (document.getElementById('uploadCuisineSelect').value || '') : '';
     closeUploadNameModal();
     if (createSearchableDoc) {
       const docName = base + ' (text)';
-      doDocsUploadImageAndText(base64, filename, mimeType, ocrText, docName, folderId);
+      doDocsUploadImageAndText(base64, filename, mimeType, ocrText, docName, folderId, cuisine);
     } else {
-      doDocsUpload(base64, filename, mimeType, folderId);
+      doDocsUpload(base64, filename, mimeType, folderId, cuisine);
     }
   }
 
@@ -6848,12 +6903,15 @@
       ocrSection.style.display = 'none';
     }
     populateUploadFolderSelect('uploadFolderSelect');
-    if (window._recipeUploadPending) {
-      window._recipeUploadPending = false;
+    var wrap = document.getElementById('uploadCuisineWrap');
+    if (window._recipeAddMode) {
       const sel = document.getElementById('uploadFolderSelect');
       const recipesFolderId = getRecipesFolderId();
       if (sel) { for (const opt of sel.options) { if (opt.value === recipesFolderId) { opt.selected = true; break; } } }
-    }
+      populateCuisineSelect('uploadCuisineSelect');
+      if (wrap) wrap.style.display = '';
+    } else if (wrap) wrap.style.display = 'none';
+    if (window._recipeUploadPending) window._recipeUploadPending = false;
     document.getElementById('uploadNameModal').classList.add('open');
     input.focus();
     if (isImage && file) {
@@ -6877,7 +6935,7 @@
     }
   }
 
-  async function doDocsUploadImageAndText(base64, imageFilename, mimeType, ocrText, docName, folderId) {
+  async function doDocsUploadImageAndText(base64, imageFilename, mimeType, ocrText, docName, folderId, cuisine) {
     folderId = folderId || getCurrentDocsFolderId();
     showDocsLoading(true);
     try {
@@ -6904,6 +6962,10 @@
       if (uploadJson.error || docJson.error) {
         showDocsToast('Upload failed: ' + (uploadJson.error || docJson.error || 'Unknown error'), true);
         return;
+      }
+      if (cuisine) {
+        if (uploadJson.fileId) setRecipeCuisineForId(uploadJson.fileId, cuisine);
+        if (docJson.fileId) setRecipeCuisineForId(docJson.fileId, cuisine);
       }
       showDocsToast('Saved image and searchable doc');
       delete docsFolderCache[folderId];
@@ -8785,6 +8847,38 @@
   const HF_FOLDER_NAME = 'HelloFresh';
 
   const RECIPE_FAV_STORAGE = 'shasta_recipe_favourites';
+  const RECIPE_CUISINE_STORAGE = 'shasta_recipe_cuisine';
+  const CUISINE_TYPES = ['', 'American', 'Asian', 'Chinese', 'French', 'Indian', 'Italian', 'Japanese', 'Korean', 'Mediterranean', 'Mexican', 'Middle Eastern', 'Thai', 'Vietnamese', 'Other'];
+  function getRecipeCuisineStorage() {
+    try {
+      const raw = localStorage.getItem(RECIPE_CUISINE_STORAGE);
+      if (!raw) return {};
+      const o = JSON.parse(raw);
+      return (o && typeof o === 'object') ? o : {};
+    } catch (_) { return {}; }
+  }
+  function setRecipeCuisineForId(fileId, cuisine) {
+    if (!fileId) return;
+    const o = getRecipeCuisineStorage();
+    if (cuisine) o[fileId] = cuisine; else delete o[fileId];
+    localStorage.setItem(RECIPE_CUISINE_STORAGE, JSON.stringify(o));
+  }
+  function getRecipeCuisine(recipe) {
+    if (!recipe) return '';
+    const o = getRecipeCuisineStorage();
+    return o[recipe.id] || o[recipe.docId] || o[recipe.imageId] || o[recipe.linkFileId] || '';
+  }
+  function setRecipeCuisine(recipe, cuisine) {
+    if (!recipe) return;
+    [recipe.id, recipe.docId, recipe.imageId, recipe.linkFileId].filter(Boolean).forEach(function(id) { setRecipeCuisineForId(id, cuisine || null); });
+    if (recipe.cuisine !== undefined) recipe.cuisine = cuisine || '';
+    renderRecipesView();
+  }
+  function populateCuisineSelect(selectId) {
+    const sel = document.getElementById(selectId);
+    if (!sel) return;
+    sel.innerHTML = CUISINE_TYPES.map(function(c) { return '<option value="' + escapeHtml(c) + '">' + escapeHtml(c || '—') + '</option>'; }).join('');
+  }
   function getRecipeFavourites() {
     try {
       const raw = localStorage.getItem(RECIPE_FAV_STORAGE);
@@ -8811,7 +8905,7 @@
   }
 
   const recipesState = {
-    all: [], filtered: [], activeSource: 'all', activeFavourites: false,
+    all: [], filtered: [], activeSource: 'all', activeFavourites: false, activeCuisine: '',
     searching: false, loaded: false, loading: false,
   };
 
@@ -8890,9 +8984,15 @@
           }
         });
 
+        const cuisineStore = getRecipeCuisineStorage();
+        function cuisineForIds(ids) {
+          for (let i = 0; i < ids.length; i++) if (ids[i] && cuisineStore[ids[i]]) return cuisineStore[ids[i]];
+          return '';
+        }
         Object.values(groups).forEach(g => {
           if (!g.img && !g.doc && !g.linkFile) return;
           const primary = g.doc || g.img || g.linkFile;
+          const ids = [primary.id, g.doc && g.doc.id, g.img && g.img.id, g.linkFile && g.linkFile.id].filter(Boolean);
           recipes.push({
             id: primary.id,
             name: g.name,
@@ -8901,6 +9001,7 @@
             linkFileId: g.linkFile ? g.linkFile.id : null,
             source, sourceLabel,
             url: primary.url,
+            cuisine: cuisineForIds(ids),
           });
         });
       }
@@ -8953,6 +9054,7 @@
   function renderRecipeSourceChips() {
     const el = document.getElementById('recipeSourceChips');
     const usedSources = ['all', 'favourites', ...new Set(recipesState.all.map(r => r.source))];
+    const usedCuisines = [...new Set(recipesState.all.map(r => (r.cuisine || '').trim()).filter(Boolean))].sort();
     const labels = { all: 'All', favourites: '★ Favourites', hellofresh: 'HelloFresh', other: 'Other' };
     el.innerHTML = '';
     usedSources.forEach(s => {
@@ -8963,15 +9065,30 @@
       const isSourceActive = s !== 'favourites' && s === recipesState.activeSource && !recipesState.activeFavourites;
       btn.className = 'recipes-source-chip' + (isFavActive || isSourceActive ? ' active' : '');
       btn.textContent = labels[s] || s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      btn.onclick = () => {
+      btn.onclick = function() {
         if (s === 'favourites') {
           recipesState.activeFavourites = !recipesState.activeFavourites;
+          recipesState.activeCuisine = '';
         } else {
           recipesState.activeSource = s;
           recipesState.activeFavourites = false;
+          recipesState.activeCuisine = '';
         }
         const q = document.getElementById('recipesSearchInput').value;
-        applyRecipesFilter(q, recipesState.activeSource);
+        applyRecipesFilter(q, recipesState.activeSource, recipesState.activeCuisine);
+        renderRecipeSourceChips();
+      };
+      el.appendChild(btn);
+    });
+    usedCuisines.forEach(function(c) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'recipes-source-chip' + (recipesState.activeCuisine === c ? ' active' : '');
+      btn.textContent = c;
+      btn.onclick = function() {
+        recipesState.activeCuisine = recipesState.activeCuisine === c ? '' : c;
+        const q = document.getElementById('recipesSearchInput').value;
+        applyRecipesFilter(q, recipesState.activeSource, recipesState.activeCuisine);
         renderRecipeSourceChips();
       };
       el.appendChild(btn);
@@ -8979,16 +9096,17 @@
   }
 
   function onRecipesSearch(query) {
-    applyRecipesFilter(query, recipesState.activeSource);
+    applyRecipesFilter(query, recipesState.activeSource, recipesState.activeCuisine);
   }
 
-  function applyRecipesFilter(query, source) {
+  function applyRecipesFilter(query, source, cuisine) {
     let list = recipesState.all;
     if (recipesState.activeFavourites) {
       const favIds = getRecipeFavourites();
       list = list.filter(r => favIds.includes(r.id));
     }
     if (source && source !== 'all') list = list.filter(r => r.source === source);
+    if (cuisine) list = list.filter(r => (r.cuisine || '') === cuisine);
     const q = (query || '').trim().toLowerCase();
     if (q) list = list.filter(r => r.name.toLowerCase().includes(q));
     recipesState.filtered = list;
@@ -9161,6 +9279,10 @@
         <div class="recipe-detail-name">${escapeHtml(recipe.name)}</div>
         <div class="recipe-detail-meta" id="recipeDetailMeta">
           <span class="recipe-card-source${hfClass}">${escapeHtml(recipe.sourceLabel)}</span>
+          <span class="recipe-detail-cuisine-wrap" id="recipeDetailCuisineWrap">
+            <span class="recipe-detail-cuisine" id="recipeDetailCuisineSpan">${escapeHtml(recipe.cuisine || getRecipeCuisine(recipe) || '') || '—'}</span>
+            <button type="button" class="recipe-detail-cuisine-edit" onclick="recipeDetailEditCuisine(event)" title="Edit cuisine">✎</button>
+          </span>
         </div>
         <div id="recipeDetailBody"><div class="recipes-loading">Loading…</div></div>
       </div>
@@ -9250,6 +9372,43 @@
   function closeRecipeDetail() {
     window._recipeEditMode = false;
     document.getElementById('recipeDetail').classList.remove('open');
+  }
+
+  function recipeDetailEditCuisine(ev) {
+    if (ev) ev.stopPropagation();
+    var recipe = window._recipeDetailCurrent;
+    if (!recipe) return;
+    var wrap = document.getElementById('recipeDetailCuisineWrap');
+    var span = document.getElementById('recipeDetailCuisineSpan');
+    if (!wrap) return;
+    var currentVal = recipe.cuisine || getRecipeCuisine(recipe) || '';
+    var sel = document.createElement('select');
+    sel.className = 'recipe-detail-cuisine-select';
+    sel.innerHTML = CUISINE_TYPES.map(function(c) { return '<option value="' + escapeHtml(c) + '"' + (c === currentVal ? ' selected' : '') + '>' + escapeHtml(c || '—') + '</option>'; }).join('');
+    wrap.innerHTML = '';
+    wrap.appendChild(sel);
+    sel.focus();
+    function done() {
+      var newVal = sel.value || '';
+      setRecipeCuisine(recipe, newVal);
+      if (recipe === window._recipeDetailCurrent) {
+        var s = document.createElement('span');
+        s.className = 'recipe-detail-cuisine';
+        s.id = 'recipeDetailCuisineSpan';
+        s.textContent = newVal || '—';
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'recipe-detail-cuisine-edit';
+        btn.title = 'Edit cuisine';
+        btn.textContent = '✎';
+        btn.onclick = function(e) { recipeDetailEditCuisine(e); };
+        wrap.innerHTML = '';
+        wrap.appendChild(s);
+        wrap.appendChild(btn);
+      }
+    }
+    sel.addEventListener('change', done);
+    sel.addEventListener('blur', done);
   }
 
   function recipeDetailHandleBack() {
@@ -9512,8 +9671,8 @@
       document.getElementById('gjGordonYell').classList.add('visible');
       document.getElementById('gjGordonBanish').classList.remove('visible');
     } else {
+      document.getElementById('gjGordonYell').classList.add('visible');
       document.getElementById('gjGordonBanish').classList.add('visible');
-      document.getElementById('gjGordonYell').classList.remove('visible');
     }
 
     var votedIndex = gjState.index;
@@ -9592,6 +9751,7 @@
   function triggerRecipesScan() {
     closeRecipesAddMenu();
     window._recipeUploadPending = true;
+    window._recipeAddMode = true;
     document.getElementById('docsFileScan').value = '';
     document.getElementById('docsFileScan').click();
   }
@@ -9599,38 +9759,34 @@
   function triggerRecipesUpload() {
     closeRecipesAddMenu();
     window._recipeUploadPending = true;
+    window._recipeAddMode = true;
     document.getElementById('docsFileUpload').value = '';
     document.getElementById('docsFileUpload').click();
   }
 
   function openRecipeSaveLinkModal() {
-    // Reuse the existing Save Link modal, pre-targeted at the Recipes folder
+    window._recipeAddMode = true;
     openSaveLinkModal();
-    // After the modal populates its folder select, override the selection
-    requestAnimationFrame(() => {
+    requestAnimationFrame(function() {
       const sel = document.getElementById('saveLinkFolderSelect');
       const recipesFolderId = getRecipesFolderId();
-      if (sel) {
-        for (const opt of sel.options) {
-          if (opt.value === recipesFolderId) { opt.selected = true; break; }
-        }
-      }
-      // Mark that we should refresh recipes on close
+      if (sel) { for (const opt of sel.options) { if (opt.value === recipesFolderId) { opt.selected = true; break; } } }
       window._recipeSaveLinkPending = true;
+      populateCuisineSelect('saveLinkCuisineSelect');
+      var w = document.getElementById('saveLinkCuisineWrap'); if (w) w.style.display = '';
     });
   }
 
   function openRecipePasteModal() {
+    window._recipeAddMode = true;
     openPasteModal();
-    requestAnimationFrame(() => {
+    requestAnimationFrame(function() {
       const sel = document.getElementById('pasteFolderSelect');
       const recipesFolderId = getRecipesFolderId();
-      if (sel) {
-        for (const opt of sel.options) {
-          if (opt.value === recipesFolderId) { opt.selected = true; break; }
-        }
-      }
+      if (sel) { for (const opt of sel.options) { if (opt.value === recipesFolderId) { opt.selected = true; break; } } }
       window._recipePastePending = true;
+      populateCuisineSelect('pasteCuisineSelect');
+      var w = document.getElementById('pasteCuisineWrap'); if (w) w.style.display = '';
     });
   }
 
