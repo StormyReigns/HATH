@@ -4040,6 +4040,27 @@
       width: 22px; height: 22px; object-fit: contain; flex-shrink: 0;
       filter: brightness(0) saturate(100%) invert(80%) sepia(40%) saturate(400%) hue-rotate(5deg);
     }
+    .gj-entry-flame {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        ellipse 60% 80% at 50% 120%,
+        rgba(255, 140, 30, 0.18) 0%,
+        rgba(255, 80, 10, 0.10) 40%,
+        transparent 70%
+      );
+      pointer-events: none;
+      animation: gjFlameReflect 3s ease-in-out infinite;
+      mix-blend-mode: screen;
+      border-radius: inherit;
+    }
+    @keyframes gjFlameReflect {
+      0%   { opacity: 0.6; transform: scaleX(0.85) translateY(0px); }
+      25%  { opacity: 1;   transform: scaleX(1.05) translateY(-2px); }
+      50%  { opacity: 0.7; transform: scaleX(0.9)  translateY(-1px); }
+      75%  { opacity: 0.95; transform: scaleX(1.1) translateY(-3px); }
+      100% { opacity: 0.6; transform: scaleX(0.85) translateY(0px); }
+    }
     .home-gj-btn {
       border-radius: 14px; padding: 12px 16px; cursor: pointer;
       opacity: 0; transition: opacity 0.4s; margin-top: 6px;
@@ -4166,7 +4187,10 @@
         </button>
       </div>
       <div class="recipes-gj-row">
-        <button type="button" class="gj-entry-btn" onclick="openGordonsJudgement()"><img class="gj-entry-icon" src="https://stormyreigns.github.io/HATH/HKChefKnife.png" alt=""> Gordon's Judgement</button>
+        <button type="button" class="gj-entry-btn" onclick="openGordonsJudgement()">
+          <span class="gj-entry-flame"></span>
+          <img class="gj-entry-icon" src="https://stormyreigns.github.io/HATH/HKChefKnife.png" alt="">
+          Gordon's Judgement</button>
         <button type="button" class="recipes-add-inline" id="recipesAddFab" onclick="openRecipesAddMenu()" title="Add recipe" aria-label="Add recipe">+</button>
       </div>
       <div class="recipes-search-wrap" id="recipesSearchWrap">
@@ -4749,7 +4773,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.5.5';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.5.6';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
