@@ -46,17 +46,28 @@
     }
     setVisualViewport();
     requestAnimationFrame(function() { requestAnimationFrame(setVisualViewport); });
-    window.addEventListener('resize', setVisualViewportDebounced);
+    window.addEventListener('resize', function() {
+      setVisualViewportDebounced();
+      if (typeof updateScrollBlur === 'function') setTimeout(updateScrollBlur, 50);
+    });
     window.addEventListener('orientationchange', function() { setTimeout(forceLayoutRecalc, 300); });
     window.addEventListener('load', function() {
       setVisualViewport();
       [50, 100, 200, 350, 500, 750, 1200].forEach(function(delay) {
         setTimeout(forceLayoutRecalc, delay);
       });
+      if (typeof updateScrollBlur === 'function') {
+        [100, 300, 600].forEach(function(delay) {
+          setTimeout(updateScrollBlur, delay);
+        });
+      }
     });
     window.addEventListener('pageshow', function(e) { if (e.persisted) forceLayoutRecalc(); });
     if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', setVisualViewportDebounced);
+      window.visualViewport.addEventListener('resize', function() {
+        setVisualViewportDebounced();
+        if (typeof updateScrollBlur === 'function') setTimeout(updateScrollBlur, 50);
+      });
       window.visualViewport.addEventListener('scroll', setVisualViewportDebounced);
     }
   </script>
@@ -101,6 +112,8 @@
       html { height: 100lvh; min-height: 100lvh; height: calc(var(--vh, 1vh) * 100); min-height: calc(var(--vh, 1vh) * 100); }
       body { min-height: 100lvh; min-height: calc(var(--vh, 1vh) * 100); }
     }
+    html { scrollbar-width: none; }
+    *::-webkit-scrollbar { display: none; width: 0; height: 0; }
     body {
       height: 100%;
       height: 100vh;
@@ -605,7 +618,8 @@
       padding-bottom: calc(32px + env(safe-area-inset-bottom));
       z-index: 1;
       display: flex; flex-direction: column;
-      overflow: hidden;
+      overflow-x: visible;
+      overflow-y: hidden;
       background: transparent;
     }
 
@@ -636,6 +650,24 @@
       color: var(--muted); margin-top: -2px; font-weight: 400;
     }
     .topbar-left, .topbar-right { width: 34px; }
+
+    .app-scroll-blur {
+      position: fixed;
+      left: 0; right: 0;
+      bottom: calc(60px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
+      height: 80px;
+      pointer-events: none;
+      z-index: 75;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      background: linear-gradient(to top, var(--edge-bg, #fdf0e8) 40%, transparent);
+      -webkit-backdrop-filter: blur(12px) saturate(1.2);
+      backdrop-filter: blur(12px) saturate(1.2);
+    }
+    .app-scroll-blur.visible { opacity: 1; }
+    html.dark-mode .app-scroll-blur {
+      background: linear-gradient(to top, #1a1816 40%, transparent);
+    }
 
     .app-bottom-bar {
       position: fixed;
@@ -758,6 +790,7 @@
       gap: 10px; opacity: 0;
       width: 100%;
       min-height: fit-content;
+      overflow-x: visible;
       animation: fadeUp 0.7s ease 0.3s forwards;
     }
     @media (prefers-reduced-motion: reduce) {
@@ -773,14 +806,15 @@
     }
     .hint-greeting em { font-style: italic; color: var(--accent); }
 
-    /* home in-progress projects scroller */
+    /* home in-progress projects scroller — extends slightly past edges to avoid cut-off */
     .home-projects-scroller {
-      width: 100%;
-      max-width: 300px;
-      margin-top: 6px;
+      width: calc(100% + 150px);
+      max-width: 450px;
+      margin: 6px -75px 0 -75px;
       opacity: 0;
       transition: opacity 0.4s ease;
       cursor: pointer;
+      overflow-x: visible;
     }
     .home-projects-scroller.has-projects { opacity: 1; }
     .home-projects-scroller:active { opacity: 0.85; }
@@ -1226,6 +1260,7 @@
       padding: 8px 0 12px;
       flex-shrink: 0;
     }
+    .docs-title-icon { width: 18px; height: 18px; flex-shrink: 0; color: var(--text); filter: drop-shadow(0 0 4px rgba(255,255,255,0.6)); }
     .docs-header .screen-breadcrumb { padding: 0; flex: 1; min-width: 0; }
     .docs-refresh-btn {
       flex-shrink: 0;
@@ -1898,6 +1933,8 @@
       display: flex; align-items: center; justify-content: space-between;
       padding: 4px 0 6px; flex-shrink: 0;
     }
+    .schedule-title-wrap { display: flex; align-items: center; gap: 8px; }
+    .schedule-title-icon { width: 18px; height: 18px; flex-shrink: 0; color: var(--text); filter: drop-shadow(0 0 4px rgba(255,255,255,0.6)); }
     .schedule-title {
       font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 400;
       color: var(--text); letter-spacing: 0.02em;
@@ -3770,6 +3807,7 @@
     <div class="sub-screen" id="projectsScreen">
       <div class="projects-landing" id="projectsLanding">
         <div class="projects-header">
+          <img class="projects-title-icon" src="https://stormyreigns.github.io/HATH/WWChest1.png" alt="">
           <h2 class="projects-title">Projects</h2>
         </div>
         <div class="projects-completed-bar" id="projectsCompletedBar">
@@ -3906,6 +3944,7 @@
 </div><!-- end .app -->
 
   <!-- Bottom bar — outside .app so fixed anchors to viewport, covers safe area -->
+  <div class="app-scroll-blur" id="appScrollBlur" aria-hidden="true"></div>
   <div class="app-bottom-bar" id="appBottomBar">
     <div class="bottom-bar-inner">
       <button type="button" class="bottom-bar-btn bottom-bar-hamburger" onclick="toggleDrawer()" aria-label="Menu">
@@ -4155,7 +4194,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.0.7';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.0.9';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -4707,6 +4746,7 @@
     updateBlatherBookVisibility();
     updateBottomBarHome();
     updateScreenAddFabs();
+    requestAnimationFrame(function() { setTimeout(updateScrollBlur, 100); });
   }
 
   function showSubScreen(screenId) {
@@ -4738,6 +4778,7 @@
     updateBlatherBookVisibility();
     updateBottomBarHome();
     updateScreenAddFabs();
+    requestAnimationFrame(function() { setTimeout(updateScrollBlur, 100); });
   }
 
   function updateBlatherBookVisibility() {
@@ -4750,6 +4791,22 @@
     if (homeBtn) homeBtn.style.display = 'flex';
     const center = homeBtn && homeBtn.parentElement;
     if (center) center.style.display = 'flex';
+  }
+
+  function updateScrollBlur() {
+    const blur = document.getElementById('appScrollBlur');
+    if (!blur) return;
+    let canScroll = false;
+    const body = document.querySelector('.body');
+    if (body && body.scrollHeight > body.clientHeight + 2) canScroll = true;
+    const subScreen = document.querySelector('.sub-screen.visible');
+    if (subScreen && !canScroll) {
+      const scrollables = subScreen.querySelectorAll('.civics-content, .screen-list, #scheduleList, #settingsScreen, .recipe-detail-scroll, .recipes-list-wrap');
+      scrollables.forEach(function(el) {
+        if (el.scrollHeight > el.clientHeight + 2) canScroll = true;
+      });
+    }
+    blur.classList.toggle('visible', canScroll);
   }
 
   function updateScreenAddFabs() {
@@ -5302,6 +5359,7 @@
     if (inProgress.length === 0) {
       wrap.classList.remove('has-projects');
       wrap.style.display = 'none';
+      setTimeout(updateScrollBlur, 0);
       return;
     }
     wrap.style.display = '';
@@ -5312,6 +5370,7 @@
       const phaseInfo = d.currentPhaseName ? escapeHtml(d.currentPhaseName) : (d.phaseLabel || '');
       return `<span class="home-project-chip" onclick="event.stopPropagation(); closeDrawer(); showProjectsScreen(); projectsSelectProject('${p.id}');"><div class="home-project-chip-top"><span class="home-project-chip-title">${escapeHtml(p.title)}</span><span class="home-project-chip-pct">${progPct}%</span></div>${phaseInfo ? `<span class="home-project-chip-phase">${phaseInfo}</span>` : ''}<div class="home-project-chip-bar"><div class="home-project-chip-fill" style="width:${progPct}%"></div></div></span>`;
     }).join('');
+    setTimeout(updateScrollBlur, 50);
   }
 
   function showProjectsScreen() {
