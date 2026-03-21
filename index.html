@@ -1829,9 +1829,9 @@
     .recipe-fav-star.list.active { color: #e6b422; }
     .recipe-list-item { position: relative; }
     .recipe-fav-star.detail {
-      position: static; margin-left: 8px;
-      background: transparent; color: var(--muted);
-      width: 36px; height: 36px; font-size: 20px;
+      position: absolute; top: 8px; right: 8px;
+      margin-left: 0;
+      width: 32px; height: 32px; font-size: 18px;
     }
     .recipe-fav-star.detail.active { color: #e6b422; }
     /* Recipe list (search results) */
@@ -1902,6 +1902,7 @@
     }
     .recipe-detail-scroll::-webkit-scrollbar { display: none; }
     .recipe-detail-image {
+      position: relative;
       width: 100%; height: 230px; background: linear-gradient(135deg, #e8d5b0, #c9a06a);
       display: flex; align-items: center; justify-content: center;
       font-size: 72px; color: rgba(0,0,0,0.2); flex-shrink: 0; overflow: hidden;
@@ -3615,6 +3616,165 @@
       font-size: 15px;
       color: var(--text2);
     }
+
+    /* ── Gordon's Judgement ── */
+    .gordons-judgement-overlay {
+      position: fixed; inset: 0; z-index: 400;
+      background: rgba(6,4,0,0.72);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .gordons-judgement-overlay.open {
+      opacity: 1; pointer-events: all;
+    }
+    .gj-card-stack {
+      position: relative;
+      width: 78vw; max-width: 320px;
+      height: 58vw; max-height: 240px;
+    }
+    .gj-card {
+      position: absolute; inset: 0;
+      border-radius: 18px;
+      background: var(--drawer-bg);
+      border: 1px solid var(--drawer-border);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      cursor: grab;
+      user-select: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      will-change: transform;
+    }
+    .gj-card.is-dragging { transition: none; cursor: grabbing; }
+    .gj-card-image {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #e8d5b0 0%, #c9a06a 100%);
+    }
+    .gj-card-image.hf-card { background: linear-gradient(135deg, #d4edd9 0%, #7dc28a 100%); }
+    .gj-card-monogram {
+      font-size: 72px; font-weight: 800;
+      color: rgba(255,255,255,0.35);
+      line-height: 1; user-select: none;
+    }
+    .gj-card-body {
+      padding: 14px 16px;
+      background: #fdf8f1;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    html.dark-mode .gordons-judgement-overlay .gj-card-body { background: #252220; }
+    .gj-card-name {
+      font-size: 16px; font-weight: 700; color: var(--text);
+      flex: 1; line-height: 1.25;
+    }
+    .gj-card-source {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; padding: 3px 8px; border-radius: 6px;
+      background: rgba(192,122,74,0.15); color: var(--accent);
+      white-space: nowrap; margin-left: 10px;
+    }
+    .gj-card-source.hf { background: rgba(0,169,91,0.13); color: #00a05a; }
+    .gj-verdict-yes, .gj-verdict-no {
+      position: absolute; inset: 0; border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 52px; font-weight: 900;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.1s;
+    }
+    .gj-verdict-yes {
+      background: rgba(0,160,90,0.18);
+      color: #00a05a;
+    }
+    .gj-verdict-no {
+      background: rgba(200,50,30,0.18);
+      color: #c8321e;
+    }
+    .gj-gordon {
+      position: absolute;
+      bottom: 0;
+      width: 160px;
+      object-fit: contain;
+      opacity: 0;
+      transition: opacity 0.25s, transform 0.25s;
+      pointer-events: none;
+      transform: translateY(20px);
+    }
+    .gj-gordon.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .gj-gordon-banish { right: -20px; }
+    .gj-gordon-winner { left: 50%; transform: translateX(-50%) translateY(20px); }
+    .gj-gordon-winner.visible { transform: translateX(-50%) translateY(0); }
+    .gj-controls {
+      margin-top: 32px;
+      display: flex; align-items: center; gap: 24px;
+    }
+    .gj-btn-no {
+      width: 58px; height: 58px; border-radius: 50%;
+      background: rgba(200,50,30,0.15);
+      border: 2px solid rgba(200,50,30,0.4);
+      font-size: 26px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .gj-btn-yes {
+      width: 58px; height: 58px; border-radius: 50%;
+      background: rgba(0,160,90,0.15);
+      border: 2px solid rgba(0,160,90,0.4);
+      font-size: 26px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .gj-btn-close {
+      position: absolute;
+      top: max(env(safe-area-inset-top), 20px);
+      right: 20px;
+      background: none; border: none;
+      font-size: 28px; color: rgba(255,255,255,0.4);
+      cursor: pointer; padding: 8px;
+    }
+    .gj-counter {
+      font-size: 13px; color: rgba(255,255,255,0.4);
+      letter-spacing: 0.06em; text-align: center;
+      margin-top: 16px;
+    }
+    .gj-winner-actions {
+      display: flex; gap: 12px; margin-top: 28px;
+    }
+    .gj-winner-btn-primary {
+      padding: 14px 28px; border-radius: 12px;
+      background: var(--accent); color: #fff;
+      font-size: 15px; font-weight: 700; border: none; cursor: pointer;
+    }
+    .gj-winner-btn-secondary {
+      padding: 14px 20px; border-radius: 12px;
+      background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);
+      font-size: 15px; font-weight: 600; border: 1px solid rgba(255,255,255,0.15);
+      cursor: pointer;
+    }
+    .gj-title {
+      font-size: 13px; font-weight: 600;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.14em; text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .gj-entry-btn {
+      margin: 0 16px 12px; padding: 13px; border-radius: 12px;
+      background: rgba(192,122,74,0.1); border: 1.5px solid rgba(192,122,74,0.25);
+      color: var(--accent); font-size: 15px; font-weight: 700;
+      cursor: pointer; width: calc(100% - 32px); box-sizing: border-box;
+    }
+    .home-gj-btn {
+      border-radius: 14px; padding: 12px 16px; cursor: pointer;
+      opacity: 0; transition: opacity 0.4s; margin-top: 6px;
+      width: 100%; max-width: 300px; text-align: center;
+      background: rgba(255,255,255,0.5); border: 1px solid rgba(192,122,74,0.2);
+      font-size: 14px; font-weight: 500; color: var(--text2);
+    }
+    .home-gj-btn.visible { opacity: 1; }
+    .home-gj-label { display: block; }
   </style>
 </head>
 <body>
@@ -3684,6 +3844,10 @@
         <div class="upcoming-events-list" id="upcomingEventsList"></div>
       </div>
 
+      <div class="home-gj-btn" id="homeGjBtn" onclick="openGordonsJudgement()" role="button" tabindex="0" aria-label="Gordon's Judgement">
+        <span class="home-gj-label">🎲 What's for dinner?</span>
+      </div>
+
       <div class="matt-note" id="mattNote"></div>
 
       <div class="recent-uploads" id="recentUploads" onclick="closeDrawer(); showDocsScreen()" role="button" tabindex="0" aria-label="View documents">
@@ -3735,6 +3899,7 @@
         <div class="recipes-carousel h-scroll-faded" id="recipesCarousel"></div>
       </div>
       <div class="recipes-list-wrap" id="recipesListWrap"></div>
+      <button type="button" class="gj-entry-btn" onclick="openGordonsJudgement()">🎲 Gordon's Judgement</button>
       <button type="button" class="screen-add-fab" id="recipesAddFab" onclick="openRecipesAddMenu()" title="Add recipe" aria-label="Add recipe">+</button>
       <!-- Recipe detail slide-in -->
       <div class="recipe-detail" id="recipeDetail">
@@ -4260,7 +4425,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.0.25';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.1.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -4938,6 +5103,7 @@
     if (projectsAdd) projectsAdd.classList.toggle('visible', onProjects);
     if (scheduleAdd) scheduleAdd.classList.toggle('visible', onSchedule);
     if (recipesAdd)  recipesAdd.classList.toggle('visible', onRecipes);
+    if (typeof updateHomeGjVisibility === 'function') updateHomeGjVisibility();
   }
 
   let docsBreadcrumb = [{ id: DOCS_FOLDER_ID, name: 'ShastApp Docs' }];
@@ -8736,6 +8902,7 @@
 
       renderRecipeSourceChips();
       renderRecipesView();
+      if (typeof updateHomeGjVisibility === 'function') updateHomeGjVisibility();
     } catch (err) {
       document.getElementById('recipesCarousel').innerHTML = '<div class="recipes-loading">Could not load recipes: ' + escapeHtml(err.message) + '</div>';
     }
@@ -8963,12 +9130,12 @@
     scroll.innerHTML = `
       <div class="recipe-detail-image${hfCardClass}" id="recipeDetailImgWrap">
         <div class="recipe-card-monogram" style="font-size:96px;color:rgba(255,255,255,0.25)">${recipeMonogram(recipe.name)}</div>
+        <button type="button" class="recipe-fav-star detail${isRecipeFavourite(recipe) ? ' active' : ''}" id="recipeDetailFavStar" title="Favourite" onclick="toggleRecipeFavourite(window._recipeDetailCurrent)">${isRecipeFavourite(recipe) ? '★' : '☆'}</button>
       </div>
       <div class="recipe-detail-content">
         <div class="recipe-detail-name">${escapeHtml(recipe.name)}</div>
         <div class="recipe-detail-meta" id="recipeDetailMeta">
           <span class="recipe-card-source${hfClass}">${escapeHtml(recipe.sourceLabel)}</span>
-          <button type="button" class="recipe-fav-star detail${isRecipeFavourite(recipe) ? ' active' : ''}" id="recipeDetailFavStar" title="Favourite" onclick="toggleRecipeFavourite(window._recipeDetailCurrent)">${isRecipeFavourite(recipe) ? '★' : '☆'}</button>
         </div>
         <div id="recipeDetailBody"><div class="recipes-loading">Loading…</div></div>
       </div>
@@ -9137,6 +9304,240 @@
     document.getElementById('recipeImgLightbox').classList.remove('open');
   }
 
+  // ── Gordon's Judgement ───────────────────────────────────────────
+  function shuffleArray(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  const gjState = { pool: [], index: 0, winner: null };
+
+  function updateHomeGjVisibility() {
+    const el = document.getElementById('homeGjBtn');
+    if (!el) return;
+    if (recipesState.all && recipesState.all.length > 0) {
+      el.classList.add('visible');
+      el.style.display = '';
+    } else {
+      el.classList.remove('visible');
+      el.style.display = 'none';
+    }
+  }
+
+  async function openGordonsJudgement() {
+    const overlay = document.getElementById('gordonsJudgement');
+    const counterEl = document.getElementById('gjCounter');
+    overlay.classList.add('open');
+    document.getElementById('gjGordonBanish').classList.remove('visible');
+    document.getElementById('gjGordonWinner').classList.remove('visible');
+    document.getElementById('gjWinnerActions').style.display = 'none';
+    document.getElementById('gjControls').style.display = 'flex';
+    counterEl.textContent = 'Loading recipes…';
+
+    if (!recipesState.loaded && !recipesState.loading) {
+      await loadRecipesData();
+    } else if (recipesState.loading) {
+      while (recipesState.loading) await new Promise(r => setTimeout(r, 100));
+    }
+
+    const pool = (recipesState.all || []).length > 0
+      ? shuffleArray(recipesState.all).slice(0, 5)
+      : [];
+    gjState.pool = pool;
+    gjState.index = 0;
+    gjState.winner = null;
+
+    if (pool.length === 0) {
+      counterEl.textContent = 'No recipes available. Add some first!';
+      document.getElementById('gjCardStack').innerHTML = '';
+      return;
+    }
+
+    startGordonsJudgement();
+  }
+
+  function startGordonsJudgement() {
+    gjState.index = 0;
+    gjState.winner = null;
+    document.getElementById('gjGordonBanish').classList.remove('visible');
+    document.getElementById('gjGordonWinner').classList.remove('visible');
+    document.getElementById('gjWinnerActions').style.display = 'none';
+    document.getElementById('gjControls').style.display = 'flex';
+    gjRenderStack();
+  }
+
+  function closeGordonsJudgement() {
+    document.getElementById('gordonsJudgement').classList.remove('open');
+    document.getElementById('gjGordonBanish').classList.remove('visible');
+    document.getElementById('gjGordonWinner').classList.remove('visible');
+    document.getElementById('gjWinnerActions').style.display = 'none';
+    document.getElementById('gjControls').style.display = 'flex';
+    document.getElementById('gjCardStack').innerHTML = '';
+  }
+
+  function gjRenderStack() {
+    const stack = document.getElementById('gjCardStack');
+    const counterEl = document.getElementById('gjCounter');
+    stack.innerHTML = '';
+    counterEl.style.fontSize = '';
+    counterEl.style.color = '';
+
+    const pool = gjState.pool;
+    const idx = gjState.index;
+    if (idx >= pool.length) return;
+
+    const count = pool.length - idx;
+    counterEl.textContent = count === 1 ? 'Last one…' : count + ' remaining';
+
+    const cardsToShow = Math.min(3, pool.length - idx);
+    for (let i = 0; i < cardsToShow; i++) {
+      const recipe = pool[idx + i];
+      const card = document.createElement('div');
+      card.className = 'gj-card' + (i === 0 ? ' gj-top' : '');
+      const hfCardClass = recipe.source === 'hellofresh' ? ' hf-card' : '';
+      const hfSourceClass = recipe.source === 'hellofresh' ? ' hf' : '';
+      const scale = i === 0 ? 1 : i === 1 ? 0.94 : 0.88;
+      const ty = i === 0 ? 0 : i === 1 ? 6 : 12;
+      const opacity = i === 0 ? 1 : i === 1 ? 0.75 : 0.5;
+      card.style.transform = `scale(${scale}) translateY(${ty}px)`;
+      card.style.opacity = opacity;
+      card.style.zIndex = 3 - i;
+
+      card.innerHTML = `
+        <div class="gj-verdict-yes">✓</div>
+        <div class="gj-verdict-no">✕</div>
+        <div class="gj-card-image${hfCardClass}">
+          <div class="gj-card-monogram">${recipeMonogram(recipe.name)}</div>
+        </div>
+        <div class="gj-card-body">
+          <div class="gj-card-name">${escapeHtml(recipe.name)}</div>
+          <span class="gj-card-source${hfSourceClass}">${escapeHtml(recipe.sourceLabel || recipe.source || 'Recipe')}</span>
+        </div>
+      `;
+
+      if (i === 0) {
+        let startX = 0;
+        card.addEventListener('touchstart', function(e) {
+          card.classList.add('is-dragging');
+          startX = e.touches[0].clientX;
+        }, { passive: true });
+        card.addEventListener('touchmove', function(e) {
+          const dx = e.touches[0].clientX - startX;
+          card.style.transform = `translateX(${dx}px) rotate(${dx / 20}deg)`;
+          card.querySelector('.gj-verdict-yes').style.opacity = dx > 40 ? '1' : '0';
+          card.querySelector('.gj-verdict-no').style.opacity = dx < -40 ? '1' : '0';
+        }, { passive: true });
+        card.addEventListener('touchend', function(e) {
+          card.classList.remove('is-dragging');
+          const dx = e.changedTouches[0].clientX - startX;
+          if (Math.abs(dx) > 80) gjVote(dx > 0 ? 'yes' : 'no');
+          else card.style.transition = 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)'; card.style.transform = 'scale(1) translateY(0)'; setTimeout(() => { card.style.transition = ''; }, 300);
+          card.querySelector('.gj-verdict-yes').style.opacity = '0';
+          card.querySelector('.gj-verdict-no').style.opacity = '0';
+        });
+        card.addEventListener('mousedown', function(e) {
+          e.preventDefault();
+          card.classList.add('is-dragging');
+          startX = e.clientX;
+          function onMove(ev) {
+            const dx = ev.clientX - startX;
+            card.style.transform = `translateX(${dx}px) rotate(${dx / 20}deg)`;
+            card.querySelector('.gj-verdict-yes').style.opacity = dx > 40 ? '1' : '0';
+            card.querySelector('.gj-verdict-no').style.opacity = dx < -40 ? '1' : '0';
+          }
+          function onUp(ev) {
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+            card.classList.remove('is-dragging');
+            const dx = ev.clientX - startX;
+            if (Math.abs(dx) > 80) gjVote(dx > 0 ? 'yes' : 'no');
+            else { card.style.transition = 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)'; card.style.transform = 'scale(1) translateY(0)'; setTimeout(() => { card.style.transition = ''; }, 300); }
+            card.querySelector('.gj-verdict-yes').style.opacity = '0';
+            card.querySelector('.gj-verdict-no').style.opacity = '0';
+          }
+          document.addEventListener('mousemove', onMove);
+          document.addEventListener('mouseup', onUp);
+        });
+      }
+
+      stack.appendChild(card);
+    }
+  }
+
+  function gjVote(direction) {
+    const topCard = document.querySelector('#gjCardStack .gj-card');
+    if (!topCard) return;
+
+    topCard.style.transition = 'transform 0.32s cubic-bezier(0.4,0,0.8,1)';
+    topCard.style.transform = direction === 'yes'
+      ? 'translateX(110%) rotate(18deg)'
+      : 'translateX(-110%) rotate(-18deg)';
+
+    if (direction === 'no') {
+      document.getElementById('gjGordonBanish').classList.add('visible');
+      setTimeout(function() {
+        document.getElementById('gjGordonBanish').classList.remove('visible');
+      }, 600);
+    }
+
+    var votedIndex = gjState.index;
+    gjState.index++;
+
+    setTimeout(function() {
+      if (direction === 'yes') {
+        gjShowWinner(gjState.pool[votedIndex]);
+      } else if (gjState.index >= gjState.pool.length) {
+        gjShowWinner(gjState.pool[gjState.pool.length - 1]);
+      } else if (gjState.pool.length - gjState.index === 1) {
+        gjShowWinner(gjState.pool[gjState.index]);
+      } else {
+        gjRenderStack();
+      }
+    }, 350);
+  }
+
+  function gjShowWinner(recipe) {
+    gjState.winner = recipe;
+    document.getElementById('gjCardStack').innerHTML = '';
+
+    const card = document.createElement('div');
+    card.className = 'gj-card';
+    const hfCardClass = recipe.source === 'hellofresh' ? ' hf-card' : '';
+    const hfSourceClass = recipe.source === 'hellofresh' ? ' hf' : '';
+    card.innerHTML = `
+      <div class="gj-card-image${hfCardClass}">
+        <div class="gj-card-monogram">${recipeMonogram(recipe.name)}</div>
+      </div>
+      <div class="gj-card-body">
+        <div class="gj-card-name">${escapeHtml(recipe.name)}</div>
+        <span class="gj-card-source${hfSourceClass}">${escapeHtml(recipe.sourceLabel || recipe.source || 'Recipe')}</span>
+      </div>
+    `;
+    document.getElementById('gjCardStack').appendChild(card);
+
+    document.getElementById('gjGordonWinner').classList.add('visible');
+    document.getElementById('gjControls').style.display = 'none';
+    document.getElementById('gjWinnerActions').style.display = 'flex';
+
+    const counterEl = document.getElementById('gjCounter');
+    counterEl.textContent = recipe.name;
+    counterEl.style.fontSize = '18px';
+    counterEl.style.color = 'rgba(255,255,255,0.9)';
+
+    const cookBtn = document.getElementById('gjWinnerCook');
+    cookBtn.onclick = function() {
+      closeGordonsJudgement();
+      if (!document.getElementById('recipesScreen').classList.contains('visible')) {
+        showRecipesScreen();
+      }
+      openRecipeDetail(recipe);
+    };
+  }
+
   // ── Recipes FAB / add sheet ─────────────────────────────────────
   function openRecipesAddMenu() {
     document.getElementById('recipesAddSheet').classList.add('open');
@@ -9253,5 +9654,26 @@
   }
 
 </script>
+
+<!-- Gordon's Judgement -->
+<div class="gordons-judgement-overlay" id="gordonsJudgement">
+  <button class="gj-btn-close" onclick="closeGordonsJudgement()">✕</button>
+  <div class="gj-title">Gordon's Judgement</div>
+  <div style="position:relative; width:78vw; max-width:320px;">
+    <div class="gj-card-stack" id="gjCardStack"></div>
+    <img class="gj-gordon gj-gordon-banish" id="gjGordonBanish" src="https://stormyreigns.github.io/HATH/HKGordonBanish.png" alt="">
+    <img class="gj-gordon gj-gordon-winner" id="gjGordonWinner" src="https://stormyreigns.github.io/HATH/HKGordon.png" alt="">
+  </div>
+  <div class="gj-counter" id="gjCounter"></div>
+  <div class="gj-controls" id="gjControls">
+    <button class="gj-btn-no" id="gjBtnNo" onclick="gjVote('no')" aria-label="Not tonight">✕</button>
+    <button class="gj-btn-yes" id="gjBtnYes" onclick="gjVote('yes')" aria-label="Let's cook">✓</button>
+  </div>
+  <div class="gj-winner-actions" id="gjWinnerActions" style="display:none">
+    <button class="gj-winner-btn-primary" id="gjWinnerCook">Let's Cook</button>
+    <button class="gj-winner-btn-secondary" onclick="startGordonsJudgement()">Go Again</button>
+  </div>
+</div>
+
 </body>
 </html>
