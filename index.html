@@ -3696,23 +3696,40 @@
       background: rgba(200,50,30,0.18);
       color: #c8321e;
     }
-    .gj-gordon {
+    .gj-gordon-zone {
+      position: relative;
+      width: 90vw;
+      max-width: 360px;
+      min-height: 130px;
+      margin-top: -16px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .gj-gordon-reaction {
       position: absolute;
       bottom: 0;
+      width: 140px;
+      object-fit: contain;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .gj-gordon-reaction.visible { opacity: 1; }
+    .gj-gordon-yell { left: 0; }
+    .gj-gordon-banish { right: 0; }
+    .gj-gordon-winner {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
       width: 160px;
       object-fit: contain;
       opacity: 0;
-      transition: opacity 0.4s ease-out, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
       pointer-events: none;
-      transform: translateY(24px);
+      transition: opacity 0.25s ease;
     }
-    .gj-gordon.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .gj-gordon-banish { right: -20px; }
-    .gj-gordon-winner { left: 50%; transform: translateX(-50%) translateY(24px); }
-    .gj-gordon-winner.visible { transform: translateX(-50%) translateY(0); }
+    .gj-gordon-winner.visible { opacity: 1; }
     .gj-controls {
       margin-top: 32px;
       display: flex; align-items: center; gap: 24px;
@@ -4431,7 +4448,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.1.3';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.1.4';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -9339,6 +9356,7 @@
     const overlay = document.getElementById('gordonsJudgement');
     const counterEl = document.getElementById('gjCounter');
     overlay.classList.add('open');
+    document.getElementById('gjGordonYell').classList.remove('visible');
     document.getElementById('gjGordonBanish').classList.remove('visible');
     document.getElementById('gjGordonWinner').classList.remove('visible');
     document.getElementById('gjWinnerActions').style.display = 'none';
@@ -9370,6 +9388,7 @@
   function startGordonsJudgement() {
     gjState.index = 0;
     gjState.winner = null;
+    document.getElementById('gjGordonYell').classList.remove('visible');
     document.getElementById('gjGordonBanish').classList.remove('visible');
     document.getElementById('gjGordonWinner').classList.remove('visible');
     document.getElementById('gjWinnerActions').style.display = 'none';
@@ -9379,6 +9398,7 @@
 
   function closeGordonsJudgement() {
     document.getElementById('gordonsJudgement').classList.remove('open');
+    document.getElementById('gjGordonYell').classList.remove('visible');
     document.getElementById('gjGordonBanish').classList.remove('visible');
     document.getElementById('gjGordonWinner').classList.remove('visible');
     document.getElementById('gjWinnerActions').style.display = 'none';
@@ -9491,11 +9511,12 @@
       ? 'translateX(110%) rotate(18deg)'
       : 'translateX(-110%) rotate(-18deg)';
 
-    if (direction === 'no') {
+    if (direction === 'yes') {
+      document.getElementById('gjGordonYell').classList.add('visible');
+      document.getElementById('gjGordonBanish').classList.remove('visible');
+    } else {
       document.getElementById('gjGordonBanish').classList.add('visible');
-      setTimeout(function() {
-        document.getElementById('gjGordonBanish').classList.remove('visible');
-      }, 1400);
+      document.getElementById('gjGordonYell').classList.remove('visible');
     }
 
     var votedIndex = gjState.index;
@@ -9533,6 +9554,8 @@
     `;
     document.getElementById('gjCardStack').appendChild(card);
 
+    document.getElementById('gjGordonYell').classList.remove('visible');
+    document.getElementById('gjGordonBanish').classList.remove('visible');
     document.getElementById('gjGordonWinner').classList.add('visible');
     document.getElementById('gjControls').style.display = 'none';
     document.getElementById('gjWinnerActions').style.display = 'flex';
@@ -9675,8 +9698,11 @@
   <div class="gj-title">Gordon's Judgement</div>
   <div style="position:relative; width:78vw; max-width:320px;">
     <div class="gj-card-stack" id="gjCardStack"></div>
-    <img class="gj-gordon gj-gordon-banish" id="gjGordonBanish" src="https://stormyreigns.github.io/HATH/HKGordonBanish.png" alt="">
-    <img class="gj-gordon gj-gordon-winner" id="gjGordonWinner" src="https://stormyreigns.github.io/HATH/HKGordon.png" alt="">
+  </div>
+  <div class="gj-gordon-zone">
+    <img class="gj-gordon-reaction gj-gordon-yell" id="gjGordonYell" src="https://stormyreigns.github.io/HATH/HKGordonYell.png" alt="">
+    <img class="gj-gordon-reaction gj-gordon-banish" id="gjGordonBanish" src="https://stormyreigns.github.io/HATH/HKGordonBanish.png" alt="">
+    <img class="gj-gordon-winner" id="gjGordonWinner" src="https://stormyreigns.github.io/HATH/HKGordon.png" alt="">
   </div>
   <div class="gj-counter" id="gjCounter"></div>
   <div class="gj-controls" id="gjControls">
