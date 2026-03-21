@@ -656,7 +656,7 @@
       bottom: calc(20px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
       height: 80px;
       pointer-events: none;
-      z-index: 0;
+      z-index: 45;
       opacity: 0;
       transition: opacity 0.25s ease;
       background: linear-gradient(to top, var(--edge-bg, #fdf0e8) 40%, transparent);
@@ -3939,10 +3939,10 @@
 
     <div class="updated-at" id="updatedAt"></div>
   </div>
+  <div class="app-scroll-blur" id="appScrollBlur" aria-hidden="true"></div>
 </div><!-- end .app -->
 
   <!-- Bottom bar — outside .app so fixed anchors to viewport, covers safe area -->
-  <div class="app-scroll-blur" id="appScrollBlur" aria-hidden="true"></div>
   <div class="app-bottom-bar" id="appBottomBar">
     <div class="bottom-bar-inner">
       <button type="button" class="bottom-bar-btn bottom-bar-hamburger" onclick="toggleDrawer()" aria-label="Menu">
@@ -4192,7 +4192,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.0.11';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.0.10';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
