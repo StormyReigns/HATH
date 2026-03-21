@@ -3834,12 +3834,26 @@
       color: rgba(255,255,255,0.8); cursor: pointer; font-family: inherit;
     }
     .gj-filter-chip.active { background: rgba(192,122,74,0.4); border-color: rgba(192,122,74,0.6); }
-    .gj-maybe-pile { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 320px; }
-    .gj-maybe-pile.visible { display: flex; }
-    .gj-maybe-title { font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 12px; }
-    .gj-maybe-stack { position: relative; width: 78vw; max-width: 320px; height: 52vw; max-height: 220px; }
-    .gj-maybe-stack .gj-verdict-yes { font-size: 20px; }
-    .gj-maybe-stack .gj-verdict-no { font-size: 52px; }
+    .gj-title { transition: opacity 0.25s ease; }
+    .gj-card-stack { transition: opacity 0.2s ease; }
+    .gj-maybe-reel { position: relative; width: 78vw; max-width: 320px; height: 52vw; max-height: 220px; overflow: hidden; }
+    .gj-maybe-reel-track { display: flex; height: 100%; transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+    .gj-maybe-reel-track .gj-maybe-slide { flex: 0 0 100%; min-width: 0; position: relative; display: flex; align-items: stretch; }
+    .gj-card-winner-btn {
+      position: absolute; bottom: 14px; right: 16px; z-index: 5;
+      padding: 8px 14px; border-radius: 10px; font-size: 13px; font-weight: 700;
+      background: rgba(0,160,90,0.9); color: #fff; border: none; cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .gj-card-winner-btn:hover { background: rgba(0,180,100,0.95); }
+    .gj-card-remove-btn {
+      position: absolute; top: 10px; right: 10px; z-index: 5;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(0,0,0,0.5); color: #fff; border: none;
+      font-size: 18px; line-height: 1; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .gj-card-remove-btn:hover { background: rgba(200,50,30,0.8); }
     .gj-entry-btn {
       margin: 0 16px 12px; padding: 13px; border-radius: 12px;
       background: rgba(192,122,74,0.1); border: 1.5px solid rgba(192,122,74,0.25);
@@ -9641,9 +9655,8 @@
     document.getElementById('gjGordonBanish').classList.remove('visible');
     document.getElementById('gjGordonWinner').classList.remove('visible');
     document.getElementById('gjWinnerActions').style.display = 'none';
-    document.getElementById('gjMaybePile').classList.remove('visible');
+    document.getElementById('gjTitle').textContent = "Gordon's Judgement";
     document.getElementById('gjSwipeRow').style.display = 'flex';
-    document.getElementById('gjWinnerBtnInline').style.display = '';
     document.getElementById('gjCardStack').parentElement.style.display = '';
     var counterEl = document.getElementById('gjCounter');
     document.getElementById('gjCardStack').parentElement.style.display = '';
@@ -9664,10 +9677,9 @@
     document.getElementById('gjGordonBanish').classList.remove('visible');
     document.getElementById('gjGordonWinner').classList.remove('visible');
     document.getElementById('gjWinnerActions').style.display = 'none';
-    document.getElementById('gjMaybePile').classList.remove('visible');
+    document.getElementById('gjTitle').textContent = "Gordon's Judgement";
     document.getElementById('gjSwipeRow').style.display = 'flex';
     document.getElementById('gjSwipeHint').style.display = '';
-    document.getElementById('gjWinnerBtnInline').style.display = '';
     gjRenderStack();
   }
 
@@ -9687,7 +9699,7 @@
     document.getElementById('gjGordonBanish').classList.remove('visible');
     document.getElementById('gjGordonWinner').classList.remove('visible');
     document.getElementById('gjWinnerActions').style.display = 'none';
-    document.getElementById('gjMaybePile').classList.remove('visible');
+    document.getElementById('gjTitle').textContent = "Gordon's Judgement";
     document.getElementById('gjCardStack').innerHTML = '';
   }
 
@@ -9782,6 +9794,7 @@
       card.innerHTML = `
         <div class="gj-verdict-yes">✓</div>
         <div class="gj-verdict-no">✕</div>
+        <button type="button" class="gj-card-winner-btn" onclick="event.stopPropagation();gjPickCurrentWinner()">Winner!</button>
         <div class="gj-card-image${hfCardClass}">
           <div class="gj-card-monogram">${recipeMonogram(recipe.name)}</div>
         </div>
@@ -9888,120 +9901,143 @@
 
   var gjMaybeIndex = 0;
   function gjShowMaybePile() {
-    document.getElementById('gjCardStack').parentElement.style.display = 'none';
     document.getElementById('gjSwipeRow').style.display = 'none';
     document.getElementById('gjGordonYell').classList.remove('visible');
     document.getElementById('gjGordonBanish').classList.remove('visible');
+    document.getElementById('gjTitle').textContent = 'Final Contestants';
+    document.getElementById('gjGamePanel').classList.add('gj-maybe-phase');
     gjMaybeIndex = 0;
-    document.getElementById('gjCounter').textContent = gjState.maybe.length + ' in maybe pile';
-    gjRenderMaybeStack();
-    document.getElementById('gjMaybePile').classList.add('visible');
+    document.getElementById('gjCounter').textContent = gjState.maybe.length + ' left — swipe to browse';
+    var stack = document.getElementById('gjCardStack');
+    stack.style.opacity = '0';
+    setTimeout(function() {
+      gjRenderMaybeReel();
+      stack.style.opacity = '1';
+    }, 200);
   }
 
-  function gjRenderMaybeStack() {
-    var stack = document.getElementById('gjMaybeStack');
+  function gjRenderMaybeReel() {
+    var stack = document.getElementById('gjCardStack');
     stack.innerHTML = '';
     var list = gjState.maybe;
-    if (gjMaybeIndex >= list.length) return;
-    var cardsToShow = Math.min(3, list.length - gjMaybeIndex);
-    for (var i = 0; i < cardsToShow; i++) {
-      var recipe = list[gjMaybeIndex + i];
-      var card = gjBuildMaybeCard(recipe, i === 0);
-      stack.appendChild(card);
+    if (list.length === 0) return;
+    var n = list.length;
+    gjMaybeIndex = ((gjMaybeIndex % n) + n) % n;
+    var reel = document.createElement('div');
+    reel.className = 'gj-maybe-reel';
+    var track = document.createElement('div');
+    track.className = 'gj-maybe-reel-track';
+    track.style.width = (n * 100) + '%';
+    track.style.transform = 'translateX(' + (-gjMaybeIndex * (100 / n)) + '%)';
+    for (var i = 0; i < n; i++) {
+      var slide = document.createElement('div');
+      slide.className = 'gj-maybe-slide';
+      slide.style.flex = '0 0 ' + (100 / n) + '%';
+      var recipe = list[i];
+      var card = gjBuildMaybeCard(recipe);
+      slide.appendChild(card);
+      track.appendChild(slide);
     }
-  }
-
-  function gjBuildMaybeCard(recipe, isTop) {
-    var hfCardClass = recipe.source === 'hellofresh' ? ' hf-card' : '';
-    var hfSourceClass = recipe.source === 'hellofresh' ? ' hf' : '';
-    var scale = isTop ? 1 : 0.94;
-    var ty = isTop ? 0 : 6;
-    var card = document.createElement('div');
-    card.className = 'gj-card' + (isTop ? ' gj-top' : '');
-    card.style.transform = 'scale(' + scale + ') translateY(' + ty + 'px)';
-    card.style.opacity = isTop ? 1 : 0.75;
-    card.style.zIndex = 3 - (isTop ? 0 : 1);
-    card.style.position = 'absolute';
-    card.style.inset = '0';
-    card.innerHTML = '<div class="gj-verdict-yes">Winner!</div><div class="gj-verdict-no">✕</div><div class="gj-card-image' + hfCardClass + '"><div class="gj-card-monogram">' + recipeMonogram(recipe.name) + '</div></div><div class="gj-card-body"><div class="gj-card-name">' + escapeHtml(recipe.name) + '</div><span class="gj-card-source' + hfSourceClass + '">' + escapeHtml(recipe.sourceLabel || recipe.source || 'Recipe') + '</span></div>';
-    var imgDiv = card.querySelector('.gj-card-image');
-    if (recipe.imageId) loadThumbnailInto(recipe.imageId, imgDiv);
-    if (!isTop) return card;
-    var startX = 0;
-    card.addEventListener('touchstart', function(e) { card.classList.add('is-dragging'); startX = e.touches[0].clientX; }, { passive: true });
-    card.addEventListener('touchmove', function(e) {
-      var dx = e.touches[0].clientX - startX;
-      card.style.transform = 'translate3d(' + dx + 'px, 0, 0) rotate(' + (dx / 20) + 'deg)';
-      card.querySelector('.gj-verdict-yes').style.opacity = dx > 40 ? '1' : '0';
-      card.querySelector('.gj-verdict-no').style.opacity = dx < -40 ? '1' : '0';
+    reel.appendChild(track);
+    var startX = 0, tracking = false;
+    function setTrackOffset(dx) {
+      var stepPct = 100 / n;
+      var pct = -gjMaybeIndex * stepPct + (dx / stack.offsetWidth) * stepPct;
+      track.style.transition = 'none';
+      track.style.transform = 'translateX(' + pct + '%)';
+    }
+    function commitSwipe(dx) {
+      track.style.transition = '';
+      var threshold = stack.offsetWidth * 0.25;
+      if (dx < -threshold) gjMaybeNavigate(1);
+      else if (dx > threshold) gjMaybeNavigate(-1);
+      else track.style.transform = 'translateX(' + (-gjMaybeIndex * (100 / n)) + '%)';
+    }
+    reel.addEventListener('touchstart', function(e) {
+      if (e.target.closest('button')) return;
+      tracking = true;
+      startX = e.touches[0].clientX;
     }, { passive: true });
-    card.addEventListener('touchend', function(e) {
-      card.classList.remove('is-dragging');
+    reel.addEventListener('touchmove', function(e) {
+      if (!tracking) return;
+      setTrackOffset(e.touches[0].clientX - startX);
+    }, { passive: true });
+    reel.addEventListener('touchend', function(e) {
+      if (!tracking) return;
+      tracking = false;
       var dx = e.changedTouches[0].clientX - startX;
-      if (Math.abs(dx) > 80) gjMaybeVote(dx > 0 ? 'winner' : 'remove');
-      else { card.style.transition = 'transform 0.28s cubic-bezier(0.34,1.56,0.64,1)'; card.style.transform = 'scale(1) translateY(0)'; setTimeout(function() { card.style.transition = ''; }, 280); }
-      card.querySelector('.gj-verdict-yes').style.opacity = '0';
-      card.querySelector('.gj-verdict-no').style.opacity = '0';
+      commitSwipe(dx);
     });
-    card.addEventListener('mousedown', function(e) {
+    reel.addEventListener('mousedown', function(e) {
+      if (e.target.closest('button')) return;
       e.preventDefault();
-      card.classList.add('is-dragging');
       startX = e.clientX;
-      function onMove(ev) {
-        var dx = ev.clientX - startX;
-        card.style.transform = 'translate3d(' + dx + 'px, 0, 0) rotate(' + (dx / 20) + 'deg)';
-        card.querySelector('.gj-verdict-yes').style.opacity = dx > 40 ? '1' : '0';
-        card.querySelector('.gj-verdict-no').style.opacity = dx < -40 ? '1' : '0';
-      }
+      function onMove(ev) { setTrackOffset(ev.clientX - startX); }
       function onUp(ev) {
         document.removeEventListener('mousemove', onMove);
         document.removeEventListener('mouseup', onUp);
-        card.classList.remove('is-dragging');
-        var dx = ev.clientX - startX;
-        if (Math.abs(dx) > 80) gjMaybeVote(dx > 0 ? 'winner' : 'remove');
-        else { card.style.transition = 'transform 0.28s cubic-bezier(0.34,1.56,0.64,1)'; card.style.transform = 'scale(1) translateY(0)'; setTimeout(function() { card.style.transition = ''; }, 280); }
-        card.querySelector('.gj-verdict-yes').style.opacity = '0';
-        card.querySelector('.gj-verdict-no').style.opacity = '0';
+        commitSwipe(ev.clientX - startX);
       }
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onUp);
     });
+    stack.appendChild(reel);
+  }
+
+  function gjMaybeNavigate(delta) {
+    var n = gjState.maybe.length;
+    if (n === 0) return;
+    gjMaybeIndex = ((gjMaybeIndex + delta) % n + n) % n;
+    var track = document.querySelector('#gjCardStack .gj-maybe-reel-track');
+    if (track) track.style.transform = 'translateX(' + (-gjMaybeIndex * (100 / n)) + '%)';
+    document.getElementById('gjCounter').textContent = gjState.maybe.length + ' left — swipe to browse';
+  }
+
+  function gjBuildMaybeCard(recipe) {
+    var hfCardClass = recipe.source === 'hellofresh' ? ' hf-card' : '';
+    var hfSourceClass = recipe.source === 'hellofresh' ? ' hf' : '';
+    var card = document.createElement('div');
+    card.className = 'gj-card gj-card-on-card';
+    card.innerHTML = '<button type="button" class="gj-card-remove-btn" onclick="event.stopPropagation();gjMaybeRemoveCurrent()" aria-label="Remove">×</button><button type="button" class="gj-card-winner-btn" onclick="event.stopPropagation();gjMaybePickWinner()">Winner!</button><div class="gj-card-image' + hfCardClass + '"><div class="gj-card-monogram">' + recipeMonogram(recipe.name) + '</div></div><div class="gj-card-body"><div class="gj-card-name">' + escapeHtml(recipe.name) + '</div><span class="gj-card-source' + hfSourceClass + '">' + escapeHtml(recipe.sourceLabel || recipe.source || 'Recipe') + '</span></div>';
+    var imgDiv = card.querySelector('.gj-card-image');
+    if (recipe.imageId) loadThumbnailInto(recipe.imageId, imgDiv);
     return card;
   }
 
-  function gjMaybeVote(action) {
+  function gjMaybePickWinner() {
     if (gjMaybeIndex >= gjState.maybe.length) return;
-    var recipe = gjState.maybe[gjMaybeIndex];
-    var topCard = document.querySelector('#gjMaybeStack .gj-card');
-    if (topCard) {
-      topCard.style.transition = 'transform 0.32s cubic-bezier(0.4,0,0.8,1)';
-      topCard.style.transform = action === 'winner' ? 'translateX(110%) rotate(18deg)' : 'translateX(-110%) rotate(-18deg)';
-    }
-    if (action === 'winner') {
-      setTimeout(function() { gjShowWinner(recipe); }, 350);
-      return;
-    }
+    gjShowWinner(gjState.maybe[gjMaybeIndex]);
+  }
+
+  function gjMaybeRemoveCurrent() {
+    if (gjMaybeIndex >= gjState.maybe.length) return;
     gjState.maybe.splice(gjMaybeIndex, 1);
-    setTimeout(function() {
-      if (gjState.maybe.length === 0) {
-        document.getElementById('gjMaybePile').classList.remove('visible');
-        document.getElementById('gjCardStack').parentElement.style.display = 'none';
-        document.getElementById('gjCounter').textContent = 'None left. Go Again?';
-        document.getElementById('gjWinnerActions').style.display = 'flex';
-        document.getElementById('gjWinnerActions').innerHTML = '<button type="button" class="gj-winner-btn-secondary" onclick="gjApplyFiltersAndRestart()">Go Again</button>';
-      } else {
-        if (gjMaybeIndex >= gjState.maybe.length) gjMaybeIndex = Math.max(0, gjState.maybe.length - 1);
-        document.getElementById('gjCounter').textContent = gjState.maybe.length + ' in maybe pile';
-        gjRenderMaybeStack();
-      }
-    }, 350);
+    if (gjState.maybe.length === 0) {
+      document.getElementById('gjGamePanel').classList.remove('gj-maybe-phase');
+      document.getElementById('gjTitle').textContent = "Gordon's Judgement";
+      document.getElementById('gjCardStack').innerHTML = '';
+      document.getElementById('gjCounter').textContent = 'None left. Go Again?';
+      document.getElementById('gjWinnerActions').style.display = 'flex';
+      document.getElementById('gjWinnerActions').innerHTML = '<button type="button" class="gj-winner-btn-secondary" onclick="gjApplyFiltersAndRestart()">Go Again</button>';
+    } else {
+      if (gjMaybeIndex >= gjState.maybe.length) gjMaybeIndex = gjState.maybe.length - 1;
+      gjRenderMaybeReel();
+      document.getElementById('gjCounter').textContent = gjState.maybe.length + ' left — swipe to browse';
+    }
+  }
+
+  function gjMaybeVote(action) {
+    if (action === 'winner') gjMaybePickWinner();
+    else if (action === 'remove') gjMaybeRemoveCurrent();
   }
 
   function gjShowWinner(recipe) {
     gjState.winner = recipe;
-    document.getElementById('gjMaybePile').classList.remove('visible');
-    document.getElementById('gjCardStack').parentElement.style.display = '';
-    document.getElementById('gjCardStack').innerHTML = '';
+    document.getElementById('gjGamePanel').classList.remove('gj-maybe-phase');
+    document.getElementById('gjTitle').textContent = "Gordon's Judgement";
+    var stack = document.getElementById('gjCardStack');
+    stack.innerHTML = '';
+    stack.style.opacity = '';
 
     var card = document.createElement('div');
     card.className = 'gj-card';
@@ -10016,7 +10052,7 @@
         <span class="gj-card-source${hfSourceClass}">${escapeHtml(recipe.sourceLabel || recipe.source || 'Recipe')}</span>
       </div>
     `;
-    document.getElementById('gjCardStack').appendChild(card);
+    stack.appendChild(card);
 
     document.getElementById('gjGordonYell').classList.remove('visible');
     document.getElementById('gjGordonBanish').classList.remove('visible');
@@ -10165,8 +10201,8 @@
   </div>
   <div class="gj-game-panel" id="gjGamePanel">
   <div class="gj-filters" id="gjGameFilters"></div>
-  <div class="gj-title">Gordon's Judgement</div>
-  <div style="position:relative; width:78vw; max-width:320px;">
+  <div class="gj-title" id="gjTitle">Gordon's Judgement</div>
+  <div class="gj-card-area" style="position:relative; width:78vw; max-width:320px;">
     <div class="gj-card-stack" id="gjCardStack"></div>
   </div>
   <div class="gj-gordon-zone">
@@ -10177,11 +10213,6 @@
   <div class="gj-counter" id="gjCounter"></div>
   <div class="gj-swipe-row" id="gjSwipeRow">
     <div class="gj-swipe-hint" id="gjSwipeHint">Swipe left to reject · right for maybe</div>
-    <button type="button" class="gj-winner-btn-inline" id="gjWinnerBtnInline" onclick="gjPickCurrentWinner()" style="display:none">Winner!</button>
-  </div>
-  <div class="gj-maybe-pile" id="gjMaybePile">
-    <div class="gj-maybe-title">Maybe pile — swipe left to remove · right for Winner!</div>
-    <div class="gj-maybe-stack" id="gjMaybeStack"></div>
   </div>
   <div class="gj-winner-actions" id="gjWinnerActions" style="display:none">
     <button class="gj-winner-btn-primary" id="gjWinnerCook">Let's Cook</button>
