@@ -3737,7 +3737,7 @@
       pointer-events: none;
     }
     .gj-gordon-reaction.visible { opacity: 1; visibility: visible; }
-    .gj-gordon-yell { left: 0; }
+    .gj-gordon-yell { left: 0; width: 180px; }
     .gj-gordon-banish { right: 0; }
     .gj-gordon-winner {
       position: absolute;
@@ -3751,25 +3751,9 @@
       pointer-events: none;
     }
     .gj-gordon-winner.visible { opacity: 1; visibility: visible; }
-    .gj-controls {
-      margin-top: 32px;
-      display: flex; align-items: center; gap: 24px;
-    }
-    .gj-btn-no {
-      width: 58px; height: 58px; border-radius: 50%;
-      background: rgba(200,50,30,0.15);
-      border: 2px solid rgba(200,50,30,0.4);
-      font-size: 26px;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-    }
-    .gj-btn-yes {
-      width: 58px; height: 58px; border-radius: 50%;
-      background: rgba(0,160,90,0.15);
-      border: 2px solid rgba(0,160,90,0.4);
-      font-size: 26px;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
+    .gj-swipe-hint {
+      margin-top: 20px; font-size: 12px; color: rgba(255,255,255,0.5);
+      letter-spacing: 0.04em; text-align: center;
     }
     .gj-btn-close {
       position: absolute;
@@ -3804,6 +3788,51 @@
       letter-spacing: 0.14em; text-transform: uppercase;
       margin-bottom: 24px;
     }
+    .gj-mode-select-panel, .gj-game-panel, .gj-randomizer-panel { display: none; flex-direction: column; align-items: center; }
+    .gj-mode-select-panel.visible, .gj-game-panel.visible, .gj-randomizer-panel.visible { display: flex; }
+    .gj-mode-select-gordon { width: 180px; object-fit: contain; margin-bottom: 24px; }
+    .gj-mode-select-btns { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 260px; }
+    .gj-mode-btn {
+      padding: 16px 24px; border-radius: 14px; font-size: 16px; font-weight: 700;
+      border: 1.5px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.95); cursor: pointer; font-family: inherit;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .gj-mode-btn:hover, .gj-mode-btn:active { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.35); }
+    .gj-randomizer-shuffle {
+      min-height: 80px; display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 700; color: rgba(255,255,255,0.9);
+      text-align: center; padding: 0 24px; margin: 16px 0;
+    }
+    .gj-randomizer-shuffle.shuffling { color: rgba(255,255,255,0.6); }
+    .gj-filters {
+      display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+      padding: 12px 16px; margin-bottom: 8px; max-width: 320px;
+    }
+    .gj-filter-chip {
+      padding: 6px 12px; border-radius: 20px; font-size: 12px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.8); cursor: pointer; font-family: inherit;
+    }
+    .gj-filter-chip.active { background: rgba(192,122,74,0.4); border-color: rgba(192,122,74,0.6); }
+    .gj-maybe-pile { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 320px; }
+    .gj-maybe-pile.visible { display: flex; }
+    .gj-maybe-title { font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 12px; }
+    .gj-maybe-scroll {
+      max-height: 200px; overflow-y: auto; width: 100%;
+      display: flex; flex-direction: column; gap: 8px; padding: 4px 0;
+    }
+    .gj-maybe-item {
+      display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+      background: rgba(255,255,255,0.08); border-radius: 12px; border: 1px solid rgba(255,255,255,0.12);
+    }
+    .gj-maybe-name { flex: 1; font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.95); }
+    .gj-maybe-x, .gj-maybe-winner {
+      padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;
+      border: none; cursor: pointer; font-family: inherit;
+    }
+    .gj-maybe-x { background: rgba(200,50,30,0.2); color: #e07070; }
+    .gj-maybe-winner { background: rgba(0,160,90,0.3); color: #50e090; }
     .gj-entry-btn {
       margin: 0 16px 12px; padding: 13px; border-radius: 12px;
       background: rgba(192,122,74,0.1); border: 1.5px solid rgba(192,122,74,0.25);
@@ -4493,7 +4522,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.2.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.4.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -9498,7 +9527,58 @@
     return a;
   }
 
-  const gjState = { pool: [], index: 0, winner: null };
+  const gjState = { pool: [], index: 0, winner: null, maybe: [], rejectCount: 0 };
+  const gjFilters = { source: 'all', favourites: false, cuisine: '' };
+  function getGjFilteredRecipes() {
+    var list = recipesState.all || [];
+    if (gjFilters.favourites) {
+      var favIds = getRecipeFavourites();
+      list = list.filter(function(r) { return favIds.includes(r.id); });
+    } else if (gjFilters.source && gjFilters.source !== 'all') {
+      list = list.filter(function(r) { return r.source === gjFilters.source; });
+    }
+    if (gjFilters.cuisine) list = list.filter(function(r) { return (r.cuisine || '') === gjFilters.cuisine; });
+    return list;
+  }
+  function renderGjFilters(containerId, onFilterChange) {
+    var el = document.getElementById(containerId);
+    if (!el) return;
+    var sources = ['all', 'favourites'];
+    var usedSources = recipesState.all ? [...new Set((recipesState.all || []).map(function(r) { return r.source; }))] : [];
+    var cuisines = recipesState.all ? [...new Set((recipesState.all || []).map(function(r) { return (r.cuisine || '').trim(); }).filter(Boolean))].sort() : [];
+    var labels = { all: 'All', favourites: '★ Favourites', hellofresh: 'HelloFresh', other: 'Other' };
+    el.innerHTML = '';
+    ['all', 'favourites'].forEach(function(s) {
+      if (s === 'favourites' && !(recipesState.all || []).some(function(r) { return getRecipeFavourites().includes(r.id); })) return;
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'gj-filter-chip' + (s === 'favourites' && gjFilters.favourites ? ' active' : s === gjFilters.source && !gjFilters.favourites ? ' active' : '');
+      btn.textContent = labels[s] || s;
+      btn.onclick = function() {
+        if (s === 'favourites') gjFilters.favourites = !gjFilters.favourites, gjFilters.source = 'all';
+        else gjFilters.source = s, gjFilters.favourites = false;
+        if (onFilterChange) onFilterChange();
+      };
+      el.appendChild(btn);
+    });
+    usedSources.forEach(function(s) {
+      if (s === 'all' || s === 'favourites') return;
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'gj-filter-chip' + (s === gjFilters.source && !gjFilters.favourites ? ' active' : '');
+      btn.textContent = labels[s] || (s.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); }));
+      btn.onclick = function() { gjFilters.source = s; gjFilters.favourites = false; if (onFilterChange) onFilterChange(); };
+      el.appendChild(btn);
+    });
+    cuisines.forEach(function(c) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'gj-filter-chip' + (gjFilters.cuisine === c ? ' active' : '');
+      btn.textContent = c;
+      btn.onclick = function() { gjFilters.cuisine = gjFilters.cuisine === c ? '' : c; if (onFilterChange) onFilterChange(); };
+      el.appendChild(btn);
+    });
+  }
 
   function updateHomeGjVisibility() {
     const el = document.getElementById('homeGjBtn');
@@ -9517,56 +9597,124 @@
       var img = new Image(); img.src = url;
     });
     const overlay = document.getElementById('gordonsJudgement');
-    const counterEl = document.getElementById('gjCounter');
     overlay.classList.add('open');
-    document.getElementById('gjGordonYell').classList.remove('visible');
-    document.getElementById('gjGordonBanish').classList.remove('visible');
-    document.getElementById('gjGordonWinner').classList.remove('visible');
-    document.getElementById('gjWinnerActions').style.display = 'none';
-    document.getElementById('gjControls').style.display = 'flex';
-    counterEl.textContent = 'Loading recipes…';
+    document.getElementById('gjModeSelectPanel').classList.add('visible');
+    document.getElementById('gjGamePanel').classList.remove('visible');
+    document.getElementById('gjRandomizerPanel').classList.remove('visible');
 
     if (!recipesState.loaded && !recipesState.loading) {
       await loadRecipesData();
     } else if (recipesState.loading) {
       while (recipesState.loading) await new Promise(r => setTimeout(r, 100));
     }
+  }
 
-    const pool = (recipesState.all || []).length > 0
-      ? shuffleArray(recipesState.all).slice(0, 5)
-      : [];
+  function chooseGjMode(mode) {
+    document.getElementById('gjModeSelectPanel').classList.remove('visible');
+    if (mode === 'judgement') {
+      document.getElementById('gjGamePanel').classList.add('visible');
+      renderGjFilters('gjGameFilters', function() { gjApplyFiltersAndRestart(); });
+      gjApplyFiltersAndRestart();
+    } else {
+      document.getElementById('gjRandomizerPanel').classList.add('visible');
+      renderGjFilters('gjRandomizerFilters', function() { randomizerGoAgain(); });
+      randomizerGoAgain();
+    }
+  }
+
+  function gjApplyFiltersAndRestart() {
+    var filtered = getGjFilteredRecipes();
+    var pool = filtered.length > 0 ? shuffleArray(filtered).slice(0, Math.min(20, filtered.length)) : [];
     gjState.pool = pool;
     gjState.index = 0;
     gjState.winner = null;
-
+    gjState.maybe = [];
+    gjState.rejectCount = 0;
+    document.getElementById('gjGordonYell').classList.remove('visible');
+    document.getElementById('gjGordonBanish').classList.remove('visible');
+    document.getElementById('gjGordonWinner').classList.remove('visible');
+    document.getElementById('gjWinnerActions').style.display = 'none';
+    document.getElementById('gjMaybePile').classList.remove('visible');
+    document.getElementById('gjSwipeHint').style.display = '';
+    document.getElementById('gjCardStack').parentElement.style.display = '';
+    var counterEl = document.getElementById('gjCounter');
+    document.getElementById('gjCardStack').parentElement.style.display = '';
     if (pool.length === 0) {
-      counterEl.textContent = 'No recipes available. Add some first!';
+      counterEl.textContent = 'No recipes match filters.';
       document.getElementById('gjCardStack').innerHTML = '';
-      return;
+    } else {
+      startGordonsJudgement();
     }
-
-    startGordonsJudgement();
   }
 
   function startGordonsJudgement() {
     gjState.index = 0;
     gjState.winner = null;
+    gjState.maybe = [];
+    gjState.rejectCount = 0;
     document.getElementById('gjGordonYell').classList.remove('visible');
     document.getElementById('gjGordonBanish').classList.remove('visible');
     document.getElementById('gjGordonWinner').classList.remove('visible');
     document.getElementById('gjWinnerActions').style.display = 'none';
-    document.getElementById('gjControls').style.display = 'flex';
+    document.getElementById('gjMaybePile').classList.remove('visible');
+    document.getElementById('gjSwipeHint').style.display = '';
     gjRenderStack();
   }
 
   function closeGordonsJudgement() {
     document.getElementById('gordonsJudgement').classList.remove('open');
+    document.getElementById('gjModeSelectPanel').classList.remove('visible');
+    document.getElementById('gjGamePanel').classList.remove('visible');
+    document.getElementById('gjRandomizerPanel').classList.remove('visible');
     document.getElementById('gjGordonYell').classList.remove('visible');
     document.getElementById('gjGordonBanish').classList.remove('visible');
     document.getElementById('gjGordonWinner').classList.remove('visible');
     document.getElementById('gjWinnerActions').style.display = 'none';
-    document.getElementById('gjControls').style.display = 'flex';
+    document.getElementById('gjMaybePile').classList.remove('visible');
     document.getElementById('gjCardStack').innerHTML = '';
+  }
+
+  var randomizerWinner = null;
+  function runRandomizer() {
+    var all = getGjFilteredRecipes();
+    if (all.length === 0) return;
+    var shuffleEl = document.getElementById('gjRandomizerShuffle');
+    var btn = document.getElementById('gjRandomizerBtn');
+    var actions = document.getElementById('gjRandomizerActions');
+    btn.disabled = true;
+    shuffleEl.classList.add('shuffling');
+    var steps = 12 + Math.floor(Math.random() * 8);
+    var idx = 0;
+    function tick() {
+      idx++;
+      var r = all[Math.floor(Math.random() * all.length)];
+      shuffleEl.textContent = r.name;
+      if (idx < steps) {
+        setTimeout(tick, 80 + (idx * 15));
+      } else {
+        randomizerWinner = r;
+        shuffleEl.classList.remove('shuffling');
+        shuffleEl.textContent = r.name;
+        btn.style.display = 'none';
+        actions.style.display = 'flex';
+        document.getElementById('gjRandomizerCook').onclick = function() {
+          closeGordonsJudgement();
+          if (!document.getElementById('recipesScreen').classList.contains('visible')) showRecipesScreen();
+          openRecipeDetail(randomizerWinner);
+        };
+        btn.disabled = false;
+      }
+    }
+    tick();
+  }
+  function randomizerGoAgain() {
+    randomizerWinner = null;
+    renderGjFilters('gjRandomizerFilters', function() {});
+    document.getElementById('gjRandomizerShuffle').textContent = 'Hit the button to pick!';
+    document.getElementById('gjRandomizerShuffle').classList.remove('shuffling');
+    document.getElementById('gjRandomizerBtn').style.display = '';
+    document.getElementById('gjRandomizerBtn').disabled = false;
+    document.getElementById('gjRandomizerActions').style.display = 'none';
   }
 
   function gjRenderStack() {
@@ -9659,7 +9807,7 @@
   }
 
   function gjVote(direction) {
-    const topCard = document.querySelector('#gjCardStack .gj-card');
+    var topCard = document.querySelector('#gjCardStack .gj-card');
     if (!topCard) return;
 
     topCard.style.transition = 'transform 0.32s cubic-bezier(0.4,0,0.8,1)';
@@ -9667,35 +9815,94 @@
       ? 'translateX(110%) rotate(18deg)'
       : 'translateX(-110%) rotate(-18deg)';
 
-    if (direction === 'yes') {
-      document.getElementById('gjGordonYell').classList.add('visible');
-      document.getElementById('gjGordonBanish').classList.remove('visible');
-    } else {
-      document.getElementById('gjGordonYell').classList.add('visible');
-      document.getElementById('gjGordonBanish').classList.add('visible');
-    }
-
     var votedIndex = gjState.index;
+    var recipe = gjState.pool[votedIndex];
     gjState.index++;
 
+    if (direction === 'yes') {
+      gjState.maybe.push(recipe);
+      document.getElementById('gjGordonYell').classList.remove('visible');
+      document.getElementById('gjGordonBanish').classList.remove('visible');
+    } else {
+      gjState.rejectCount++;
+      document.getElementById('gjGordonYell').classList.remove('visible');
+      document.getElementById('gjGordonBanish').classList.remove('visible');
+      if (gjState.rejectCount % 2 === 1) {
+        document.getElementById('gjGordonBanish').classList.add('visible');
+      } else {
+        document.getElementById('gjGordonYell').classList.add('visible');
+      }
+    }
+
     setTimeout(function() {
-      if (direction === 'yes') {
-        gjShowWinner(gjState.pool[votedIndex]);
-      } else if (gjState.index >= gjState.pool.length) {
-        gjShowWinner(gjState.pool[gjState.pool.length - 1]);
-      } else if (gjState.pool.length - gjState.index === 1) {
-        gjShowWinner(gjState.pool[gjState.index]);
+      if (gjState.index >= gjState.pool.length) {
+        if (gjState.maybe.length > 0) {
+          gjShowMaybePile();
+        } else {
+          document.getElementById('gjCardStack').parentElement.style.display = 'none';
+          document.getElementById('gjCardStack').innerHTML = '';
+          document.getElementById('gjSwipeHint').style.display = 'none';
+          document.getElementById('gjCounter').textContent = 'None made the cut. Go Again?';
+          document.getElementById('gjWinnerActions').style.display = 'flex';
+          document.getElementById('gjWinnerActions').innerHTML = '<button type="button" class="gj-winner-btn-secondary" onclick="gjApplyFiltersAndRestart()">Go Again</button>';
+        }
       } else {
         gjRenderStack();
       }
     }, 350);
   }
 
+  function gjShowMaybePile() {
+    document.getElementById('gjCardStack').parentElement.style.display = 'none';
+    document.getElementById('gjSwipeHint').style.display = 'none';
+    document.getElementById('gjGordonYell').classList.remove('visible');
+    document.getElementById('gjGordonBanish').classList.remove('visible');
+    document.getElementById('gjCounter').textContent = gjState.maybe.length + ' in maybe pile';
+    var scroll = document.getElementById('gjMaybeScroll');
+    scroll.innerHTML = '';
+    gjState.maybe.forEach(function(r) {
+      var item = document.createElement('div');
+      item.className = 'gj-maybe-item';
+      item.innerHTML = '<span class="gj-maybe-name">' + escapeHtml(r.name) + '</span>' +
+        '<button type="button" class="gj-maybe-x" onclick="gjMaybeRemove(this)">✕</button>' +
+        '<button type="button" class="gj-maybe-winner" onclick="gjMaybeWinner(this)">Winner!</button>';
+      item.dataset.recipeId = r.id;
+      item._recipe = r;
+      scroll.appendChild(item);
+    });
+    document.getElementById('gjMaybePile').classList.add('visible');
+  }
+
+  function gjMaybeRemove(btn) {
+    var item = btn.closest('.gj-maybe-item');
+    if (!item || !item._recipe) return;
+    var id = item._recipe.id;
+    gjState.maybe = gjState.maybe.filter(function(r) { return r.id !== id; });
+    item.remove();
+    if (gjState.maybe.length === 0) {
+      document.getElementById('gjMaybePile').classList.remove('visible');
+      document.getElementById('gjCardStack').parentElement.style.display = 'none';
+      document.getElementById('gjCounter').textContent = 'None left. Go Again?';
+      document.getElementById('gjWinnerActions').style.display = 'flex';
+      document.getElementById('gjWinnerActions').innerHTML = '<button type="button" class="gj-winner-btn-secondary" onclick="gjApplyFiltersAndRestart()">Go Again</button>';
+    } else {
+      document.getElementById('gjCounter').textContent = gjState.maybe.length + ' in maybe pile';
+    }
+  }
+
+  function gjMaybeWinner(btn) {
+    var item = btn.closest('.gj-maybe-item');
+    if (!item || !item._recipe) return;
+    gjShowWinner(item._recipe);
+  }
+
   function gjShowWinner(recipe) {
     gjState.winner = recipe;
+    document.getElementById('gjMaybePile').classList.remove('visible');
+    document.getElementById('gjCardStack').parentElement.style.display = '';
     document.getElementById('gjCardStack').innerHTML = '';
 
-    const card = document.createElement('div');
+    var card = document.createElement('div');
     card.className = 'gj-card';
     const hfCardClass = recipe.source === 'hellofresh' ? ' hf-card' : '';
     const hfSourceClass = recipe.source === 'hellofresh' ? ' hf' : '';
@@ -9713,7 +9920,7 @@
     document.getElementById('gjGordonYell').classList.remove('visible');
     document.getElementById('gjGordonBanish').classList.remove('visible');
     document.getElementById('gjGordonWinner').classList.add('visible');
-    document.getElementById('gjControls').style.display = 'none';
+    document.getElementById('gjWinnerActions').innerHTML = '<button type="button" class="gj-winner-btn-primary" id="gjWinnerCook">Let\'s Cook</button><button type="button" class="gj-winner-btn-secondary" onclick="startGordonsJudgement()">Go Again</button>';
     document.getElementById('gjWinnerActions').style.display = 'flex';
 
     const counterEl = document.getElementById('gjCounter');
@@ -9848,6 +10055,15 @@
 <!-- Gordon's Judgement -->
 <div class="gordons-judgement-overlay" id="gordonsJudgement">
   <button class="gj-btn-close" onclick="closeGordonsJudgement()">✕</button>
+  <div class="gj-mode-select-panel visible" id="gjModeSelectPanel">
+    <img class="gj-mode-select-gordon" src="https://stormyreigns.github.io/HATH/HKGordon.png" alt="">
+    <div class="gj-mode-select-btns">
+      <button type="button" class="gj-mode-btn" onclick="chooseGjMode('judgement')">Gordon's Judgement</button>
+      <button type="button" class="gj-mode-btn" onclick="chooseGjMode('randomizer')">Randomizer</button>
+    </div>
+  </div>
+  <div class="gj-game-panel" id="gjGamePanel">
+  <div class="gj-filters" id="gjGameFilters"></div>
   <div class="gj-title">Gordon's Judgement</div>
   <div style="position:relative; width:78vw; max-width:320px;">
     <div class="gj-card-stack" id="gjCardStack"></div>
@@ -9858,13 +10074,26 @@
     <img class="gj-gordon-winner" id="gjGordonWinner" src="https://stormyreigns.github.io/HATH/HKGordon.png" alt="">
   </div>
   <div class="gj-counter" id="gjCounter"></div>
-  <div class="gj-controls" id="gjControls">
-    <button class="gj-btn-no" id="gjBtnNo" onclick="gjVote('no')" aria-label="Not tonight">✕</button>
-    <button class="gj-btn-yes" id="gjBtnYes" onclick="gjVote('yes')" aria-label="Let's cook">✓</button>
+  <div class="gj-swipe-hint" id="gjSwipeHint">Swipe left to reject · right for maybe</div>
+  <div class="gj-maybe-pile" id="gjMaybePile">
+    <div class="gj-maybe-title">Maybe pile — pick one</div>
+    <div class="gj-maybe-scroll" id="gjMaybeScroll"></div>
   </div>
   <div class="gj-winner-actions" id="gjWinnerActions" style="display:none">
     <button class="gj-winner-btn-primary" id="gjWinnerCook">Let's Cook</button>
     <button class="gj-winner-btn-secondary" onclick="startGordonsJudgement()">Go Again</button>
+  </div>
+  </div>
+  <div class="gj-randomizer-panel" id="gjRandomizerPanel">
+    <img class="gj-mode-select-gordon" src="https://stormyreigns.github.io/HATH/HKGordon.png" alt="">
+    <div class="gj-filters" id="gjRandomizerFilters"></div>
+    <div class="gj-title">Randomizer</div>
+    <div class="gj-randomizer-shuffle" id="gjRandomizerShuffle">Hit the button to pick!</div>
+    <button type="button" class="gj-mode-btn" id="gjRandomizerBtn" onclick="runRandomizer()">🎲 Pick for me</button>
+    <div class="gj-winner-actions" id="gjRandomizerActions" style="display:none; margin-top:20px">
+      <button type="button" class="gj-winner-btn-primary" id="gjRandomizerCook">Let's Cook</button>
+      <button type="button" class="gj-winner-btn-secondary" onclick="randomizerGoAgain()">Go Again</button>
+    </div>
   </div>
 </div>
 
