@@ -3996,19 +3996,49 @@
     .recipes-add-inline:active { transform: scale(0.95); }
     html.dark-mode .recipes-add-inline { box-shadow: 0 2px 8px rgba(192,122,74,0.4); }
     .gj-entry-btn {
-      flex: 1; margin: 0; padding: 12px 18px; border-radius: 14px;
-      background: linear-gradient(135deg, rgba(192,122,74,0.18) 0%, rgba(168,100,50,0.12) 100%);
-      border: 1.5px solid rgba(192,122,74,0.35);
-      color: var(--accent); font-size: 14px; font-weight: 700;
+      flex: 1; margin: 0; padding: 13px 18px; border-radius: 10px;
+      background: linear-gradient(160deg, #2a1a0e 0%, #1a0e06 100%);
+      border: none;
+      color: #e8c97a;
+      font-size: 14px; font-weight: 800;
+      letter-spacing: 0.08em; text-transform: uppercase;
       cursor: pointer; box-sizing: border-box; display: flex;
-      align-items: center; justify-content: center; gap: 8px;
-      box-shadow: 0 2px 8px rgba(192,122,74,0.15);
-      transition: transform 0.12s, box-shadow 0.2s;
+      align-items: center; justify-content: center; gap: 10px;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.06) inset,
+        0 -1px 0 rgba(0,0,0,0.4) inset,
+        0 4px 18px rgba(0,0,0,0.35),
+        0 1px 3px rgba(0,0,0,0.5);
+      position: relative; overflow: hidden;
+      transition: transform 0.12s, box-shadow 0.15s, filter 0.15s;
     }
-    .gj-entry-btn:hover { box-shadow: 0 3px 12px rgba(192,122,74,0.22); }
-    .gj-entry-btn:active { transform: scale(0.98); }
+    .gj-entry-btn::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        90deg,
+        transparent 0px,
+        transparent 3px,
+        rgba(255,255,255,0.015) 3px,
+        rgba(255,255,255,0.015) 4px
+      );
+      pointer-events: none;
+    }
+    .gj-entry-btn::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(232,201,122,0.3), transparent);
+      pointer-events: none;
+    }
+    .gj-entry-btn:active {
+      transform: scale(0.97);
+      box-shadow: 0 1px 6px rgba(0,0,0,0.4);
+      filter: brightness(0.92);
+    }
     .gj-entry-btn .gj-entry-icon {
       width: 22px; height: 22px; object-fit: contain; flex-shrink: 0;
+      filter: brightness(0) saturate(100%) invert(80%) sepia(40%) saturate(400%) hue-rotate(5deg);
     }
     .home-gj-btn {
       border-radius: 14px; padding: 12px 16px; cursor: pointer;
