@@ -608,7 +608,8 @@
       min-height: 100vh;
       min-height: -webkit-fill-available;
       height: calc(var(--vh, 1vh) * 100);
-      padding-bottom: calc(32px + env(safe-area-inset-bottom));
+      /* Reserve space for bottom bar (~60px) so Blathers/input stay above it */
+      padding-bottom: calc(72px + env(safe-area-inset-bottom));
       z-index: 1;
       display: flex; flex-direction: column;
       overflow: hidden;
@@ -658,8 +659,8 @@
     }
     .civics-content::-webkit-scrollbar,
     .screen-list::-webkit-scrollbar,
-    .sub-screen::-webkit-scrollbar { display: none; }
-    .civics-content, .screen-list, .sub-screen {
+    #settingsScreen::-webkit-scrollbar { display: none; }
+    .civics-content, .screen-list, #settingsScreen {
       scrollbar-width: none;
       -ms-overflow-style: none;
     }
@@ -3771,8 +3772,7 @@
           </div>
         </div>
       </div>
-    </div>
-    <div class="civics-carousel-indicator civics-carousel-indicator--fixed" id="civicsCarouselIndicator">
+      <div class="civics-carousel-indicator civics-carousel-indicator--fixed" id="civicsCarouselIndicator">
         <div class="civics-carousel-dots" id="civicsCarouselDots"></div>
         <div class="civics-carousel-hint" id="civicsCarouselHint">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
@@ -4197,7 +4197,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.0.13';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.0.14';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
