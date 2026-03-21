@@ -1766,10 +1766,9 @@
     html.dark-mode .recipes-search-toggle:hover, html.dark-mode .recipes-search-toggle.active { border-color: var(--accent); background: rgba(192,122,74,0.12); }
     .recipes-search-toggle svg { width: 20px; height: 20px; }
     .recipes-search-wrap {
-      padding: 0 16px 8px; flex-shrink: 0; max-height: 0; overflow: hidden;
-      transition: max-height 0.2s ease-out;
+      flex-shrink: 0; display: none; padding: 0 16px 8px;
     }
-    .recipes-search-wrap.open { max-height: 60px; }
+    .recipes-search-wrap.open { display: block; }
     .recipes-search {
       width: 100%; padding: 10px 14px 10px 38px;
       font-size: 15px; font-family: inherit;
@@ -3981,8 +3980,23 @@
       display: flex; align-items: center; justify-content: center;
     }
     .gj-card-remove-btn:hover { background: rgba(200,50,30,0.8); }
+    .recipes-gj-row {
+      display: flex; align-items: center; gap: 10px; padding: 0 16px 10px;
+      flex-shrink: 0;
+    }
+    .recipes-add-inline {
+      width: 44px; height: 44px; flex-shrink: 0;
+      border-radius: 12px; border: 1.5px solid rgba(192,122,74,0.3);
+      background: var(--accent); color: #fff; font-size: 24px; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: transform 0.12s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px rgba(192,122,74,0.3);
+    }
+    .recipes-add-inline:hover { box-shadow: 0 3px 12px rgba(192,122,74,0.4); }
+    .recipes-add-inline:active { transform: scale(0.95); }
+    html.dark-mode .recipes-add-inline { box-shadow: 0 2px 8px rgba(192,122,74,0.4); }
     .gj-entry-btn {
-      margin: 0 16px 10px; padding: 12px 18px; border-radius: 14px;
+      flex: 1; margin: 0; padding: 12px 18px; border-radius: 14px;
       background: linear-gradient(135deg, rgba(192,122,74,0.18) 0%, rgba(168,100,50,0.12) 100%);
       border: 1.5px solid rgba(192,122,74,0.35);
       color: var(--accent); font-size: 14px; font-weight: 700;
@@ -4121,7 +4135,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         </button>
       </div>
-      <button type="button" class="gj-entry-btn" onclick="openGordonsJudgement()"><img class="gj-entry-icon" src="https://stormyreigns.github.io/HATH/HKChefKnife.png" alt=""> Gordon's Judgement</button>
+      <div class="recipes-gj-row">
+        <button type="button" class="gj-entry-btn" onclick="openGordonsJudgement()"><img class="gj-entry-icon" src="https://stormyreigns.github.io/HATH/HKChefKnife.png" alt=""> Gordon's Judgement</button>
+        <button type="button" class="recipes-add-inline" id="recipesAddFab" onclick="openRecipesAddMenu()" title="Add recipe" aria-label="Add recipe">+</button>
+      </div>
       <div class="recipes-search-wrap" id="recipesSearchWrap">
         <input type="search" class="recipes-search" id="recipesSearchInput" placeholder="Search recipes…" autocomplete="off" oninput="onRecipesSearch(this.value)">
       </div>
@@ -4142,7 +4159,6 @@
         </div>
         <div class="takeout-spots-wrap h-scroll-faded" id="takeoutSpotsWrap"></div>
       </div>
-      <button type="button" class="screen-add-fab" id="recipesAddFab" onclick="openRecipesAddMenu()" title="Add recipe" aria-label="Add recipe">+</button>
       <!-- Recipe detail slide-in -->
       <div class="recipe-detail" id="recipeDetail">
         <div class="recipe-detail-topbar">
@@ -4703,7 +4719,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.5.4';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.5.5';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
