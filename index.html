@@ -618,8 +618,7 @@
       padding-bottom: calc(32px + env(safe-area-inset-bottom));
       z-index: 1;
       display: flex; flex-direction: column;
-      overflow-x: visible;
-      overflow-y: hidden;
+      overflow: hidden;
       background: transparent;
     }
 
@@ -654,10 +653,10 @@
     .app-scroll-blur {
       position: fixed;
       left: 0; right: 0;
-      bottom: calc(60px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
+      bottom: calc(20px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
       height: 80px;
       pointer-events: none;
-      z-index: 75;
+      z-index: 40;
       opacity: 0;
       transition: opacity 0.25s ease;
       background: linear-gradient(to top, var(--edge-bg, #fdf0e8) 40%, transparent);
@@ -742,10 +741,8 @@
       height: 44px;
       object-fit: contain;
     }
-    .bottom-bar-btn svg,
-    .bottom-bar-btn img {
-      filter: drop-shadow(0 0 6px rgba(255,255,255,0.7));
-    }
+    .bottom-bar-btn svg { filter: drop-shadow(0 0 6px rgba(255,255,255,0.7)); }
+    .bottom-bar-blathers img { filter: drop-shadow(0 0 2px rgba(255,255,255,0.35)); }
 
     /* ── WELLBEING ── */
     .wellbeing { text-align: center; padding: 10px 24px 0; flex-shrink: 0; }
@@ -790,7 +787,6 @@
       gap: 10px; opacity: 0;
       width: 100%;
       min-height: fit-content;
-      overflow-x: visible;
       animation: fadeUp 0.7s ease 0.3s forwards;
     }
     @media (prefers-reduced-motion: reduce) {
@@ -806,15 +802,14 @@
     }
     .hint-greeting em { font-style: italic; color: var(--accent); }
 
-    /* home in-progress projects scroller — extends slightly past edges to avoid cut-off */
+    /* home in-progress projects scroller */
     .home-projects-scroller {
-      width: calc(100% + 150px);
-      max-width: 450px;
-      margin: 6px -75px 0 -75px;
+      width: 100%;
+      max-width: 300px;
+      margin-top: 6px;
       opacity: 0;
       transition: opacity 0.4s ease;
       cursor: pointer;
-      overflow-x: visible;
     }
     .home-projects-scroller.has-projects { opacity: 1; }
     .home-projects-scroller:active { opacity: 0.85; }
@@ -829,12 +824,13 @@
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
       padding: 2px 0;
+      overscroll-behavior-x: contain;
     }
     .home-projects-scroll-wrap::-webkit-scrollbar { display: none; }
     .home-projects-scroll {
       display: flex;
       gap: 8px;
-      padding: 0 4px;
+      padding: 0 12px;
       min-width: min-content;
     }
     .home-project-chip {
@@ -1160,6 +1156,7 @@
     .drawer-icon-svg {
       width: 18px; height: 18px; flex-shrink: 0;
       opacity: 0.55; transition: opacity 0.15s;
+      filter: drop-shadow(0 0 4px rgba(255,255,255,0.6));
     }
     .drawer-item:hover .drawer-icon-svg,
     .drawer-item:active .drawer-icon-svg,
@@ -1168,6 +1165,7 @@
       width: 22px; height: 22px; flex-shrink: 0;
       object-fit: contain; image-rendering: pixelated;
       opacity: 0.75; transition: opacity 0.15s;
+      filter: drop-shadow(0 0 4px rgba(255,255,255,0.6));
     }
     .drawer-item:hover .drawer-icon-img,
     .drawer-item:active .drawer-icon-img,
@@ -4194,7 +4192,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.0.9';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.0.10';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
