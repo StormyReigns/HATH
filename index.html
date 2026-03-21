@@ -3981,7 +3981,8 @@
     }
     .gj-card-remove-btn:hover { background: rgba(200,50,30,0.8); }
     .recipes-gj-row {
-      display: flex; align-items: center; gap: 10px; padding: 0 16px 10px;
+      display: flex; align-items: center; gap: 10px;
+      padding: 16px 16px max(20px, env(safe-area-inset-bottom));
       flex-shrink: 0;
     }
     .recipes-add-inline {
@@ -4044,22 +4045,23 @@
       position: absolute;
       inset: 0;
       background: radial-gradient(
-        ellipse 60% 80% at 50% 120%,
-        rgba(255, 140, 30, 0.18) 0%,
-        rgba(255, 80, 10, 0.10) 40%,
-        transparent 70%
+        ellipse 70% 90% at 50% 115%,
+        rgba(255, 160, 50, 0.38) 0%,
+        rgba(255, 100, 30, 0.25) 35%,
+        rgba(255, 60, 10, 0.12) 60%,
+        transparent 75%
       );
       pointer-events: none;
-      animation: gjFlameReflect 3s ease-in-out infinite;
+      animation: gjFlameReflect 2.5s ease-in-out infinite;
       mix-blend-mode: screen;
       border-radius: inherit;
     }
     @keyframes gjFlameReflect {
-      0%   { opacity: 0.6; transform: scaleX(0.85) translateY(0px); }
-      25%  { opacity: 1;   transform: scaleX(1.05) translateY(-2px); }
-      50%  { opacity: 0.7; transform: scaleX(0.9)  translateY(-1px); }
-      75%  { opacity: 0.95; transform: scaleX(1.1) translateY(-3px); }
-      100% { opacity: 0.6; transform: scaleX(0.85) translateY(0px); }
+      0%   { opacity: 0.85; transform: scaleX(0.8) translateY(2px); }
+      25%  { opacity: 1;    transform: scaleX(1.15) translateY(-5px); }
+      50%  { opacity: 0.9;  transform: scaleX(0.9) translateY(-3px); }
+      75%  { opacity: 1;    transform: scaleX(1.2) translateY(-6px); }
+      100% { opacity: 0.85; transform: scaleX(0.8) translateY(2px); }
     }
     .home-gj-btn {
       border-radius: 14px; padding: 12px 16px; cursor: pointer;
@@ -4186,13 +4188,6 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         </button>
       </div>
-      <div class="recipes-gj-row">
-        <button type="button" class="gj-entry-btn" onclick="openGordonsJudgement()">
-          <span class="gj-entry-flame"></span>
-          <img class="gj-entry-icon" src="https://stormyreigns.github.io/HATH/HKChefKnife.png" alt="">
-          Gordon's Judgement</button>
-        <button type="button" class="recipes-add-inline" id="recipesAddFab" onclick="openRecipesAddMenu()" title="Add recipe" aria-label="Add recipe">+</button>
-      </div>
       <div class="recipes-search-wrap" id="recipesSearchWrap">
         <input type="search" class="recipes-search" id="recipesSearchInput" placeholder="Search recipes…" autocomplete="off" oninput="onRecipesSearch(this.value)">
       </div>
@@ -4212,6 +4207,13 @@
           <button type="button" class="takeout-manage-btn" onclick="openTakeoutManage()">Manage</button>
         </div>
         <div class="takeout-spots-wrap h-scroll-faded" id="takeoutSpotsWrap"></div>
+      </div>
+      <div class="recipes-gj-row">
+        <button type="button" class="gj-entry-btn" onclick="openGordonsJudgement()">
+          <span class="gj-entry-flame"></span>
+          <img class="gj-entry-icon" src="https://stormyreigns.github.io/HATH/HKChefKnife.png" alt="">
+          Gordon's Judgement</button>
+        <button type="button" class="recipes-add-inline" id="recipesAddFab" onclick="openRecipesAddMenu()" title="Add recipe" aria-label="Add recipe">+</button>
       </div>
       <!-- Recipe detail slide-in -->
       <div class="recipe-detail" id="recipeDetail">
@@ -4773,7 +4775,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.5.7';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.5.8';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
