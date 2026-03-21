@@ -48,7 +48,6 @@
     requestAnimationFrame(function() { requestAnimationFrame(setVisualViewport); });
     window.addEventListener('resize', function() {
       setVisualViewportDebounced();
-      if (typeof updateScrollBlur === 'function') setTimeout(updateScrollBlur, 50);
     });
     window.addEventListener('orientationchange', function() { setTimeout(forceLayoutRecalc, 300); });
     window.addEventListener('load', function() {
@@ -56,17 +55,11 @@
       [50, 100, 200, 350, 500, 750, 1200].forEach(function(delay) {
         setTimeout(forceLayoutRecalc, delay);
       });
-      if (typeof updateScrollBlur === 'function') {
-        [100, 300, 600].forEach(function(delay) {
-          setTimeout(updateScrollBlur, delay);
-        });
-      }
     });
     window.addEventListener('pageshow', function(e) { if (e.persisted) forceLayoutRecalc(); });
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', function() {
         setVisualViewportDebounced();
-        if (typeof updateScrollBlur === 'function') setTimeout(updateScrollBlur, 50);
       });
       window.visualViewport.addEventListener('scroll', setVisualViewportDebounced);
     }
@@ -650,22 +643,19 @@
     }
     .topbar-left, .topbar-right { width: 34px; }
 
-    .app-scroll-blur {
-      position: fixed;
-      left: 0; right: 0;
-      bottom: calc(20px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
-      height: 80px;
+    .scroll-fade-bottom {
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 52px;
+      margin-top: -52px;
+      flex-shrink: 0;
       pointer-events: none;
-      z-index: 40;
-      opacity: 0;
-      transition: opacity 0.25s ease;
-      background: linear-gradient(to top, var(--edge-bg, #fdf0e8) 40%, transparent);
-      -webkit-backdrop-filter: blur(12px) saturate(1.2);
-      backdrop-filter: blur(12px) saturate(1.2);
+      background: linear-gradient(to bottom, transparent, var(--edge-bg, rgba(253,248,245,0.98)));
     }
-    .app-scroll-blur.visible { opacity: 1; }
-    html.dark-mode .app-scroll-blur {
-      background: linear-gradient(to top, #1a1816 40%, transparent);
+    html.dark-mode .scroll-fade-bottom {
+      background: linear-gradient(to bottom, transparent, rgba(26,24,22,0.98));
     }
 
     .app-bottom-bar {
@@ -1315,6 +1305,7 @@
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
+      -ms-overflow-style: none;
     }
     .screen-list::-webkit-scrollbar { display: none; }
     .screen-item {
@@ -1444,7 +1435,10 @@
     .civics-content {
       flex: 1; overflow-y: auto; display: flex; flex-direction: column;
       padding: 0 16px 24px; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
     }
+    .civics-content::-webkit-scrollbar { display: none; }
     .civics-zone-a {
       flex-shrink: 0; margin-bottom: 12px;
     }
@@ -1780,7 +1774,10 @@
     .recipes-list-wrap {
       flex: 1; overflow-y: auto; padding: 0 16px;
       overscroll-behavior-y: contain; display: none;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
     }
+    .recipes-list-wrap::-webkit-scrollbar { display: none; }
     .recipe-list-item {
       display: flex; align-items: center; gap: 12px;
       padding: 11px 0; border-bottom: 1px solid rgba(0,0,0,0.07); cursor: pointer;
@@ -1834,7 +1831,12 @@
     }
     .recipe-edit-textarea:focus { border-color: var(--accent); }
     html.dark-mode .recipe-edit-textarea { border-color: rgba(192,122,74,0.4); }
-    .recipe-detail-scroll { flex: 1; overflow-y: auto; overscroll-behavior-y: contain; }
+    .recipe-detail-scroll {
+      flex: 1; overflow-y: auto; overscroll-behavior-y: contain;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .recipe-detail-scroll::-webkit-scrollbar { display: none; }
     .recipe-detail-image {
       width: 100%; height: 230px; background: linear-gradient(135deg, #e8d5b0, #c9a06a);
       display: flex; align-items: center; justify-content: center;
@@ -2225,7 +2227,13 @@
     .schedule-mini-cal-day.today.has-events::after { background: var(--text); }
 
     /* Settings screen */
-    #settingsScreen { padding: 8px 0 24px; overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    #settingsScreen {
+      padding: 8px 0 24px; overflow-y: auto; -webkit-overflow-scrolling: touch;
+      flex: 1; min-height: 0; display: flex; flex-direction: column;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    #settingsScreen::-webkit-scrollbar { display: none; }
     #settingsScreen.visible { display: flex !important; }
     .settings-section { padding: 16px 0; border-bottom: 1px solid rgba(0,0,0,0.06); flex-shrink: 0; }
     .settings-section:last-child { border-bottom: none; }
@@ -3726,6 +3734,7 @@
           <button type="button" class="civics-source-add-btn" onclick="addCivicsSource()">Add</button>
         </div>
       </div>
+      <div class="scroll-fade-bottom"></div>
     </div>
 
     <!-- Civics screen -->
@@ -3766,7 +3775,9 @@
           </div>
         </div>
       </div>
-      <div class="civics-carousel-indicator civics-carousel-indicator--fixed" id="civicsCarouselIndicator">
+      <div class="scroll-fade-bottom"></div>
+    </div>
+    <div class="civics-carousel-indicator civics-carousel-indicator--fixed" id="civicsCarouselIndicator">
         <div class="civics-carousel-dots" id="civicsCarouselDots"></div>
         <div class="civics-carousel-hint" id="civicsCarouselHint">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
@@ -3938,7 +3949,6 @@
     </div>
 
     <div class="updated-at" id="updatedAt"></div>
-    <div class="app-scroll-blur" id="appScrollBlur" aria-hidden="true"></div>
   </div>
 </div><!-- end .app -->
 
@@ -4192,7 +4202,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.0.10';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.0.12';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -4744,7 +4754,6 @@
     updateBlatherBookVisibility();
     updateBottomBarHome();
     updateScreenAddFabs();
-    requestAnimationFrame(function() { setTimeout(updateScrollBlur, 100); });
   }
 
   function showSubScreen(screenId) {
@@ -4776,7 +4785,6 @@
     updateBlatherBookVisibility();
     updateBottomBarHome();
     updateScreenAddFabs();
-    requestAnimationFrame(function() { setTimeout(updateScrollBlur, 100); });
   }
 
   function updateBlatherBookVisibility() {
@@ -4789,22 +4797,6 @@
     if (homeBtn) homeBtn.style.display = 'flex';
     const center = homeBtn && homeBtn.parentElement;
     if (center) center.style.display = 'flex';
-  }
-
-  function updateScrollBlur() {
-    const blur = document.getElementById('appScrollBlur');
-    if (!blur) return;
-    let canScroll = false;
-    const body = document.querySelector('.body');
-    if (body && body.scrollHeight > body.clientHeight + 2) canScroll = true;
-    const subScreen = document.querySelector('.sub-screen.visible');
-    if (subScreen && !canScroll) {
-      const scrollables = subScreen.querySelectorAll('.civics-content, .screen-list, #scheduleList, #settingsScreen, .recipe-detail-scroll, .recipes-list-wrap');
-      scrollables.forEach(function(el) {
-        if (el.scrollHeight > el.clientHeight + 2) canScroll = true;
-      });
-    }
-    blur.classList.toggle('visible', canScroll);
   }
 
   function updateScreenAddFabs() {
@@ -4875,10 +4867,16 @@
     list.innerHTML = '';
     if (!data) {
       list.innerHTML = '<div class="screen-loading">Loading…</div>';
+      const fade = document.createElement('div');
+      fade.className = 'scroll-fade-bottom';
+      list.appendChild(fade);
       return;
     }
     if (data.error) {
       list.innerHTML = '<div class="screen-loading">Could not load folder. ' + escapeHtml(String(data.error).slice(0, 80)) + (String(data.error).length > 80 ? '…' : '') + '</div>';
+      const fade = document.createElement('div');
+      fade.className = 'scroll-fade-bottom';
+      list.appendChild(fade);
       return;
     }
     const folders = data.folders || [];
@@ -4927,6 +4925,9 @@
     if (folders.length === 0 && files.length === 0) {
       list.innerHTML = '<div class="screen-loading">This folder is empty.</div>';
     }
+    const fade = document.createElement('div');
+    fade.className = 'scroll-fade-bottom';
+    list.appendChild(fade);
     updateDocsSelectionBar();
   }
 
@@ -5357,7 +5358,6 @@
     if (inProgress.length === 0) {
       wrap.classList.remove('has-projects');
       wrap.style.display = 'none';
-      setTimeout(updateScrollBlur, 0);
       return;
     }
     wrap.style.display = '';
@@ -5368,7 +5368,6 @@
       const phaseInfo = d.currentPhaseName ? escapeHtml(d.currentPhaseName) : (d.phaseLabel || '');
       return `<span class="home-project-chip" onclick="event.stopPropagation(); closeDrawer(); showProjectsScreen(); projectsSelectProject('${p.id}');"><div class="home-project-chip-top"><span class="home-project-chip-title">${escapeHtml(p.title)}</span><span class="home-project-chip-pct">${progPct}%</span></div>${phaseInfo ? `<span class="home-project-chip-phase">${phaseInfo}</span>` : ''}<div class="home-project-chip-bar"><div class="home-project-chip-fill" style="width:${progPct}%"></div></div></span>`;
     }).join('');
-    setTimeout(updateScrollBlur, 50);
   }
 
   function showProjectsScreen() {
@@ -5429,6 +5428,9 @@
         </div>
       </div>`;
     }).join('');
+    const fade = document.createElement('div');
+    fade.className = 'scroll-fade-bottom';
+    listEl.appendChild(fade);
 
     const emptyEl = document.getElementById('projectsEmpty');
     if (emptyEl) emptyEl.style.display = inProgress.length === 0 && completed.length === 0 ? 'flex' : 'none';
@@ -7578,6 +7580,9 @@
     const filtered = filterScheduleEvents(scheduleEvents);
     if (filtered.length === 0) {
       list.innerHTML = '<div class="screen-loading">' + (scheduleFilter === 'all' ? 'No upcoming events.' : 'No events match this filter.') + '</div>';
+      const fade = document.createElement('div');
+      fade.className = 'scroll-fade-bottom';
+      list.appendChild(fade);
       return;
     }
     const byDate = {};
@@ -7638,6 +7643,9 @@
         list.appendChild(div);
       });
     });
+    const fade = document.createElement('div');
+    fade.className = 'scroll-fade-bottom';
+    list.appendChild(fade);
   }
 
   function generateIcs(ev) {
@@ -8672,6 +8680,9 @@
         listWrap.appendChild(item);
         if (r.imageId) loadThumbnailInto(r.imageId, iconEl);
       });
+      const fade = document.createElement('div');
+      fade.className = 'scroll-fade-bottom';
+      listWrap.appendChild(fade);
     } else {
       carouselWrap.style.display = '';
       listWrap.style.display = 'none';
@@ -8725,7 +8736,8 @@
         <div class="recipe-detail-name">${escapeHtml(recipe.name)}</div>
         <div class="recipe-detail-meta" id="recipeDetailMeta"><span class="recipe-card-source${hfClass}">${escapeHtml(recipe.sourceLabel)}</span></div>
         <div id="recipeDetailBody"><div class="recipes-loading">Loading…</div></div>
-      </div>`;
+      </div>
+      <div class="scroll-fade-bottom"></div>`;
 
     detail.classList.add('open');
 
