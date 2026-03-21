@@ -2003,6 +2003,19 @@
       display: flex; gap: 12px; overflow-x: auto;
       padding: 4px 0; -webkit-overflow-scrolling: touch;
     }
+    .takeout-cuisine-chips {
+      display: flex; gap: 8px; padding: 0 0 10px;
+      overflow-x: auto; flex-shrink: 0; scrollbar-width: none;
+    }
+    .takeout-cuisine-chips::-webkit-scrollbar { display: none; }
+    .takeout-cuisine-chip {
+      padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;
+      border: 1.5px solid rgba(0,0,0,0.1); background: transparent;
+      color: var(--text2); cursor: pointer; white-space: nowrap;
+      transition: all 0.15s; font-family: inherit;
+    }
+    .takeout-cuisine-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    html.dark-mode .takeout-cuisine-chip { border-color: rgba(255,255,255,0.13); }
     .takeout-spots-wrap::-webkit-scrollbar { height: 4px; }
     .takeout-card {
       flex: 0 0 auto;
@@ -2050,12 +2063,12 @@
     }
     .takeout-manage-row.editing .takeout-edit-form { display: flex; }
     .takeout-manage-row.editing .takeout-manage-row-name { display: none; }
-    .takeout-edit-form input, .takeout-edit-form label { font-size: 14px; }
-    .takeout-edit-form input {
+    .takeout-edit-form input, .takeout-edit-form select, .takeout-edit-form label { font-size: 14px; }
+    .takeout-edit-form input, .takeout-edit-form select {
       padding: 8px 10px; border: 1px solid rgba(0,0,0,0.1);
-      border-radius: 6px; width: 100%; color: var(--text);
+      border-radius: 6px; width: 100%; color: var(--text); font-family: inherit;
     }
-    html.dark-mode .takeout-edit-form input { border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); }
+    html.dark-mode .takeout-edit-form input, html.dark-mode .takeout-edit-form select { border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); }
     .takeout-edit-form .takeout-toggle-row {
       display: flex; align-items: center; justify-content: space-between;
     }
@@ -4206,6 +4219,7 @@
           <span class="takeout-title">🥡 Takeout</span>
           <button type="button" class="takeout-manage-btn" onclick="openTakeoutManage()">Manage</button>
         </div>
+        <div class="takeout-cuisine-chips h-scroll-faded" id="takeoutCuisineChips"></div>
         <div class="takeout-spots-wrap h-scroll-faded" id="takeoutSpotsWrap"></div>
       </div>
       <div class="recipes-gj-row">
@@ -4775,7 +4789,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.5.8';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.5.9';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -9130,7 +9144,7 @@
 
   const RECIPE_FAV_STORAGE = 'shasta_recipe_favourites';
   const RECIPE_CUISINE_STORAGE = 'shasta_recipe_cuisine';
-  const CUISINE_TYPES = ['', 'American', 'Asian', 'Chinese', 'French', 'Indian', 'Italian', 'Japanese', 'Korean', 'Mediterranean', 'Mexican', 'Middle Eastern', 'Thai', 'Vietnamese', 'Other'];
+  const CUISINE_TYPES = ['', 'American', 'Asian', 'Burgers', 'Chinese', 'French', 'Indian', 'Italian', 'Japanese', 'Korean', 'Mediterranean', 'Mexican', 'Middle Eastern', 'Pasta', 'Pizza', 'Sandwiches', 'Thai', 'Vietnamese', 'Wings', 'Other'];
   function getRecipeCuisineStorage() {
     try {
       const raw = localStorage.getItem(RECIPE_CUISINE_STORAGE);
@@ -10343,6 +10357,7 @@
     { name: "Panda Express", cuisine: "Chinese", doordash: null, ubereats: null, website: null }
   ];
 
+  var takeoutActiveCuisine = '';
   function takeoutGenId() { return 'to_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7); }
 
   function getTakeoutSpots() {
@@ -10370,6 +10385,7 @@
 
   function initTakeoutSpots() {
     if (localStorage.getItem(TAKEOUT_STORAGE_KEY) !== null) {
+      renderTakeoutCuisineChips();
       renderTakeoutSpots();
       return;
     }
@@ -10377,13 +10393,37 @@
       return { id: takeoutGenId(), name: p.name, cuisine: p.cuisine || '', doordash: p.doordash, ubereats: p.ubereats, website: p.website, active: true };
     });
     saveTakeoutSpots(preload);
+    renderTakeoutCuisineChips();
     renderTakeoutSpots();
+  }
+
+  function renderTakeoutCuisineChips() {
+    var el = document.getElementById('takeoutCuisineChips');
+    if (!el) return;
+    var spots = getTakeoutSpots().filter(function(s) { return s.active !== false; });
+    var usedCuisines = [...new Set(spots.map(function(s) { return (s.cuisine || '').trim(); }).filter(Boolean))].sort();
+    el.innerHTML = '';
+    var allBtn = document.createElement('button');
+    allBtn.type = 'button';
+    allBtn.className = 'takeout-cuisine-chip' + (takeoutActiveCuisine === '' ? ' active' : '');
+    allBtn.textContent = 'All';
+    allBtn.onclick = function() { takeoutActiveCuisine = ''; renderTakeoutCuisineChips(); renderTakeoutSpots(); };
+    el.appendChild(allBtn);
+    usedCuisines.forEach(function(c) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'takeout-cuisine-chip' + (takeoutActiveCuisine === c ? ' active' : '');
+      btn.textContent = c;
+      btn.onclick = function() { takeoutActiveCuisine = takeoutActiveCuisine === c ? '' : c; renderTakeoutCuisineChips(); renderTakeoutSpots(); };
+      el.appendChild(btn);
+    });
   }
 
   function renderTakeoutSpots() {
     var wrap = document.getElementById('takeoutSpotsWrap');
     if (!wrap) return;
     var spots = getTakeoutSpots().filter(function(s) { return s.active !== false; });
+    if (takeoutActiveCuisine) spots = spots.filter(function(s) { return (s.cuisine || '').trim() === takeoutActiveCuisine; });
     wrap.innerHTML = '';
     spots.forEach(function(s) {
       var card = document.createElement('div');
@@ -10416,7 +10456,11 @@
       editBtn.onclick = function() { takeoutToggleEdit(s.id); };
       var form = document.createElement('div');
       form.className = 'takeout-edit-form';
-      form.innerHTML = '<input type="text" class="takeout-input-name" placeholder="Name" value="' + escapeHtml(s.name) + '"><input type="text" class="takeout-input-cuisine" placeholder="Cuisine" value="' + escapeHtml(s.cuisine || '') + '"><input type="text" class="takeout-input-doordash" placeholder="DoorDash URL — leave blank to auto-generate" value="' + escapeHtml(s.doordash || '') + '"><input type="text" class="takeout-input-ubereats" placeholder="Uber Eats URL — leave blank to auto-generate" value="' + escapeHtml(s.ubereats || '') + '"><input type="text" class="takeout-input-website" placeholder="Website (optional)" value="' + escapeHtml(s.website || '') + '"><div class="takeout-toggle-row"><label>Active</label><input type="checkbox" class="takeout-input-active"' + (s.active !== false ? ' checked' : '') + '></div><button type="button" class="takeout-delete-btn" onclick="deleteTakeoutSpot(\'' + s.id.replace(/'/g, "\\'") + '\')">Delete</button><button type="button" class="takeout-save-btn" onclick="saveTakeoutSpotFromForm(\'' + s.id.replace(/'/g, "\\'") + '\')">Save</button>';
+      var cuisineOpts = CUISINE_TYPES.slice();
+      var sc = (s.cuisine || '').trim();
+      if (sc && cuisineOpts.indexOf(sc) === -1) cuisineOpts = [sc].concat(cuisineOpts);
+      var cuisineSelectHtml = '<select class="takeout-input-cuisine">' + cuisineOpts.map(function(c) { return '<option value="' + escapeHtml(c) + '"' + (c === sc ? ' selected' : '') + '>' + escapeHtml(c || '—') + '</option>'; }).join('') + '</select>';
+      form.innerHTML = '<input type="text" class="takeout-input-name" placeholder="Name" value="' + escapeHtml(s.name) + '">' + cuisineSelectHtml + '<input type="text" class="takeout-input-doordash" placeholder="DoorDash URL — leave blank to auto-generate" value="' + escapeHtml(s.doordash || '') + '"><input type="text" class="takeout-input-ubereats" placeholder="Uber Eats URL — leave blank to auto-generate" value="' + escapeHtml(s.ubereats || '') + '"><input type="text" class="takeout-input-website" placeholder="Website (optional)" value="' + escapeHtml(s.website || '') + '"><div class="takeout-toggle-row"><label>Active</label><input type="checkbox" class="takeout-input-active"' + (s.active !== false ? ' checked' : '') + '></div><button type="button" class="takeout-delete-btn" onclick="deleteTakeoutSpot(\'' + s.id.replace(/'/g, "\\'") + '\')">Delete</button><button type="button" class="takeout-save-btn" onclick="saveTakeoutSpotFromForm(\'' + s.id.replace(/'/g, "\\'") + '\')">Save</button>';
       row.appendChild(nameEl);
       row.appendChild(editBtn);
       row.appendChild(form);
@@ -10466,6 +10510,7 @@
       spots.push(Object.assign({ id: id }, data, { active: data.active !== false }));
     }
     saveTakeoutSpots(spots);
+    renderTakeoutCuisineChips();
     renderTakeoutSpots();
     openTakeoutManage();
   }
@@ -10473,6 +10518,7 @@
   function deleteTakeoutSpot(id) {
     var spots = getTakeoutSpots().filter(function(s) { return s.id !== id; });
     saveTakeoutSpots(spots);
+    renderTakeoutCuisineChips();
     renderTakeoutSpots();
     var row = document.querySelector('.takeout-manage-row[data-id="' + id + '"]');
     if (row) row.remove();
