@@ -616,8 +616,8 @@
       min-height: 100vh;
       min-height: -webkit-fill-available;
       height: calc(var(--vh, 1vh) * 100);
-      /* Reserve space for bottom bar (~56px) + minimal gap */
-      padding-bottom: calc(56px + env(safe-area-inset-bottom));
+      /* Reserve space for bottom bar (~72px) + minimal gap */
+      padding-bottom: calc(80px + env(safe-area-inset-bottom));
       z-index: 1;
       display: flex; flex-direction: column;
       overflow: hidden;
@@ -808,7 +808,7 @@
     .body.chat-mode .hint-area { display: none !important; }
     .body:has(.sub-screen.visible) .chat-area { display: none !important; }
     .app.in-project-view {
-      padding-bottom: calc(4px + min(env(safe-area-inset-bottom, 0px), 40px));
+      padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
     }
 
     /* ── HINT AREA ── */
@@ -1335,8 +1335,8 @@
     }
     #documentsScreen .docs-header,
     #documentsScreen .docs-selection-bar,
-    #documentsScreen .screen-list,
-    #documentsScreen .screen-add-fab { position: relative; z-index: 1; }
+    #documentsScreen .screen-list { position: relative; z-index: 1; }
+    #documentsScreen .screen-add-fab { position: fixed; z-index: 1; }
     .docs-title-icon { width: 18px; height: 18px; flex-shrink: 0; object-fit: contain; }
     .docs-header .screen-breadcrumb { padding: 0; flex: 1; min-width: 0; }
     .docs-refresh-btn {
@@ -2643,7 +2643,7 @@
     }
     .screen-add-fab.visible { display: flex; align-items: center; justify-content: center; }
     .screen-add-fab:active { transform: translateX(-50%) scale(0.95); }
-    #docsAddFab { bottom: calc(64px + min(env(safe-area-inset-bottom, 0px), 8px)); }
+    #docsAddFab { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
     html.dark-mode .screen-add-fab { background: var(--accent); box-shadow: 0 4px 16px rgba(192,122,74,0.35); }
 
     @keyframes mapFloat {
@@ -2964,6 +2964,7 @@
       overflow-y: auto;
       overflow-x: hidden;
       position: relative;
+      padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
     }
     .projects-phase-cards {
       flex: 1 1 auto;
@@ -4909,7 +4910,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.6.24';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.6.25';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
