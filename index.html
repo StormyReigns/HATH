@@ -2876,7 +2876,10 @@
       text-transform: uppercase; letter-spacing: 0.06em;
       padding: 0 4px 8px;
     }
-    #projectsInProgressList { flex: 1; min-height: 0; overflow-y: auto; }
+    #projectsInProgressList {
+      flex: 1; min-height: 0; overflow-y: auto;
+      padding-bottom: calc(72px + env(safe-area-inset-bottom));
+    }
     .projects-empty {
       flex: 1;
       display: flex; align-items: center; justify-content: center;
@@ -4906,7 +4909,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.6.22';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.6.24';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -5331,22 +5334,32 @@
         }
       } catch (_) {}
 
-      const civicEvents = (typeof getCivicEvents === 'function' ? getCivicEvents() : []).map(ev => ({ ...ev, start: ev.start || ev.date + 'T12:00:00', calendar: 'civic' }));
-      const allEvents = [...calEvents, ...civicEvents]
-        .filter(ev => ev.start)
-        .sort((a, b) => new Date(a.start) - new Date(b.start))
-        .slice(0, 4);
+      const calOnly = calEvents.slice(0, 3);
+      const civicSummary = (typeof getNextCivicGroupSummary === 'function' ? getNextCivicGroupSummary() : null);
+      const civicForList = civicSummary ? {
+        start: civicSummary.start,
+        title: civicSummary.title,
+        dateRangeLabel: civicSummary.start && civicSummary.end
+          ? (formatEventDate(civicSummary.start) === formatEventDate(civicSummary.end)
+            ? formatEventDate(civicSummary.start)
+            : formatEventDate(civicSummary.start) + ' – ' + formatEventDate(civicSummary.end))
+          : formatEventDate(civicSummary.start),
+        calendar: 'civic'
+      } : null;
+      const allEvents = [...calOnly];
+      if (civicForList) allEvents.push(civicForList);
+      allEvents.sort((a, b) => new Date(a.start) - new Date(b.start));
 
       if (allEvents.length === 0) {
         wrap.style.display = 'none';
         return;
       }
       list.innerHTML = allEvents.map(ev => {
-        const d = formatEventDate(ev.start);
-        const title = (ev.title || ev.summary || 'Event').trim();
         const isCivic = ev.calendar === 'civic';
+        const dateLabel = isCivic ? ev.dateRangeLabel : formatEventDate(ev.start);
+        const title = (ev.title || ev.summary || 'Event').trim();
         const civicAttrs = isCivic ? ' class="event-item event-item--civic" role="button" onclick="event.stopPropagation(); closeDrawer(); showCivicsScreen();"' : ' class="event-item"';
-        return `<div${civicAttrs}><span class="event-date">${d}</span><span class="event-title">${escapeHtml(title)}</span></div>`;
+        return `<div${civicAttrs}><span class="event-date">${dateLabel}</span><span class="event-title">${escapeHtml(title)}</span></div>`;
       }).join('');
       wrap.style.display = '';
       wrap.classList.add('loaded');
@@ -7795,6 +7808,30 @@
   function getNextElectionEvent() {
     const upcoming = getCivicEvents();
     return upcoming.find(ev => (ev.title || '').includes('🗳️')) || null;
+  }
+
+  /** Returns the next civic election group as { start, end, title } for home-page summary. */
+  function getNextCivicGroupSummary() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const allEvents = (typeof getCivicEvents === 'function' ? getCivicEvents() : []).map(ev => ({ ...ev, date: (ev.date || ev.start || '').slice(0, 10) }));
+    const electionDays = allEvents.filter(ev => (ev.title || '').includes('🗳️'));
+    if (electionDays.length === 0) return null;
+    const elEv = electionDays[0];
+    const elDate = new Date(elEv.date + 'T12:00:00');
+    elDate.setHours(0, 0, 0, 0);
+    const supporting = allEvents.filter(ev => {
+      if (ev === elEv) return false;
+      if ((ev.title || '').includes('🗳️')) return false;
+      const d = new Date(ev.date + 'T12:00:00');
+      d.setHours(0, 0, 0, 0);
+      return d <= elDate;
+    });
+    const allInGroup = [...supporting, elEv].sort((a, b) => a.date.localeCompare(b.date));
+    const startDate = allInGroup[0].date;
+    const endDate = elEv.date;
+    const titleClean = (elEv.title || '').replace(/🗳️\s*/g, '').trim();
+    return { start: startDate + 'T12:00:00', end: endDate + 'T12:00:00', title: titleClean, calendar: 'civic' };
   }
 
   function getCivicEventDescription(ev) {
