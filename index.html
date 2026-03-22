@@ -1839,6 +1839,7 @@
     .recipes-source-chips {
       display: flex; gap: 8px; flex: 1; min-width: 0;
       overflow-x: auto; flex-shrink: 1; scrollbar-width: none;
+      padding-left: 8px;
     }
     .recipes-source-chips::-webkit-scrollbar { display: none; }
     .recipes-source-chip {
@@ -2014,16 +2015,19 @@
     /* Recipe detail overlay */
     .recipe-detail {
       position: fixed; inset: 0;
-      background: #fdf8f1; z-index: 300;
+      background: #fff; z-index: 300;
       display: flex; flex-direction: column;
       transform: translateX(105%);
       transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); overflow: hidden;
+      box-shadow: -4px 0 24px rgba(0,0,0,0.08), -1px 0 8px rgba(0,0,0,0.04);
     }
     .recipe-detail.open { transform: translateX(0); }
     .recipe-detail-topbar {
       display: flex; align-items: center; gap: 8px;
       padding: max(env(safe-area-inset-top), 14px) 16px 12px;
-      flex-shrink: 0; border-bottom: 1px solid rgba(0,0,0,0.07);
+      flex-shrink: 0; border-bottom: 1px solid rgba(0,0,0,0.06);
+      background: #fff;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.8);
     }
     .recipe-detail-back {
       background: none; border: none; font-size: 24px;
@@ -2057,12 +2061,45 @@
     .recipe-detail-scroll::-webkit-scrollbar { display: none; }
     .recipe-detail-image {
       position: relative;
-      width: 100%; height: 230px; background: linear-gradient(135deg, #e8d5b0, #c9a06a);
+      width: 100%; height: 240px; flex-shrink: 0; overflow: hidden;
+      background: #f0e6d4;
       display: flex; align-items: center; justify-content: center;
-      font-size: 72px; color: rgba(0,0,0,0.2); flex-shrink: 0; overflow: hidden;
     }
-    .recipe-detail-image img { width: 100%; height: 100%; object-fit: cover; }
-    .recipe-detail-content { padding: 20px 18px 44px; }
+    .recipe-detail-image.hf-card { background: #e8f2ea; }
+    .recipe-detail-image::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+      background: repeating-linear-gradient(90deg, transparent 0, transparent 2px, rgba(122,74,32,0.04) 2px, rgba(122,74,32,0.04) 3px),
+                  repeating-linear-gradient(0deg, transparent 0, transparent 2px, rgba(122,74,32,0.04) 2px, rgba(122,74,32,0.04) 3px);
+    }
+    .recipe-detail-image.hf-card::before {
+      background: repeating-linear-gradient(90deg, transparent 0, transparent 2px, rgba(26,106,48,0.04) 2px, rgba(26,106,48,0.04) 3px),
+                  repeating-linear-gradient(0deg, transparent 0, transparent 2px, rgba(26,106,48,0.04) 2px, rgba(26,106,48,0.04) 3px);
+    }
+    .recipe-detail-image::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0; height: 80px;
+      background: linear-gradient(to top, rgba(180,120,60,0.2), transparent);
+      z-index: 4; pointer-events: none;
+    }
+    .recipe-detail-image.hf-card::after {
+      background: linear-gradient(to top, rgba(40,140,70,0.15), transparent);
+    }
+    .recipe-detail-image .recipe-card-monogram {
+      font-size: 108px; font-weight: 800; font-family: 'Playfair Display', Georgia, serif;
+      color: rgba(160,100,50,0.12); line-height: 1; letter-spacing: -4px;
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -48%);
+      z-index: 2; pointer-events: none;
+    }
+    .recipe-detail-image.hf-card .recipe-card-monogram { color: rgba(0,140,60,0.1); }
+    .recipe-detail-image img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; z-index: 5;
+    }
+    .recipe-detail-content {
+      padding: 20px 18px 44px; background: #fff;
+      border-top: 1px solid rgba(0,0,0,0.04);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+    }
     .recipe-detail-name { font-size: 24px; font-weight: 800; color: var(--text); line-height: 1.25; margin-bottom: 8px; }
     .recipe-detail-meta { font-size: 13px; color: var(--text2); margin-bottom: 14px; display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
     .recipe-detail-cuisine-wrap { display: inline-flex; align-items: center; gap: 6px; }
@@ -2227,11 +2264,20 @@
     html.dark-mode .recipe-card-body { background: #252220; border-top-color: rgba(255,255,255,0.05); }
     html.dark-mode .recipe-card-hk-watermark { opacity: 0.11; filter: invert(1) sepia(20%) brightness(1.5); }
     html.dark-mode .recipe-list-icon,
-    html.dark-mode .recipe-detail-image { background: linear-gradient(135deg, #3a2e20, #2a1e10); }
+    html.dark-mode .recipe-list-icon { background: linear-gradient(135deg, #3a2e20, #2a1e10); }
+    html.dark-mode .recipe-detail-image { background: #2a2218; }
+    html.dark-mode .recipe-detail-image.hf-card { background: #1a2a1e; }
+    html.dark-mode .recipe-detail-image .recipe-card-monogram { color: rgba(220,170,100,0.12); }
+    html.dark-mode .recipe-detail-image.hf-card .recipe-card-monogram { color: rgba(0,180,80,0.1); }
+    html.dark-mode .recipe-detail-image::before { opacity: 0.08; }
+    html.dark-mode .recipe-detail-image::after { background: linear-gradient(to top, rgba(180,120,50,0.25), transparent); }
+    html.dark-mode .recipe-detail-image.hf-card::after { background: linear-gradient(to top, rgba(40,140,70,0.2), transparent); }
+    html.dark-mode .recipe-detail-content { background: #252220; border-top-color: rgba(255,255,255,0.05); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
+    html.dark-mode .recipe-detail-topbar { background: #252220; box-shadow: 0 1px 0 rgba(255,255,255,0.06); }
     html.dark-mode .recipe-list-item { border-bottom-color: rgba(255,255,255,0.07); }
     html.dark-mode .recipe-ingredient,
     html.dark-mode .recipe-step { border-bottom-color: rgba(255,255,255,0.06); }
-    html.dark-mode .recipe-detail { background: #1a1714; }
+    html.dark-mode .recipe-detail { background: #252220; }
     html.dark-mode .recipe-detail-topbar { border-bottom-color: rgba(255,255,255,0.08); }
     html.dark-mode .recipes-search { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.12); }
     html.dark-mode .recipes-source-chip { border-color: rgba(255,255,255,0.13); }
@@ -5031,7 +5077,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.7.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.7.1';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -9551,7 +9597,7 @@
 
   const RECIPE_FAV_STORAGE = 'shasta_recipe_favourites';
   const RECIPE_CUISINE_STORAGE = 'shasta_recipe_cuisine';
-  const CUISINE_TYPES = ['', 'American', 'Asian', 'Burgers', 'Chinese', 'French', 'Indian', 'Italian', 'Japanese', 'Korean', 'Mediterranean', 'Mexican', 'Middle Eastern', 'Pasta', 'Pizza', 'Sandwiches', 'Thai', 'Vietnamese', 'Wings', 'Other'];
+  const CUISINE_TYPES = ['', 'American', 'Asian', 'Burgers', 'Chinese', 'Dessert', 'French', 'Indian', 'Italian', 'Japanese', 'Korean', 'Mediterranean', 'Mexican', 'Middle Eastern', 'Pasta', 'Pizza', 'Sandwiches', 'Thai', 'Vietnamese', 'Wings', 'Other'];
   const CUISINE_ICONS = {
     'American':       ['🍔','🌽','🥧'],
     'Asian':          ['🥢','🍜','🌿'],
@@ -10073,7 +10119,7 @@
     const hfCardClass = recipe.source === 'hellofresh' ? ' hf-card' : '';
     scroll.innerHTML = `
       <div class="recipe-detail-image${hfCardClass}" id="recipeDetailImgWrap">
-        <div class="recipe-card-monogram" style="font-size:96px;color:rgba(255,255,255,0.25)">${recipeMonogram(recipe.name)}</div>
+        <div class="recipe-card-monogram">${recipeMonogram(recipe.name)}</div>
         <button type="button" class="recipe-fav-star detail${isRecipeFavourite(recipe) ? ' active' : ''}" id="recipeDetailFavStar" title="Favourite" onclick="toggleRecipeFavourite(window._recipeDetailCurrent)">${isRecipeFavourite(recipe) ? '★' : '☆'}</button>
       </div>
       <div class="recipe-detail-content">
