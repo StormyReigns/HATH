@@ -2643,7 +2643,7 @@
     }
     .screen-add-fab.visible { display: flex; align-items: center; justify-content: center; }
     .screen-add-fab:active { transform: translateX(-50%) scale(0.95); }
-    #docsAddFab { bottom: calc(52px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px))); }
+    #docsAddFab { bottom: calc(64px + min(env(safe-area-inset-bottom, 0px), 8px)); }
     html.dark-mode .screen-add-fab { background: var(--accent); box-shadow: 0 4px 16px rgba(192,122,74,0.35); }
 
     @keyframes mapFloat {
@@ -4906,7 +4906,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.6.21';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.6.22';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -5137,21 +5137,29 @@
     const img2 = document.getElementById('docsBgImg2');
     if (!img1 || !img2) return;
     const base = 'https://stormyreigns.github.io/HATH/';
+    const FADE_MS = 1200;
+    const HOLD_MS = 3000;
+    const PAUSE_MS = 300;
     let idx = 0;
     img1.src = base + DOCS_BG_IMGS[0];
     img2.src = base + DOCS_BG_IMGS[1];
     img1.classList.add('active');
     img2.classList.remove('active');
-    docsBgCarouselInterval = setInterval(() => {
-      const nextIdx = (idx + 1) % DOCS_BG_IMGS.length;
+
+    function cycle() {
       const active = img1.classList.contains('active') ? img1 : img2;
       const next = active === img1 ? img2 : img1;
-      next.src = base + DOCS_BG_IMGS[nextIdx];
-      active.src = base + DOCS_BG_IMGS[(nextIdx + 1) % DOCS_BG_IMGS.length];
+      const nextIdx = (idx + 1) % DOCS_BG_IMGS.length;
       active.classList.remove('active');
-      next.classList.add('active');
-      idx = nextIdx;
-    }, 4400);
+      setTimeout(() => {
+        next.src = base + DOCS_BG_IMGS[nextIdx];
+        active.src = base + DOCS_BG_IMGS[(nextIdx + 1) % DOCS_BG_IMGS.length];
+        next.classList.add('active');
+        idx = nextIdx;
+      }, FADE_MS + PAUSE_MS);
+    }
+
+    docsBgCarouselInterval = setInterval(cycle, HOLD_MS + FADE_MS + PAUSE_MS + FADE_MS);
   }
 
   function stopDocsBgCarousel() {
