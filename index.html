@@ -2292,6 +2292,13 @@
       color: var(--accent);
     }
     .schedule-chip:active { opacity: 0.9; }
+    .schedule-event-count {
+      font-size: 12px;
+      color: var(--muted);
+      padding: 0 16px 6px;
+      min-height: 20px;
+      font-family: 'Inter', sans-serif;
+    }
     .schedule-event {
       display: flex; align-items: flex-start; gap: 12px;
       padding: 12px 16px;
@@ -4357,8 +4364,12 @@
         </div>
       </div>
       <div class="schedule-chips-wrap h-scroll-faded">
+        <div class="schedule-chips" id="scheduleTimeChips"></div>
+      </div>
+      <div class="schedule-chips-wrap h-scroll-faded">
         <div class="schedule-chips" id="scheduleChips"></div>
       </div>
+      <div class="schedule-event-count" id="scheduleEventCount"></div>
       <div class="screen-list" id="scheduleList"></div>
       <div class="screen-footer">
         <a href="https://calendar.google.com" target="_blank" rel="noopener">Open in Google Calendar</a>
@@ -4779,7 +4790,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.5.12';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.6.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -8218,6 +8229,28 @@
 
   let scheduleEvents = [];
   let scheduleFilter = 'all';
+  let scheduleTimeFilter = 'all'; // 'all' | 'week' | 'month'
+
+  function renderScheduleTimeChips() {
+    const wrap = document.getElementById('scheduleTimeChips');
+    if (!wrap) return;
+    const chips = [
+      { id: 'all',   label: 'All time' },
+      { id: 'week',  label: 'This week' },
+      { id: 'month', label: 'This month' }
+    ];
+    wrap.innerHTML = chips.map(c => {
+      const active = scheduleTimeFilter === c.id ? ' active' : '';
+      return `<button type="button" class="schedule-chip${active}" data-time-filter="${c.id}">${escapeHtml(c.label)}</button>`;
+    }).join('');
+    wrap.querySelectorAll('.schedule-chip').forEach(btn => {
+      btn.onclick = () => {
+        scheduleTimeFilter = btn.dataset.timeFilter;
+        renderScheduleTimeChips();
+        renderScheduleList();
+      };
+    });
+  }
 
   function renderScheduleChips() {
     const wrap = document.getElementById('scheduleChips');
@@ -8238,27 +8271,65 @@
     wrap.querySelectorAll('.schedule-chip').forEach(btn => {
       btn.onclick = () => {
         scheduleFilter = btn.dataset.filter;
+        renderScheduleTimeChips();
         renderScheduleChips();
         renderScheduleList();
       };
     });
   }
 
+  function filterScheduleEventsByTime(events) {
+    if (scheduleTimeFilter === 'all') return events;
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    if (scheduleTimeFilter === 'week') {
+      const end = new Date(now);
+      end.setDate(end.getDate() + 7);
+      return events.filter(ev => {
+        const d = new Date(ev.start || ev.date || ev.startTime);
+        return d >= now && d < end;
+      });
+    }
+    if (scheduleTimeFilter === 'month') {
+      const end = new Date(now.getFullYear(), now.getMonth() + 1, 1); // start of next month
+      return events.filter(ev => {
+        const d = new Date(ev.start || ev.date || ev.startTime);
+        return d >= now && d < end;
+      });
+    }
+    return events;
+  }
+
   function filterScheduleEvents(events) {
-    if (scheduleFilter === 'all') return events;
+    let result = filterScheduleEventsByTime(events);
+    if (scheduleFilter === 'all') return result;
     if (scheduleFilter === 'starred') {
       const starred = getStarredEvents();
-      return events.filter(ev => starred.includes(getEventId(ev)));
+      return result.filter(ev => starred.includes(getEventId(ev)));
     }
-    return events.filter(ev => getEventCategory(ev) === scheduleFilter);
+    return result.filter(ev => getEventCategory(ev) === scheduleFilter);
   }
 
   function renderScheduleList() {
     const list = document.getElementById('scheduleList');
     if (!list) return;
     const filtered = filterScheduleEvents(scheduleEvents);
+
+    // Event count line
+    const countEl = document.getElementById('scheduleEventCount');
+    if (countEl) {
+      if (filtered.length === 0) {
+        countEl.textContent = '';
+      } else {
+        const label = scheduleTimeFilter === 'week' ? 'this week'
+                    : scheduleTimeFilter === 'month' ? 'this month'
+                    : 'upcoming';
+        countEl.textContent = filtered.length + ' event' + (filtered.length === 1 ? '' : 's') + ' ' + label;
+      }
+    }
+
     if (filtered.length === 0) {
-      list.innerHTML = '<div class="screen-loading">' + (scheduleFilter === 'all' ? 'No upcoming events.' : 'No events match this filter.') + '</div>';
+      list.innerHTML = '<div class="screen-loading">' + (scheduleFilter === 'all' && scheduleTimeFilter === 'all' ? 'No upcoming events.' : 'No events match this filter.') + '</div>';
       return;
     }
     const byDate = {};
@@ -8665,6 +8736,7 @@
     document.querySelector('.drawer-item:nth-child(6)').classList.add('active');
     const list = document.getElementById('scheduleList');
     list.innerHTML = '<div class="screen-loading">Loading…</div>';
+    renderScheduleTimeChips();
     renderScheduleChips();
     const user = localStorage.getItem('shasta_user');
     if (!user) {
@@ -8683,6 +8755,7 @@
         scheduleEvents = getCivicEvents();
         if (scheduleEvents.length === 0) list.innerHTML = '<div class="screen-loading">No upcoming events.</div>';
         else renderScheduleList();
+        renderScheduleTimeChips();
         renderScheduleChips();
         return;
       }
@@ -8692,6 +8765,7 @@
       scheduleEvents = getCivicEvents();
       if (scheduleEvents.length === 0) list.innerHTML = '<div class="screen-loading">Could not load schedule.</div>';
       else renderScheduleList();
+      renderScheduleTimeChips();
       renderScheduleChips();
     }
   }
