@@ -2903,7 +2903,7 @@
       min-height: 0; min-width: 100%;
     }
     .app.in-project-view .projects-view {
-      padding-bottom: 24px;
+      padding-bottom: calc(88px + 52px + 12px + env(safe-area-inset-bottom, 0px));
     }
     .projects-view-header {
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -4940,7 +4940,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.6.30';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.6.31';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
