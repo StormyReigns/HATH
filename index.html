@@ -1295,14 +1295,16 @@
       flex-shrink: 0;
     }
     #documentsScreen { position: relative; }
-    .docs-bg-icon {
+    #documentsScreen::before {
+      content: '';
       position: absolute; inset: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
-      object-position: center;
-      pointer-events: none;
+      background-image: url('https://stormyreigns.github.io/HATH/FFXIVAether2.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0.1;
       z-index: 0;
-      opacity: 0.15;
+      pointer-events: none;
     }
     #documentsScreen .docs-header,
     #documentsScreen .docs-selection-bar,
@@ -4251,7 +4253,6 @@
 
     <!-- Documents screen -->
     <div class="sub-screen" id="documentsScreen">
-      <img class="docs-bg-icon" src="https://stormyreigns.github.io/HATH/FFXIVAether2.png" alt="" loading="lazy" aria-hidden="true">
       <div class="docs-header">
         <img class="docs-title-icon" src="https://stormyreigns.github.io/HATH/FFXIVIcon.png" alt="" loading="lazy">
         <div class="screen-breadcrumb" id="docsBreadcrumb"></div>
@@ -4876,7 +4877,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.6.14';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.6.15';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
