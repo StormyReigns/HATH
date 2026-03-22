@@ -2327,9 +2327,13 @@
     .schedule-event-dot.jessica { background: #c47ab8; }
     .schedule-event-dot.holidays { background: #c9a227; }
     .schedule-event-dot.civic { background: #2a5ba8; }
+    .schedule-event-right {
+      flex-shrink: 0; display: flex; flex-direction: column;
+      align-items: flex-end; gap: 2px;
+    }
     .schedule-event-time {
-      flex-shrink: 0; font-size: 12px; color: var(--muted);
-      font-family: 'Playfair Display', serif; min-width: 52px;
+      font-size: 12px; color: var(--muted);
+      font-family: 'Playfair Display', serif;
     }
     .schedule-event-main {
       flex: 1; min-width: 0; display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap;
@@ -4790,7 +4794,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.6.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.6.1';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -8376,14 +8380,16 @@
           : '';
         div.innerHTML = `
           <span class="schedule-event-dot ${cal}"></span>
-          <span class="schedule-event-time">${escapeHtml(time)}</span>
           <div class="schedule-event-main">
             <span class="schedule-event-title">${escapeHtml(title)}</span>
             ${badge}
           </div>
           ${editBtn}
-          ${bellBtn}
-          <div class="schedule-event-star${starClass}" onclick="event.stopPropagation(); scheduleToggleStar(event)">${starSvg}</div>
+          <div class="schedule-event-right">
+            ${bellBtn}
+            <div class="schedule-event-star${starClass}" onclick="event.stopPropagation(); scheduleToggleStar(event)">${starSvg}</div>
+            <span class="schedule-event-time">${escapeHtml(time)}</span>
+          </div>
         `;
         div.onclick = () => { if (ev.url) window.open(ev.url, '_blank'); };
         div._eventData = ev;
