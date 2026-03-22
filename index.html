@@ -2266,20 +2266,20 @@
     .event-modal-actions { display: flex; align-items: center; flex-wrap: wrap; }
     .schedule-chips-wrap {
       flex-shrink: 0;
-      display: flex; align-items: center; gap: 10px;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
+      display: flex; align-items: center;
+      position: relative;
+      overflow: hidden;
       margin-bottom: 4px;
       padding-right: env(safe-area-inset-right, 0);
     }
-    .schedule-chips-wrap::-webkit-scrollbar { display: none; }
     .schedule-time-select {
-      flex-shrink: 0;
+      position: absolute; left: 16px; top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
       padding: 8px 12px;
       font-size: 13px; font-weight: 400;
       color: var(--text2);
-      background: rgba(255,255,255,0.5);
+      background: #fdf8f5;
       border: 1px solid rgba(0,0,0,0.08);
       border-radius: 20px;
       font-family: 'Inter', sans-serif;
@@ -2291,10 +2291,18 @@
     }
     .schedule-time-select:focus { outline: none; border-color: var(--accent); }
     html.dark-mode .schedule-time-select {
-      background-color: rgba(255,255,255,0.08);
+      background-color: #1a1816;
       border-color: rgba(255,255,255,0.12);
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
     }
+    .schedule-chips-scroll {
+      flex: 1; min-width: 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-left: 115px;
+    }
+    .schedule-chips-scroll::-webkit-scrollbar { display: none; }
     .schedule-chips {
       display: flex; gap: 8px; padding: 2px 0;
       flex-shrink: 0;
@@ -4390,13 +4398,15 @@
           </button>
         </div>
       </div>
-      <div class="schedule-chips-wrap h-scroll-faded">
+      <div class="schedule-chips-wrap">
         <select id="scheduleTimeSelect" class="schedule-time-select" aria-label="Time range">
           <option value="all">All time</option>
           <option value="week">This week</option>
           <option value="month">This month</option>
         </select>
-        <div class="schedule-chips" id="scheduleChips"></div>
+        <div class="schedule-chips-scroll h-scroll-faded">
+          <div class="schedule-chips" id="scheduleChips"></div>
+        </div>
       </div>
       <div class="schedule-event-count" id="scheduleEventCount"></div>
       <div class="screen-list" id="scheduleList"></div>
@@ -4819,7 +4829,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.6.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.6.3';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
