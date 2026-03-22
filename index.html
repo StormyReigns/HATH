@@ -977,6 +977,25 @@
       line-height: 1.4; display: flex; align-items: baseline; gap: 8px;
       font-weight: 300;
     }
+    .event-item--civic {
+      background: rgba(42,91,168,0.12);
+      color: #1e4a96;
+      font-weight: 500;
+      padding: 8px 12px;
+      margin: 0 -12px;
+      border-radius: 10px;
+      border-left: 3px solid #2a5ba8;
+      cursor: pointer;
+    }
+    .event-item--civic:active { opacity: 0.85; }
+    .event-item--civic .event-date { color: #2a5ba8; }
+    .event-item--civic .event-title { color: #1e4a96; font-weight: 500; }
+    html.dark-mode .event-item--civic {
+      background: rgba(42,91,168,0.2);
+      border-left-color: #5a8fd8;
+    }
+    html.dark-mode .event-item--civic .event-date,
+    html.dark-mode .event-item--civic .event-title { color: #8ab4f8; }
     .event-date {
       flex-shrink: 0;
       font-size: 11px; color: var(--muted);
@@ -1296,7 +1315,10 @@
     }
     #documentsScreen { position: relative; overflow: hidden; }
     .docs-bg-carousel {
-      position: absolute; inset: 0;
+      position: absolute;
+      bottom: 0;
+      left: 0; right: 0;
+      height: 200px;
       z-index: 0;
       pointer-events: none;
     }
@@ -1304,9 +1326,9 @@
       position: absolute; inset: 0;
       width: 100%; height: 100%;
       object-fit: contain;
-      object-position: center;
+      object-position: center bottom;
       opacity: 0;
-      transition: opacity 0.4s ease;
+      transition: opacity 1.2s ease-in-out;
     }
     .docs-bg-carousel img.active {
       opacity: 0.15;
@@ -2302,18 +2324,20 @@
       border: 1px solid rgba(0,0,0,0.12); background: #fff;
     }
     .event-modal-actions { display: flex; align-items: center; flex-wrap: wrap; }
-    .schedule-chips-wrap {
+    .schedule-filters-wrap {
       flex-shrink: 0;
-      display: flex; align-items: center;
-      position: relative;
-      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
       margin-bottom: 4px;
-      padding-right: env(safe-area-inset-right, 0);
+      padding: 0 16px;
+      padding-right: max(16px, env(safe-area-inset-right, 0));
+    }
+    .schedule-time-row {
+      display: flex;
+      align-items: center;
     }
     .schedule-time-select {
-      position: absolute; left: 16px; top: 50%;
-      transform: translateY(-50%);
-      z-index: 2;
       padding: 8px 12px;
       font-size: 13px; font-weight: 400;
       color: var(--text2);
@@ -2333,14 +2357,12 @@
       border-color: rgba(255,255,255,0.12);
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
     }
-    .schedule-chips-scroll {
-      flex: 1; min-width: 0;
+    .schedule-chips-wrap {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
-      padding-left: 115px;
     }
-    .schedule-chips-scroll::-webkit-scrollbar { display: none; }
+    .schedule-chips-wrap::-webkit-scrollbar { display: none; }
     .schedule-chips {
       display: flex; gap: 8px; padding: 2px 0;
       flex-shrink: 0;
@@ -2621,6 +2643,7 @@
     }
     .screen-add-fab.visible { display: flex; align-items: center; justify-content: center; }
     .screen-add-fab:active { transform: translateX(-50%) scale(0.95); }
+    #docsAddFab { bottom: calc(52px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px))); }
     html.dark-mode .screen-add-fab { background: var(--accent); box-shadow: 0 4px 16px rgba(192,122,74,0.35); }
 
     @keyframes mapFloat {
@@ -4247,11 +4270,6 @@
       </div>
 
       <div class="matt-note" id="mattNote"></div>
-
-      <div class="recent-uploads" id="recentUploads" onclick="closeDrawer(); showDocsScreen()" role="button" tabindex="0" aria-label="View documents">
-        <div class="recent-uploads-label">Recent Uploads</div>
-        <div class="recent-uploads-list" id="recentUploadsList"></div>
-      </div>
     </div>
 
     <div class="chat-area" id="chatArea"></div>
@@ -4458,13 +4476,15 @@
           </button>
         </div>
       </div>
-      <div class="schedule-chips-wrap">
-        <select id="scheduleTimeSelect" class="schedule-time-select" aria-label="Time range">
-          <option value="all">All time</option>
-          <option value="week">This week</option>
-          <option value="month">This month</option>
-        </select>
-        <div class="schedule-chips-scroll h-scroll-faded">
+      <div class="schedule-filters-wrap">
+        <div class="schedule-time-row">
+          <select id="scheduleTimeSelect" class="schedule-time-select" aria-label="Time range">
+            <option value="all">All time</option>
+            <option value="week">This week</option>
+            <option value="month">This month</option>
+          </select>
+        </div>
+        <div class="schedule-chips-wrap h-scroll-faded">
           <div class="schedule-chips" id="scheduleChips"></div>
         </div>
       </div>
@@ -4886,7 +4906,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.6.18';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.6.21';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -5131,7 +5151,7 @@
       active.classList.remove('active');
       next.classList.add('active');
       idx = nextIdx;
-    }, 3400);
+    }, 4400);
   }
 
   function stopDocsBgCarousel() {
@@ -5252,7 +5272,6 @@
         if (data && data.error) console.warn('Shasta API error:', data.error);
         setWellbeing('OK');
         renderHomeProjectsScroller();
-        renderRecentUploads();
         loadCalendar();
         return;
       }
@@ -5279,7 +5298,6 @@
       setWellbeing('OK');
     }
     renderHomeProjectsScroller();
-    renderRecentUploads();
     loadCalendar();
   }
 
@@ -5287,26 +5305,42 @@
     const user = localStorage.getItem('shasta_user');
     if (!user) return;
     try {
-      let url = `${API_URL}?action=calendar&user=${encodeURIComponent(user)}`;
-      const calIds = getEnabledCalendars();
-      if (calIds && calIds.length > 0) {
-        url += '&calendars=' + encodeURIComponent(JSON.stringify(calIds));
-      }
-      const res = await fetch(url, { redirect: 'follow' });
-      const data = await res.json();
       const list = document.getElementById('upcomingEventsList');
       const wrap = document.getElementById('upcomingEvents');
       if (!list || !wrap) return;
-      if (data.error || !data.events || data.events.length === 0) {
+
+      let calEvents = [];
+      try {
+        let url = `${API_URL}?action=calendar&user=${encodeURIComponent(user)}`;
+        const calIds = getEnabledCalendars();
+        if (calIds && calIds.length > 0) {
+          url += '&calendars=' + encodeURIComponent(JSON.stringify(calIds));
+        }
+        const res = await fetch(url, { redirect: 'follow' });
+        const data = await res.json();
+        if (!data.error && data.events && data.events.length > 0) {
+          calEvents = data.events.map(ev => ({ ...ev, start: ev.start || ev.date || ev.startTime, calendar: ev.calendar || 'calendar' }));
+        }
+      } catch (_) {}
+
+      const civicEvents = (typeof getCivicEvents === 'function' ? getCivicEvents() : []).map(ev => ({ ...ev, start: ev.start || ev.date + 'T12:00:00', calendar: 'civic' }));
+      const allEvents = [...calEvents, ...civicEvents]
+        .filter(ev => ev.start)
+        .sort((a, b) => new Date(a.start) - new Date(b.start))
+        .slice(0, 4);
+
+      if (allEvents.length === 0) {
         wrap.style.display = 'none';
         return;
       }
-      const events = data.events.slice(0, 3);
-      list.innerHTML = events.map(ev => {
-        const d = formatEventDate(ev.start || ev.date || ev.startTime);
+      list.innerHTML = allEvents.map(ev => {
+        const d = formatEventDate(ev.start);
         const title = (ev.title || ev.summary || 'Event').trim();
-        return `<div class="event-item"><span class="event-date">${d}</span><span class="event-title">${escapeHtml(title)}</span></div>`;
+        const isCivic = ev.calendar === 'civic';
+        const civicAttrs = isCivic ? ' class="event-item event-item--civic" role="button" onclick="event.stopPropagation(); closeDrawer(); showCivicsScreen();"' : ' class="event-item"';
+        return `<div${civicAttrs}><span class="event-date">${d}</span><span class="event-title">${escapeHtml(title)}</span></div>`;
       }).join('');
+      wrap.style.display = '';
       wrap.classList.add('loaded');
     } catch (err) {
       document.getElementById('upcomingEvents').style.display = 'none';
@@ -5535,7 +5569,6 @@
     setBlathers('sleep');
     document.getElementById('greetingText').innerHTML = getRandomGreeting();
     renderHomeProjectsScroller();
-    renderRecentUploads();
     updateBlatherBookVisibility();
     updateBottomBarHome();
     updateScreenAddFabs();
