@@ -1303,13 +1303,13 @@
     .docs-bg-carousel img {
       position: absolute; inset: 0;
       width: 100%; height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       object-position: center;
       opacity: 0;
       transition: opacity 0.4s ease;
     }
     .docs-bg-carousel img.active {
-      opacity: 0.25;
+      opacity: 0.15;
     }
     #documentsScreen .docs-header,
     #documentsScreen .docs-selection-bar,
@@ -4259,8 +4259,8 @@
     <!-- Documents screen -->
     <div class="sub-screen" id="documentsScreen">
       <div class="docs-bg-carousel" id="docsBgCarousel">
-        <img id="docsBgImg1" src="https://stormyreigns.github.io/HATH/FFXIVLogo.png" alt="" loading="eager">
-        <img id="docsBgImg2" src="https://stormyreigns.github.io/HATH/FFXIVLogo1.png" alt="" loading="lazy">
+        <img id="docsBgImg1" src="https://stormyreigns.github.io/HATH/FFXIVLogo1.png" alt="" loading="eager">
+        <img id="docsBgImg2" src="https://stormyreigns.github.io/HATH/FFXIVLogo2.webp" alt="" loading="lazy">
       </div>
       <div class="docs-header">
         <img class="docs-title-icon" src="https://stormyreigns.github.io/HATH/FFXIVIcon.png" alt="" loading="lazy">
@@ -4886,7 +4886,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.6.17';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.6.18';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -5108,7 +5108,7 @@
   }
   // Must match your Shasta Docs folder: open it in Drive, copy ID from URL (after /folders/)
   const DOCS_FOLDER_ID = '1UTVAmNx854R9a1YqTPPlZ1gA_V9nUulI';
-  const DOCS_BG_IMGS = ['FFXIVLogo.png', 'FFXIVLogo1.png', 'FFXIVLogo2.png', 'FFXIVLogo3.png', 'FFXIVLogo4.png', 'FFXIVLogo5.png'];
+  const DOCS_BG_IMGS = ['FFXIVLogo1.png', 'FFXIVLogo2.webp', 'FFXIVLogo3.png', 'FFXIVLogo4.png', 'FFXIVLogo5.png'];
   let docsBgCarouselInterval = null;
 
   function startDocsBgCarousel() {
