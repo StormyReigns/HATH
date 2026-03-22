@@ -647,6 +647,11 @@
     .hamburger span:nth-child(3) { width: 82%; }
 
     .topbar-brand { display: flex; flex-direction: column; align-items: center; gap: 0; }
+    .topbar.collapsed {
+      padding-top: max(env(safe-area-inset-top), 14px);
+      padding-bottom: 0;
+    }
+    .topbar.collapsed .topbar-brand { display: none; }
     .wordmark {
       font-family: 'Playfair Display', serif;
       font-size: 21px; letter-spacing: 0.12em;
@@ -1790,6 +1795,12 @@
     /* ── Recipes screen ─────────────────────────────────────── */
     #recipesScreen { flex-direction: column; padding: 0; overflow: hidden; }
     #recipesScreen.visible { padding-bottom: 80px; }
+    .section-version-label {
+      font-size: 9px; letter-spacing: 0.07em;
+      color: var(--muted); font-weight: 400;
+      align-self: flex-end; margin-bottom: 3px;
+      opacity: 0.7;
+    }
     .recipes-header {
       display: flex; align-items: center; gap: 10px;
       padding: 14px 16px 6px; flex-shrink: 0;
@@ -1871,9 +1882,10 @@
       display: flex; flex-direction: column; flex-shrink: 0;
       position: relative;
       box-shadow:
-        0 2px 4px rgba(0,0,0,0.06),
-        0 8px 20px rgba(180,100,40,0.13),
-        0 20px 40px rgba(100,50,10,0.09);
+        0 1px 0 rgba(255,255,255,0.8) inset,
+        0 2px 3px rgba(0,0,0,0.06),
+        0 6px 16px rgba(180,100,40,0.11),
+        0 16px 32px -8px rgba(100,50,10,0.1);
     }
     .recipe-card:active {
       transform: scale(0.97) translateY(1px);
@@ -2181,9 +2193,10 @@
       border: none;
       position: relative;
       box-shadow:
-        0 2px 4px rgba(0,0,0,0.05),
-        0 6px 16px rgba(180,100,40,0.1),
-        0 14px 28px rgba(100,50,10,0.07);
+        0 1px 0 rgba(255,255,255,0.9) inset,
+        0 2px 3px rgba(0,0,0,0.05),
+        0 5px 12px rgba(180,100,40,0.09),
+        0 12px 24px -6px rgba(100,50,10,0.08);
     }
     .takeout-card::before {
       content: '';
@@ -2196,9 +2209,10 @@
     html.dark-mode .takeout-card {
       background: #252220;
       box-shadow:
+        0 1px 0 rgba(255,255,255,0.05) inset,
         0 2px 4px rgba(0,0,0,0.2),
-        0 8px 20px rgba(0,0,0,0.3),
-        0 16px 32px rgba(0,0,0,0.18);
+        0 6px 16px rgba(0,0,0,0.28),
+        0 16px 28px -8px rgba(0,0,0,0.22);
     }
     html.dark-mode .takeout-card::before {
       background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06) 30%, rgba(255,255,255,0.06) 70%, transparent);
@@ -2266,9 +2280,10 @@
     html.dark-mode .recipe-card {
       background: #252220;
       box-shadow:
-        0 2px 4px rgba(0,0,0,0.2),
-        0 10px 28px rgba(0,0,0,0.35),
-        0 24px 48px rgba(0,0,0,0.2);
+        0 1px 0 rgba(255,255,255,0.05) inset,
+        0 2px 4px rgba(0,0,0,0.22),
+        0 8px 20px rgba(0,0,0,0.3),
+        0 20px 36px -10px rgba(0,0,0,0.25);
     }
     html.dark-mode .recipe-card-inner {
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
@@ -4318,8 +4333,10 @@
       background: rgba(242,248,253,0.88);
     }
     html.dark-mode #recipesScreen.visible .recipes-gj-row {
-      background: rgba(26,24,22,0.90);
-      border-top-color: rgba(255,255,255,0.06);
+      background: rgba(36,30,26,0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,180,80,0.08);
     }
     .recipes-add-inline {
       width: 44px; height: 44px; flex-shrink: 0;
@@ -4495,6 +4512,7 @@
       <div class="docs-header">
         <img class="docs-title-icon" src="https://stormyreigns.github.io/HATH/FFXIVIcon.png" alt="" loading="lazy">
         <div class="screen-breadcrumb" id="docsBreadcrumb"></div>
+        <span class="section-version-label"></span>
         <div class="docs-header-actions">
           <button type="button" class="docs-edit-btn" id="docsEditBtn" onclick="toggleDocsEditMode()" title="Edit mode">Edit</button>
           <button type="button" class="docs-refresh-btn" onclick="refreshCurrentDocsFolder()" title="Refresh folder" aria-label="Refresh">
@@ -4519,6 +4537,7 @@
       <div class="recipes-header">
         <span class="hk-icon-circle"><img class="recipes-title-icon" src="https://stormyreigns.github.io/HATH/HK.png" alt="" loading="lazy"></span>
         <span class="recipes-title">Recipes</span>
+        <span class="section-version-label"></span>
         <button type="button" class="recipes-refresh-btn" onclick="loadRecipesData()" title="Refresh">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         </button>
@@ -4585,6 +4604,7 @@
       <div class="settings-header">
         <svg class="settings-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="12" y1="18" x2="20" y2="18"/><circle cx="6" cy="12" r="2"/><circle cx="10" cy="18" r="2"/></svg>
         <h2 class="settings-title">Settings</h2>
+        <span class="section-version-label"></span>
       </div>
       <div class="settings-section">
         <label class="settings-toggle">
@@ -4629,6 +4649,7 @@
       <div class="civics-header">
         <img class="civics-title-icon" src="https://stormyreigns.github.io/HATH/LaytonIcon.png" alt="" loading="lazy">
         <h2 class="civics-title">Civics</h2>
+        <span class="section-version-label"></span>
         <button type="button" class="civics-refresh-btn" onclick="refreshCivicsCarousel()" title="Refresh carousel" aria-label="Refresh carousel">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         </button>
@@ -4679,6 +4700,7 @@
         <div class="schedule-title-wrap">
           <img class="schedule-title-icon" src="https://stormyreigns.github.io/HATH/STIcon2.png" alt="" loading="lazy">
           <h2 class="schedule-title">Schedule</h2>
+          <span class="section-version-label"></span>
         </div>
         <div class="schedule-header-actions">
           <button type="button" class="schedule-icon-btn" onclick="openScheduleCalendarsModal()" title="Calendars" aria-label="Manage calendars">
@@ -4715,6 +4737,7 @@
         <div class="projects-header">
           <img class="projects-title-icon" src="https://stormyreigns.github.io/HATH/WWChest1.png" alt="" loading="lazy">
           <h2 class="projects-title">Projects</h2>
+          <span class="section-version-label"></span>
         </div>
         <div class="projects-completed-bar" id="projectsCompletedBar">
           <div class="projects-completed-header"><img src="https://stormyreigns.github.io/HATH/Triforce.webp" alt="" class="projects-completed-trophy" loading="lazy"> Victories</div>
@@ -5119,7 +5142,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.7.3';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.7.4';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -5155,6 +5178,7 @@
     document.getElementById('appScreen').style.display    = 'block';
     const vEl = document.getElementById('versionLabel');
     if (vEl) vEl.textContent = 'v' + SHASTAPP_VERSION;
+    document.querySelectorAll('.section-version-label').forEach(function(el) { el.textContent = 'v' + SHASTAPP_VERSION; });
     document.getElementById('greetingText').innerHTML = getRandomGreeting();
     loadData(preloadedBalance);
     initScrollFades();
@@ -5791,6 +5815,8 @@
     document.getElementById('recipesScreen').classList.remove('visible');
     document.getElementById('settingsScreen').classList.remove('visible');
     document.getElementById('recipeDetail').classList.remove('open');
+    const topbar = document.querySelector('.topbar');
+    if (topbar) topbar.classList.remove('collapsed');
     document.getElementById('inputZone').style.display = 'flex';
     document.getElementById('updatedAt').style.display = '';
     document.querySelector('.body').classList.remove('chat-mode');
@@ -5821,6 +5847,8 @@
     document.getElementById('settingsScreen').classList.remove('visible');
     document.getElementById('recipesScreen').classList.remove('visible');
     document.getElementById(screenId).classList.add('visible');
+    const topbar = document.querySelector('.topbar');
+    if (topbar) topbar.classList.add('collapsed');
     if (screenId === 'projectsScreen') {
       document.getElementById('projectsLanding').style.display = 'flex';
       document.getElementById('projectsView').style.display = 'none';
