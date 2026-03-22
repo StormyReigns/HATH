@@ -1160,9 +1160,9 @@
     }
     .drawer-nav { flex: 1; padding: 10px 0; }
     .drawer-item {
-      display: flex; align-items: center; gap: 14px;
-      padding: 12px 20px 12px 24px;
-      font-size: 14px; font-weight: 400;
+      display: flex; align-items: center; gap: 18px;
+      padding: 14px 20px 14px 24px;
+      font-size: 17px; font-weight: 400;
       color: var(--text2); cursor: pointer;
       transition: color 0.15s, background 0.15s, transform 0.12s cubic-bezier(0.2,0,0.2,1);
       touch-action: manipulation;
@@ -1185,7 +1185,7 @@
       box-shadow: inset 3px 0 0 var(--accent);
     }
     .drawer-icon-svg {
-      width: 18px; height: 18px; flex-shrink: 0;
+      width: 24px; height: 24px; flex-shrink: 0;
       opacity: 0.55; transition: opacity 0.15s;
       filter: drop-shadow(0 0 6px rgba(255,255,255,0.95)) drop-shadow(0 0 12px rgba(255,255,255,0.6));
     }
@@ -1193,7 +1193,7 @@
     .drawer-item:active .drawer-icon-svg,
     .drawer-item.active .drawer-icon-svg { opacity: 1; }
     .drawer-icon-img {
-      width: 22px; height: 22px; flex-shrink: 0;
+      width: 28px; height: 28px; flex-shrink: 0;
       object-fit: contain; image-rendering: pixelated;
       opacity: 0.75; transition: opacity 0.15s;
       filter: drop-shadow(0 0 6px rgba(255,255,255,0.95)) drop-shadow(0 0 12px rgba(255,255,255,0.6));
@@ -1205,7 +1205,7 @@
       box-shadow: 0 0 6px rgba(255,255,255,0.95), 0 0 12px rgba(255,255,255,0.6);
     }
     .drawer-icon-emoji {
-      font-size: 20px; line-height: 1; flex-shrink: 0;
+      font-size: 26px; line-height: 1; flex-shrink: 0;
       opacity: 0.85; transition: opacity 0.15s;
       filter: drop-shadow(0 0 6px rgba(255,255,255,0.95)) drop-shadow(0 0 12px rgba(255,255,255,0.6));
     }
@@ -2149,7 +2149,7 @@
       padding: 4px 0 6px; flex-shrink: 0;
     }
     .schedule-title-wrap { display: flex; align-items: center; gap: 8px; }
-    .schedule-title-icon { width: 18px; height: 18px; flex-shrink: 0; color: var(--text); filter: drop-shadow(0 0 4px rgba(255,255,255,0.6)); }
+    .schedule-title-icon { width: 18px; height: 18px; flex-shrink: 0; object-fit: contain; }
     .schedule-title {
       font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 400;
       color: var(--text); letter-spacing: 0.02em;
@@ -4659,10 +4659,6 @@
       <svg class="drawer-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
       Finances
     </div>
-    <div class="drawer-item" onclick="drawerNavTap(this)">
-      <svg class="drawer-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
-      Maintenance
-    </div>
     <div class="drawer-item" onclick="drawerNavTap(this, ()=>{ closeDrawer(); showScheduleScreen(); })">
       <img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/STIcon2.png" alt="" loading="lazy">
       Schedule
@@ -4863,7 +4859,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.6.9';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.6.11';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -7630,7 +7626,7 @@
       };
     }
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
-    const settingsItem = document.querySelector('.drawer-item:nth-child(9)');
+    const settingsItem = document.querySelector('.drawer-item:nth-child(8)');
     if (settingsItem) settingsItem.classList.add('active');
   }
 
