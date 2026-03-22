@@ -1294,7 +1294,21 @@
       padding: 8px 0 12px;
       flex-shrink: 0;
     }
-    .docs-title-icon { width: 18px; height: 18px; flex-shrink: 0; color: var(--text); filter: drop-shadow(0 0 4px rgba(255,255,255,0.6)); }
+    #documentsScreen { position: relative; }
+    .docs-bg-icon {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: contain;
+      object-position: center;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.2;
+    }
+    #documentsScreen .docs-header,
+    #documentsScreen .docs-selection-bar,
+    #documentsScreen .screen-list,
+    #documentsScreen .screen-add-fab { position: relative; z-index: 1; }
+    .docs-title-icon { width: 18px; height: 18px; flex-shrink: 0; object-fit: contain; }
     .docs-header .screen-breadcrumb { padding: 0; flex: 1; min-width: 0; }
     .docs-refresh-btn {
       flex-shrink: 0;
@@ -1364,6 +1378,7 @@
     }
     .screen-item:active { background: rgba(192,122,74,0.06); }
     .screen-item-icon { font-size: 18px; opacity: 0.7; }
+    .docs-folder-icon { width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; opacity: 0.85; }
     .screen-item-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .screen-item-edit-actions {
       display: flex;
@@ -4236,8 +4251,9 @@
 
     <!-- Documents screen -->
     <div class="sub-screen" id="documentsScreen">
+      <img class="docs-bg-icon" src="https://stormyreigns.github.io/HATH/FFXIVAether2.png" alt="" loading="lazy" aria-hidden="true">
       <div class="docs-header">
-        <svg class="docs-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+        <img class="docs-title-icon" src="https://stormyreigns.github.io/HATH/FFXIVIcon.png" alt="" loading="lazy">
         <div class="screen-breadcrumb" id="docsBreadcrumb"></div>
         <div class="docs-header-actions">
           <button type="button" class="docs-edit-btn" id="docsEditBtn" onclick="toggleDocsEditMode()" title="Edit mode">Edit</button>
@@ -4649,7 +4665,7 @@
       Projects
     </div>
     <div class="drawer-item" onclick="drawerNavTap(this, ()=>{ closeDrawer(); showDocumentsScreen(); })">
-      <svg class="drawer-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+      <img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/FFXIVIcon.png" alt="" loading="lazy">
       Documents
     </div>
     <div class="drawer-item" data-screen="recipes" onclick="drawerNavTap(this, ()=>{ closeDrawer(); showRecipesScreen(); })">
@@ -4860,7 +4876,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.6.12';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.6.13';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -5616,7 +5632,7 @@
       const selected = docsSelectedItems.has(key);
       div.className = 'screen-item' + (selected ? ' selected' : '');
       if (docsEditMode) {
-        div.innerHTML = `<input type="checkbox" class="screen-item-checkbox" ${selected ? 'checked' : ''} aria-label="Select"><span class="screen-item-icon">📁</span><span class="screen-item-name">${escapeHtml(f.name)}</span><div class="screen-item-edit-actions"><button type="button" class="screen-item-edit-btn rename" title="Rename" aria-label="Rename">Edit</button><button type="button" class="screen-item-edit-btn move-item" title="Move" aria-label="Move">Move</button><button type="button" class="screen-item-edit-btn delete" title="Delete" aria-label="Delete">🗑</button></div>`;
+        div.innerHTML = `<input type="checkbox" class="screen-item-checkbox" ${selected ? 'checked' : ''} aria-label="Select"><img class="screen-item-icon docs-folder-icon" src="https://stormyreigns.github.io/HATH/FFXIVAether.png" alt="" loading="lazy"><span class="screen-item-name">${escapeHtml(f.name)}</span><div class="screen-item-edit-actions"><button type="button" class="screen-item-edit-btn rename" title="Rename" aria-label="Rename">Edit</button><button type="button" class="screen-item-edit-btn move-item" title="Move" aria-label="Move">Move</button><button type="button" class="screen-item-edit-btn delete" title="Delete" aria-label="Delete">🗑</button></div>`;
         const cb = div.querySelector('.screen-item-checkbox');
         cb.onclick = (e) => { e.stopPropagation(); toggleDocsSelection('folder', f.id); };
         div.onclick = (e) => { if (!e.target.closest('.screen-item-edit-btn') && !e.target.closest('.screen-item-checkbox')) toggleDocsSelection('folder', f.id); };
@@ -5624,7 +5640,7 @@
         div.querySelector('.screen-item-edit-btn.move-item').onclick = (e) => { e.stopPropagation(); openDocsMoveSheet('folder', f.id); };
         div.querySelector('.screen-item-edit-btn.delete').onclick = (e) => { e.stopPropagation(); openDocsDeleteModal('folder', f.id, f.name); };
       } else {
-        div.innerHTML = `<span class="screen-item-icon">📁</span><span class="screen-item-name">${escapeHtml(f.name)}</span>`;
+        div.innerHTML = `<img class="screen-item-icon docs-folder-icon" src="https://stormyreigns.github.io/HATH/FFXIVAether.png" alt="" loading="lazy"><span class="screen-item-name">${escapeHtml(f.name)}</span>`;
         div.onclick = () => openDocsFolder(f.id, f.name);
       }
       list.appendChild(div);
