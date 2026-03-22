@@ -1204,6 +1204,7 @@
     .drawer-item[data-screen="recipes"] .hk-icon-circle {
       box-shadow: 0 0 6px rgba(255,255,255,0.95), 0 0 12px rgba(255,255,255,0.6);
     }
+    .drawer-item[data-screen="schedule"] .drawer-icon-img { filter: none; }
     .drawer-icon-emoji {
       font-size: 26px; line-height: 1; flex-shrink: 0;
       opacity: 0.85; transition: opacity 0.15s;
@@ -4659,7 +4660,7 @@
       <svg class="drawer-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
       Finances
     </div>
-    <div class="drawer-item" onclick="drawerNavTap(this, ()=>{ closeDrawer(); showScheduleScreen(); })">
+    <div class="drawer-item" data-screen="schedule" onclick="drawerNavTap(this, ()=>{ closeDrawer(); showScheduleScreen(); })">
       <img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/STIcon2.png" alt="" loading="lazy">
       Schedule
     </div>
@@ -4859,7 +4860,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.6.11';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.6.12';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -8814,7 +8815,8 @@
     showSubScreen('scheduleScreen');
     startScheduleFloatingRotation();
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
-    document.querySelector('.drawer-item:nth-child(6)').classList.add('active');
+    const scheduleBtn = document.querySelector('.drawer-item[data-screen="schedule"]');
+    if (scheduleBtn) scheduleBtn.classList.add('active');
     const list = document.getElementById('scheduleList');
     list.innerHTML = '<div class="screen-loading">Loading…</div>';
     renderScheduleTimeChips();
