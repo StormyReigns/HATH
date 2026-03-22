@@ -1797,8 +1797,9 @@
     .recipes-stage-texture {
       position: absolute;
       left: -24px; right: -24px;
-      top: 5px; bottom: 5px;
+      top: 130px; bottom: 130px;
       pointer-events: none;
+      z-index: -1;
     }
     .recipes-stage-texture svg {
       width: 100%; height: 100%;
@@ -2237,15 +2238,13 @@
     }
     .takeout-drawer-overlay.open { background: rgba(0,0,0,0.4); pointer-events: all; }
     .takeout-drawer {
-      position: fixed;
-      bottom: calc(52px + 76px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
-      left: 0; right: 0;
+      position: fixed; bottom: 0; left: 0; right: 0;
       background: #fdf8f2; border-radius: 22px 22px 0 0;
       box-shadow: 0 -4px 40px rgba(0,0,0,0.15);
       transform: translateY(105%);
       transition: transform 0.35s cubic-bezier(0.32,0.72,0,1);
-      z-index: 201; padding: 0 16px 32px;
-      max-height: 78vh; overflow-y: auto;
+      z-index: 201; padding: 0 16px calc(env(safe-area-inset-bottom) + 32px);
+      max-height: calc(60vh + 30px); overflow-y: auto;
     }
     .takeout-drawer.open { transform: translateY(0); }
     html.dark-mode .takeout-drawer { background: #252220; }
@@ -5304,7 +5303,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.8.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.8.2';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
