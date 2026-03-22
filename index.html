@@ -1878,7 +1878,9 @@
       background: white; border-radius: 16px;
       overflow: visible;
       cursor: pointer;
-      transition: transform 0.18s cubic-bezier(0.34,1.4,0.64,1), box-shadow 0.18s;
+      will-change: transform, opacity;
+      transform-origin: center bottom;
+      transition: transform 0.25s cubic-bezier(0.34,1.2,0.64,1), opacity 0.25s ease, box-shadow 0.18s;
       display: flex; flex-direction: column; flex-shrink: 0;
       position: relative;
       box-shadow:
@@ -1967,8 +1969,8 @@
     .recipe-card-body {
       padding: 10px 12px 13px; flex: 1;
       display: flex; flex-direction: column; gap: 3px; min-height: 0;
-      background: white;
-      border-top: 1px solid rgba(0,0,0,0.04);
+      background: #fdf8f2;
+      border-top: 1px solid rgba(180,120,60,0.07);
     }
     .recipe-card-source {
       font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
@@ -1976,7 +1978,14 @@
       background: rgba(192,122,74,0.15); color: var(--accent);
     }
     .recipe-card-source.hf { background: rgba(0,169,91,0.13); color: #00a05a; }
-    .recipe-card-name { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.3; }
+    .recipe-card-name {
+      font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
     .recipe-fav-star {
       position: absolute; top: 8px; right: 8px;
       width: 32px; height: 32px;
@@ -4304,16 +4313,15 @@
     }
     .gj-card-remove-btn:hover { background: rgba(200,50,30,0.8); }
     .recipes-gj-row {
-      display: flex; align-items: center; gap: 10px;
-      padding: 16px;
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; padding: 12px 20px 14px;
       flex-shrink: 0;
     }
     #recipesScreen.visible .recipes-gj-row {
       position: fixed;
       bottom: calc(52px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
-      left: 0;
-      right: 0;
-      padding: 16px 16px;
+      left: 0; right: 0;
+      padding: 12px 20px 14px;
       z-index: 60;
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
@@ -4350,7 +4358,9 @@
     .recipes-add-inline:active { transform: scale(0.95); }
     html.dark-mode .recipes-add-inline { box-shadow: 0 2px 8px rgba(192,122,74,0.4); }
     .gj-entry-btn {
-      flex: 1; margin: 0; padding: 14px 18px; border-radius: 12px;
+      flex: none;
+      width: min(72%, 340px);
+      margin: 0; padding: 14px 18px; border-radius: 12px;
       background: linear-gradient(175deg, #2e1208 0%, #1a0a04 60%, #0e0602 100%);
       border: 1px solid rgba(180,80,20,0.25);
       color: #d4a45a;
@@ -5142,7 +5152,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.7.4';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.7.5';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -9758,6 +9768,7 @@
     if (recipeBtn) recipeBtn.classList.add('active');
     if (!recipesState.loaded && !recipesState.loading) loadRecipesData();
     initTakeoutSpots();
+    setTimeout(updateCarouselFocus, 80);
   }
 
   async function loadRecipesData() {
@@ -9999,6 +10010,26 @@
       .then(raw => { try { return JSON.parse(raw); } catch(_) { return { error: '' }; } });
   }
 
+  function updateCarouselFocus() {
+    const carousel = document.getElementById('recipesCarousel');
+    if (!carousel) return;
+    const cards = carousel.querySelectorAll('.recipe-card');
+    if (!cards.length) return;
+    const carouselRect = carousel.getBoundingClientRect();
+    const centerX = carouselRect.left + carouselRect.width / 2;
+    cards.forEach(function(card) {
+      const rect = card.getBoundingClientRect();
+      const cardCenterX = rect.left + rect.width / 2;
+      const distance = Math.abs(centerX - cardCenterX);
+      const maxDist = carouselRect.width * 0.6;
+      const ratio = Math.min(distance / maxDist, 1);
+      const scale = 1 - (ratio * 0.07);
+      const opacity = 1 - (ratio * 0.35);
+      card.style.transform = 'scale(' + scale + ')';
+      card.style.opacity = opacity;
+    });
+  }
+
   function renderRecipesView() {
     const carouselWrap = document.getElementById('recipesCarouselWrap');
     const listWrap = document.getElementById('recipesListWrap');
@@ -10162,6 +10193,15 @@
           }
         });
       });
+
+      if (carousel._focusListener) {
+        carousel.removeEventListener('scroll', carousel._focusListener);
+      }
+      carousel._focusListener = function() {
+        requestAnimationFrame(updateCarouselFocus);
+      };
+      carousel.addEventListener('scroll', carousel._focusListener, { passive: true });
+      requestAnimationFrame(updateCarouselFocus);
     }
   }
 
