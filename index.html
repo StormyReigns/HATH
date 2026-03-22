@@ -1861,30 +1861,101 @@
     }
     .recipes-carousel::-webkit-scrollbar { display: none; }
     .recipe-card {
-      flex: 0 0 75%; min-width: 0; scroll-snap-align: center;
-      background: #fdf8f1; border-radius: 14px;
-      box-shadow: 0 3px 14px rgba(0,0,0,0.08); overflow: hidden;
-      cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+      flex: 0 0 72%; min-width: 0; scroll-snap-align: center;
+      background: white; border-radius: 16px;
+      overflow: visible;
+      cursor: pointer;
+      transition: transform 0.18s cubic-bezier(0.34,1.4,0.64,1), box-shadow 0.18s;
       display: flex; flex-direction: column; flex-shrink: 0;
+      position: relative;
+      box-shadow:
+        0 2px 4px rgba(0,0,0,0.06),
+        0 8px 20px rgba(180,100,40,0.13),
+        0 20px 40px rgba(100,50,10,0.09);
     }
-    .recipe-card:active { transform: scale(0.97); box-shadow: 0 1px 8px rgba(0,0,0,0.1); }
+    .recipe-card:active {
+      transform: scale(0.97) translateY(1px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .recipe-card-shine {
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 25%, rgba(255,255,255,0.9) 75%, transparent 100%);
+      border-radius: 16px 16px 0 0;
+      z-index: 10; pointer-events: none;
+    }
+    .recipe-card-inner {
+      border-radius: 16px; overflow: hidden;
+      display: flex; flex-direction: column; flex: 1;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+    }
     .recipe-card-image-wrap {
-      width: 100%; height: 155px;
-      background: linear-gradient(135deg, #e8d5b0 0%, #c9a06a 100%);
+      width: 100%; height: 152px;
       position: relative; overflow: hidden; flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
+      background: #f0e6d4;
     }
-    .recipe-card-image-wrap img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .recipe-card-image-wrap.hf-card { background: #e8f2ea; }
+    .recipe-card-image-wrap img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; z-index: 5;
+    }
+    .recipe-card-texture {
+      position: absolute; inset: 0; pointer-events: none;
+      opacity: 0.13; z-index: 1; width: 100%; height: 100%;
+    }
     .recipe-card-monogram {
-      font-size: 60px; font-weight: 800; color: rgba(255,255,255,0.35);
-      line-height: 1; user-select: none; letter-spacing: -2px;
+      position: absolute;
+      font-size: 108px; font-weight: 800;
+      font-family: 'Playfair Display', Georgia, serif;
+      color: rgba(160,100,50,0.09);
+      line-height: 1; letter-spacing: -4px;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -48%);
+      pointer-events: none; user-select: none; z-index: 2;
     }
-    .recipe-card-image-wrap.hf-card { background: linear-gradient(135deg, #d4edd9 0%, #7dc28a 100%); }
-    .recipe-card-image-placeholder {
-      width: 100%; height: 100%; display: flex;
-      align-items: center; justify-content: center; font-size: 56px; opacity: 0.45;
+    .recipe-card-image-wrap.hf-card .recipe-card-monogram { color: rgba(0,140,60,0.08); }
+    .recipe-card-icons {
+      position: relative; z-index: 3;
+      display: flex; gap: 8px; align-items: center; justify-content: center;
+      flex-wrap: wrap; padding: 10px;
     }
-    .recipe-card-body { padding: 10px 12px 14px; flex: 1; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
+    .recipe-card-icon {
+      font-size: 32px; line-height: 1;
+      filter: drop-shadow(0 2px 5px rgba(0,0,0,0.13));
+    }
+    .recipe-card-hk-watermark {
+      position: absolute; z-index: 3;
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 52px; height: 52px; object-fit: contain;
+      opacity: 0.16;
+      filter: sepia(40%) saturate(0.5);
+    }
+    .recipe-card-vignette {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 52px;
+      background: linear-gradient(to top, rgba(180,120,60,0.2), transparent);
+      z-index: 4; pointer-events: none;
+    }
+    .recipe-card-image-wrap.hf-card .recipe-card-vignette {
+      background: linear-gradient(to top, rgba(40,140,70,0.15), transparent);
+    }
+    .recipe-card-cuisine-pill {
+      position: absolute; bottom: 9px; left: 10px; z-index: 6;
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.07em;
+      background: rgba(255,255,255,0.88);
+      color: var(--accent);
+      padding: 3px 9px; border-radius: 20px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+    }
+    .recipe-card-image-wrap.hf-card .recipe-card-cuisine-pill { color: #00a05a; }
+    .recipe-card-body {
+      padding: 10px 12px 13px; flex: 1;
+      display: flex; flex-direction: column; gap: 3px; min-height: 0;
+      background: white;
+      border-top: 1px solid rgba(0,0,0,0.04);
+    }
     .recipe-card-source {
       font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
       padding: 3px 8px; border-radius: 6px; align-self: flex-start;
@@ -1892,7 +1963,6 @@
     }
     .recipe-card-source.hf { background: rgba(0,169,91,0.13); color: #00a05a; }
     .recipe-card-name { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.3; }
-    .recipe-card-cuisine { font-size: 11px; color: var(--text2); font-weight: 400; }
     .recipe-fav-star {
       position: absolute; top: 8px; right: 8px;
       width: 32px; height: 32px;
@@ -1905,7 +1975,6 @@
     }
     .recipe-fav-star:active { transform: scale(0.9); }
     .recipe-fav-star.active { background: rgba(220,170,50,0.5); color: #f4d03f; }
-    .recipe-card-image-wrap { position: relative; }
     .recipe-fav-star.list {
       position: static; margin-left: auto; flex-shrink: 0;
       background: transparent; color: var(--muted);
@@ -2135,8 +2204,28 @@
     }
     .takeout-add-spot-btn:hover { background: rgba(192,122,74,0.15); }
     /* Dark mode — recipes */
-    html.dark-mode .recipe-card { background: #252220; }
-    html.dark-mode .recipe-card-image-wrap,
+    html.dark-mode .recipe-card {
+      background: #252220;
+      box-shadow:
+        0 2px 4px rgba(0,0,0,0.2),
+        0 10px 28px rgba(0,0,0,0.35),
+        0 24px 48px rgba(0,0,0,0.2);
+    }
+    html.dark-mode .recipe-card-inner {
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    html.dark-mode .recipe-card-shine {
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.07) 30%, rgba(255,255,255,0.07) 70%, transparent);
+    }
+    html.dark-mode .recipe-card-image-wrap { background: #2a2218; }
+    html.dark-mode .recipe-card-image-wrap.hf-card { background: #1a2a1e; }
+    html.dark-mode .recipe-card-monogram { color: rgba(220,170,100,0.1); }
+    html.dark-mode .recipe-card-image-wrap.hf-card .recipe-card-monogram { color: rgba(0,180,80,0.09); }
+    html.dark-mode .recipe-card-vignette { background: linear-gradient(to top, rgba(180,120,50,0.28), transparent); }
+    html.dark-mode .recipe-card-cuisine-pill { background: rgba(30,24,18,0.92); color: #d4a45a; box-shadow: 0 1px 6px rgba(0,0,0,0.4); }
+    html.dark-mode .recipe-card-image-wrap.hf-card .recipe-card-cuisine-pill { color: #40c070; }
+    html.dark-mode .recipe-card-body { background: #252220; border-top-color: rgba(255,255,255,0.05); }
+    html.dark-mode .recipe-card-hk-watermark { opacity: 0.11; filter: invert(1) sepia(20%) brightness(1.5); }
     html.dark-mode .recipe-list-icon,
     html.dark-mode .recipe-detail-image { background: linear-gradient(135deg, #3a2e20, #2a1e10); }
     html.dark-mode .recipe-list-item { border-bottom-color: rgba(255,255,255,0.07); }
@@ -4942,7 +5031,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.6.31';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.7.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -9463,6 +9552,28 @@
   const RECIPE_FAV_STORAGE = 'shasta_recipe_favourites';
   const RECIPE_CUISINE_STORAGE = 'shasta_recipe_cuisine';
   const CUISINE_TYPES = ['', 'American', 'Asian', 'Burgers', 'Chinese', 'French', 'Indian', 'Italian', 'Japanese', 'Korean', 'Mediterranean', 'Mexican', 'Middle Eastern', 'Pasta', 'Pizza', 'Sandwiches', 'Thai', 'Vietnamese', 'Wings', 'Other'];
+  const CUISINE_ICONS = {
+    'American':       ['🍔','🌽','🥧'],
+    'Asian':          ['🥢','🍜','🌿'],
+    'Chinese':        ['🥟','🍜','🥢'],
+    'French':         ['🥐','🧀','🍷'],
+    'Indian':         ['🍛','🧅','🌶️'],
+    'Italian':        ['🍝','🧀','🥚'],
+    'Japanese':       ['🍣','🥢','🍱'],
+    'Korean':         ['🥩','🧄','🌶️'],
+    'Mediterranean':  ['🫒','🥗','🍋'],
+    'Mexican':        ['🌮','🍚','🌶️'],
+    'Middle Eastern': ['🧆','🫓','🌿'],
+    'Pizza':          ['🍕','🧀','🍅'],
+    'Thai':           ['🍜','🥜','🌿'],
+    'Vietnamese':     ['🍜','🌿','🍋'],
+    'Dessert':        ['🍰','🫐','🥛'],
+    'Sandwiches':     ['🥪','🧀','🥬'],
+    'Burgers':        ['🍔','🧅','🥒'],
+    'Wings':          ['🍗','🔥','🧄'],
+    'Pasta':          ['🍝','🫙','🌿'],
+    'Other':          ['🍽️','✨'],
+  };
   function getRecipeCuisineStorage() {
     try {
       const raw = localStorage.getItem(RECIPE_CUISINE_STORAGE);
@@ -9839,11 +9950,63 @@
       recipesState.filtered.forEach(r => {
         const card = document.createElement('div');
         card.className = 'recipe-card';
+
+        const shine = document.createElement('div');
+        shine.className = 'recipe-card-shine';
+        card.appendChild(shine);
+
+        const inner = document.createElement('div');
+        inner.className = 'recipe-card-inner';
+        card.appendChild(inner);
+
         const hfClass = r.source === 'hellofresh' ? ' hf' : '';
         const hfCardClass = r.source === 'hellofresh' ? ' hf-card' : '';
         const imgWrap = document.createElement('div');
         imgWrap.className = 'recipe-card-image-wrap' + hfCardClass;
-        imgWrap.innerHTML = `<div class="recipe-card-monogram">${recipeMonogram(r.name)}</div>`;
+
+        const svgNS = 'http://www.w3.org/2000/svg';
+        const svg = document.createElementNS(svgNS, 'svg');
+        svg.setAttribute('class', 'recipe-card-texture');
+        svg.setAttribute('viewBox', '0 0 200 152');
+        svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+        const uid = 'rc_' + r.id.replace(/[^a-z0-9]/gi,'').slice(0,8);
+        const strokeColor = r.source === 'hellofresh' ? '#1a6a30' : '#7a4a20';
+        svg.innerHTML = '<defs><pattern id="' + uid + 'a" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse"><line x1="0" y1="8" x2="8" y2="0" stroke="' + strokeColor + '" stroke-width="0.6"/></pattern><pattern id="' + uid + 'b" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="8" y2="8" stroke="' + strokeColor + '" stroke-width="0.6"/></pattern></defs><rect width="200" height="152" fill="url(#' + uid + 'a)"/><rect width="200" height="152" fill="url(#' + uid + 'b)" opacity="0.4"/>';
+        imgWrap.appendChild(svg);
+
+        const mono = document.createElement('div');
+        mono.className = 'recipe-card-monogram';
+        mono.textContent = recipeMonogram(r.name);
+        imgWrap.appendChild(mono);
+
+        const cuisine = (r.cuisine || '').trim() || getRecipeCuisine(r) || '';
+        const icons = cuisine && CUISINE_ICONS[cuisine];
+        if (icons) {
+          const iconWrap = document.createElement('div');
+          iconWrap.className = 'recipe-card-icons';
+          icons.forEach(function(ic) {
+            const s = document.createElement('span');
+            s.className = 'recipe-card-icon';
+            s.textContent = ic;
+            iconWrap.appendChild(s);
+          });
+          imgWrap.appendChild(iconWrap);
+          const pill = document.createElement('div');
+          pill.className = 'recipe-card-cuisine-pill';
+          pill.textContent = cuisine;
+          imgWrap.appendChild(pill);
+        } else {
+          const hkImg = document.createElement('img');
+          hkImg.className = 'recipe-card-hk-watermark';
+          hkImg.src = 'https://stormyreigns.github.io/HATH/HK.png';
+          hkImg.alt = '';
+          imgWrap.appendChild(hkImg);
+        }
+
+        const vig = document.createElement('div');
+        vig.className = 'recipe-card-vignette';
+        imgWrap.appendChild(vig);
+
         const starBtn = document.createElement('button');
         starBtn.type = 'button';
         starBtn.className = 'recipe-fav-star' + (isRecipeFavourite(r) ? ' active' : '');
@@ -9851,13 +10014,20 @@
         starBtn.title = 'Favourite';
         starBtn.onclick = (e) => { e.stopPropagation(); toggleRecipeFavourite(r); };
         imgWrap.appendChild(starBtn);
+
+        inner.appendChild(imgWrap);
+
         const body = document.createElement('div');
         body.className = 'recipe-card-body';
-        body.innerHTML = `<span class="recipe-card-source${hfClass}">${escapeHtml(r.sourceLabel)}</span><div class="recipe-card-name">${escapeHtml(r.name)}</div>${r.cuisine ? '<span class="recipe-card-cuisine">' + escapeHtml(r.cuisine) + '</span>' : ''}`;
-        card.appendChild(imgWrap);
-        card.appendChild(body);
+        if (!cuisine) {
+          body.innerHTML = '<span class="recipe-card-source' + hfClass + '">' + escapeHtml(r.sourceLabel) + '</span>';
+        }
+        body.innerHTML += '<div class="recipe-card-name">' + escapeHtml(r.name) + '</div>';
+        inner.appendChild(body);
+
         card.onclick = () => openRecipeDetail(r);
         carousel.appendChild(card);
+
         if (r.imageId) {
           thumbTasks.push(fetchThumbnail(r.imageId));
           carouselContainers.push(imgWrap);
@@ -9871,7 +10041,6 @@
             const img = document.createElement('img');
             img.alt = '';
             img.src = 'data:' + res.value.mimeType + ';base64,' + res.value.base64;
-            el.innerHTML = '';
             el.appendChild(img);
             requestAnimationFrame(function() { img.style.opacity = '1'; });
           }
