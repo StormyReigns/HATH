@@ -1850,12 +1850,13 @@
     }
     .recipes-source-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
     .recipes-carousel-wrap {
-      flex: 1; overflow: hidden; position: relative; min-height: 0;
-      flex-shrink: 0; min-height: 260px; /* prevents wobble during swipe */
+      flex: 1; overflow: visible; position: relative; min-height: 0;
+      flex-shrink: 0; min-height: 260px;
     }
     .recipes-carousel {
-      display: flex; gap: 14px; padding: 4px 16px 20px;
-      overflow-x: auto; scroll-snap-type: x mandatory;
+      display: flex; gap: 14px; padding: 4px 16px 28px;
+      overflow-x: auto; overflow-y: visible;
+      scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
       scrollbar-width: none; height: 100%; align-items: stretch;
       box-sizing: border-box; flex-shrink: 0;
@@ -4299,13 +4300,25 @@
       right: 0;
       padding: 16px 16px;
       z-index: 60;
-      background: rgba(253,240,232,0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-top: 1px solid rgba(0,0,0,0.06);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(0,0,0,0.07);
+      background: rgba(253,240,232,0.88);
+    }
+    html.card-scheme-lavender #recipesScreen.visible .recipes-gj-row {
+      background: rgba(248,245,253,0.88);
+    }
+    html.card-scheme-sage #recipesScreen.visible .recipes-gj-row {
+      background: rgba(245,250,248,0.88);
+    }
+    html.card-scheme-sunset #recipesScreen.visible .recipes-gj-row {
+      background: rgba(253,248,242,0.88);
+    }
+    html.card-scheme-ocean #recipesScreen.visible .recipes-gj-row {
+      background: rgba(242,248,253,0.88);
     }
     html.dark-mode #recipesScreen.visible .recipes-gj-row {
-      background: rgba(26,24,22,0.88);
+      background: rgba(26,24,22,0.90);
       border-top-color: rgba(255,255,255,0.06);
     }
     .recipes-add-inline {
@@ -4330,9 +4343,9 @@
       display: flex; align-items: center; justify-content: center; gap: 10px;
       box-shadow:
         0 1px 0 rgba(255,160,60,0.08) inset,
-        0 -1px 0 rgba(0,0,0,0.5) inset,
-        0 4px 20px rgba(0,0,0,0.3),
-        0 1px 3px rgba(0,0,0,0.4);
+        0 -1px 0 rgba(0,0,0,0.4) inset,
+        0 2px 8px rgba(0,0,0,0.2),
+        0 4px 16px rgba(80,20,0,0.18);
       position: relative; overflow: hidden;
       transition: transform 0.12s, filter 0.15s;
     }
@@ -5106,7 +5119,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.7.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.7.3';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
