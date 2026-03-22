@@ -1294,10 +1294,10 @@
       padding: 8px 0 12px;
       flex-shrink: 0;
     }
-    #documentsScreen { position: relative; }
+    #documentsScreen { position: relative; overflow: hidden; }
     #documentsScreen::before {
       content: '';
-      position: absolute; inset: 0;
+      position: absolute; inset: -20%;
       background-image: url('https://stormyreigns.github.io/HATH/FFXIVAether2.png');
       background-size: cover;
       background-position: center;
@@ -4877,7 +4877,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.6.15';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.6.16';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
