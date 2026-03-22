@@ -1295,16 +1295,21 @@
       flex-shrink: 0;
     }
     #documentsScreen { position: relative; overflow: hidden; }
-    #documentsScreen::before {
-      content: '';
-      position: absolute; inset: -20%;
-      background-image: url('https://stormyreigns.github.io/HATH/FFXIVAether2.png');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      opacity: 0.1;
+    .docs-bg-carousel {
+      position: absolute; inset: 0;
       z-index: 0;
       pointer-events: none;
+    }
+    .docs-bg-carousel img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .docs-bg-carousel img.active {
+      opacity: 0.25;
     }
     #documentsScreen .docs-header,
     #documentsScreen .docs-selection-bar,
@@ -4253,6 +4258,10 @@
 
     <!-- Documents screen -->
     <div class="sub-screen" id="documentsScreen">
+      <div class="docs-bg-carousel" id="docsBgCarousel">
+        <img id="docsBgImg1" src="https://stormyreigns.github.io/HATH/FFXIVLogo.png" alt="" loading="eager">
+        <img id="docsBgImg2" src="https://stormyreigns.github.io/HATH/FFXIVLogo1.png" alt="" loading="lazy">
+      </div>
       <div class="docs-header">
         <img class="docs-title-icon" src="https://stormyreigns.github.io/HATH/FFXIVIcon.png" alt="" loading="lazy">
         <div class="screen-breadcrumb" id="docsBreadcrumb"></div>
@@ -4877,7 +4886,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.6.16';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.6.17';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -5099,6 +5108,38 @@
   }
   // Must match your Shasta Docs folder: open it in Drive, copy ID from URL (after /folders/)
   const DOCS_FOLDER_ID = '1UTVAmNx854R9a1YqTPPlZ1gA_V9nUulI';
+  const DOCS_BG_IMGS = ['FFXIVLogo.png', 'FFXIVLogo1.png', 'FFXIVLogo2.png', 'FFXIVLogo3.png', 'FFXIVLogo4.png', 'FFXIVLogo5.png'];
+  let docsBgCarouselInterval = null;
+
+  function startDocsBgCarousel() {
+    if (docsBgCarouselInterval) return;
+    const img1 = document.getElementById('docsBgImg1');
+    const img2 = document.getElementById('docsBgImg2');
+    if (!img1 || !img2) return;
+    const base = 'https://stormyreigns.github.io/HATH/';
+    let idx = 0;
+    img1.src = base + DOCS_BG_IMGS[0];
+    img2.src = base + DOCS_BG_IMGS[1];
+    img1.classList.add('active');
+    img2.classList.remove('active');
+    docsBgCarouselInterval = setInterval(() => {
+      const nextIdx = (idx + 1) % DOCS_BG_IMGS.length;
+      const active = img1.classList.contains('active') ? img1 : img2;
+      const next = active === img1 ? img2 : img1;
+      next.src = base + DOCS_BG_IMGS[nextIdx];
+      active.src = base + DOCS_BG_IMGS[(nextIdx + 1) % DOCS_BG_IMGS.length];
+      active.classList.remove('active');
+      next.classList.add('active');
+      idx = nextIdx;
+    }, 3400);
+  }
+
+  function stopDocsBgCarousel() {
+    if (docsBgCarouselInterval) {
+      clearInterval(docsBgCarouselInterval);
+      docsBgCarouselInterval = null;
+    }
+  }
 
   // Docs cache — populated during preload for instant navigation
   const docsFolderCache = {};
@@ -5508,6 +5549,7 @@
     const wb = document.getElementById('wellbeing');
     if (wb) wb.style.display = 'none';
     if (screenId !== 'scheduleScreen') stopScheduleFloatingRotation();
+    if (screenId !== 'documentsScreen') stopDocsBgCarousel();
     document.getElementById('documentsScreen').classList.remove('visible');
     document.getElementById('projectsScreen').classList.remove('visible');
     document.getElementById('scheduleScreen').classList.remove('visible');
@@ -5831,6 +5873,7 @@
 
   function showDocumentsScreen() {
     showSubScreen('documentsScreen');
+    startDocsBgCarousel();
     var user = localStorage.getItem('shasta_user');
     if (!user) {
       var list = document.getElementById('docsList');
