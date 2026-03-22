@@ -2627,7 +2627,7 @@
       position: fixed;
       left: 50%;
       transform: translateX(-50%);
-      bottom: calc(76px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
+      bottom: calc(42px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
       width: 56px;
       height: 56px;
       border: none;
@@ -2643,7 +2643,6 @@
     }
     .screen-add-fab.visible { display: flex; align-items: center; justify-content: center; }
     .screen-add-fab:active { transform: translateX(-50%) scale(0.95); }
-    #docsAddFab { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
     html.dark-mode .screen-add-fab { background: var(--accent); box-shadow: 0 4px 16px rgba(192,122,74,0.35); }
 
     @keyframes mapFloat {
@@ -2891,6 +2890,9 @@
       flex: 1; display: flex; flex-direction: column;
       overflow: hidden; padding: 0; position: relative;
       min-height: 0; min-width: 100%;
+    }
+    .app.in-project-view .projects-view {
+      padding-bottom: 96px;
     }
     .projects-view-header {
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -3323,6 +3325,15 @@
       border: 2px solid rgba(60,100,140,0.4);
       transition: box-shadow 0.5s ease, border-color 0.5s ease;
       background: #2a6fb5;
+    }
+    .app.in-project-view .projects-ocean-strip {
+      position: fixed;
+      bottom: calc(42px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(calc(100vw - 24px), 420px);
+      margin: 0;
+      z-index: 65;
     }
     .projects-ocean-strip.complete {
       border-color: rgba(210,165,80,0.8);
@@ -4910,7 +4921,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.6.25';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.6.27';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
