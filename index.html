@@ -1967,7 +1967,7 @@
     }
     .recipe-card-texture {
       position: absolute; inset: 0; pointer-events: none;
-      opacity: 0.55; filter: blur(1.5px); z-index: 1; width: 100%; height: 100%;
+      opacity: 0.104; z-index: 1; width: 100%; height: 100%;
     }
     .recipe-card-monogram {
       position: absolute;
@@ -5369,7 +5369,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.8.9';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.9.1';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -10329,95 +10329,99 @@
       carousel.innerHTML = '';
       const thumbTasks = [];
       const carouselContainers = [];
-      recipesState.filtered.forEach(r => {
-        const card = document.createElement('div');
-        card.className = 'recipe-card';
+      const filtered = recipesState.filtered;
+      const copies = filtered.length > 1 ? 3 : 1;
+      for (var copyIdx = 0; copyIdx < copies; copyIdx++) {
+        filtered.forEach(function(r, i) {
+          const card = document.createElement('div');
+          card.className = 'recipe-card';
 
-        const shine = document.createElement('div');
-        shine.className = 'recipe-card-shine';
-        card.appendChild(shine);
-        const shineAccent = document.createElement('div');
-        shineAccent.className = 'recipe-card-shine-accent';
-        card.appendChild(shineAccent);
+          const shine = document.createElement('div');
+          shine.className = 'recipe-card-shine';
+          card.appendChild(shine);
+          const shineAccent = document.createElement('div');
+          shineAccent.className = 'recipe-card-shine-accent';
+          card.appendChild(shineAccent);
 
-        const inner = document.createElement('div');
-        inner.className = 'recipe-card-inner';
-        card.appendChild(inner);
+          const inner = document.createElement('div');
+          inner.className = 'recipe-card-inner';
+          card.appendChild(inner);
 
-        const hfClass = r.source === 'hellofresh' ? ' hf' : '';
-        const hfCardClass = r.source === 'hellofresh' ? ' hf-card' : '';
-        const imgWrap = document.createElement('div');
-        imgWrap.className = 'recipe-card-image-wrap' + hfCardClass;
+          const hfClass = r.source === 'hellofresh' ? ' hf' : '';
+          const hfCardClass = r.source === 'hellofresh' ? ' hf-card' : '';
+          const imgWrap = document.createElement('div');
+          imgWrap.className = 'recipe-card-image-wrap' + hfCardClass;
 
-        const svgNS = 'http://www.w3.org/2000/svg';
-        const svg = document.createElementNS(svgNS, 'svg');
-        svg.setAttribute('class', 'recipe-card-texture');
-        svg.setAttribute('viewBox', '0 0 200 152');
-        svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
-        const uid = 'rc_' + r.id.replace(/[^a-z0-9]/gi,'').slice(0,8);
-        const strokeColor = r.source === 'hellofresh' ? '#1a6a30' : '#7a4a20';
-        svg.innerHTML = '<defs><pattern id="' + uid + 'a" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse"><line x1="0" y1="8" x2="8" y2="0" stroke="' + strokeColor + '" stroke-width="0.6"/></pattern><pattern id="' + uid + 'b" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="8" y2="8" stroke="' + strokeColor + '" stroke-width="0.6"/></pattern></defs><rect width="200" height="152" fill="url(#' + uid + 'a)"/><rect width="200" height="152" fill="url(#' + uid + 'b)" opacity="0.4"/>';
-        imgWrap.appendChild(svg);
+          const svgNS = 'http://www.w3.org/2000/svg';
+          const svg = document.createElementNS(svgNS, 'svg');
+          svg.setAttribute('class', 'recipe-card-texture');
+          svg.setAttribute('viewBox', '0 0 200 152');
+          svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+          const uid = 'rc_' + r.id.replace(/[^a-z0-9]/gi,'').slice(0,8) + '_' + copyIdx + '_' + i;
+          const strokeColor = r.source === 'hellofresh' ? '#1a6a30' : '#7a4a20';
+          svg.innerHTML = '<defs><pattern id="' + uid + 'a" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse"><line x1="0" y1="8" x2="8" y2="0" stroke="' + strokeColor + '" stroke-width="0.6"/></pattern><pattern id="' + uid + 'b" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="8" y2="8" stroke="' + strokeColor + '" stroke-width="0.6"/></pattern></defs><rect width="200" height="152" fill="url(#' + uid + 'a)"/><rect width="200" height="152" fill="url(#' + uid + 'b)" opacity="0.4"/>';
+          imgWrap.appendChild(svg);
 
-        const mono = document.createElement('div');
-        mono.className = 'recipe-card-monogram';
-        mono.textContent = recipeMonogram(r.name);
-        imgWrap.appendChild(mono);
+          const mono = document.createElement('div');
+          mono.className = 'recipe-card-monogram';
+          mono.textContent = recipeMonogram(r.name);
+          imgWrap.appendChild(mono);
 
-        const cuisine = (r.cuisine || '').trim() || getRecipeCuisine(r) || '';
-        const icons = cuisine && CUISINE_ICONS[cuisine];
-        if (icons) {
-          const iconWrap = document.createElement('div');
-          iconWrap.className = 'recipe-card-icons';
-          icons.forEach(function(ic) {
-            const s = document.createElement('span');
-            s.className = 'recipe-card-icon';
-            s.textContent = ic;
-            iconWrap.appendChild(s);
-          });
-          imgWrap.appendChild(iconWrap);
-          const pill = document.createElement('div');
-          pill.className = 'recipe-card-cuisine-pill';
-          pill.textContent = cuisine;
-          imgWrap.appendChild(pill);
-        } else {
-          const hkImg = document.createElement('img');
-          hkImg.className = 'recipe-card-hk-watermark';
-          hkImg.src = 'https://stormyreigns.github.io/HATH/HK.png';
-          hkImg.alt = '';
-          imgWrap.appendChild(hkImg);
-        }
+          const cuisine = (r.cuisine || '').trim() || getRecipeCuisine(r) || '';
+          const icons = cuisine && CUISINE_ICONS[cuisine];
+          if (icons) {
+            const iconWrap = document.createElement('div');
+            iconWrap.className = 'recipe-card-icons';
+            icons.forEach(function(ic) {
+              const s = document.createElement('span');
+              s.className = 'recipe-card-icon';
+              s.textContent = ic;
+              iconWrap.appendChild(s);
+            });
+            imgWrap.appendChild(iconWrap);
+            const pill = document.createElement('div');
+            pill.className = 'recipe-card-cuisine-pill';
+            pill.textContent = cuisine;
+            imgWrap.appendChild(pill);
+          } else {
+            const hkImg = document.createElement('img');
+            hkImg.className = 'recipe-card-hk-watermark';
+            hkImg.src = 'https://stormyreigns.github.io/HATH/HK.png';
+            hkImg.alt = '';
+            imgWrap.appendChild(hkImg);
+          }
 
-        const vig = document.createElement('div');
-        vig.className = 'recipe-card-vignette';
-        imgWrap.appendChild(vig);
+          const vig = document.createElement('div');
+          vig.className = 'recipe-card-vignette';
+          imgWrap.appendChild(vig);
 
-        const starBtn = document.createElement('button');
-        starBtn.type = 'button';
-        starBtn.className = 'recipe-fav-star' + (isRecipeFavourite(r) ? ' active' : '');
-        starBtn.textContent = isRecipeFavourite(r) ? '★' : '☆';
-        starBtn.title = 'Favourite';
-        starBtn.onclick = (e) => { e.stopPropagation(); toggleRecipeFavourite(r); };
-        imgWrap.appendChild(starBtn);
+          const starBtn = document.createElement('button');
+          starBtn.type = 'button';
+          starBtn.className = 'recipe-fav-star' + (isRecipeFavourite(r) ? ' active' : '');
+          starBtn.textContent = isRecipeFavourite(r) ? '★' : '☆';
+          starBtn.title = 'Favourite';
+          starBtn.onclick = (e) => { e.stopPropagation(); toggleRecipeFavourite(r); };
+          imgWrap.appendChild(starBtn);
 
-        inner.appendChild(imgWrap);
+          inner.appendChild(imgWrap);
 
-        const body = document.createElement('div');
-        body.className = 'recipe-card-body';
-        if (!cuisine) {
-          body.innerHTML = '<span class="recipe-card-source' + hfClass + '">' + escapeHtml(r.sourceLabel) + '</span>';
-        }
-        body.innerHTML += '<div class="recipe-card-name">' + escapeHtml(r.name) + '</div>';
-        inner.appendChild(body);
+          const body = document.createElement('div');
+          body.className = 'recipe-card-body';
+          if (!cuisine) {
+            body.innerHTML = '<span class="recipe-card-source' + hfClass + '">' + escapeHtml(r.sourceLabel) + '</span>';
+          }
+          body.innerHTML += '<div class="recipe-card-name">' + escapeHtml(r.name) + '</div>';
+          inner.appendChild(body);
 
-        card.onclick = () => openRecipeDetail(r);
-        carousel.appendChild(card);
+          card.onclick = function() { openRecipeDetail(r); };
+          carousel.appendChild(card);
 
-        if (r.imageId) {
-          thumbTasks.push(fetchThumbnail(r.imageId));
-          carouselContainers.push(imgWrap);
-        }
-      });
+          if (r.imageId) {
+            thumbTasks.push(fetchThumbnail(r.imageId));
+            carouselContainers.push(imgWrap);
+          }
+        });
+      }
       Promise.allSettled(thumbTasks).then(function(results) {
         results.forEach(function(res, i) {
           const el = carouselContainers[i];
@@ -10432,13 +10436,44 @@
         });
       });
 
-      if (carousel._focusListener) {
-        carousel.removeEventListener('scroll', carousel._focusListener);
+      if (carousel._onScroll) {
+        carousel.removeEventListener('scroll', carousel._onScroll);
       }
       carousel._focusListener = function() {
         requestAnimationFrame(updateCarouselFocus);
       };
-      carousel.addEventListener('scroll', carousel._focusListener, { passive: true });
+      carousel._loopListener = function() {
+        if (carousel._loopJumping) return;
+        if (filtered.length <= 1) return;
+        var sw = carousel.scrollWidth;
+        var setW = sw / 3;
+        var sl = carousel.scrollLeft;
+        if (sl < setW * 0.15) {
+          carousel._loopJumping = true;
+          carousel.scrollLeft = sl + setW;
+          requestAnimationFrame(function() {
+            carousel._loopJumping = false;
+          });
+        } else if (sl > setW * 2.15) {
+          carousel._loopJumping = true;
+          carousel.scrollLeft = sl - setW;
+          requestAnimationFrame(function() {
+            carousel._loopJumping = false;
+          });
+        }
+      };
+      carousel._onScroll = function() {
+        carousel._loopListener();
+        carousel._focusListener();
+      };
+      carousel.addEventListener('scroll', carousel._onScroll, { passive: true });
+      if (filtered.length > 1) {
+        requestAnimationFrame(function() {
+          requestAnimationFrame(function() {
+            carousel.scrollLeft = carousel.scrollWidth / 3;
+          });
+        });
+      }
       requestAnimationFrame(updateCarouselFocus);
     }
   }
