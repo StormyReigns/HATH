@@ -1918,10 +1918,11 @@
     }
     .recipe-card-shine-accent {
       position: absolute;
-      top: 4px; left: 8px;
+      top: 10px; left: 8px;
       width: 50%; height: 3px;
       background: linear-gradient(90deg, rgba(255,255,255,0.85), transparent);
       border-radius: 0 0 3px 0;
+      filter: blur(2px);
       z-index: 11; pointer-events: none;
     }
     .recipe-card-inner {
@@ -4662,12 +4663,12 @@
               <line x1="0" y1="0" x2="0" y2="40" stroke="#8a5a28" stroke-width="0.7"/>
               <line x1="20" y1="0" x2="20" y2="40" stroke="#8a5a28" stroke-width="0.3"/>
             </pattern>
-            <radialGradient id="rst_rg" cx="50%" cy="48%" r="42%" gradientUnits="objectBoundingBox">
+            <radialGradient id="rst_rg" cx="50%" cy="58%" r="35%" gradientUnits="objectBoundingBox">
               <stop offset="0%" stop-color="white" stop-opacity="1"/>
-              <stop offset="30%" stop-color="white" stop-opacity="0.9"/>
-              <stop offset="55%" stop-color="white" stop-opacity="0.45"/>
-              <stop offset="72%" stop-color="white" stop-opacity="0.1"/>
-              <stop offset="85%" stop-color="white" stop-opacity="0.02"/>
+              <stop offset="25%" stop-color="white" stop-opacity="0.9"/>
+              <stop offset="50%" stop-color="white" stop-opacity="0.4"/>
+              <stop offset="68%" stop-color="white" stop-opacity="0.05"/>
+              <stop offset="80%" stop-color="white" stop-opacity="0"/>
               <stop offset="100%" stop-color="white" stop-opacity="0"/>
             </radialGradient>
             <mask id="rst_m">
@@ -4694,12 +4695,12 @@
               <line x1="0" y1="0" x2="0" y2="40" stroke="#c08040" stroke-width="0.7"/>
               <line x1="20" y1="0" x2="20" y2="40" stroke="#c08040" stroke-width="0.3"/>
             </pattern>
-            <radialGradient id="rst_dark_rg" cx="50%" cy="48%" r="42%" gradientUnits="objectBoundingBox">
+            <radialGradient id="rst_dark_rg" cx="50%" cy="58%" r="35%" gradientUnits="objectBoundingBox">
               <stop offset="0%" stop-color="white" stop-opacity="1"/>
-              <stop offset="30%" stop-color="white" stop-opacity="0.9"/>
-              <stop offset="55%" stop-color="white" stop-opacity="0.45"/>
-              <stop offset="72%" stop-color="white" stop-opacity="0.1"/>
-              <stop offset="85%" stop-color="white" stop-opacity="0.02"/>
+              <stop offset="25%" stop-color="white" stop-opacity="0.9"/>
+              <stop offset="50%" stop-color="white" stop-opacity="0.4"/>
+              <stop offset="68%" stop-color="white" stop-opacity="0.05"/>
+              <stop offset="80%" stop-color="white" stop-opacity="0"/>
               <stop offset="100%" stop-color="white" stop-opacity="0"/>
             </radialGradient>
             <mask id="rst_dark_m">
@@ -5339,7 +5340,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.8.4';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.8.6';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
