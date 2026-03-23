@@ -1271,29 +1271,6 @@
       font-size: 10px; color: var(--muted);
       font-style: italic; letter-spacing: 0.05em;
     }
-    .drawer-refresh-btn {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      width: 100%;
-      padding: 10px 16px;
-      margin-bottom: 12px;
-      border: 1px solid var(--drawer-border);
-      border-radius: 10px;
-      background: rgba(192,122,74,0.08);
-      color: var(--accent);
-      font-size: 13px; font-weight: 500;
-      cursor: pointer;
-      transition: background 0.15s, opacity 0.15s;
-    }
-    .drawer-refresh-btn:hover { background: rgba(192,122,74,0.14); }
-    .drawer-refresh-btn:active { opacity: 0.85; }
-    .drawer-refresh-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    .drawer-refresh-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
-    .drawer-refresh-btn.spinning svg { animation: drawerRefreshSpin 0.8s linear infinite; }
-    @keyframes drawerRefreshSpin { to { transform: rotate(360deg); } }
-    html.dark-mode .drawer-refresh-btn {
-      background: rgba(192,122,74,0.12);
-      border-color: rgba(255,255,255,0.08);
-    }
     .drawer-update-btn {
       display: flex; align-items: center; justify-content: center; gap: 8px;
       width: 100%;
@@ -5195,10 +5172,6 @@
     </div>
   </nav>
   <div class="drawer-footer">
-    <button type="button" class="drawer-refresh-btn" id="drawerRefreshBtn" onclick="forceFetchUpdate()" aria-label="Refresh data">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-      Refresh data
-    </button>
     <button type="button" class="drawer-update-btn" onclick="forceAppUpdate()" aria-label="Get latest app version">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
       Get latest version
@@ -5391,7 +5364,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.9.3';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.9.5';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -5900,18 +5873,6 @@
   }
 
   loadData(); // called by auth on login
-
-  async function forceFetchUpdate() {
-    const btn = document.getElementById('drawerRefreshBtn');
-    if (btn && btn.disabled) return;
-    if (btn) { btn.disabled = true; btn.classList.add('spinning'); }
-    try {
-      await loadData(null, true);
-      await loadCalendar(true);
-    } finally {
-      if (btn) { btn.disabled = false; btn.classList.remove('spinning'); }
-    }
-  }
 
   /** Forces a full app reload with cache busting — use when PWA is stuck on an old cached version. */
   function forceAppUpdate() {
@@ -10497,29 +10458,37 @@
       carousel.addEventListener('scroll', carousel._onScroll, { passive: true });
       if (filtered.length > 1) {
         function initCarouselScroll() {
+          var sw = carousel.scrollWidth;
+          if (sw < 10) return false;
+          var setW = sw / 3;
+          carousel.scrollLeft = setW;
+          return true;
+        }
+        function centerSecondCard() {
           var cards = carousel.querySelectorAll('.recipe-card');
           var setSize = Math.floor(cards.length / 3);
-          if (setSize < 2) {
-            carousel.scrollLeft = carousel.scrollWidth / 3;
-            return;
-          }
+          if (setSize < 2) return;
           var centerIdx = setSize + 1;
           var card = cards[centerIdx];
-          if (card) {
-            var cr = carousel.getBoundingClientRect();
-            var cardR = card.getBoundingClientRect();
-            var cardCenter = carousel.scrollLeft + (cardR.left - cr.left) + cardR.width / 2;
-            var viewportCenter = cr.width / 2;
-            carousel.scrollLeft = cardCenter - viewportCenter;
-          } else {
-            carousel.scrollLeft = carousel.scrollWidth / 3;
-          }
+          if (!card) return;
+          var cr = carousel.getBoundingClientRect();
+          var cardR = card.getBoundingClientRect();
+          var cardCenter = carousel.scrollLeft + (cardR.left - cr.left) + cardR.width / 2;
+          var viewportCenter = cr.width / 2;
+          carousel.scrollLeft = cardCenter - viewportCenter;
         }
-        setTimeout(function() {
+        function doInit() {
+          if (!initCarouselScroll()) {
+            requestAnimationFrame(doInit);
+            return;
+          }
           requestAnimationFrame(function() {
-            initCarouselScroll();
+            setTimeout(centerSecondCard, 50);
           });
-        }, 80);
+        }
+        requestAnimationFrame(function() {
+          requestAnimationFrame(doInit);
+        });
       }
       requestAnimationFrame(updateCarouselFocus);
     }
