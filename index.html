@@ -1885,7 +1885,7 @@
       overflow-x: auto; overflow-y: visible;
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
-      scrollbar-width: none; height: 100%; align-items: flex-start;
+      scrollbar-width: none; height: 100%; align-items: center;
       box-sizing: border-box; flex-shrink: 0;
     }
     .recipes-carousel::-webkit-scrollbar { display: none; }
@@ -1915,6 +1915,14 @@
       background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 25%, rgba(255,255,255,0.9) 75%, transparent 100%);
       border-radius: 16px 16px 0 0;
       z-index: 10; pointer-events: none;
+    }
+    .recipe-card-shine-accent {
+      position: absolute;
+      top: 4px; left: 8px;
+      width: 50%; height: 3px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.85), transparent);
+      border-radius: 0 0 3px 0;
+      z-index: 11; pointer-events: none;
     }
     .recipe-card-inner {
       border-radius: 16px; overflow: hidden;
@@ -2251,12 +2259,27 @@
       opacity: 0;
       z-index: 201;
       padding: 0 16px 20px;
-      max-height: 50vh; overflow-y: auto;
+      max-height: 68vh; overflow-y: auto;
     }
     .takeout-drawer.open { transform: translateY(0); opacity: 1; }
     html.dark-mode .takeout-drawer { background: #252220; }
-    .takeout-drawer-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-top: 16px; }
+    .takeout-drawer-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding-top: 16px; }
     .takeout-drawer-header-actions { display: flex; align-items: center; gap: 8px; }
+    .takeout-drawer-filters {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;
+      overflow-x: auto; flex-shrink: 0; scrollbar-width: none;
+      padding-bottom: 2px;
+    }
+    .takeout-drawer-filters::-webkit-scrollbar { display: none; }
+    .takeout-drawer-chip {
+      padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 500;
+      border: 1.5px solid rgba(0,0,0,0.1); background: transparent;
+      color: var(--text2); cursor: pointer; white-space: nowrap;
+      transition: all 0.15s; font-family: inherit;
+    }
+    .takeout-drawer-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    html.dark-mode .takeout-drawer-chip { border-color: rgba(255,255,255,0.13); }
+    html.dark-mode .takeout-drawer-chip.active { background: var(--accent); border-color: var(--accent); }
     .takeout-drawer-title { font-size: 16px; font-weight: 700; color: var(--text); }
     html.dark-mode .takeout-drawer-title { color: #f0e8e2; }
     .takeout-drawer-close {
@@ -4733,6 +4756,7 @@
             <button type="button" class="takeout-drawer-close" onclick="closeTakeoutDrawer()" aria-label="Close">✕</button>
           </div>
         </div>
+        <div class="takeout-drawer-filters h-scroll-faded" id="takeoutDrawerFilters"></div>
         <div class="takeout-spots-wrap h-scroll-faded" id="takeoutSpotsWrap"></div>
       </div>
       <div class="recipes-gj-row">
@@ -5315,7 +5339,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.8.3';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.8.4';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -10268,6 +10292,9 @@
         const shine = document.createElement('div');
         shine.className = 'recipe-card-shine';
         card.appendChild(shine);
+        const shineAccent = document.createElement('div');
+        shineAccent.className = 'recipe-card-shine-accent';
+        card.appendChild(shineAccent);
 
         const inner = document.createElement('div');
         inner.className = 'recipe-card-inner';
@@ -11210,7 +11237,10 @@
     renderRecipeSourceChips();
   }
 
+  var takeoutDrawerCuisine = '';
+
   function openTakeoutDrawer() {
+    renderTakeoutDrawerFilters();
     document.getElementById('takeoutDrawer').classList.add('open');
     document.getElementById('takeoutDrawerOverlay').classList.add('open');
   }
@@ -11219,12 +11249,35 @@
     document.getElementById('takeoutDrawerOverlay').classList.remove('open');
   }
 
+  function renderTakeoutDrawerFilters() {
+    var el = document.getElementById('takeoutDrawerFilters');
+    if (!el) return;
+    var allActive = getTakeoutSpots().filter(function(s) { return s.active !== false; });
+    var usedCuisines = [...new Set(allActive.map(function(s) { return (s.cuisine || '').trim(); }).filter(Boolean))].sort();
+    el.innerHTML = '';
+    var allBtn = document.createElement('button');
+    allBtn.type = 'button';
+    allBtn.className = 'takeout-drawer-chip' + (!takeoutDrawerCuisine ? ' active' : '');
+    allBtn.textContent = 'All';
+    allBtn.onclick = function() { takeoutDrawerCuisine = ''; renderTakeoutDrawerFilters(); renderTakeoutSpots(); };
+    el.appendChild(allBtn);
+    usedCuisines.forEach(function(c) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'takeout-drawer-chip' + (takeoutDrawerCuisine === c ? ' active' : '');
+      btn.textContent = c;
+      btn.onclick = function() { takeoutDrawerCuisine = takeoutDrawerCuisine === c ? '' : c; renderTakeoutDrawerFilters(); renderTakeoutSpots(); };
+      el.appendChild(btn);
+    });
+  }
+
   function renderTakeoutSpots() {
+    renderTakeoutDrawerFilters();
     var wrap = document.getElementById('takeoutSpotsWrap');
     if (!wrap) return;
     var allActive = getTakeoutSpots().filter(function(s) { return s.active !== false; });
     var spots = allActive;
-    if (recipesState && recipesState.activeCuisine) spots = spots.filter(function(s) { return (s.cuisine || '').trim() === recipesState.activeCuisine; });
+    if (takeoutDrawerCuisine) spots = spots.filter(function(s) { return (s.cuisine || '').trim() === takeoutDrawerCuisine; });
     wrap.innerHTML = '';
     spots.forEach(function(s) {
       var card = document.createElement('div');
