@@ -1266,10 +1266,33 @@
     /* Prevent the item slide-right from fighting the icon wiggle */
     .drawer-item.item-wiggling:active { transform: none; }
     .drawer-footer {
-      padding: 14px 26px;
+      padding: 10px 26px 14px;
       border-top: 1px solid var(--drawer-border);
       font-size: 10px; color: var(--muted);
       font-style: italic; letter-spacing: 0.05em;
+    }
+    .drawer-refresh-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%;
+      padding: 10px 16px;
+      margin-bottom: 12px;
+      border: 1px solid var(--drawer-border);
+      border-radius: 10px;
+      background: rgba(192,122,74,0.08);
+      color: var(--accent);
+      font-size: 13px; font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.15s;
+    }
+    .drawer-refresh-btn:hover { background: rgba(192,122,74,0.14); }
+    .drawer-refresh-btn:active { opacity: 0.85; }
+    .drawer-refresh-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .drawer-refresh-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .drawer-refresh-btn.spinning svg { animation: drawerRefreshSpin 0.8s linear infinite; }
+    @keyframes drawerRefreshSpin { to { transform: rotate(360deg); } }
+    html.dark-mode .drawer-refresh-btn {
+      background: rgba(192,122,74,0.12);
+      border-color: rgba(255,255,255,0.08);
     }
 
     /* updated-at timestamp */
@@ -5153,7 +5176,13 @@
       Settings
     </div>
   </nav>
-  <div class="drawer-footer">Built for your home</div>
+  <div class="drawer-footer">
+    <button type="button" class="drawer-refresh-btn" id="drawerRefreshBtn" onclick="forceFetchUpdate()" aria-label="Refresh data">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      Refresh data
+    </button>
+    Built for your home
+  </div>
   <div class="drawer-blathers" id="drawerBlathersWrap">
     <img id="blathersDrawer" src="https://stormyreigns.github.io/HATH/IMG_7941.png" alt="Blathers" class="blathers-idle">
   </div>
@@ -5340,7 +5369,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.8.8';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.8.9';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -5700,11 +5729,12 @@
   }
 
   // ── LOAD LIVE DATA ────────────────────────────────────────────
-  async function loadData(preloadedBalance) {
+  async function loadData(preloadedBalance, forceRefresh) {
     let data = preloadedBalance && !preloadedBalance.error ? preloadedBalance : null;
     if (!data) {
       try {
-        const res = await fetch(apiUrlWithUser(API_URL), { redirect: 'follow' });
+        const url = apiUrlWithUser(API_URL, forceRefresh ? '&_t=' + Date.now() : '');
+        const res = await fetch(url, { redirect: 'follow', cache: forceRefresh ? 'no-store' : 'default' });
         data = await res.json();
       } catch (err) {
         data = null;
@@ -5744,7 +5774,7 @@
     loadCalendar();
   }
 
-  async function loadCalendar() {
+  async function loadCalendar(forceRefresh) {
     const user = localStorage.getItem('shasta_user');
     if (!user) return;
     try {
@@ -5759,7 +5789,8 @@
         if (calIds && calIds.length > 0) {
           url += '&calendars=' + encodeURIComponent(JSON.stringify(calIds));
         }
-        const res = await fetch(url, { redirect: 'follow' });
+        if (forceRefresh) url += '&_t=' + Date.now();
+        const res = await fetch(url, { redirect: 'follow', cache: forceRefresh ? 'no-store' : 'default' });
         const data = await res.json();
         if (!data.error && data.events && data.events.length > 0) {
           calEvents = data.events.map(ev => ({ ...ev, start: ev.start || ev.date || ev.startTime, calendar: ev.calendar || 'calendar' }));
@@ -5847,6 +5878,18 @@
   }
 
   loadData(); // called by auth on login
+
+  async function forceFetchUpdate() {
+    const btn = document.getElementById('drawerRefreshBtn');
+    if (btn && btn.disabled) return;
+    if (btn) { btn.disabled = true; btn.classList.add('spinning'); }
+    try {
+      await loadData(null, true);
+      await loadCalendar(true);
+    } finally {
+      if (btn) { btn.disabled = false; btn.classList.remove('spinning'); }
+    }
+  }
 
   // ── DRAWER ────────────────────────────────────────────────────
   let blathersWakeTimer = null;
