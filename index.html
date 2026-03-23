@@ -5391,7 +5391,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.9.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.9.3';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -10496,11 +10496,30 @@
       };
       carousel.addEventListener('scroll', carousel._onScroll, { passive: true });
       if (filtered.length > 1) {
-        requestAnimationFrame(function() {
-          requestAnimationFrame(function() {
+        function initCarouselScroll() {
+          var cards = carousel.querySelectorAll('.recipe-card');
+          var setSize = Math.floor(cards.length / 3);
+          if (setSize < 2) {
             carousel.scrollLeft = carousel.scrollWidth / 3;
+            return;
+          }
+          var centerIdx = setSize + 1;
+          var card = cards[centerIdx];
+          if (card) {
+            var cr = carousel.getBoundingClientRect();
+            var cardR = card.getBoundingClientRect();
+            var cardCenter = carousel.scrollLeft + (cardR.left - cr.left) + cardR.width / 2;
+            var viewportCenter = cr.width / 2;
+            carousel.scrollLeft = cardCenter - viewportCenter;
+          } else {
+            carousel.scrollLeft = carousel.scrollWidth / 3;
+          }
+        }
+        setTimeout(function() {
+          requestAnimationFrame(function() {
+            initCarouselScroll();
           });
-        });
+        }, 80);
       }
       requestAnimationFrame(updateCarouselFocus);
     }
