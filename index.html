@@ -389,6 +389,8 @@
       background: rgba(192,122,74,0.12);
       border-color: rgba(192,122,74,0.2);
     }
+    html.dark-mode .docs-folder-tab { fill: rgba(235,195,155,0.9); }
+    html.dark-mode .docs-swipe-btn.rename { background: rgba(255,255,255,0.1); }
     html.dark-mode .celebration-content {
       background: linear-gradient(145deg, #2a2520 0%, #1f1c18 100%);
       border-color: rgba(224,152,104,0.5);
@@ -1501,7 +1503,15 @@
       transition: background 0.15s;
     }
     .docs-folder-card:active { background: rgba(192,122,74,0.12); }
-    .docs-folder-card-icon { font-size: 24px; opacity: 0.85; }
+    .docs-folder-card-icon {
+      width: 36px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .docs-folder-card-icon svg { width: 36px; height: 30px; }
     .docs-folder-card-name {
       font-size: 13px; font-weight: 600; color: var(--text);
       display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical;
@@ -1518,7 +1528,9 @@
       border-bottom: 1px solid rgba(0,0,0,0.04);
     }
     .docs-file-row-inner {
-      flex: 1;
+      flex-shrink: 0;
+      width: 100%;
+      min-width: 100%;
       display: flex;
       align-items: center;
       gap: 12px;
@@ -1530,34 +1542,43 @@
       background: var(--bg);
       transform: translateX(0);
       transition: transform 0.2s ease;
-      min-width: 100%;
+      overflow: hidden;
     }
     .docs-file-row:active .docs-file-row-inner { background: rgba(192,122,74,0.06); }
     .docs-file-row-icon { font-size: 18px; opacity: 0.7; flex-shrink: 0; }
-    .docs-file-row-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .docs-file-row-name {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .docs-file-row-tray {
       position: absolute;
       right: 0;
       top: 0;
       bottom: 0;
-      width: 160px;
+      width: 150px;
       display: flex;
       flex-shrink: 0;
+      transform: translateX(100%);
+      transition: transform 0.2s ease;
     }
+    .docs-file-row.open .docs-file-row-tray { transform: translateX(0); }
+    .docs-file-row-inner { position: relative; z-index: 1; }
     .docs-swipe-btn {
       flex: 1;
       border: none;
       cursor: pointer;
-      font-size: 12px;
-      font-weight: 500;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 0 8px;
+      padding: 0;
     }
-    .docs-swipe-btn.move { background: rgba(192,122,74,0.25); color: #8a5a28; }
-    .docs-swipe-btn.rename { background: rgba(0,0,0,0.06); color: var(--text2); }
-    .docs-swipe-btn.delete { background: #c05050; color: white; }
+    .docs-swipe-btn svg { width: 20px; height: 20px; }
+    .docs-swipe-btn.move { background: var(--accent); color: white; }
+    .docs-swipe-btn.rename { background: rgba(0,0,0,0.08); color: var(--muted); }
+    .docs-swipe-btn.delete { background: #d94f4f; color: white; }
     .docs-swipe-btn:active { opacity: 0.9; }
     .screen-footer {
       padding: 12px 0;
@@ -5458,7 +5479,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.10.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.10.1';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -6251,7 +6272,7 @@
         const card = document.createElement('div');
         card.className = 'docs-folder-card';
         const count = f.count != null ? f.count + ' items' : '';
-        card.innerHTML = `<span class="docs-folder-card-icon">📁</span><span class="docs-folder-card-name">${escapeHtml(f.name)}</span>${count ? `<span class="docs-folder-card-count">${escapeHtml(String(count))}</span>` : ''}`;
+        card.innerHTML = `<span class="docs-folder-card-icon"><svg viewBox="0 0 36 30" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="10" width="32" height="18" rx="2.5" fill="var(--accent)"/><rect x="2" y="4" width="18" height="8" rx="1.5" class="docs-folder-tab" fill="rgba(220,170,130,0.95)"/></svg></span><span class="docs-folder-card-name">${escapeHtml(f.name)}</span>${count ? `<span class="docs-folder-card-count">${escapeHtml(String(count))}</span>` : ''}`;
         card.onclick = () => openDocsFolder(f.id, f.name);
         grid.appendChild(card);
       });
@@ -6269,7 +6290,7 @@
         row.dataset.type = 'file';
         row.dataset.id = f.id;
         row.dataset.name = f.name;
-        row.innerHTML = `<div class="docs-file-row-inner"><span class="docs-file-row-icon">${fileIcon}</span><span class="docs-file-row-name">${escapeHtml(displayName)}</span></div><div class="docs-file-row-tray"><button type="button" class="docs-swipe-btn move" aria-label="Move">Move</button><button type="button" class="docs-swipe-btn rename" aria-label="Rename">Rename</button><button type="button" class="docs-swipe-btn delete" aria-label="Delete">Delete</button></div>`;
+        row.innerHTML = `<div class="docs-file-row-inner"><span class="docs-file-row-icon">${fileIcon}</span><span class="docs-file-row-name">${escapeHtml(displayName)}</span></div><div class="docs-file-row-tray"><button type="button" class="docs-swipe-btn move" aria-label="Move"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9V5a2 2 0 0 1 2-2h3.5a2 2 0 0 1 1.5.5l1 1H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9z"/><path d="M12 11v6M9 14h6"/></svg></button><button type="button" class="docs-swipe-btn rename" aria-label="Rename"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button type="button" class="docs-swipe-btn delete" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button></div>`;
         const inner = row.querySelector('.docs-file-row-inner');
         inner.onclick = () => { if (f.url) window.open(f.url, '_blank'); };
         row.querySelector('.docs-swipe-btn.move').onclick = (e) => { e.stopPropagation(); closeDocsSwipeRow(); openDocsMoveSheet('file', f.id); };
@@ -6299,7 +6320,7 @@
 
   function setupDocsSwipeRow(row) {
     let startX = 0, currentX = 0;
-    const trayW = 160;
+    const trayW = 150;
     const threshold = trayW * 0.4;
     function setTranslate(x) {
       const v = Math.max(-trayW, Math.min(0, x));
