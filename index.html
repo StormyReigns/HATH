@@ -306,10 +306,6 @@
     html.dark-mode .screen-item:active { background: rgba(224,152,104,0.12); }
     html.dark-mode .screen-breadcrumb span { color: var(--text2); }
     html.dark-mode .docs-header { border-color: transparent; }
-    html.dark-mode .docs-selection-bar {
-      background: rgba(224,152,104,0.15);
-      border-color: rgba(255,255,255,0.06);
-    }
     html.dark-mode .screen-item.selected { background: rgba(224,152,104,0.15); }
     html.dark-mode .screen-item-edit-btn:hover { background: rgba(255,255,255,0.08); }
     html.dark-mode .settings-section { border-color: rgba(255,255,255,0.08); }
@@ -386,6 +382,13 @@
     html.dark-mode .action-sheet { background: #252220; }
     html.dark-mode .action-sheet-option { color: var(--text); }
     html.dark-mode .action-sheet-option:hover { background: rgba(255,255,255,0.06); }
+    html.dark-mode .docs-add-drawer { background: #252220; }
+    html.dark-mode .docs-add-drawer-handle { background: rgba(255,255,255,0.2); }
+    html.dark-mode .docs-add-drawer-btn { background: rgba(224,152,104,0.12); color: var(--text); }
+    html.dark-mode .docs-folder-card {
+      background: rgba(192,122,74,0.12);
+      border-color: rgba(192,122,74,0.2);
+    }
     html.dark-mode .celebration-content {
       background: linear-gradient(145deg, #2a2520 0%, #1f1c18 100%);
       border-color: rgba(224,152,104,0.5);
@@ -1367,10 +1370,20 @@
       opacity: 0.15;
     }
     #documentsScreen .docs-header,
-    #documentsScreen .docs-selection-bar,
     #documentsScreen .screen-list { position: relative; z-index: 1; }
     #documentsScreen .screen-add-fab { position: fixed; z-index: 1; }
-    .docs-title-icon { width: 18px; height: 18px; flex-shrink: 0; object-fit: contain; }
+    .docs-accent-touch {
+      position: absolute; top: 0; left: 0; right: 0; height: 80px;
+      background: linear-gradient(to bottom, rgba(192,122,74,0.04), transparent);
+      pointer-events: none; z-index: 0;
+    }
+    .docs-back-chevron {
+      font-size: 22px; color: var(--text2); background: none; border: none;
+      cursor: pointer; padding: 0; min-width: 44px; min-height: 44px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .docs-back-chevron:hover, .docs-back-chevron:active { color: var(--accent); }
     .docs-header .screen-breadcrumb { padding: 0; flex: 1; min-width: 0; }
     .docs-refresh-btn {
       flex-shrink: 0;
@@ -1387,22 +1400,6 @@
       justify-content: center;
       transition: color 0.12s;
       padding: 0;
-    }
-    .docs-header-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
-    .docs-edit-btn {
-      font-size: 13px;
-      padding: 6px 10px;
-      border: none;
-      background: transparent;
-      color: var(--text2);
-      cursor: pointer;
-      border-radius: 6px;
-      font-weight: 500;
-    }
-    .docs-edit-btn:hover, .docs-edit-btn:active { color: var(--accent); }
-    .docs-edit-btn.active {
-      background: rgba(192,122,74,0.15);
-      color: var(--accent);
     }
     .settings-header { display: flex; align-items: center; gap: 10px; padding: 14px 0 12px; flex-shrink: 0; }
     .settings-title-icon { width: 22px; height: 22px; flex-shrink: 0; color: var(--text); filter: drop-shadow(0 0 4px rgba(255,255,255,0.6)); }
@@ -1485,46 +1482,83 @@
       cursor: pointer;
     }
     .screen-item.selected { background: rgba(192,122,74,0.08); }
-    .docs-selection-bar {
+    .docs-folder-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 12px 4px 16px;
+    }
+    .docs-folder-card {
+      background: rgba(192,122,74,0.07);
+      border: 1px solid rgba(192,122,74,0.15);
+      border-radius: 14px;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .docs-folder-card:active { background: rgba(192,122,74,0.12); }
+    .docs-folder-card-icon { font-size: 24px; opacity: 0.85; }
+    .docs-folder-card-name {
+      font-size: 13px; font-weight: 600; color: var(--text);
+      display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden; text-align: center; line-height: 1.3;
+    }
+    .docs-folder-card-count { font-size: 11px; color: var(--muted); }
+    .docs-file-list { margin-top: 4px; }
+    .docs-file-row {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: stretch;
+      min-height: 52px;
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+    }
+    .docs-file-row-inner {
+      flex: 1;
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 10px 16px;
-      background: rgba(192,122,74,0.12);
-      border-bottom: 1px solid rgba(0,0,0,0.06);
-      flex-shrink: 0;
-    }
-    .docs-selection-count { font-size: 13px; color: var(--text); flex: 1; }
-    .docs-selection-clear {
-      font-size: 13px;
-      padding: 6px 12px;
-      border: none;
-      background: transparent;
-      color: var(--text2);
-      cursor: pointer;
-      border-radius: 6px;
-    }
-    .docs-selection-clear:hover { background: rgba(0,0,0,0.06); }
-    .docs-selection-move {
-      font-size: 13px;
-      padding: 6px 14px;
-      border: none;
-      background: rgba(192,122,74,0.2);
+      padding: 12px 4px;
+      font-size: 14px;
       color: var(--text);
       cursor: pointer;
-      border-radius: 6px;
+      font-weight: 300;
+      background: var(--bg);
+      transform: translateX(0);
+      transition: transform 0.2s ease;
+      min-width: 100%;
     }
-    .docs-selection-move:hover { background: rgba(192,122,74,0.35); }
-    .docs-selection-delete {
-      font-size: 13px;
-      padding: 6px 14px;
+    .docs-file-row:active .docs-file-row-inner { background: rgba(192,122,74,0.06); }
+    .docs-file-row-icon { font-size: 18px; opacity: 0.7; flex-shrink: 0; }
+    .docs-file-row-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .docs-file-row-tray {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 160px;
+      display: flex;
+      flex-shrink: 0;
+    }
+    .docs-swipe-btn {
+      flex: 1;
       border: none;
-      background: #c05050;
-      color: #fff;
       cursor: pointer;
-      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 8px;
     }
-    .docs-selection-delete:hover { background: #a04040; }
+    .docs-swipe-btn.move { background: rgba(192,122,74,0.25); color: #8a5a28; }
+    .docs-swipe-btn.rename { background: rgba(0,0,0,0.06); color: var(--text2); }
+    .docs-swipe-btn.delete { background: #c05050; color: white; }
+    .docs-swipe-btn:active { opacity: 0.9; }
     .screen-footer {
       padding: 12px 0;
       font-size: 12px;
@@ -4006,6 +4040,70 @@
     .action-sheet-option:active { background: rgba(192,122,74,0.08); }
     .action-sheet-option span:first-child { font-size: 20px; opacity: 0.85; }
 
+    /* Documents add drawer */
+    .docs-add-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      z-index: 150;
+    }
+    .docs-add-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .docs-add-drawer {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%) translateY(100%);
+      width: 100%;
+      max-width: 420px;
+      background: var(--card, #fdf8f1);
+      border-radius: 20px 20px 0 0;
+      padding: 0 0 max(24px, env(safe-area-inset-bottom));
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.1);
+      z-index: 151;
+      transition: transform 0.28s cubic-bezier(0.34,1.1,0.64,1);
+    }
+    .docs-add-overlay.open .docs-add-drawer {
+      transform: translateX(-50%) translateY(0);
+    }
+    .docs-add-drawer-handle {
+      width: 40px;
+      height: 4px;
+      background: rgba(0,0,0,0.15);
+      border-radius: 2px;
+      margin: 10px auto 16px;
+    }
+    .docs-add-drawer-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 0 20px 24px;
+    }
+    .docs-add-drawer-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 80px;
+      padding: 12px;
+      border: none;
+      background: rgba(192,122,74,0.08);
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text);
+      transition: background 0.12s;
+    }
+    .docs-add-drawer-btn span { font-size: 28px; }
+    .docs-add-drawer-btn:active { background: rgba(192,122,74,0.15); }
+
     /* Paste text modal */
     .paste-modal-overlay {
       position: fixed;
@@ -4638,26 +4736,18 @@
 
     <!-- Documents screen -->
     <div class="sub-screen" id="documentsScreen">
+      <div class="docs-accent-touch" aria-hidden="true"></div>
       <div class="docs-bg-carousel" id="docsBgCarousel">
         <img id="docsBgImg1" src="https://stormyreigns.github.io/HATH/FFXIVLogo1.png" alt="" loading="eager">
         <img id="docsBgImg2" src="https://stormyreigns.github.io/HATH/FFXIVLogo2.webp" alt="" loading="lazy">
       </div>
       <div class="docs-header">
-        <img class="docs-title-icon" src="https://stormyreigns.github.io/HATH/FFXIVIcon.png" alt="" loading="lazy">
+        <button type="button" class="docs-back-chevron" id="docsBackBtn" onclick="docsGoBack()" title="Back" aria-label="Back" style="display:none">‹</button>
         <div class="screen-breadcrumb" id="docsBreadcrumb"></div>
         <span class="section-version-label"></span>
-        <div class="docs-header-actions">
-          <button type="button" class="docs-edit-btn" id="docsEditBtn" onclick="toggleDocsEditMode()" title="Edit mode">Edit</button>
-          <button type="button" class="docs-refresh-btn" onclick="refreshCurrentDocsFolder()" title="Refresh folder" aria-label="Refresh">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-          </button>
-        </div>
-      </div>
-      <div class="docs-selection-bar" id="docsSelectionBar" style="display:none">
-        <span class="docs-selection-count" id="docsSelectionCount">0 selected</span>
-        <button type="button" class="docs-selection-clear" onclick="clearDocsSelection()">Clear</button>
-        <button type="button" class="docs-selection-move" onclick="openDocsMoveSheet()">Move</button>
-        <button type="button" class="docs-selection-delete" onclick="deleteSelectedDocs()">Delete</button>
+        <button type="button" class="docs-refresh-btn" onclick="refreshCurrentDocsFolder()" title="Refresh folder" aria-label="Refresh">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </button>
       </div>
       <div class="screen-list" id="docsList"></div>
       <button type="button" class="screen-add-fab" id="docsAddFab" onclick="openDocsAddMenu()" title="Add document" aria-label="Add">+</button>
@@ -5211,13 +5301,16 @@
 
 <!-- Phase editor (inline in modal) - template structure added via JS -->
 
-<!-- Documents action sheet -->
-<div class="action-sheet-overlay" id="docsActionSheet" onclick="closeDocsAddMenu(event)">
-  <div class="action-sheet" onclick="event.stopPropagation()">
-    <div class="action-sheet-option" onclick="triggerDocsScan()"><span>📷</span> Scan Document</div>
-    <div class="action-sheet-option" onclick="openPasteModal()"><span>📋</span> Paste Text</div>
-    <div class="action-sheet-option" onclick="triggerDocsUpload()"><span>📁</span> Upload File</div>
-    <div class="action-sheet-option" onclick="openSaveLinkModal()"><span>🔗</span> Save Link</div>
+<!-- Documents add drawer -->
+<div class="docs-add-overlay" id="docsActionSheet" onclick="closeDocsAddMenu(event)">
+  <div class="docs-add-drawer" onclick="event.stopPropagation()">
+    <div class="docs-add-drawer-handle"></div>
+    <div class="docs-add-drawer-grid">
+      <button type="button" class="docs-add-drawer-btn" onclick="triggerDocsScan()"><span>📷</span> Scan Document</button>
+      <button type="button" class="docs-add-drawer-btn" onclick="openPasteModal()"><span>📋</span> Paste Text</button>
+      <button type="button" class="docs-add-drawer-btn" onclick="triggerDocsUpload()"><span>📁</span> Upload File</button>
+      <button type="button" class="docs-add-drawer-btn" onclick="openSaveLinkModal()"><span>🔗</span> Save Link</button>
+    </div>
   </div>
 </div>
 
@@ -5365,7 +5458,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.9.5';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.10.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -6126,55 +6219,14 @@
   }
 
   let docsBreadcrumb = [{ id: DOCS_FOLDER_ID, name: 'ShastApp Docs' }];
-  let docsEditMode = false;
-  let docsSelectedItems = new Set();
   let docsPendingRename = null;
   let docsPendingDelete = null;
-
-  function docsSelectionKey(type, id) { return type + ':' + id; }
-
-  function toggleDocsEditMode() {
-    docsEditMode = !docsEditMode;
-    docsSelectedItems.clear();
-    updateDocsSelectionBar();
-    document.getElementById('docsEditBtn').textContent = docsEditMode ? 'Done' : 'Edit';
-    document.getElementById('docsEditBtn').classList.toggle('active', docsEditMode);
-    const folderId = getCurrentDocsFolderId();
-    const cached = docsFolderCache[folderId];
-    if (cached) renderDocsList(cached);
-  }
-
-  function toggleDocsSelection(type, id) {
-    const key = docsSelectionKey(type, id);
-    if (docsSelectedItems.has(key)) docsSelectedItems.delete(key);
-    else docsSelectedItems.add(key);
-    updateDocsSelectionBar();
-    renderDocsList(docsFolderCache[getCurrentDocsFolderId()]);
-  }
-
-  function clearDocsSelection() {
-    docsSelectedItems.clear();
-    updateDocsSelectionBar();
-    const folderId = getCurrentDocsFolderId();
-    const cached = docsFolderCache[folderId];
-    if (cached) renderDocsList(cached);
-  }
-
-  function updateDocsSelectionBar() {
-    const bar = document.getElementById('docsSelectionBar');
-    const countEl = document.getElementById('docsSelectionCount');
-    const n = docsSelectedItems.size;
-    if (n > 0 && docsEditMode) {
-      bar.style.display = 'flex';
-      countEl.textContent = n === 1 ? '1 selected' : n + ' selected';
-    } else {
-      bar.style.display = 'none';
-    }
-  }
+  let docsSwipeOpenRow = null;
 
   function renderDocsList(data) {
     const list = document.getElementById('docsList');
     if (!list) return;
+    docsSwipeOpenRow = null;
     list.innerHTML = '';
     if (!data) {
       list.innerHTML = '<div class="screen-loading">Loading…</div>';
@@ -6192,51 +6244,109 @@
     }
     const folders = data.folders || [];
     const files = data.files || [];
-    folders.forEach(f => {
-      const div = document.createElement('div');
-      const key = docsSelectionKey('folder', f.id);
-      const selected = docsSelectedItems.has(key);
-      div.className = 'screen-item' + (selected ? ' selected' : '');
-      if (docsEditMode) {
-        div.innerHTML = `<input type="checkbox" class="screen-item-checkbox" ${selected ? 'checked' : ''} aria-label="Select"><img class="screen-item-icon docs-folder-icon" src="https://stormyreigns.github.io/HATH/FFXIVAether.png" alt="" loading="lazy"><span class="screen-item-name">${escapeHtml(f.name)}</span><div class="screen-item-edit-actions"><button type="button" class="screen-item-edit-btn rename" title="Rename" aria-label="Rename">Edit</button><button type="button" class="screen-item-edit-btn move-item" title="Move" aria-label="Move">Move</button><button type="button" class="screen-item-edit-btn delete" title="Delete" aria-label="Delete">🗑</button></div>`;
-        const cb = div.querySelector('.screen-item-checkbox');
-        cb.onclick = (e) => { e.stopPropagation(); toggleDocsSelection('folder', f.id); };
-        div.onclick = (e) => { if (!e.target.closest('.screen-item-edit-btn') && !e.target.closest('.screen-item-checkbox')) toggleDocsSelection('folder', f.id); };
-        div.querySelector('.screen-item-edit-btn.rename').onclick = (e) => { e.stopPropagation(); openDocsRenameModal('folder', f.id, f.name); };
-        div.querySelector('.screen-item-edit-btn.move-item').onclick = (e) => { e.stopPropagation(); openDocsMoveSheet('folder', f.id); };
-        div.querySelector('.screen-item-edit-btn.delete').onclick = (e) => { e.stopPropagation(); openDocsDeleteModal('folder', f.id, f.name); };
-      } else {
-        div.innerHTML = `<img class="screen-item-icon docs-folder-icon" src="https://stormyreigns.github.io/HATH/FFXIVAether.png" alt="" loading="lazy"><span class="screen-item-name">${escapeHtml(f.name)}</span>`;
-        div.onclick = () => openDocsFolder(f.id, f.name);
-      }
-      list.appendChild(div);
-    });
-    files.forEach(f => {
-      const div = document.createElement('div');
-      const key = docsSelectionKey('file', f.id);
-      const selected = docsSelectedItems.has(key);
-      div.className = 'screen-item' + (selected ? ' selected' : '');
-      const isLink = f.name.endsWith(' (link).txt');
-      const fileIcon = isLink ? '🔗' : '📄';
-      const displayName = isLink ? getBaseName(f.name.replace(/ \(link\)$/, '')) : getBaseName(f.name);
-      if (docsEditMode) {
-        div.innerHTML = `<input type="checkbox" class="screen-item-checkbox" ${selected ? 'checked' : ''} aria-label="Select"><span class="screen-item-icon">${fileIcon}</span><span class="screen-item-name">${escapeHtml(displayName)}</span><div class="screen-item-edit-actions"><button type="button" class="screen-item-edit-btn rename" title="Rename" aria-label="Rename">Edit</button><button type="button" class="screen-item-edit-btn move-item" title="Move" aria-label="Move">Move</button><button type="button" class="screen-item-edit-btn delete" title="Delete" aria-label="Delete">🗑</button></div>`;
-        const cb = div.querySelector('.screen-item-checkbox');
-        cb.onclick = (e) => { e.stopPropagation(); toggleDocsSelection('file', f.id); };
-        div.onclick = (e) => { if (!e.target.closest('.screen-item-edit-btn') && !e.target.closest('.screen-item-checkbox')) toggleDocsSelection('file', f.id); };
-        div.querySelector('.screen-item-edit-btn.rename').onclick = (e) => { e.stopPropagation(); openDocsRenameModal('file', f.id, f.name); };
-        div.querySelector('.screen-item-edit-btn.move-item').onclick = (e) => { e.stopPropagation(); openDocsMoveSheet('file', f.id); };
-        div.querySelector('.screen-item-edit-btn.delete').onclick = (e) => { e.stopPropagation(); openDocsDeleteModal('file', f.id, f.name); };
-      } else {
-        div.innerHTML = `<span class="screen-item-icon">${fileIcon}</span><span class="screen-item-name">${escapeHtml(displayName)}</span>`;
-        div.onclick = () => { if (f.url) window.open(f.url, '_blank'); };
-      }
-      list.appendChild(div);
-    });
+    if (folders.length > 0) {
+      const grid = document.createElement('div');
+      grid.className = 'docs-folder-grid';
+      folders.forEach(f => {
+        const card = document.createElement('div');
+        card.className = 'docs-folder-card';
+        const count = f.count != null ? f.count + ' items' : '';
+        card.innerHTML = `<span class="docs-folder-card-icon">📁</span><span class="docs-folder-card-name">${escapeHtml(f.name)}</span>${count ? `<span class="docs-folder-card-count">${escapeHtml(String(count))}</span>` : ''}`;
+        card.onclick = () => openDocsFolder(f.id, f.name);
+        grid.appendChild(card);
+      });
+      list.appendChild(grid);
+    }
+    if (files.length > 0) {
+      const fileList = document.createElement('div');
+      fileList.className = 'docs-file-list';
+      files.forEach(f => {
+        const isLink = f.name.endsWith(' (link).txt');
+        const fileIcon = isLink ? '🔗' : '📄';
+        const displayName = isLink ? getBaseName(f.name.replace(/ \(link\)$/, '')) : getBaseName(f.name);
+        const row = document.createElement('div');
+        row.className = 'docs-file-row';
+        row.dataset.type = 'file';
+        row.dataset.id = f.id;
+        row.dataset.name = f.name;
+        row.innerHTML = `<div class="docs-file-row-inner"><span class="docs-file-row-icon">${fileIcon}</span><span class="docs-file-row-name">${escapeHtml(displayName)}</span></div><div class="docs-file-row-tray"><button type="button" class="docs-swipe-btn move" aria-label="Move">Move</button><button type="button" class="docs-swipe-btn rename" aria-label="Rename">Rename</button><button type="button" class="docs-swipe-btn delete" aria-label="Delete">Delete</button></div>`;
+        const inner = row.querySelector('.docs-file-row-inner');
+        inner.onclick = () => { if (f.url) window.open(f.url, '_blank'); };
+        row.querySelector('.docs-swipe-btn.move').onclick = (e) => { e.stopPropagation(); closeDocsSwipeRow(); openDocsMoveSheet('file', f.id); };
+        row.querySelector('.docs-swipe-btn.rename').onclick = (e) => { e.stopPropagation(); closeDocsSwipeRow(); openDocsRenameModal('file', f.id, f.name); };
+        row.querySelector('.docs-swipe-btn.delete').onclick = (e) => { e.stopPropagation(); closeDocsSwipeRow(); openDocsDeleteModal('file', f.id, f.name); };
+        setupDocsSwipeRow(row);
+        fileList.appendChild(row);
+      });
+      list.appendChild(fileList);
+    }
     if (folders.length === 0 && files.length === 0) {
       list.innerHTML = '<div class="screen-loading">This folder is empty.</div>';
     }
-    updateDocsSelectionBar();
+    const fade = document.createElement('div');
+    fade.className = 'scroll-fade-bottom';
+    list.appendChild(fade);
+  }
+
+  function closeDocsSwipeRow() {
+    if (docsSwipeOpenRow) {
+      docsSwipeOpenRow.classList.remove('open');
+      const inner = docsSwipeOpenRow.querySelector('.docs-file-row-inner');
+      if (inner) inner.style.transform = '';
+      docsSwipeOpenRow = null;
+    }
+  }
+
+  function setupDocsSwipeRow(row) {
+    let startX = 0, currentX = 0;
+    const trayW = 160;
+    const threshold = trayW * 0.4;
+    function setTranslate(x) {
+      const v = Math.max(-trayW, Math.min(0, x));
+      row.querySelector('.docs-file-row-inner').style.transform = 'translateX(' + v + 'px)';
+    }
+    function openRow() {
+      row.classList.add('open');
+      docsSwipeOpenRow = row;
+      setTranslate(-trayW);
+    }
+    function closeRow() {
+      row.classList.remove('open');
+      if (docsSwipeOpenRow === row) docsSwipeOpenRow = null;
+      setTranslate(0);
+    }
+    row.addEventListener('touchstart', function(e) {
+      startX = e.touches[0].clientX;
+      currentX = 0;
+    }, { passive: true });
+    row.addEventListener('touchmove', function(e) {
+      const dx = e.touches[0].clientX - startX;
+      if (dx < 0) {
+        currentX = dx;
+        setTranslate(currentX);
+      }
+    }, { passive: true });
+    row.addEventListener('touchend', function() {
+      if (currentX < -threshold) {
+        if (docsSwipeOpenRow && docsSwipeOpenRow !== row) {
+          docsSwipeOpenRow.classList.remove('open');
+          const o = docsSwipeOpenRow.querySelector('.docs-file-row-inner');
+          if (o) o.style.transform = '';
+        }
+        openRow();
+      } else {
+        closeRow();
+      }
+    });
+  }
+
+  function initDocsListTapOutside() {
+    const list = document.getElementById('docsList');
+    if (!list || list._docsTapInit) return;
+    list._docsTapInit = true;
+    list.addEventListener('click', function(e) {
+      if (docsSwipeOpenRow && !e.target.closest('.docs-swipe-btn')) closeDocsSwipeRow();
+    });
   }
 
   function getFileExtension(name) {
@@ -6284,24 +6394,6 @@
     document.getElementById('docsDeleteModal').classList.add('open');
   }
 
-  function deleteSelectedDocs() {
-    if (docsSelectedItems.size === 0) return;
-    const items = [];
-    docsSelectedItems.forEach(key => {
-      const [type, id] = key.split(':');
-      items.push({ type, id });
-    });
-    docsPendingDelete = items;
-    const n = items.length;
-    const folders = items.filter(i => i.type === 'folder').length;
-    const files = items.filter(i => i.type === 'file').length;
-    let msg = 'Are you sure you want to permanently delete ';
-    if (n === 1) msg += folders ? 'this folder?' : 'this file?';
-    else msg += n + ' items' + (folders && files ? ' (folders and files)' : folders ? ' (folders)' : ' (files)') + '?';
-    document.getElementById('docsDeleteWarning').textContent = msg;
-    document.getElementById('docsDeleteModal').classList.add('open');
-  }
-
   function closeDocsDeleteModal(ev) {
     if (ev && ev.target !== ev.currentTarget && ev.type === 'click') return;
     document.getElementById('docsDeleteModal').classList.remove('open');
@@ -6313,8 +6405,6 @@
     const items = docsPendingDelete;
     closeDocsDeleteModal();
     docsPendingDelete = null;
-    docsSelectedItems.clear();
-    updateDocsSelectionBar();
     doDocsDeleteMultiple(items);
   }
 
@@ -6361,8 +6451,6 @@
   }
 
   function openDocsFolder(folderId, folderName) {
-    docsSelectedItems.clear();
-    updateDocsSelectionBar();
     const idx = docsBreadcrumb.findIndex(b => b.id === folderId);
     if (idx >= 0) {
       docsBreadcrumb = docsBreadcrumb.slice(0, idx + 1);
@@ -6373,8 +6461,18 @@
     loadFolderContents(folderId);
   }
 
+  function docsGoBack() {
+    if (docsBreadcrumb.length <= 1) return;
+    docsBreadcrumb = docsBreadcrumb.slice(0, -1);
+    const parent = docsBreadcrumb[docsBreadcrumb.length - 1];
+    renderDocsBreadcrumb();
+    loadFolderContents(parent.id);
+  }
+
   function renderDocsBreadcrumb() {
     const el = document.getElementById('docsBreadcrumb');
+    const backBtn = document.getElementById('docsBackBtn');
+    if (backBtn) backBtn.style.display = docsBreadcrumb.length > 1 ? '' : 'none';
     el.innerHTML = '';
     docsBreadcrumb.forEach((b, i) => {
       if (i > 0) {
@@ -6397,6 +6495,7 @@
   function showDocumentsScreen() {
     showSubScreen('documentsScreen');
     startDocsBgCarousel();
+    initDocsListTapOutside();
     var user = localStorage.getItem('shasta_user');
     if (!user) {
       var list = document.getElementById('docsList');
@@ -7655,16 +7754,7 @@
   let docsMoveTargetItems = [];
 
   function openDocsMoveSheet(singleType, singleId) {
-    // Called either from selection bar (no args) or per-item button
-    if (singleType && singleId) {
-      docsMoveTargetItems = [{ type: singleType, id: singleId }];
-    } else {
-      docsMoveTargetItems = [];
-      docsSelectedItems.forEach(key => {
-        const [type, id] = key.split(':');
-        docsMoveTargetItems.push({ type, id });
-      });
-    }
+    docsMoveTargetItems = singleType && singleId ? [{ type: singleType, id: singleId }] : [];
     if (docsMoveTargetItems.length === 0) return;
 
     // Populate the folder list from cache
