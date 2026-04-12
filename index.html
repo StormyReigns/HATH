@@ -1926,6 +1926,38 @@
     .civics-link-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
     .civics-card-research { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.06); }
     html.dark-mode .civics-card-research { border-top-color: rgba(255,255,255,0.08); }
+    .civics-fec-chart {
+      margin-bottom: 16px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(42,91,168,0.06);
+      border: 1px solid rgba(42,91,168,0.14);
+    }
+    html.dark-mode .civics-fec-chart {
+      background: rgba(42,91,168,0.1);
+      border-color: rgba(90,143,216,0.22);
+    }
+    .civics-fec-chart-title {
+      font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--muted); margin-bottom: 10px;
+    }
+    .civics-fec-chart-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .civics-fec-donut { width: 140px; height: 140px; flex-shrink: 0; }
+    .civics-fec-donut-hole { fill: #fdf8f1; }
+    html.dark-mode .civics-fec-donut-hole { fill: #252220; }
+    .civics-fec-legend { flex: 1; min-width: 140px; font-size: 13px; color: var(--text2); }
+    .civics-fec-legend-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+    }
+    .civics-fec-swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+    .civics-fec-legend-row span:nth-child(2) { flex: 1; min-width: 0; }
+    .civics-fec-legend-amt { font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+    .civics-fec-totals {
+      display: flex; flex-wrap: wrap; gap: 10px 16px; margin-top: 12px;
+      padding-top: 10px; border-top: 1px solid rgba(42,91,168,0.12);
+      font-size: 12px; color: var(--text2); font-variant-numeric: tabular-nums;
+    }
+    html.dark-mode .civics-fec-totals { border-top-color: rgba(90,143,216,0.2); }
     .civics-card-notes { margin-top: 12px; }
     .civics-card-notes-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px; }
     .civics-card-notes textarea {
@@ -5576,7 +5608,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.12.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.12.3';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -9151,6 +9183,68 @@
     }
   }
 
+  function formatCivicsUSD(n) {
+    if (n == null || n === '' || (typeof n === 'number' && isNaN(n))) return '—';
+    return '$' + Math.round(Number(n)).toLocaleString('en-US');
+  }
+
+  function renderCivicsFecFinanceChartHtml(fin) {
+    if (!fin || typeof fin.totalRaised !== 'number' || fin.totalRaised <= 0) return '';
+    var cy = fin.electionCycle || '';
+    var ind = fin.individualContributions || 0;
+    var pac = fin.pacContributions || 0;
+    var self = fin.selfFunding || 0;
+    var raised = fin.totalRaised || 0;
+    var other = Math.max(0, raised - ind - pac - self);
+    var slices = [];
+    if (ind > 0) slices.push({ label: 'Individual', v: ind, c: '#2a5ba8' });
+    if (pac > 0) slices.push({ label: 'PAC', v: pac, c: '#c07a4a' });
+    if (self > 0) slices.push({ label: 'Self-funded', v: self, c: '#64748b' });
+    if (other > 0) slices.push({ label: 'Other', v: other, c: '#94a3b8' });
+    if (!slices.length) return '';
+    var total = slices.reduce(function(a, s) { return a + s.v; }, 0);
+    if (total <= 0) return '';
+    var cx = 100, cySvg = 100, rOut = 78, rIn = 44;
+    var paths = [];
+    if (slices.length === 1) {
+      paths.push(
+        '<circle cx="' + cx + '" cy="' + cySvg + '" r="' + rOut + '" fill="' + slices[0].c + '"/>' +
+        '<circle cx="' + cx + '" cy="' + cySvg + '" r="' + rIn + '" class="civics-fec-donut-hole"/>'
+      );
+    } else {
+      var a = -Math.PI / 2;
+      for (var i = 0; i < slices.length; i++) {
+        var sweep = (slices[i].v / total) * 2 * Math.PI;
+        var a1 = a + sweep;
+        var x0 = cx + rOut * Math.cos(a), y0 = cySvg + rOut * Math.sin(a);
+        var x1 = cx + rOut * Math.cos(a1), y1 = cySvg + rOut * Math.sin(a1);
+        var x2 = cx + rIn * Math.cos(a1), y2 = cySvg + rIn * Math.sin(a1);
+        var x3 = cx + rIn * Math.cos(a), y3 = cySvg + rIn * Math.sin(a);
+        var large = sweep > Math.PI ? 1 : 0;
+        paths.push('<path fill="' + slices[i].c + '" d="M ' + x0 + ' ' + y0 + ' A ' + rOut + ' ' + rOut + ' 0 ' + large + ' 1 ' + x1 + ' ' + y1 + ' L ' + x2 + ' ' + y2 + ' A ' + rIn + ' ' + rIn + ' 0 ' + large + ' 0 ' + x3 + ' ' + y3 + ' Z" />');
+        a = a1;
+      }
+    }
+    var leg = slices.map(function(s) {
+      return '<div class="civics-fec-legend-row"><span class="civics-fec-swatch" style="background:' + s.c + '"></span>' +
+        '<span>' + escapeHtml(s.label) + '</span><span class="civics-fec-legend-amt">' + formatCivicsUSD(s.v) + '</span></div>';
+    }).join('');
+    return '<div class="civics-fec-chart" role="img" aria-label="FEC fundraising breakdown, cycle ' + escapeHtml(String(cy)) + '">' +
+      '<div class="civics-fec-chart-title">Where the money came from (FEC)</div>' +
+      '<div class="civics-fec-chart-row">' +
+      '<svg class="civics-fec-donut" viewBox="0 0 200 200" aria-hidden="true">' + paths.join('') + '</svg>' +
+      '<div class="civics-fec-legend">' + leg + '</div></div>' +
+      '<div class="civics-fec-totals">' +
+      '<span>Raised ' + formatCivicsUSD(fin.totalRaised) + '</span>' +
+      '<span>Spent ' + formatCivicsUSD(fin.totalSpent) + '</span>' +
+      '<span>Cash on hand ' + formatCivicsUSD(fin.cashOnHand) + '</span></div></div>';
+  }
+
+  function mergeCivicsResearchDisplay(fecFinance, proseHtml) {
+    var chart = fecFinance ? renderCivicsFecFinanceChartHtml(fecFinance) : '';
+    return chart + proseHtml;
+  }
+
   async function civicsAskBlathersAboutCandidate(btn) {
     const name = (btn.getAttribute('data-name') || '').trim();
     const office = (btn.getAttribute('data-office') || '').trim();
@@ -9169,7 +9263,7 @@
         if (cached) {
           const parsed = JSON.parse(cached);
           if (parsed && parsed.ts && parsed.html && (Date.now() - parsed.ts) < 7 * 24 * 60 * 60 * 1000) {
-            researchEl.innerHTML = parsed.html;
+            researchEl.innerHTML = mergeCivicsResearchDisplay(parsed.fecFinance || null, parsed.html);
             researchEl.setAttribute('data-loaded', 'true');
             card.classList.add('expanded');
             var sum = card.querySelector('.civics-card-summary');
@@ -9207,14 +9301,15 @@
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       const reply = data.reply || '';
+      const fecFinance = data.fecFinance && typeof data.fecFinance === 'object' ? data.fecFinance : null;
       const replyNorm = normalizeCivicsResearchText(reply);
       const html = isCivicsResponse(replyNorm)
         ? renderCivicsResponse(replyNorm)
         : '<div class="civics-research-section-body">' + escapeHtml(String(reply || '')).replace(/\n/g, '<br>') + '</div>';
-      researchEl.innerHTML = html;
+      researchEl.innerHTML = mergeCivicsResearchDisplay(fecFinance, html);
       researchEl.setAttribute('data-loaded', 'true');
       try {
-        localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), html: html }));
+        localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), html: html, fecFinance: fecFinance }));
       } catch (_) {}
     } catch (err) {
       researchEl.querySelectorAll('.civics-research-updating').forEach(function(el) { el.remove(); });
