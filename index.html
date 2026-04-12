@@ -5508,7 +5508,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.10.7';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.10.8';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -9907,29 +9907,73 @@
     if (!text || typeof text !== 'string') return '';
     var t = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
     ['Background', 'Funding', 'Record', 'News'].forEach(function(h) {
-      t = t.replace(new RegExp('^\\s*\\*\\*' + h + '\\*\\*\\s*$', 'gim'), h);
+      t = t.replace(new RegExp('^\\s*\\*\\*' + h + ':\\*\\*\\s*$', 'gim'), h);
+      t = t.replace(new RegExp('^\\s*\\*\\*' + h + '\\*\\*\\s*:?\\s*$', 'gim'), h);
+      t = t.replace(new RegExp('^\\s*' + h + '\\s*:\\s*$', 'gim'), h);
     });
     t = t.replace(/^\s*\*\*Sources used:\*\*\s*/gim, 'Sources used: ');
     t = t.replace(/^\s*\*\*Sources used\*\*:\s*/gim, 'Sources used: ');
     return t.trim();
   }
 
+  function findCivicsSectionHeaderMatches(normText) {
+    const canonMap = { background: 'Background', funding: 'Funding', record: 'Record', news: 'News' };
+    const re = /(^|\n)\s*(?:\*\*)?(Background|Funding|Record|News)(?:\*\*)?\s*:?\s*\n/gi;
+    const matches = [];
+    var m;
+    while ((m = re.exec(normText)) !== null) {
+      var key = canonMap[m[2].toLowerCase()];
+      if (key) {
+        matches.push({
+          key: key,
+          contentStart: m.index + m[0].length,
+          headerStart: m.index
+        });
+      }
+    }
+    return matches;
+  }
+
+  function stripCivicsSourcesFromChunk(chunk) {
+    if (!chunk) return '';
+    var idx = chunk.search(/(^|\n)\s*Sources used:\s*/im);
+    if (idx >= 0) return chunk.slice(0, idx).trim();
+    return chunk.trim();
+  }
+
+  function extractCivicsSectionBodies(normText) {
+    const order = ['Background', 'Funding', 'Record', 'News'];
+    const body = { Background: '', Funding: '', Record: '', News: '' };
+    if (!normText) return body;
+    var matches = findCivicsSectionHeaderMatches(normText);
+    if (!matches.length) return body;
+    for (var i = 0; i < matches.length; i++) {
+      var key = matches[i].key;
+      var contentEnd = i + 1 < matches.length ? matches[i + 1].headerStart : normText.length;
+      var chunk = normText.slice(matches[i].contentStart, contentEnd);
+      chunk = stripCivicsSourcesFromChunk(chunk);
+      body[key] = chunk;
+    }
+    return body;
+  }
+
   function isCivicsResponse(text) {
     const n = normalizeCivicsResearchText(text);
-    return /(?:^|\n)Background\s*\n/.test(n) && /(?:^|\n)Funding\s*\n/.test(n);
+    if (!n) return false;
+    var matches = findCivicsSectionHeaderMatches(n);
+    var hasB = matches.some(function(x) { return x.key === 'Background'; });
+    var hasF = matches.some(function(x) { return x.key === 'Funding'; });
+    return hasB && hasF;
   }
 
   function renderCivicsResponse(text) {
     const n = normalizeCivicsResearchText(text);
     const sections = ['Background', 'Funding', 'Record', 'News'];
+    const body = extractCivicsSectionBodies(n);
     let html = '<div class="civics-research-card">';
-    sections.forEach((section, i) => {
-      const next = sections[i + 1];
-      const regex = next
-        ? new RegExp('^' + section + '\\s*\\n([\\s\\S]*?)(?=^' + next + '\\s*$)', 'm')
-        : new RegExp('^' + section + '\\s*\\n([\\s\\S]*?)(?=^Sources used:|$)', 'm');
-      const match = n.match(regex);
-      const content = match ? match[1].trim() : 'No information available';
+    sections.forEach(function(section) {
+      var content = (body[section] || '').trim();
+      if (!content) content = 'No information available';
       html += '<div class="civics-research-section">' +
         '<div class="civics-research-section-title">' + escapeHtml(section) + '</div>' +
         '<div class="civics-research-section-body">' + escapeHtml(content) + '</div></div>';
