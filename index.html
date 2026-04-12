@@ -1756,6 +1756,14 @@
     .civics-slide-date-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--text2); }
     .civics-slide-date-row--election { color: var(--text); font-weight: 500; }
     .civics-slide-date-val { color: var(--text); font-size: 13px; }
+    .civics-slide-blurb {
+      font-size: 12px;
+      color: var(--text2);
+      margin-top: 10px;
+      line-height: 1.5;
+      font-style: italic;
+      padding: 0 1px;
+    }
     html.dark-mode .civics-carousel-slide {
       background: #252220;
       border-color: rgba(255,255,255,0.08);
@@ -1939,6 +1947,10 @@
     .civics-card-header { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
     .civics-card-name { font-size: 16px; font-weight: 600; color: var(--text); flex: 1; min-width: 0; }
     .civics-card-office { font-size: 13px; color: var(--text2); width: 100%; margin-top: 2px; }
+    .civics-card-roles { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; width: 100%; }
+    .civics-card-role-row { display: flex; gap: 6px; font-size: 13px; align-items: baseline; }
+    .civics-card-role-label { color: var(--muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; min-width: 72px; flex-shrink: 0; }
+    .civics-card-role-val { color: var(--text2); }
     .civics-card-actions {
       display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;
     }
@@ -1973,56 +1985,25 @@
     .civics-link-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
     .civics-card-research { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.06); }
     html.dark-mode .civics-card-research { border-top-color: rgba(255,255,255,0.08); }
-    .civics-fec-chart {
+    .civics-funding-chart {
+      display: flex; align-items: center; gap: 16px;
+      padding: 12px 0 8px; border-bottom: 1px solid rgba(192,122,74,0.1);
       margin-bottom: 12px;
-      padding: 8px 10px;
-      border-radius: 12px;
-      background: rgba(42,91,168,0.06);
-      border: 1px solid rgba(42,91,168,0.14);
     }
-    html.dark-mode .civics-fec-chart {
-      background: rgba(42,91,168,0.1);
-      border-color: rgba(90,143,216,0.22);
+    .civics-funding-donut {
+      width: 72px; height: 72px; border-radius: 50%; flex-shrink: 0;
+      position: relative;
     }
-    .civics-fec-chart-title {
-      font-size: 13px; font-weight: 600; color: var(--text);
-      margin-bottom: 8px; line-height: 1.25; white-space: nowrap;
-      overflow: hidden; text-overflow: ellipsis;
+    .civics-funding-donut-hole {
+      position: absolute; inset: 18px; border-radius: 50%;
+      background: var(--edge-bg, #fdf8f5);
     }
-    .civics-fec-cycle { font-weight: 500; color: var(--muted); }
-    .civics-fec-chart-row {
-      display: flex; align-items: center; gap: 6px;
-      flex-wrap: nowrap;
-    }
-    .civics-fec-donut-wrap {
-      flex: 0 0 auto;
-      width: 92px;
-      line-height: 0;
-    }
-    .civics-fec-donut { width: 92px; height: 92px; display: block; }
-    .civics-fec-donut-hole { fill: #fdf8f1; }
-    html.dark-mode .civics-fec-donut-hole { fill: #252220; }
-    .civics-fec-right {
-      flex: 1; min-width: 0;
-      display: flex; flex-direction: column; gap: 6px;
-      justify-content: center;
-    }
-    .civics-fec-legend { font-size: 12px; color: var(--text2); }
-    .civics-fec-legend-row {
-      display: flex; align-items: center; gap: 6px; margin-bottom: 3px;
-    }
-    .civics-fec-legend-row:last-child { margin-bottom: 0; }
-    .civics-fec-swatch { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
-    .civics-fec-legend-row span:nth-child(2) { flex: 1; min-width: 0; }
-    .civics-fec-legend-amt { flex-shrink: 0; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; font-size: 11px; }
-    .civics-fec-totals {
-      display: flex; flex-wrap: wrap; align-items: center;
-      gap: 2px 6px; margin: 0; padding-top: 6px;
-      border-top: 1px solid rgba(42,91,168,0.12);
-      font-size: 11px; color: var(--text2); font-variant-numeric: tabular-nums; line-height: 1.35;
-    }
-    .civics-fec-totals-sep { color: var(--muted); padding: 0 2px; user-select: none; }
-    html.dark-mode .civics-fec-totals { border-top-color: rgba(90,143,216,0.2); }
+    html.dark-mode .civics-funding-donut-hole { background: #252220; }
+    .civics-funding-legend { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 0; }
+    .civics-funding-legend-row { display: flex; align-items: center; gap: 7px; font-size: 13px; }
+    .civics-funding-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .civics-funding-legend-label { color: var(--text2); min-width: 56px; }
+    .civics-funding-legend-val { color: var(--text); font-weight: 500; font-variant-numeric: tabular-nums; }
     .civics-card-notes { margin-top: 12px; }
     .civics-card-notes-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px; }
     .civics-card-notes textarea {
@@ -5705,7 +5686,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.13.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.14.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -8660,31 +8641,31 @@
   const CIVIC_IL_EVENTS = [
     // ── 2026 Primary ──────────────────────────────────────────────
     { title: 'Last Day: Early Voting — IL Primary',          date: '2026-03-16', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
-    { title: '🗳️ Illinois Primary Election Day',             date: '2026-03-17', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary' },
+    { title: '🗳️ Illinois Primary Election Day',             date: '2026-03-17', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees who will appear on the November general election ballot.' },
     // ── 2026 General ──────────────────────────────────────────────
     { title: 'Voter Registration Deadline — General',        date: '2026-10-06', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
     { title: 'Early Voting Opens — IL General Election',     date: '2026-10-19', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
     { title: 'Mail Ballot Request Deadline — General',       date: '2026-10-29', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
     { title: 'Last Day: Early Voting — IL General',          date: '2026-11-02', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
-    { title: '🗳️ Illinois General Election Day',             date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general' },
+    { title: '🗳️ Illinois General Election Day',             date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for U.S. Senate, U.S. House, Governor, and other statewide offices.' },
     // ── 2027 Consolidated Primary ─────────────────────────────────
     { title: 'Voter Registration Deadline — Consol. Primary', date: '2027-01-26', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
     { title: 'Last Day: Early Voting — Consol. Primary',     date: '2027-02-22', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
-    { title: '🗳️ IL Consolidated Primary Election',          date: '2027-02-23', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: false },
+    { title: '🗳️ IL Consolidated Primary Election',          date: '2027-02-23', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: false, civicsBlurb: 'Determines nominees for local offices including city council, school board, and township positions.' },
     // ── 2027 Consolidated Election ────────────────────────────────
     { title: 'Voter Registration Deadline — Consol. Election', date: '2027-03-09', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
     { title: 'Last Day: Early Voting — Consol. Election',    date: '2027-04-05', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
-    { title: '🗳️ IL Consolidated Election Day',              date: '2027-04-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: false },
+    { title: '🗳️ IL Consolidated Election Day',              date: '2027-04-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: false, civicsBlurb: 'Voters choose candidates for local offices including municipal, township, and school board seats.' },
     // ── 2028 Presidential Primary ─────────────────────────────────
     { title: 'Voter Registration Deadline — Pres. Primary',  date: '2028-02-22', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
     { title: 'Early Voting Opens — Presidential Primary',    date: '2028-02-10', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
     { title: 'Last Day: Early Voting — Pres. Primary',       date: '2028-03-20', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
-    { title: '🗳️ Illinois Presidential Primary',             date: '2028-03-21', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary' },
+    { title: '🗳️ Illinois Presidential Primary',             date: '2028-03-21', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Illinois voters select their preferred presidential candidate and delegates for each party\'s national convention.' },
     // ── 2028 Presidential General ─────────────────────────────────
     { title: 'Voter Registration Deadline — Pres. General',  date: '2028-10-10', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
     { title: 'Early Voting Opens — Presidential General',    date: '2028-09-28', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
     { title: 'Last Day: Early Voting — Pres. General',       date: '2028-11-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
-    { title: '🗳️ Presidential General Election',             date: '2028-11-07', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general' },
+    { title: '🗳️ Presidential General Election',             date: '2028-11-07', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose the President and Vice President, along with U.S. Senate, U.S. House, and state offices.' },
   ];
 
   function getCivicEvents() {
@@ -9024,11 +9005,14 @@
           '<span class="civics-slide-date-val">' + escapeHtml(val) + '</span></div>';
       }).join('');
 
+      const blurb = election.civicsBlurb || '';
+
       return '<div class="civics-carousel-slide" data-civics-slide-index="' + slideIdx + '">' +
         '<div class="civics-slide-hero">' +
         '<div class="civics-slide-title">' + escapeHtml(titleClean) + '</div>' +
         '<div class="civics-slide-days">' + escapeHtml(daysText) + '</div>' +
-        '<div class="civics-slide-dates">' + dateRows + '</div></div>' +
+        '<div class="civics-slide-dates">' + dateRows + '</div>' +
+        (blurb ? '<div class="civics-slide-blurb">' + escapeHtml(blurb) + '</div>' : '') + '</div>' +
         '<div class="civics-slide-zone-b"></div>' +
         '<div class="civics-slide-zone-c"></div></div>';
     }).join('');
@@ -9379,62 +9363,59 @@
     return '$' + Math.round(Number(n)).toLocaleString('en-US');
   }
 
-  function renderCivicsFecFinanceChartHtml(fin) {
-    if (!fin || typeof fin.totalRaised !== 'number' || fin.totalRaised <= 0) return '';
-    var cy = fin.electionCycle || '';
-    var ind = fin.individualContributions || 0;
-    var pac = fin.pacContributions || 0;
-    var self = fin.selfFunding || 0;
-    var raised = fin.totalRaised || 0;
-    var other = Math.max(0, raised - ind - pac - self);
-    var slices = [];
-    if (ind > 0) slices.push({ label: 'Personal', v: ind, c: '#2a5ba8' });
-    if (pac > 0) slices.push({ label: 'PAC', v: pac, c: '#c07a4a' });
-    if (self > 0) slices.push({ label: 'Self-funded', v: self, c: '#64748b' });
-    if (other > 0) slices.push({ label: 'Other', v: other, c: '#94a3b8' });
-    if (!slices.length) return '';
-    var total = slices.reduce(function(a, s) { return a + s.v; }, 0);
-    if (total <= 0) return '';
-    var cx = 100, cySvg = 100, rOut = 78, rIn = 44;
-    var paths = [];
-    if (slices.length === 1) {
-      paths.push(
-        '<circle cx="' + cx + '" cy="' + cySvg + '" r="' + rOut + '" fill="' + slices[0].c + '"/>' +
-        '<circle cx="' + cx + '" cy="' + cySvg + '" r="' + rIn + '" class="civics-fec-donut-hole"/>'
-      );
-    } else {
-      var a = -Math.PI / 2;
-      for (var i = 0; i < slices.length; i++) {
-        var sweep = (slices[i].v / total) * 2 * Math.PI;
-        var a1 = a + sweep;
-        var x0 = cx + rOut * Math.cos(a), y0 = cySvg + rOut * Math.sin(a);
-        var x1 = cx + rOut * Math.cos(a1), y1 = cySvg + rOut * Math.sin(a1);
-        var x2 = cx + rIn * Math.cos(a1), y2 = cySvg + rIn * Math.sin(a1);
-        var x3 = cx + rIn * Math.cos(a), y3 = cySvg + rIn * Math.sin(a);
-        var large = sweep > Math.PI ? 1 : 0;
-        paths.push('<path fill="' + slices[i].c + '" d="M ' + x0 + ' ' + y0 + ' A ' + rOut + ' ' + rOut + ' 0 ' + large + ' 1 ' + x1 + ' ' + y1 + ' L ' + x2 + ' ' + y2 + ' A ' + rIn + ' ' + rIn + ' 0 ' + large + ' 0 ' + x3 + ' ' + y3 + ' Z" />');
-        a = a1;
-      }
-    }
-    var leg = slices.map(function(s) {
-      return '<div class="civics-fec-legend-row"><span class="civics-fec-swatch" style="background:' + s.c + '"></span>' +
-        '<span>' + escapeHtml(s.label) + '</span><span class="civics-fec-legend-amt">' + formatCivicsUSD(s.v) + '</span></div>';
-    }).join('');
-    var titleLine = 'Cashflow per FEC' + (cy ? ' <span class="civics-fec-cycle">· ' + escapeHtml(String(cy)) + '</span>' : '');
-    return '<div class="civics-fec-chart" role="img" aria-label="FEC cashflow, cycle ' + escapeHtml(String(cy || '')) + '">' +
-      '<div class="civics-fec-chart-title">' + titleLine + '</div>' +
-      '<div class="civics-fec-chart-row">' +
-      '<div class="civics-fec-donut-wrap"><svg class="civics-fec-donut" viewBox="0 0 200 200" aria-hidden="true">' + paths.join('') + '</svg></div>' +
-      '<div class="civics-fec-right">' +
-      '<div class="civics-fec-legend">' + leg + '</div>' +
-      '<div class="civics-fec-totals">' +
-      '<span>Raised ' + formatCivicsUSD(fin.totalRaised) + '</span><span class="civics-fec-totals-sep">·</span>' +
-      '<span>Spent ' + formatCivicsUSD(fin.totalSpent) + '</span><span class="civics-fec-totals-sep">·</span>' +
-      '<span>Cash ' + formatCivicsUSD(fin.cashOnHand) + '</span></div></div></div></div>';
+  function renderFundingChart(t) {
+    if (!t) return '';
+    var personal = Math.max(0, Number(t.individual) || 0);
+    var pac = Math.max(0, Number(t.pac) || 0);
+    var selfAmt = Math.max(0, Number(t.selfFunding) || 0);
+    var total = personal + pac + selfAmt;
+    if (total === 0) return '';
+
+    var pPct = Math.floor((personal / total) * 100);
+    var pacPct = Math.floor((pac / total) * 100);
+    var selfPct = Math.max(0, 100 - pPct - pacPct);
+
+    var stops = [];
+    var cursor = 0;
+    if (pPct > 0) { stops.push('#4a90d9 ' + cursor + '% ' + (cursor + pPct) + '%'); cursor += pPct; }
+    if (pacPct > 0) { stops.push('#e07070 ' + cursor + '% ' + (cursor + pacPct) + '%'); cursor += pacPct; }
+    if (selfPct > 0 && selfAmt > 0) { stops.push('#c0a060 ' + cursor + '% 100%'); }
+
+    if (!stops.length) return '';
+
+    var gradient = 'conic-gradient(from 0deg, ' + stops.join(', ') + ')';
+
+    var fmt = function(n) {
+      if (!n) return '$0';
+      if (n >= 1000000) return '$' + (n / 1000000).toFixed(1) + 'M';
+      if (n >= 1000) return '$' + Math.round(n / 1000) + 'K';
+      return '$' + Math.round(n);
+    };
+
+    return '<div class="civics-funding-chart" role="img" aria-label="Campaign funding breakdown">' +
+      '<div class="civics-funding-donut" style="background:' + gradient + '"><div class="civics-funding-donut-hole"></div></div>' +
+      '<div class="civics-funding-legend">' +
+      (personal > 0 && pPct > 0 ? '<div class="civics-funding-legend-row"><span class="civics-funding-dot" style="background:#4a90d9"></span><span class="civics-funding-legend-label">Personal</span><span class="civics-funding-legend-val">' + fmt(personal) + ' (' + pPct + '%)</span></div>' : '') +
+      (pac > 0 && pacPct > 0 ? '<div class="civics-funding-legend-row"><span class="civics-funding-dot" style="background:#e07070"></span><span class="civics-funding-legend-label">PAC</span><span class="civics-funding-legend-val">' + fmt(pac) + ' (' + pacPct + '%)</span></div>' : '') +
+      (selfAmt > 0 && selfPct > 0 ? '<div class="civics-funding-legend-row"><span class="civics-funding-dot" style="background:#c0a060"></span><span class="civics-funding-legend-label">Self</span><span class="civics-funding-legend-val">' + fmt(selfAmt) + ' (' + selfPct + '%)</span></div>' : '') +
+      '</div></div>';
   }
 
-  function mergeCivicsResearchDisplay(fecFinance, proseHtml) {
-    var chart = fecFinance ? renderCivicsFecFinanceChartHtml(fecFinance) : '';
+  function normalizeCivicsFecTotalsFromData(data) {
+    if (!data || typeof data !== 'object') return null;
+    if (data.fecTotals && typeof data.fecTotals === 'object') return data.fecTotals;
+    if (data.fecFinance && typeof data.fecFinance === 'object' && data.fecFinance.individualContributions != null) {
+      return {
+        individual: data.fecFinance.individualContributions,
+        pac: data.fecFinance.pacContributions,
+        selfFunding: data.fecFinance.selfFunding
+      };
+    }
+    return null;
+  }
+
+  function mergeCivicsResearchDisplay(fecTotals, proseHtml) {
+    var chart = fecTotals ? renderFundingChart(fecTotals) : '';
     return chart + proseHtml;
   }
 
@@ -9456,7 +9437,7 @@
         if (cached) {
           const parsed = JSON.parse(cached);
           if (parsed && parsed.ts && parsed.html && (Date.now() - parsed.ts) < 7 * 24 * 60 * 60 * 1000) {
-            researchEl.innerHTML = mergeCivicsResearchDisplay(parsed.fecFinance || null, parsed.html);
+            researchEl.innerHTML = mergeCivicsResearchDisplay(parsed.fecTotals || normalizeCivicsFecTotalsFromData(parsed), parsed.html);
             researchEl.setAttribute('data-loaded', 'true');
             card.classList.add('expanded');
             var sum = card.querySelector('.civics-card-summary');
@@ -9494,15 +9475,15 @@
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       const reply = data.reply || '';
-      const fecFinance = data.fecFinance && typeof data.fecFinance === 'object' ? data.fecFinance : null;
+      const fecTotals = normalizeCivicsFecTotalsFromData(data);
       const replyNorm = normalizeCivicsResearchText(reply);
       const html = isCivicsResponse(replyNorm)
         ? renderCivicsResponse(replyNorm)
         : '<div class="civics-research-section-body">' + escapeHtml(String(reply || '')).replace(/\n/g, '<br>') + '</div>';
-      researchEl.innerHTML = mergeCivicsResearchDisplay(fecFinance, html);
+      researchEl.innerHTML = mergeCivicsResearchDisplay(fecTotals, html);
       researchEl.setAttribute('data-loaded', 'true');
       try {
-        localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), html: html, fecFinance: fecFinance }));
+        localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), html: html, fecTotals: fecTotals }));
       } catch (_) {}
     } catch (err) {
       researchEl.querySelectorAll('.civics-research-updating').forEach(function(el) { el.remove(); });
@@ -9557,6 +9538,7 @@
     const cid = c.candidate_id || c.candidateId || c.name || '';
     const name = c.name || '';
     const office = c.office || '';
+    const currentRole = String(c.currentRole != null ? c.currentRole : (c.current_role != null ? c.current_role : '')).trim();
     const party = c.party || '';
     const level = (c.level || '').toLowerCase();
 
@@ -9586,7 +9568,10 @@
       '<div class="civics-card-summary" tabindex="0" role="button" aria-expanded="false" aria-label="Show or hide details for ' + escapeHtml(name) + '">' +
       '<div class="civics-card-header">' +
       '<span class="civics-card-name">' + escapeHtml(name) + '</span>' + partyChip + '</div>' +
-      (office ? '<div class="civics-card-office">' + escapeHtml(office) + '</div>' : '') +
+      '<div class="civics-card-roles">' +
+      '<span class="civics-card-role-row"><span class="civics-card-role-label">Running for</span><span class="civics-card-role-val">' + escapeHtml(office || '—') + '</span></span>' +
+      (currentRole ? '<span class="civics-card-role-row"><span class="civics-card-role-label">Currently</span><span class="civics-card-role-val">' + escapeHtml(currentRole) + '</span></span>' : '') +
+      '</div>' +
       '<div class="civics-card-expand-hint">Tap to expand · links, Ask Blathers, notes</div>' +
       summaryChevron + '</div>' +
       '<div class="civics-card-body">' +
