@@ -1823,9 +1823,30 @@
       border: 1px solid rgba(0,0,0,0.06);
       padding: 14px 16px; margin-bottom: 10px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-      cursor: pointer; transition: background 0.15s;
+      cursor: default; transition: background 0.15s;
     }
-    .civics-card:active { background: rgba(192,122,74,0.04); }
+    .civics-card-summary {
+      cursor: pointer;
+      position: relative;
+      padding-right: 28px;
+      border-radius: 8px;
+      margin: -4px;
+      padding: 4px 28px 4px 4px;
+    }
+    .civics-card-summary:active { background: rgba(192,122,74,0.06); }
+    .civics-card-chevron {
+      position: absolute; right: 2px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      display: flex; align-items: center;
+      transition: transform 0.2s ease;
+      pointer-events: none;
+    }
+    .civics-card.expanded .civics-card-chevron {
+      transform: translateY(-50%) rotate(180deg);
+    }
+    .civics-card-body { display: none; padding-top: 4px; }
+    .civics-card.expanded .civics-card-body { display: block; }
     .civics-card.expanded { padding-bottom: 18px; }
     .civics-card-header { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
     .civics-card-name { font-size: 16px; font-weight: 600; color: var(--text); flex: 1; min-width: 0; }
@@ -1850,7 +1871,7 @@
       align-items: center;
     }
     .civics-card-links-expanded {
-      display: none; flex-wrap: wrap; gap: 8px; margin-top: 10px;
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
       align-items: center;
     }
     .civics-link-btn {
@@ -5508,7 +5529,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.10.8';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.12.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -8364,18 +8385,18 @@
 
   // McLean County, IL — key civic/election dates through 2028 presidential cycle
   // Sources: IL State Board of Elections (elections.il.gov) + McLean County Clerk
-  // civicsUseFetchedCandidates: true = carousel slide shows the list from getCandidatesForElection
-  // (federal + Illinois state general races). false = primaries, consolidated, local — use manual add / Blathers.
+  // civicsUseFetchedCandidates: true = show auto list from getCandidatesForElection for this slide
+  // civicsElectionKind: general | primary — passed to API (Wikipedia + Claude extract for that ballot type)
   const CIVIC_IL_EVENTS = [
     // ── 2026 Primary ──────────────────────────────────────────────
     { title: 'Last Day: Early Voting — IL Primary',          date: '2026-03-16', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
-    { title: '🗳️ Illinois Primary Election Day',             date: '2026-03-17', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: false },
+    { title: '🗳️ Illinois Primary Election Day',             date: '2026-03-17', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary' },
     // ── 2026 General ──────────────────────────────────────────────
     { title: 'Voter Registration Deadline — General',        date: '2026-10-06', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
     { title: 'Early Voting Opens — IL General Election',     date: '2026-10-19', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
     { title: 'Mail Ballot Request Deadline — General',       date: '2026-10-29', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
     { title: 'Last Day: Early Voting — IL General',          date: '2026-11-02', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
-    { title: '🗳️ Illinois General Election Day',             date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: true },
+    { title: '🗳️ Illinois General Election Day',             date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general' },
     // ── 2027 Consolidated Primary ─────────────────────────────────
     { title: 'Voter Registration Deadline — Consol. Primary', date: '2027-01-26', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
     { title: 'Last Day: Early Voting — Consol. Primary',     date: '2027-02-22', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
@@ -8388,12 +8409,12 @@
     { title: 'Voter Registration Deadline — Pres. Primary',  date: '2028-02-22', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
     { title: 'Early Voting Opens — Presidential Primary',    date: '2028-02-10', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
     { title: 'Last Day: Early Voting — Pres. Primary',       date: '2028-03-20', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
-    { title: '🗳️ Illinois Presidential Primary',             date: '2028-03-21', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: false },
+    { title: '🗳️ Illinois Presidential Primary',             date: '2028-03-21', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary' },
     // ── 2028 Presidential General ─────────────────────────────────
     { title: 'Voter Registration Deadline — Pres. General',  date: '2028-10-10', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
     { title: 'Early Voting Opens — Presidential General',    date: '2028-09-28', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
     { title: 'Last Day: Early Voting — Pres. General',       date: '2028-11-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
-    { title: '🗳️ Presidential General Election',             date: '2028-11-07', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: true },
+    { title: '🗳️ Presidential General Election',             date: '2028-11-07', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general' },
   ];
 
   function getCivicEvents() {
@@ -8405,12 +8426,62 @@
   }
 
   // ── CIVICS SCREEN ─────────────────────────────────────────────────
-  let civicsCandidateCache = null;
   let civicsPartyFilter = 'all';
   const CIVICS_CANDIDATE_CACHE_KEY = 'shasta_civics_candidates';
   const CIVICS_CANDIDATE_CACHE_TTL = 24 * 60 * 60 * 1000;
   const CIVICS_NOTES_KEY = 'shasta_civics_notes';
   const POLLING_URL = 'https://www.mcleancountyil.gov/1593/2026-Elections';
+
+  function readCivicsStorageState() {
+    try {
+      var raw = localStorage.getItem(CIVICS_CANDIDATE_CACHE_KEY);
+      if (!raw) return { manual: [], buckets: {} };
+      var o = JSON.parse(raw);
+      if (Array.isArray(o.manual) && o.buckets && typeof o.buckets === 'object') return o;
+      if (o.data && o.data.candidates) {
+        var manual = o.data.candidates.filter(function(c) { return c.source === 'manual'; });
+        var auto = o.data.candidates.filter(function(c) { return c.source !== 'manual'; });
+        var buckets = {};
+        if (auto.length) {
+          buckets['general|2026-11-03'] = { candidates: auto.slice(), fetchedAt: o.data.fetchedAt || new Date().toISOString() };
+        }
+        return { manual: manual, buckets: buckets };
+      }
+      return { manual: [], buckets: {} };
+    } catch (_) {
+      return { manual: [], buckets: {} };
+    }
+  }
+
+  function writeCivicsStorageState(state) {
+    localStorage.setItem(CIVICS_CANDIDATE_CACHE_KEY, JSON.stringify({
+      ts: Date.now(),
+      manual: state.manual || [],
+      buckets: state.buckets || {}
+    }));
+  }
+
+  function getCivicsBucketId(elEv) {
+    if (!elEv || elEv.civicsUseFetchedCandidates !== true) return null;
+    var kind = elEv.civicsElectionKind || 'general';
+    if (kind !== 'primary' && kind !== 'general') kind = 'general';
+    var date = String(elEv.date || '').slice(0, 10);
+    return kind + '|' + date;
+  }
+
+  function getMergedCandidatesForSlide(slideIndex) {
+    var group = civicsElectionGroups[slideIndex];
+    var elEv = group ? group.electionEvent : null;
+    var st = readCivicsStorageState();
+    var auto = [];
+    var bid = getCivicsBucketId(elEv);
+    if (bid && st.buckets[bid]) auto = (st.buckets[bid].candidates || []).slice();
+    var merged = auto.slice();
+    (st.manual || []).forEach(function(m) {
+      if (!merged.some(function(c) { return (c.name || '').toLowerCase() === (m.name || '').toLowerCase(); })) merged.push(m);
+    });
+    return merged;
+  }
 
   function getNextCivicEvent() {
     const upcoming = getCivicEvents();
@@ -8471,7 +8542,7 @@
     if (elEv.civicsUseFetchedCandidates === false) return false;
     const t = (elEv.title || '').replace(/[\u{1F000}-\u{1FFFF}]|[\u2600-\u27FF]/gu, '').trim().toLowerCase();
     if (t.indexOf('consolidated') !== -1) return false;
-    if (t.indexOf('primary') !== -1) return false;
+    if (t.indexOf('primary') !== -1) return true;
     return t.indexOf('general') !== -1;
   }
 
@@ -8530,7 +8601,7 @@
   }
 
   function refreshCivicsCarousel() {
-    renderCivicsScreen();
+    renderCivicsScreen(civicsCurrentSlide);
   }
 
   function toggleCivicsManualAdd() {
@@ -8544,22 +8615,13 @@
     const party = document.getElementById('civicsManualParty').value || 'Nonpartisan';
     if (!name || !office) return;
 
-    const cache = civicsCandidateCache || { candidates: [] };
-    const existing = cache.candidates || [];
-    if (existing.some(function(c) { return (c.name || '').toLowerCase() === name.toLowerCase(); })) {
+    var st = readCivicsStorageState();
+    if (st.manual.some(function(c) { return (c.name || '').toLowerCase() === name.toLowerCase(); })) {
       showDocsToast('Candidate already in list');
       return;
     }
-    existing.push({ name: name, office: office, party: party, level: 'local', source: 'manual' });
-    civicsCandidateCache = { candidates: existing, fetchedAt: cache.fetchedAt || new Date().toISOString() };
-
-    try {
-      const raw = localStorage.getItem(CIVICS_CANDIDATE_CACHE_KEY);
-      const stored = raw ? JSON.parse(raw) : { ts: Date.now(), data: { candidates: [], fetchedAt: new Date().toISOString() } };
-      stored.data = civicsCandidateCache;
-      stored.ts = Date.now();
-      localStorage.setItem(CIVICS_CANDIDATE_CACHE_KEY, JSON.stringify(stored));
-    } catch (_) {}
+    st.manual.push({ name: name, office: office, party: party, level: 'local', source: 'manual' });
+    writeCivicsStorageState(st);
 
     document.getElementById('civicsManualName').value = '';
     document.getElementById('civicsManualOffice').value = '';
@@ -8568,19 +8630,28 @@
   }
 
   async function loadCivicsCandidates(forceRefresh) {
-    renderCivicsScreen();
-    if (!forceRefresh) {
+    const slideKeep = civicsCurrentSlide;
+    renderCivicsScreen(slideKeep);
+
+    const group = civicsElectionGroups[civicsCurrentSlide];
+    const elEv = group ? group.electionEvent : null;
+    const bucketId = getCivicsBucketId(elEv);
+    if (!forceRefresh && bucketId) {
       try {
-        const raw = localStorage.getItem(CIVICS_CANDIDATE_CACHE_KEY);
-        if (raw) {
-          const { ts, data } = JSON.parse(raw);
-          if (Date.now() - ts < CIVICS_CANDIDATE_CACHE_TTL) {
-            civicsCandidateCache = data;
-            renderCivicsScreen();
+        var stSkip = readCivicsStorageState();
+        var bSkip = stSkip.buckets[bucketId];
+        if (bSkip && bSkip.fetchedAt) {
+          var tSkip = Date.parse(bSkip.fetchedAt);
+          if (!isNaN(tSkip) && (Date.now() - tSkip) < CIVICS_CANDIDATE_CACHE_TTL) {
             return;
           }
         }
       } catch (_) {}
+    }
+    if (!bucketId) {
+      showDocsToast('Add candidates manually for this election');
+      renderCivicsZoneBC(civicsCurrentSlide);
+      return;
     }
 
     const zoneC = document.getElementById('civicsZoneC');
@@ -8588,34 +8659,31 @@
 
     try {
       const user = localStorage.getItem('shasta_user');
-      const res = await fetch(apiUrlWithUser(API_URL, '&action=getCandidatesForElection&user=' + encodeURIComponent(user)), { redirect: 'follow' });
+      const electionYear = parseInt(String(elEv.date || '').slice(0, 4), 10);
+      const kind = elEv.civicsElectionKind || 'general';
+      const y = isNaN(electionYear) ? new Date().getFullYear() : electionYear;
+      const q = '&action=getCandidatesForElection&electionKind=' + encodeURIComponent(kind) +
+        '&electionYear=' + encodeURIComponent(String(y)) +
+        '&user=' + encodeURIComponent(user);
+      const res = await fetch(apiUrlWithUser(API_URL, q), { redirect: 'follow' });
       const data = await res.json();
       const fetched = data.candidates || [];
-      const existing = civicsCandidateCache || { candidates: [] };
-      const manualOnes = (existing.candidates || []).filter(function(c) { return c.source === 'manual'; });
-      const merged = fetched.slice();
-      manualOnes.forEach(function(m) {
-        if (!merged.some(function(c) { return (c.name || '').toLowerCase() === (m.name || '').toLowerCase(); })) {
-          merged.push(m);
-        }
-      });
-      civicsCandidateCache = { candidates: merged, fetchedAt: data.fetchedAt || new Date().toISOString() };
-      localStorage.setItem(CIVICS_CANDIDATE_CACHE_KEY, JSON.stringify({ ts: Date.now(), data: civicsCandidateCache }));
-      renderCivicsScreen();
+      var st = readCivicsStorageState();
+      st.buckets[bucketId] = { candidates: fetched.slice(), fetchedAt: data.fetchedAt || new Date().toISOString() };
+      writeCivicsStorageState(st);
+      renderCivicsScreen(slideKeep);
       showDocsToast('Civics data updated');
     } catch (err) {
-      const existing = civicsCandidateCache || { candidates: [] };
-      const manualOnes = (existing.candidates || []).filter(function(c) { return c.source === 'manual'; });
-      civicsCandidateCache = { candidates: manualOnes, fetchedAt: new Date().toISOString() };
-      renderCivicsScreen();
+      renderCivicsScreen(slideKeep);
       showDocsToast('Failed to load candidates', true);
     }
   }
 
   let civicsCurrentSlide = 0;
   let civicsElectionGroups = [];
+  let civicsSuppressCardSummaryClickUntil = 0;
 
-  function renderCivicsCarousel(groups) {
+  function renderCivicsCarousel(groups, preserveSlide) {
     const track = document.getElementById('civicsCarouselTrack');
     const carousel = document.getElementById('civicsCarousel');
     if (!track || !carousel) return;
@@ -8625,6 +8693,11 @@
       return;
     }
     carousel.style.display = '';
+
+    const targetSlide = typeof preserveSlide === 'number' && preserveSlide >= 0
+      ? Math.min(preserveSlide, groups.length - 1)
+      : 0;
+    civicsCurrentSlide = targetSlide;
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -8656,8 +8729,7 @@
         '<div class="civics-slide-dates">' + dateRows + '</div></div>';
     }).join('');
 
-    civicsCurrentSlide = 0;
-    track.style.transform = 'translateX(0)';
+    track.style.transform = 'translateX(-' + (civicsCurrentSlide * 100) + '%)';
 
     carousel._civicsGroups = groups;
     carousel._civicsTrack = track;
@@ -8673,7 +8745,7 @@
       } else {
         indicator.style.display = 'flex';
         if (dotsEl) {
-          dotsEl.innerHTML = groups.map((_, i) => '<div class="civics-carousel-dot' + (i === 0 ? ' active' : '') + '" data-index="' + i + '"></div>').join('');
+          dotsEl.innerHTML = groups.map((_, i) => '<div class="civics-carousel-dot' + (i === civicsCurrentSlide ? ' active' : '') + '" data-index="' + i + '"></div>').join('');
         }
         if (hint) {
           hint.classList.remove('hidden');
@@ -8683,7 +8755,7 @@
       }
     }
 
-    renderCivicsZoneBC(0);
+    renderCivicsZoneBC(civicsCurrentSlide);
   }
 
   function updateCivicsCarouselEdges() {
@@ -8698,32 +8770,91 @@
   }
 
   function setupCivicsCarouselSwipe() {
+    const screen = document.getElementById('civicsScreen');
     const carousel = document.getElementById('civicsCarousel');
     const track = document.getElementById('civicsCarouselTrack');
-    if (!carousel || !track || !carousel._civicsGroups) return;
+    if (!screen || !carousel || !track || !carousel._civicsGroups) return;
+    if (screen._civicsPageSwipeBound) return;
+    screen._civicsPageSwipeBound = true;
 
-    let startX = 0;
-    carousel.ontouchstart = function(e) {
-      startX = e.touches[0].clientX;
-    };
-    carousel.ontouchend = function(e) {
-      const endX = e.changedTouches[0].clientX;
-      const delta = startX - endX;
-      const groups = carousel._civicsGroups;
-      if (delta > 40 && civicsCurrentSlide < groups.length - 1) {
+    var startX = 0;
+    var startY = 0;
+    var swipeAxis = null;
+
+    function civicsSwipeInteractive(el) {
+      return el && el.closest && el.closest('button, a, input, textarea, select, label');
+    }
+
+    function applySlideDelta(dx) {
+      var groups = carousel._civicsGroups;
+      if (!groups || groups.length < 2) return;
+      if (dx > 0 && civicsCurrentSlide < groups.length - 1) {
         civicsCurrentSlide++;
-        track.style.transform = 'translateX(-' + (civicsCurrentSlide * 100) + '%)';
-        document.getElementById('civicsCarouselHint') && document.getElementById('civicsCarouselHint').classList.add('hidden');
-        updateCivicsCarouselEdges();
-        renderCivicsZoneBC(civicsCurrentSlide);
-      } else if (delta < -40 && civicsCurrentSlide > 0) {
+      } else if (dx < 0 && civicsCurrentSlide > 0) {
         civicsCurrentSlide--;
-        track.style.transform = 'translateX(-' + (civicsCurrentSlide * 100) + '%)';
-        document.getElementById('civicsCarouselHint') && document.getElementById('civicsCarouselHint').classList.add('hidden');
-        updateCivicsCarouselEdges();
-        renderCivicsZoneBC(civicsCurrentSlide);
+      } else {
+        return;
       }
-    };
+      civicsSuppressCardSummaryClickUntil = Date.now() + 420;
+      track.style.transform = 'translateX(-' + (civicsCurrentSlide * 100) + '%)';
+      var hintEl = document.getElementById('civicsCarouselHint');
+      if (hintEl) hintEl.classList.add('hidden');
+      updateCivicsCarouselEdges();
+      renderCivicsZoneBC(civicsCurrentSlide);
+    }
+
+    screen.addEventListener('touchstart', function(e) {
+      if (e.touches.length !== 1) return;
+      if (civicsSwipeInteractive(e.target)) {
+        swipeAxis = 'skip';
+        return;
+      }
+      swipeAxis = null;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    }, { passive: true });
+
+    screen.addEventListener('touchmove', function(e) {
+      if (swipeAxis === 'skip' || e.touches.length !== 1) return;
+      var x = e.touches[0].clientX;
+      var y = e.touches[0].clientY;
+      var dx = x - startX;
+      var dy = y - startY;
+      if (swipeAxis === null) {
+        if (Math.abs(dx) < 12 && Math.abs(dy) < 12) return;
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 14) {
+          swipeAxis = 'h';
+        } else if (Math.abs(dy) >= Math.abs(dx)) {
+          swipeAxis = 'v';
+        }
+      }
+      if (swipeAxis === 'h') e.preventDefault();
+    }, { passive: false });
+
+    screen.addEventListener('touchend', function(e) {
+      if (swipeAxis === 'skip') {
+        swipeAxis = null;
+        return;
+      }
+      if (swipeAxis !== 'h') {
+        swipeAxis = null;
+        return;
+      }
+      var endX = e.changedTouches[0].clientX;
+      var endY = e.changedTouches[0].clientY;
+      var dx = startX - endX;
+      var dy = startY - endY;
+      swipeAxis = null;
+      if (Math.abs(dx) < 48 || Math.abs(dx) <= Math.abs(dy)) return;
+      applySlideDelta(dx);
+    }, { passive: true });
+
+    screen.addEventListener('touchcancel', function() {
+      swipeAxis = null;
+    }, { passive: true });
+
+    carousel.ontouchstart = null;
+    carousel.ontouchend = null;
   }
 
   function renderCivicsZoneBC(slideIndex) {
@@ -8734,8 +8865,7 @@
     const group = civicsElectionGroups[slideIndex];
     const elEv = group ? group.electionEvent : null;
 
-    const cache = civicsCandidateCache || { candidates: [] };
-    const allList = cache.candidates || [];
+    const allList = getMergedCandidatesForSlide(slideIndex);
     const useFetched = civicsSlideShowsFetchedCandidateList(elEv);
     const manualOnly = allList.filter(function(c) { return c.source === 'manual'; });
     const rawPool = useFetched ? allList.slice() : manualOnly.slice();
@@ -8784,7 +8914,7 @@
           '<div class="civics-ask-inline-text">The auto-loaded list is for Illinois and presidential general elections. For this date, add candidates with "+ Add candidate manually" below, or ask Blathers for an overview. You can still refresh the general-election list for when you swipe to that carousel slide.</div>' +
           '<button type="button" class="civics-refresh-btn civics-get-candidates-inline" onclick="loadCivicsCandidates(true)" title="Refresh general-election list" aria-label="Refresh general-election list">' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>' +
-          '<span>Refresh general list</span></button>' +
+          '<span>Refresh candidates</span></button>' +
           '<button type="button" class="civics-ask-blathers-btn" id="civicsAskElectionBtn" onclick="civicsAskBlathersAboutElectionInline()">' +
           '\uD83E\uDD89 Ask Blathers about this election</button>' +
           '<div class="civics-ask-inline-response" id="civicsAskInlineResponse"></div></div>';
@@ -8831,16 +8961,27 @@
     zoneC.innerHTML = nextCandidates.map(c => renderCivicsCard(c, electionName)).join('');
     zoneC.querySelectorAll('.civics-card').forEach((card, i) => {
       const c = nextCandidates[i];
-      const notesEl = card.querySelector('.civics-card-notes');
-      const linksExpanded = card.querySelector('.civics-card-links-expanded');
-      const researchEl = card.querySelector('.civics-card-research');
-      card.onclick = (e) => {
-        if (e.target.closest('.civics-card-actions') || e.target.closest('.civics-link-btn') || e.target.closest('.civics-ask-blathers-btn') || e.target.closest('textarea')) return;
-        const isExp = card.classList.toggle('expanded');
-        if (notesEl) notesEl.style.display = isExp ? 'block' : 'none';
-        if (linksExpanded) linksExpanded.style.display = isExp ? 'flex' : 'none';
-        if (researchEl && researchEl.getAttribute('data-loaded') === 'true') researchEl.style.display = isExp ? 'block' : 'none';
-      };
+      const summary = card.querySelector('.civics-card-summary');
+      function syncCivicsCardExpanded() {
+        const on = card.classList.contains('expanded');
+        if (summary) summary.setAttribute('aria-expanded', on ? 'true' : 'false');
+      }
+      function toggleCivicsCardFromSummary(e) {
+        if (Date.now() < civicsSuppressCardSummaryClickUntil) return;
+        if (e && e.target.closest && e.target.closest('button, a, textarea')) return;
+        card.classList.toggle('expanded');
+        syncCivicsCardExpanded();
+      }
+      if (summary) {
+        summary.onclick = toggleCivicsCardFromSummary;
+        summary.onkeydown = function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggleCivicsCardFromSummary();
+          }
+        };
+      }
+      syncCivicsCardExpanded();
       const ta = card.querySelector('.civics-card-notes textarea');
       if (ta) {
         ta.value = getCivicsNotes(c.candidate_id || c.candidateId || c.name);
@@ -8928,8 +9069,6 @@
     const card = btn.closest('.civics-card');
     const researchEl = card && card.querySelector('.civics-card-research');
     if (!researchEl) return;
-    const notesEl = card.querySelector('.civics-card-notes');
-    const linksExpanded = card.querySelector('.civics-card-links-expanded');
     const cacheKey = 'shasta_civics_research_' + name.replace(/\s+/g, '_').toLowerCase();
     const isRefresh = researchEl.getAttribute('data-loaded') === 'true';
     const prevHtml = researchEl.innerHTML;
@@ -8943,9 +9082,8 @@
             researchEl.innerHTML = parsed.html;
             researchEl.setAttribute('data-loaded', 'true');
             card.classList.add('expanded');
-            researchEl.style.display = 'block';
-            if (notesEl) notesEl.style.display = 'block';
-            if (linksExpanded) linksExpanded.style.display = 'flex';
+            var sum = card.querySelector('.civics-card-summary');
+            if (sum) sum.setAttribute('aria-expanded', 'true');
             return;
           }
         }
@@ -8954,7 +9092,6 @@
 
     btn.disabled = true;
     btn.textContent = isRefresh ? 'Updating…' : 'Researching…';
-    researchEl.style.display = 'block';
     if (isRefresh && prevHtml.trim().length > 0) {
       researchEl.querySelectorAll('.civics-research-updating').forEach(function(el) { el.remove(); });
       researchEl.insertAdjacentHTML('beforeend', '<div class="civics-research-updating">Fetching latest research…</div>');
@@ -8962,8 +9099,8 @@
       researchEl.innerHTML = '<div class="civics-loading">Researching…</div>';
     }
     card.classList.add('expanded');
-    if (notesEl) notesEl.style.display = 'block';
-    if (linksExpanded) linksExpanded.style.display = 'flex';
+    var sumEl = card.querySelector('.civics-card-summary');
+    if (sumEl) sumEl.setAttribute('aria-expanded', 'true');
     try {
       const body = {
         action: 'getCivicsResearch',
@@ -9002,7 +9139,7 @@
     btn.textContent = '🦉 Ask Blathers';
   }
 
-  function renderCivicsScreen() {
+  function renderCivicsScreen(preserveSlide) {
     const zoneA = document.getElementById('civicsZoneA');
     const zoneB = document.getElementById('civicsZoneB');
     const zoneC = document.getElementById('civicsZoneC');
@@ -9031,9 +9168,7 @@
       return { electionEvent: elEv, supportingEvents: supporting };
     });
 
-    civicsCurrentSlide = 0;
-
-    renderCivicsCarousel(civicsElectionGroups);
+    renderCivicsCarousel(civicsElectionGroups, preserveSlide);
 
     if (civicsElectionGroups.length === 0) {
       renderCivicsZoneBC(0);
@@ -9053,6 +9188,7 @@
     const ballotpediaLink = '<a class="civics-link-btn" href="' + escapeHtml(ballotpediaUrl(name)) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔍 Find on Ballotpedia</a>';
     const askBlathersBtn = '<button type="button" class="civics-ask-blathers-btn civics-research-btn" data-name="' + escapeHtml(name) + '" data-office="' + escapeHtml(office) + '" data-level="' + escapeHtml(level) + '" onclick="event.stopPropagation(); civicsAskBlathersAboutCandidate(this)">🦉 Ask Blathers</button>';
 
+    const summaryChevron = '<span class="civics-card-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></span>';
     const integritySlug = (name || '').replace(/\s+/g, '-').toLowerCase().replace(/[^\w\-]/g, '') || 'explore';
     const links = [
       ['Integrity Index', 'https://integrityindex.us/' + (integritySlug === 'explore' ? 'explore' : 'candidate/' + integritySlug)],
@@ -9069,16 +9205,19 @@
     ).join('');
 
     return '<div class="civics-card" data-id="' + escapeHtml(cid) + '">' +
+      '<div class="civics-card-summary" tabindex="0" role="button" aria-expanded="false" aria-label="Show or hide details for ' + escapeHtml(name) + '">' +
       '<div class="civics-card-header">' +
       '<span class="civics-card-name">' + escapeHtml(name) + '</span>' + partyChip + '</div>' +
       (office ? '<div class="civics-card-office">' + escapeHtml(office) + '</div>' : '') +
+      summaryChevron + '</div>' +
+      '<div class="civics-card-body">' +
       '<div class="civics-card-actions">' + ballotpediaLink + askBlathersBtn + '</div>' +
-      '<div class="civics-card-links-expanded" style="display:none">' + linkRowExpanded + '</div>' +
-      '<div class="civics-card-research" data-loaded="false" style="display:none"></div>' +
-      '<div class="civics-card-notes" style="display:none">' +
+      '<div class="civics-card-links-expanded">' + linkRowExpanded + '</div>' +
+      '<div class="civics-card-research" data-loaded="false"></div>' +
+      '<div class="civics-card-notes">' +
       '<div class="civics-card-notes-label">Notes</div>' +
       '<textarea class="recipe-edit-textarea" placeholder="Your notes…"></textarea></div>' +
-      '</div>';
+      '</div></div>';
   }
 
   const STARRED_STORAGE_KEY = 'shasta_starred_events';
@@ -9921,6 +10060,7 @@
     const re = /(^|\n)\s*(?:\*\*)?(Background|Funding|Record|News)(?:\*\*)?\s*:?\s*\n/gi;
     const matches = [];
     var m;
+    re.lastIndex = 0;
     while ((m = re.exec(normText)) !== null) {
       var key = canonMap[m[2].toLowerCase()];
       if (key) {
