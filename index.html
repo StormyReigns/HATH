@@ -1616,12 +1616,10 @@
     }
     .civics-carousel-wrap { position: relative; width: 100%; }
     .civics-carousel { overflow: hidden; border-radius: 14px; width: 100%; touch-action: pan-y; }
+    /* Edge fades were for the old short calendar strip; full-height slides made them read as blue side bars. */
     .civics-carousel-edge {
-      position: absolute; top: 0; bottom: 0; width: 28px;
-      pointer-events: none; opacity: 0.6; z-index: 1;
+      display: none !important;
     }
-    .civics-carousel-edge--right { right: 0; background: linear-gradient(to left, rgba(42,91,168,0.15), transparent); }
-    .civics-carousel-edge--left { left: 0; background: linear-gradient(to right, rgba(42,91,168,0.15), transparent); }
     .civics-carousel-indicator {
       display: flex; align-items: center; justify-content: center; gap: 12px;
       margin-top: 12px; padding: 4px 0;
@@ -1676,35 +1674,51 @@
       0%, 100% { transform: translateX(0); opacity: 0.8; }
       50% { transform: translateX(4px); opacity: 1; }
     }
-    .civics-carousel-track { display: flex; transition: transform 0.28s ease; will-change: transform; }
+    .civics-carousel-track {
+      display: flex; transition: transform 0.28s ease; will-change: transform;
+      gap: 0;
+    }
     .civics-carousel-slide {
       min-width: 100%;
+      max-width: 100%;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
       align-items: stretch;
       gap: 0;
+      background: #fdf8f1;
+      border: 1px solid rgba(0,0,0,0.07);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
     }
     .civics-slide-hero {
-      background: rgba(42,91,168,0.08);
-      border-left: 3px solid #2a5ba8;
-      border-radius: 14px;
+      background: rgba(42,91,168,0.06);
+      border-left: none;
+      border-radius: 0;
+      border-bottom: 1px solid rgba(42,91,168,0.12);
       padding: 14px 16px;
       box-sizing: border-box;
       flex-shrink: 0;
     }
-    .civics-slide-zone-b { flex-shrink: 0; margin-top: 12px; padding: 0 2px; }
-    .civics-slide-zone-c { flex-shrink: 0; margin-top: 4px; padding: 0 2px 4px; }
+    .civics-slide-zone-b { flex-shrink: 0; margin-top: 12px; padding: 0 12px; }
+    .civics-slide-zone-c { flex-shrink: 0; margin-top: 4px; padding: 0 12px 12px; }
     .civics-slide-title { font-weight: 600; color: #1e4a96; font-size: 15px; }
     .civics-slide-days { font-size: 12px; color: var(--muted); margin: 2px 0 10px; }
     .civics-slide-dates { display: flex; flex-direction: column; gap: 5px; }
     .civics-slide-date-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--text2); }
     .civics-slide-date-row--election { color: var(--text); font-weight: 500; }
     .civics-slide-date-val { color: var(--text); font-size: 13px; }
-    html.dark-mode .civics-slide-hero { background: rgba(42,91,168,0.12); border-left-color: #5a8fd8; }
+    html.dark-mode .civics-carousel-slide {
+      background: #252220;
+      border-color: rgba(255,255,255,0.08);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    }
+    html.dark-mode .civics-slide-hero {
+      background: rgba(42,91,168,0.1);
+      border-bottom-color: rgba(90,143,216,0.22);
+    }
     html.dark-mode .civics-slide-title { color: #8ab4f8; }
-    html.dark-mode .civics-carousel-edge--right { background: linear-gradient(to left, rgba(42,91,168,0.25), transparent); }
-    html.dark-mode .civics-carousel-edge--left { background: linear-gradient(to right, rgba(42,91,168,0.25), transparent); }
     .civics-empty-card {
       background: #fdf8f1; border-radius: 12px;
       border: 1px solid rgba(0,0,0,0.06);
@@ -5562,7 +5576,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.12.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.12.2';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
