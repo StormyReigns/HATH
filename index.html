@@ -466,10 +466,11 @@
       text-shadow: 0 0 12px rgba(255,255,255,0.9), 0 0 24px rgba(255,255,255,0.6);
     }
 
-    /* ── LOGIN SCREEN ── */
+    /* ── LOGIN SCREEN (retained in DOM; not used in normal flow) ── */
     .login-screen {
       position: fixed; inset: 0; z-index: 50;
-      display: flex; flex-direction: column;
+      display: none;
+      flex-direction: column;
       align-items: center; justify-content: center;
       gap: 20px; padding: 40px;
     }
@@ -501,8 +502,8 @@
       line-height: 1.5; display: none;
     }
 
-    /* ── APP SCREEN (hidden until authed) ── */
-    .app-screen { display: none; position: relative; z-index: 1; height: 100%; min-height: 100vh; min-height: 100dvh; }
+    /* ── APP SCREEN ── */
+    .app-screen { display: block; position: relative; z-index: 1; height: 100%; min-height: 100vh; min-height: 100dvh; }
     @media all and (display-mode: standalone) {
       .app-screen { min-height: 100lvh; min-height: calc(var(--vh, 1vh) * 100); }
     }
@@ -1270,6 +1271,52 @@
     }
     /* Prevent the item slide-right from fighting the icon wiggle */
     .drawer-item.item-wiggling:active { transform: none; }
+    .drawer-item.locked {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+    .drawer-auth {
+      padding: 12px 26px 0;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      margin-top: auto;
+    }
+    html.dark-mode .drawer-auth { border-color: rgba(255,255,255,0.08); }
+    .drawer-auth-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 10px;
+      font-style: italic;
+    }
+    .drawer-auth-name {
+      font-size: 12px;
+      color: var(--text2);
+      margin-bottom: 6px;
+      font-style: italic;
+    }
+    .drawer-auth-signout {
+      font-size: 12px;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+    html.dark-mode .drawer-auth-signout { border-color: rgba(255,255,255,0.15); }
+    .drawer-auth-denied {
+      font-size: 12px;
+      color: #c05050;
+      margin-bottom: 10px;
+      line-height: 1.4;
+      display: none;
+    }
+    .schedule-guest-banner {
+      font-size: 12px;
+      color: var(--muted);
+      font-style: italic;
+      padding: 8px 20px 4px;
+      text-align: center;
+    }
     .drawer-footer {
       padding: 10px 26px 14px;
       border-top: 1px solid var(--drawer-border);
@@ -5090,7 +5137,7 @@
         <div class="settings-label">Background</div>
         <div class="settings-options" id="bgSchemeOptions"></div>
       </div>
-      <div class="settings-section">
+      <div class="settings-section" id="settingsSectionNickname">
         <div class="settings-label">Nickname</div>
         <input type="text" class="settings-input" id="settingsNickname" placeholder="What should we call you?" maxlength="30">
         <div class="settings-hint">Used in greetings and by the AI</div>
@@ -5099,7 +5146,7 @@
         <div class="settings-label">Font Size</div>
         <div class="settings-options" id="fontSizeOptions"></div>
       </div>
-      <div class="settings-section">
+      <div class="settings-section" id="settingsSectionDumb">
         <label class="settings-toggle">
           <span>Dumb Blathers</span>
           <input type="checkbox" id="settingsDumbBlathers">
@@ -5199,6 +5246,7 @@
         </div>
       </div>
       <div class="schedule-event-count" id="scheduleEventCount"></div>
+      <div class="schedule-guest-banner" id="scheduleGuestBanner" style="display:none">Sign in to see your personal calendar</div>
       <div class="screen-list" id="scheduleList"></div>
       <div class="screen-footer">
         <a href="https://calendar.google.com" target="_blank" rel="noopener">Open in Google Calendar</a>
@@ -5401,11 +5449,11 @@
       <svg class="drawer-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/><path d="M9 21v-7h6v7"/></svg>
       Home
     </div>
-    <div class="drawer-item" onclick="drawerNavTap(this, ()=>{ closeDrawer(); showProjectsScreen(); })">
+    <div class="drawer-item" data-guest-lock onclick="drawerNavTap(this, ()=>{ closeDrawer(); showProjectsScreen(); })">
       <img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/WWChest1.png" alt="" loading="lazy">
       Projects
     </div>
-    <div class="drawer-item" onclick="drawerNavTap(this, ()=>{ closeDrawer(); showDocumentsScreen(); })">
+    <div class="drawer-item" data-guest-lock onclick="drawerNavTap(this, ()=>{ closeDrawer(); showDocumentsScreen(); })">
       <img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/FFXIVIcon.png" alt="" loading="lazy">
       Documents
     </div>
@@ -5413,7 +5461,7 @@
       <span class="hk-icon-circle"><img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/HK.png" alt="" loading="lazy"></span>
       Recipes
     </div>
-    <div class="drawer-item" onclick="drawerNavTap(this)">
+    <div class="drawer-item" data-guest-lock onclick="drawerNavTap(this)">
       <svg class="drawer-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
       Finances
     </div>
@@ -5430,6 +5478,17 @@
       Settings
     </div>
   </nav>
+  <div class="drawer-auth" id="drawerAuth">
+    <div class="drawer-auth-guest" id="drawerAuthGuest">
+      <div class="drawer-auth-denied" id="drawerAuthDenied">This account doesn't have access to ShastApp. Please sign in with your Higgins household account.</div>
+      <div class="drawer-auth-label">Sign in for full access</div>
+      <div id="drawerGoogleSignInBtn"></div>
+    </div>
+    <div class="drawer-auth-signedin" id="drawerAuthSignedIn" style="display:none">
+      <div class="drawer-auth-name" id="drawerAuthName"></div>
+      <button type="button" class="drawer-auth-signout" onclick="signOut()">Sign out</button>
+    </div>
+  </div>
   <div class="drawer-footer">
     <button type="button" class="drawer-update-btn" onclick="forceAppUpdate()" aria-label="Get latest app version">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
@@ -5626,13 +5685,83 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.12.5';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.13.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
   const ALLOWED_USERS = ['whiskerwallmatt@gmail.com', 'jessicafisher407@gmail.com'];
 
   let _lastPreloadBalance = null;
+  let _appShellInitialized = false;
+  let _gsiInitialized = false;
+  let _lastAuthUiHadUser;
+
+  function signOut() {
+    localStorage.removeItem('shasta_user');
+    localStorage.removeItem('shasta_auth_exp');
+    closeDrawer();
+    location.reload();
+  }
+
+  function updateAuthUI(email) {
+    const hasUser = !!getApiUser();
+    document.querySelectorAll('.drawer-item[data-guest-lock]').forEach(function(el) {
+      el.classList.toggle('locked', !hasUser);
+    });
+    var guestEl = document.getElementById('drawerAuthGuest');
+    var signedEl = document.getElementById('drawerAuthSignedIn');
+    var deniedEl = document.getElementById('drawerAuthDenied');
+    if (guestEl) guestEl.style.display = hasUser ? 'none' : '';
+    if (signedEl) signedEl.style.display = hasUser ? '' : 'none';
+    if (deniedEl) deniedEl.style.display = 'none';
+    var nameEl = document.getElementById('drawerAuthName');
+    if (nameEl && hasUser) nameEl.textContent = getDisplayName();
+
+    var schedBanner = document.getElementById('scheduleGuestBanner');
+    if (schedBanner) schedBanner.style.display = hasUser ? 'none' : '';
+
+    var schedActions = document.querySelector('#scheduleScreen .schedule-header-actions');
+    if (schedActions) schedActions.style.display = hasUser ? '' : 'none';
+
+    if (!hasUser) {
+      var wb = document.getElementById('wellbeing');
+      if (wb) wb.style.display = 'none';
+      var up = document.getElementById('upcomingEvents');
+      if (up) { up.style.display = 'none'; up.classList.remove('loaded'); }
+      var mn = document.getElementById('mattNote');
+      if (mn) { mn.innerHTML = ''; mn.classList.remove('loaded'); }
+      var ua = document.getElementById('updatedAt');
+      if (ua) { ua.textContent = ''; ua.classList.remove('loaded'); ua.style.display = 'none'; }
+      var hps = document.getElementById('homeProjectsScroller');
+      if (hps) hps.style.display = 'none';
+    } else {
+      var wb2 = document.getElementById('wellbeing');
+      if (wb2) wb2.style.display = '';
+      var ua2 = document.getElementById('updatedAt');
+      if (ua2) ua2.style.display = '';
+      renderHomeProjectsScroller();
+      renderRecentUploads();
+      loadCalendar();
+    }
+
+    if (hasUser && _lastAuthUiHadUser === false) {
+      var gt = document.getElementById('greetingText');
+      if (gt) gt.innerHTML = getRandomGreeting();
+    }
+    _lastAuthUiHadUser = hasUser;
+
+    applyGuestSettingsSectionsVisibility();
+  }
+
+  function applyGuestSettingsSectionsVisibility() {
+    var guest = !getApiUser();
+    var nickSec = document.getElementById('settingsSectionNickname');
+    var dumbSec = document.getElementById('settingsSectionDumb');
+    var civSec = document.getElementById('civicsSourcesSection');
+    if (nickSec) nickSec.style.display = guest ? 'none' : '';
+    if (dumbSec) dumbSec.style.display = guest ? 'none' : '';
+    if (civSec) civSec.style.display = guest ? 'none' : '';
+  }
 
   function handleCredentialResponse(response) {
     const payload = JSON.parse(atob(response.credential.split('.')[1]));
@@ -5641,8 +5770,16 @@
     if (ALLOWED_USERS.includes(email)) {
       localStorage.setItem('shasta_user', email);
       localStorage.setItem('shasta_auth_exp', Date.now() + (30 * 24 * 60 * 60 * 1000));
-      launchApp(email, _lastPreloadBalance);
+      var denied = document.getElementById('drawerAuthDenied');
+      if (denied) denied.style.display = 'none';
+      applyDarkMode(localStorage.getItem('shasta_dark_' + email) === 'true');
+      applyBgScheme(localStorage.getItem('shasta_bg_' + email) || 'peach');
+      applyFontSize(localStorage.getItem('shasta_font_' + email) || 'default');
+      updateAuthUI(email);
+      loadData(_lastPreloadBalance).then(function() { updateAuthUI(email); });
     } else {
+      var d = document.getElementById('drawerAuthDenied');
+      if (d) d.style.display = 'block';
       document.getElementById('loginDenied').style.display = 'block';
     }
   }
@@ -5658,18 +5795,22 @@
   }
 
   function launchApp(email, preloadedBalance) {
+    var settingsKey = email || 'guest';
     document.getElementById('loginScreen').style.display  = 'none';
     document.getElementById('appScreen').style.display    = 'block';
     const vEl = document.getElementById('versionLabel');
     if (vEl) vEl.textContent = 'v' + SHASTAPP_VERSION;
     document.querySelectorAll('.section-version-label').forEach(function(el) { el.textContent = 'v' + SHASTAPP_VERSION; });
     document.getElementById('greetingText').innerHTML = getRandomGreeting();
-    loadData(preloadedBalance);
-    initScrollFades();
-    setupKeyboardHandling();
-    applyDarkMode(localStorage.getItem('shasta_dark_' + email) === 'true');
-    applyBgScheme(localStorage.getItem('shasta_bg_' + email) || 'peach');
-    applyFontSize(localStorage.getItem('shasta_font_' + email) || 'default');
+    loadData(preloadedBalance).then(function() { updateAuthUI(email); });
+    if (!_appShellInitialized) {
+      initScrollFades();
+      setupKeyboardHandling();
+      _appShellInitialized = true;
+    }
+    applyDarkMode(localStorage.getItem('shasta_dark_' + settingsKey) === 'true');
+    applyBgScheme(localStorage.getItem('shasta_bg_' + settingsKey) || 'peach');
+    applyFontSize(localStorage.getItem('shasta_font_' + settingsKey) || 'default');
     startKeepalivePing();
     updateBlatherBookVisibility();
     updateBottomBarHome();
@@ -5681,6 +5822,7 @@
         img.src = BLATHERS[key];
       }
     });
+    updateAuthUI(email);
   }
 
   function initScrollFades() {
@@ -5796,16 +5938,21 @@
 
   function initGSIWhenReady() {
     if (typeof google !== 'undefined' && google.accounts) {
-      google.accounts.id.initialize({
-        client_id:   CLIENT_ID,
-        callback:    handleCredentialResponse,
-        auto_select: true
-      });
-      google.accounts.id.renderButton(
-        document.getElementById('googleSignInBtn'),
-        { theme: 'outline', size: 'large', shape: 'pill', text: 'signin_with' }
-      );
-      google.accounts.id.prompt();
+      if (!_gsiInitialized) {
+        google.accounts.id.initialize({
+          client_id:   CLIENT_ID,
+          callback:    handleCredentialResponse,
+          auto_select: false
+        });
+        _gsiInitialized = true;
+      }
+      var drawerBtn = document.getElementById('drawerGoogleSignInBtn');
+      if (drawerBtn && drawerBtn.children.length === 0) {
+        google.accounts.id.renderButton(
+          drawerBtn,
+          { theme: 'outline', size: 'large', shape: 'pill', text: 'signin_with' }
+        );
+      }
     } else {
       setTimeout(initGSIWhenReady, 50);
     }
@@ -5823,15 +5970,13 @@
 
     const savedUser = localStorage.getItem('shasta_user');
     const savedExp  = localStorage.getItem('shasta_auth_exp');
+    const sessionEmail = (savedUser && savedExp && Date.now() < parseInt(savedExp)) ? savedUser : null;
 
     const preloadResult = await preloadApp();
     _lastPreloadBalance = preloadResult;
 
-    if (savedUser && savedExp && Date.now() < parseInt(savedExp)) {
-      launchApp(savedUser, preloadResult);
-    } else {
-      initGSIWhenReady();
-    }
+    launchApp(sessionEmail, preloadResult);
+    initGSIWhenReady();
 
     hideLoadScreen();
   });
@@ -5959,6 +6104,11 @@
       "What's on your mind, <em>{{name}}?</em>",
       "Hey <em>{{name}}.</em> What can I help with?",
       "Ready when you are, <em>{{name}}.</em>"
+    ]},
+    { weight: 1, quotes: [
+      "Welcome to the Higgins household.",
+      "Have a look around.",
+      "This is ShastApp. Managed by Shasta."
     ]}
   ];
 
@@ -5987,6 +6137,9 @@
 
   // ── LOAD LIVE DATA ────────────────────────────────────────────
   async function loadData(preloadedBalance, forceRefresh) {
+    if (!getApiUser()) {
+      return;
+    }
     let data = preloadedBalance && !preloadedBalance.error ? preloadedBalance : null;
     if (!data) {
       try {
@@ -6134,8 +6287,6 @@
     }
   }
 
-  loadData(); // called by auth on login
-
   /** Forces a full app reload with cache busting — use when PWA is stuck on an old cached version. */
   function forceAppUpdate() {
     const base = location.origin + location.pathname;
@@ -6168,6 +6319,7 @@
       if (blathersWakeTimer) { clearTimeout(blathersWakeTimer); blathersWakeTimer = null; }
       document.body.classList.add('drawer-open');
       setDrawerBlathers('startled');
+      initGSIWhenReady();
     }
   }
   function closeDrawer() {
@@ -6181,6 +6333,7 @@
   }
 
   function drawerNavTap(el, fn) {
+    if (el.classList.contains('locked')) return;
     const icon = el.querySelector('.drawer-icon-svg, .drawer-icon-img, .drawer-icon-emoji');
     if (icon && !icon.classList.contains('wiggling')) {
       el.classList.add('item-wiggling');
@@ -6299,7 +6452,7 @@
     document.getElementById('chatArea').style.display = 'none';
     document.getElementById('hintArea').style.display = 'flex';
     const wb = document.getElementById('wellbeing');
-    if (wb) wb.style.display = '';
+    if (wb) wb.style.display = getApiUser() ? '' : 'none';
     document.getElementById('documentsScreen').classList.remove('visible');
     document.getElementById('projectsScreen').classList.remove('visible');
     document.getElementById('scheduleScreen').classList.remove('visible');
@@ -6310,7 +6463,8 @@
     const topbar = document.querySelector('.topbar');
     if (topbar) topbar.classList.remove('collapsed');
     document.getElementById('inputZone').style.display = 'flex';
-    document.getElementById('updatedAt').style.display = '';
+    var uaHome = document.getElementById('updatedAt');
+    if (uaHome) uaHome.style.display = getApiUser() ? '' : 'none';
     document.querySelector('.body').classList.remove('chat-mode');
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
     document.querySelector('.drawer-item:first-child').classList.add('active');
@@ -8313,7 +8467,7 @@
   }
 
   function getSettingsUser() {
-    return localStorage.getItem('shasta_user') || '_default';
+    return localStorage.getItem('shasta_user') || 'guest';
   }
 
   const CIVICS_SOURCES_KEY = 'shasta_civics_sources';
@@ -8442,6 +8596,7 @@
       renderFontSizeOptions();
       renderCivicsSourcesList();
     } catch (e) { console.warn('Settings render error:', e); }
+    applyGuestSettingsSectionsVisibility();
     const nickEl = document.getElementById('settingsNickname');
     const dumbEl = document.getElementById('settingsDumbBlathers');
     const darkEl = document.getElementById('settingsDarkMode');
@@ -10004,7 +10159,14 @@
     renderScheduleChips();
     const user = localStorage.getItem('shasta_user');
     if (!user) {
-      list.innerHTML = '<div class="screen-loading">Sign in to see your schedule.</div>';
+      scheduleEvents = getCivicEvents();
+      if (scheduleEvents.length === 0) {
+        list.innerHTML = '<div class="screen-loading">No upcoming civic dates.</div>';
+      } else {
+        renderScheduleList();
+      }
+      renderScheduleTimeChips();
+      renderScheduleChips();
       return;
     }
     try {
