@@ -1928,7 +1928,7 @@
     html.dark-mode .civics-card-research { border-top-color: rgba(255,255,255,0.08); }
     .civics-fec-chart {
       margin-bottom: 12px;
-      padding: 10px 12px;
+      padding: 8px 10px;
       border-radius: 12px;
       background: rgba(42,91,168,0.06);
       border: 1px solid rgba(42,91,168,0.14);
@@ -1944,10 +1944,15 @@
     }
     .civics-fec-cycle { font-weight: 500; color: var(--muted); }
     .civics-fec-chart-row {
-      display: flex; align-items: center; gap: 12px;
+      display: flex; align-items: center; gap: 6px;
       flex-wrap: nowrap;
     }
-    .civics-fec-donut { width: 112px; height: 112px; flex-shrink: 0; }
+    .civics-fec-donut-wrap {
+      flex: 0 0 auto;
+      width: 92px;
+      line-height: 0;
+    }
+    .civics-fec-donut { width: 92px; height: 92px; display: block; }
     .civics-fec-donut-hole { fill: #fdf8f1; }
     html.dark-mode .civics-fec-donut-hole { fill: #252220; }
     .civics-fec-right {
@@ -1962,7 +1967,7 @@
     .civics-fec-legend-row:last-child { margin-bottom: 0; }
     .civics-fec-swatch { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
     .civics-fec-legend-row span:nth-child(2) { flex: 1; min-width: 0; }
-    .civics-fec-legend-amt { font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; font-size: 11px; }
+    .civics-fec-legend-amt { flex-shrink: 0; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; font-size: 11px; }
     .civics-fec-totals {
       display: flex; flex-wrap: wrap; align-items: center;
       gap: 2px 6px; margin: 0; padding-top: 6px;
@@ -5621,7 +5626,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.12.4';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.12.5';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -9210,7 +9215,7 @@
     var raised = fin.totalRaised || 0;
     var other = Math.max(0, raised - ind - pac - self);
     var slices = [];
-    if (ind > 0) slices.push({ label: 'Individual', v: ind, c: '#2a5ba8' });
+    if (ind > 0) slices.push({ label: 'Personal', v: ind, c: '#2a5ba8' });
     if (pac > 0) slices.push({ label: 'PAC', v: pac, c: '#c07a4a' });
     if (self > 0) slices.push({ label: 'Self-funded', v: self, c: '#64748b' });
     if (other > 0) slices.push({ label: 'Other', v: other, c: '#94a3b8' });
@@ -9246,7 +9251,7 @@
     return '<div class="civics-fec-chart" role="img" aria-label="FEC cashflow, cycle ' + escapeHtml(String(cy || '')) + '">' +
       '<div class="civics-fec-chart-title">' + titleLine + '</div>' +
       '<div class="civics-fec-chart-row">' +
-      '<svg class="civics-fec-donut" viewBox="0 0 200 200" aria-hidden="true">' + paths.join('') + '</svg>' +
+      '<div class="civics-fec-donut-wrap"><svg class="civics-fec-donut" viewBox="0 0 200 200" aria-hidden="true">' + paths.join('') + '</svg></div>' +
       '<div class="civics-fec-right">' +
       '<div class="civics-fec-legend">' + leg + '</div>' +
       '<div class="civics-fec-totals">' +
