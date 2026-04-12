@@ -1781,6 +1781,11 @@
     }
     .civics-research-section-body { font-size: 14px; color: var(--text); line-height: 1.55; }
     .civics-research-sources { font-size: 11px; color: var(--muted); margin-top: 4px; font-style: italic; }
+    .civics-research-updating {
+      margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(42,91,168,0.35);
+      font-size: 13px; color: var(--muted); font-style: italic;
+    }
+    html.dark-mode .civics-research-updating { border-top-color: rgba(90,143,216,0.35); }
     .civics-zone-b {
       flex-shrink: 0; margin-bottom: 16px;
     }
@@ -5503,7 +5508,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.10.6';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.10.7';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -8923,33 +8928,42 @@
     const card = btn.closest('.civics-card');
     const researchEl = card && card.querySelector('.civics-card-research');
     if (!researchEl) return;
-    if (researchEl.getAttribute('data-loaded') === 'true') {
-      card.classList.add('expanded');
-      researchEl.style.display = 'block';
-      card.querySelector('.civics-card-notes').style.display = 'block';
-      card.querySelector('.civics-card-links-expanded').style.display = 'flex';
-      return;
-    }
+    const notesEl = card.querySelector('.civics-card-notes');
+    const linksExpanded = card.querySelector('.civics-card-links-expanded');
     const cacheKey = 'shasta_civics_research_' + name.replace(/\s+/g, '_').toLowerCase();
-    try {
-      const cached = localStorage.getItem(cacheKey);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed && parsed.ts && parsed.html && (Date.now() - parsed.ts) < 7 * 24 * 60 * 60 * 1000) {
-          researchEl.innerHTML = parsed.html;
-          researchEl.setAttribute('data-loaded', 'true');
-          card.classList.add('expanded');
-          researchEl.style.display = 'block';
-          card.querySelector('.civics-card-notes').style.display = 'block';
-          card.querySelector('.civics-card-links-expanded').style.display = 'flex';
-          return;
+    const isRefresh = researchEl.getAttribute('data-loaded') === 'true';
+    const prevHtml = researchEl.innerHTML;
+
+    if (!isRefresh) {
+      try {
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && parsed.ts && parsed.html && (Date.now() - parsed.ts) < 7 * 24 * 60 * 60 * 1000) {
+            researchEl.innerHTML = parsed.html;
+            researchEl.setAttribute('data-loaded', 'true');
+            card.classList.add('expanded');
+            researchEl.style.display = 'block';
+            if (notesEl) notesEl.style.display = 'block';
+            if (linksExpanded) linksExpanded.style.display = 'flex';
+            return;
+          }
         }
-      }
-    } catch (_) {}
+      } catch (_) {}
+    }
+
     btn.disabled = true;
-    btn.textContent = 'Researching…';
+    btn.textContent = isRefresh ? 'Updating…' : 'Researching…';
     researchEl.style.display = 'block';
-    researchEl.innerHTML = '<div class="civics-loading">Researching…</div>';
+    if (isRefresh && prevHtml.trim().length > 0) {
+      researchEl.querySelectorAll('.civics-research-updating').forEach(function(el) { el.remove(); });
+      researchEl.insertAdjacentHTML('beforeend', '<div class="civics-research-updating">Fetching latest research…</div>');
+    } else {
+      researchEl.innerHTML = '<div class="civics-loading">Researching…</div>';
+    }
+    card.classList.add('expanded');
+    if (notesEl) notesEl.style.display = 'block';
+    if (linksExpanded) linksExpanded.style.display = 'flex';
     try {
       const body = {
         action: 'getCivicsResearch',
@@ -8966,14 +8980,23 @@
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       const reply = data.reply || '';
-      const html = isCivicsResponse(reply) ? renderCivicsResponse(reply) : '<div class="civics-research-section-body">' + String(reply).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/`(.*?)`/g, '<code>$1</code>').replace(/\n/g, '<br>') + '</div>';
+      const replyNorm = normalizeCivicsResearchText(reply);
+      const html = isCivicsResponse(replyNorm)
+        ? renderCivicsResponse(replyNorm)
+        : '<div class="civics-research-section-body">' + escapeHtml(String(reply || '')).replace(/\n/g, '<br>') + '</div>';
       researchEl.innerHTML = html;
       researchEl.setAttribute('data-loaded', 'true');
       try {
         localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), html: html }));
       } catch (_) {}
     } catch (err) {
-      researchEl.innerHTML = '<div class="civics-research-section-body" style="color:var(--muted)">' + escapeHtml(err.message || 'Research failed') + '</div>';
+      researchEl.querySelectorAll('.civics-research-updating').forEach(function(el) { el.remove(); });
+      if (isRefresh && prevHtml.trim().length > 0) {
+        researchEl.innerHTML = prevHtml;
+        researchEl.insertAdjacentHTML('beforeend', '<div class="civics-research-section-body" style="color:var(--muted);margin-top:10px">' + escapeHtml(err.message || 'Update failed') + '</div>');
+      } else {
+        researchEl.innerHTML = '<div class="civics-research-section-body" style="color:var(--muted)">' + escapeHtml(err.message || 'Research failed') + '</div>';
+      }
     }
     btn.disabled = false;
     btn.textContent = '🦉 Ask Blathers';
@@ -9880,25 +9903,38 @@
     document.getElementById('blatherbookOverlay').classList.remove('open');
   }
 
+  function normalizeCivicsResearchText(text) {
+    if (!text || typeof text !== 'string') return '';
+    var t = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    ['Background', 'Funding', 'Record', 'News'].forEach(function(h) {
+      t = t.replace(new RegExp('^\\s*\\*\\*' + h + '\\*\\*\\s*$', 'gim'), h);
+    });
+    t = t.replace(/^\s*\*\*Sources used:\*\*\s*/gim, 'Sources used: ');
+    t = t.replace(/^\s*\*\*Sources used\*\*:\s*/gim, 'Sources used: ');
+    return t.trim();
+  }
+
   function isCivicsResponse(text) {
-    return /^Background\n/m.test(text) && /^Funding\n/m.test(text);
+    const n = normalizeCivicsResearchText(text);
+    return /(?:^|\n)Background\s*\n/.test(n) && /(?:^|\n)Funding\s*\n/.test(n);
   }
 
   function renderCivicsResponse(text) {
+    const n = normalizeCivicsResearchText(text);
     const sections = ['Background', 'Funding', 'Record', 'News'];
     let html = '<div class="civics-research-card">';
     sections.forEach((section, i) => {
       const next = sections[i + 1];
       const regex = next
-        ? new RegExp(section + '\\n([\\s\\S]*?)(?=' + next + '\\n)', 'm')
-        : new RegExp(section + '\\n([\\s\\S]*?)(?=Sources used:|$)', 'm');
-      const match = text.match(regex);
+        ? new RegExp('^' + section + '\\s*\\n([\\s\\S]*?)(?=^' + next + '\\s*$)', 'm')
+        : new RegExp('^' + section + '\\s*\\n([\\s\\S]*?)(?=^Sources used:|$)', 'm');
+      const match = n.match(regex);
       const content = match ? match[1].trim() : 'No information available';
       html += '<div class="civics-research-section">' +
-        '<div class="civics-research-section-title">' + section + '</div>' +
+        '<div class="civics-research-section-title">' + escapeHtml(section) + '</div>' +
         '<div class="civics-research-section-body">' + escapeHtml(content) + '</div></div>';
     });
-    const sourcesMatch = text.match(/Sources used:([\s\S]*)$/m);
+    const sourcesMatch = n.match(/(?:^|\n)Sources used:\s*([\s\S]*)$/im);
     if (sourcesMatch) {
       html += '<div class="civics-research-sources">' + escapeHtml(sourcesMatch[1].trim()) + '</div>';
     }
