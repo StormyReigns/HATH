@@ -1814,6 +1814,9 @@
     html.dark-mode .civics-ask-inline-response:not(:empty) { border-top-color: rgba(255,255,255,0.08); }
     .civics-ask-inline .bubble { max-width: 100%; }
     .settings-section-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
+    .settings-section-subtitle {
+      font-size: 12px; color: var(--muted); margin-bottom: 10px; margin-top: -6px;
+    }
     .civics-source-row {
       display: flex; align-items: center; gap: 10px;
       padding: 8px 0; border-bottom: 1px solid rgba(192,122,74,0.08);
@@ -5151,6 +5154,14 @@
         </label>
         <div class="settings-hint">Short, concise answers without the AI personality</div>
       </div>
+      <div class="settings-section" id="civicsLocationSection">
+        <div class="settings-section-title">Your Location</div>
+        <div class="settings-section-subtitle">Used for election calendar, polling place, and Blathers research. Add your ZIP for more accurate polling-place lookup.</div>
+        <select class="settings-input" id="civicsStateSelect" onchange="saveCivicsState(this.value)">
+          <option value="">— Select your state —</option>
+        </select>
+        <input type="text" class="settings-input" id="civicsZipCode" placeholder="ZIP code (for polling place lookup)" maxlength="10">
+      </div>
       <div class="settings-section" id="civicsSourcesSection">
         <div class="settings-section-title">Civics Research Sources</div>
         <div id="civicsSourcesList"></div>
@@ -5686,7 +5697,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.14.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.15.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -8593,6 +8604,7 @@
     try {
       renderBgSchemeOptions();
       renderFontSizeOptions();
+      renderCivicsStateSelect();
       renderCivicsSourcesList();
     } catch (e) { console.warn('Settings render error:', e); }
     applyGuestSettingsSectionsVisibility();
@@ -8631,14 +8643,15 @@
     medical: ['hospital', 'doctor', 'dr', 'medical', 'dentist', 'appointment', 'clinic', 'prescription'],
     pets: ['vet', 'grooming', 'gonzo', 'shasta', 'taquito', 'pet'],
     home: ['repair', 'maintenance', 'inspection', 'plumber', 'electrician', 'cleaner'],
-    civic: ['vote', 'voting', 'election', 'primary', 'ballot', 'polling', 'civic', 'registration', 'early voting']
+    /* Civic row still tags schedule events from getCivicEvents(); legacy data constant was CIVIC_IL_EVENTS — calendar is now CIVIC_STATE_CONFIGS + location. */
+    civic: ['vote', 'voting', 'election', 'primary', 'ballot', 'polling', 'civic', 'registration', 'early voting', 'CIVIC_IL_EVENTS']
   };
 
-  // McLean County, IL — key civic/election dates through 2028 presidential cycle
-  // Sources: IL State Board of Elections (elections.il.gov) + McLean County Clerk
+  // 50-state civic calendar: CIVIC_STATE_CONFIGS. IL retains McLean/ILSOS detail; set location in Settings.
   // civicsUseFetchedCandidates: true = show auto list from getCandidatesForElection for this slide
   // civicsElectionKind: general | primary — passed to API (Wikipedia + Claude extract for that ballot type)
-  const CIVIC_IL_EVENTS = [
+  const CIVIC_STATE_CONFIGS = {
+  IL: { name: 'Illinois', pollingUrl: 'https://www.mcleancountyil.gov/1593/2026-Elections', events: [
     // ── 2026 Primary ──────────────────────────────────────────────
     { title: 'Last Day: Early Voting — IL Primary',          date: '2026-03-16', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
     { title: '🗳️ Illinois Primary Election Day',             date: '2026-03-17', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees who will appear on the November general election ballot.' },
@@ -8666,14 +8679,237 @@
     { title: 'Early Voting Opens — Presidential General',    date: '2028-09-28', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
     { title: 'Last Day: Early Voting — Pres. General',       date: '2028-11-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
     { title: '🗳️ Presidential General Election',             date: '2028-11-07', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose the President and Vice President, along with U.S. Senate, U.S. House, and state offices.' },
-  ];
+  ]},
+  AL: { name: 'Alabama', pollingUrl: 'https://www.sos.alabama.gov/alabama-votes/voter/find-my-polling-place', events: [
+    { title: '\u{1F5F3}\uFE0F Alabama Primary', date: '2026-05-19', calendar: 'civic', isAllDay: true, url: 'https://www.sos.alabama.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Alabama General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.sos.alabama.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  AK: { name: 'Alaska', pollingUrl: 'https://myvoterinformation.alaska.gov/', events: [
+    { title: '\u{1F5F3}\uFE0F Alaska Primary', date: '2026-08-18', calendar: 'civic', isAllDay: true, url: 'https://www.elections.alaska.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Alaska uses a ranked-choice open primary — top 4 candidates advance to the general election.' },
+    { title: '\u{1F5F3}\uFE0F Alaska General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.elections.alaska.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters rank their top choices for federal and state offices using ranked-choice voting.' }
+  ]},
+  AZ: { name: 'Arizona', pollingUrl: 'https://my.arizona.vote/PortalList.aspx', events: [
+    { title: '\u{1F5F3}\uFE0F Arizona Primary', date: '2026-08-04', calendar: 'civic', isAllDay: true, url: 'https://azsos.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Arizona General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://azsos.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  AR: { name: 'Arkansas', pollingUrl: 'https://www.voterview.ar-nova.org/VoterView/', events: [
+    { title: '\u{1F5F3}\uFE0F Arkansas Primary', date: '2026-03-03', calendar: 'civic', isAllDay: true, url: 'https://www.sos.arkansas.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Arkansas General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.sos.arkansas.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  CA: { name: 'California', pollingUrl: 'https://www.sos.ca.gov/elections/polling-place', events: [
+    { title: '\u{1F5F3}\uFE0F California Primary', date: '2026-06-02', calendar: 'civic', isAllDay: true, url: 'https://www.sos.ca.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'California uses a top-two open primary — the two highest vote-getters advance regardless of party.' },
+    { title: '\u{1F5F3}\uFE0F California General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.sos.ca.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between the top two primary finishers for federal and state offices.' }
+  ]},
+  CO: { name: 'Colorado', pollingUrl: 'https://www.sos.state.co.us/voter/pages/pub/olvr/findVoterReg.xhtml', events: [
+    { title: '\u{1F5F3}\uFE0F Colorado Primary', date: '2026-06-30', calendar: 'civic', isAllDay: true, url: 'https://www.sos.state.co.us/pubs/elections/main.html', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Colorado General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.sos.state.co.us/pubs/elections/main.html', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices. Ballots are mailed to all registered voters.' }
+  ]},
+  CT: { name: 'Connecticut', pollingUrl: 'https://portaldir.ct.gov/sots/LookUp.aspx', events: [
+    { title: '\u{1F5F3}\uFE0F Connecticut Primary', date: '2026-08-11', calendar: 'civic', isAllDay: true, url: 'https://portal.ct.gov/sots/election-services', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Connecticut General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://portal.ct.gov/sots/election-services', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  DE: { name: 'Delaware', pollingUrl: 'https://ivrs.elections.delaware.gov/Voter/VoterInformation.aspx', events: [
+    { title: '\u{1F5F3}\uFE0F Delaware Primary', date: '2026-09-15', calendar: 'civic', isAllDay: true, url: 'https://elections.delaware.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Delaware General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://elections.delaware.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  FL: { name: 'Florida', pollingUrl: 'https://dos.myflorida.com/elections/for-voters/polling-place-information/', events: [
+    { title: '\u{1F5F3}\uFE0F Florida Primary', date: '2026-08-18', calendar: 'civic', isAllDay: true, url: 'https://dos.myflorida.com/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Florida General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://dos.myflorida.com/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  GA: { name: 'Georgia', pollingUrl: 'https://mvp.sos.ga.gov/s/voter-registration', events: [
+    { title: '\u{1F5F3}\uFE0F Georgia Primary', date: '2026-05-19', calendar: 'civic', isAllDay: true, url: 'https://sos.ga.gov/elections-division', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Georgia General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://sos.ga.gov/elections-division', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  HI: { name: 'Hawaii', pollingUrl: 'https://olvr.hawaii.gov/', events: [
+    { title: '\u{1F5F3}\uFE0F Hawaii Primary', date: '2026-08-08', calendar: 'civic', isAllDay: true, url: 'https://elections.hawaii.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices. All elections are by mail.' },
+    { title: '\u{1F5F3}\uFE0F Hawaii General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://elections.hawaii.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices. Ballots are mailed to all registered voters.' }
+  ]},
+  ID: { name: 'Idaho', pollingUrl: 'https://idahovotes.gov/find-my-polling-place/', events: [
+    { title: '\u{1F5F3}\uFE0F Idaho Primary', date: '2026-05-19', calendar: 'civic', isAllDay: true, url: 'https://sos.idaho.gov/elections-division', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Idaho General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://sos.idaho.gov/elections-division', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  IN: { name: 'Indiana', pollingUrl: 'https://indianavoters.in.gov/', events: [
+    { title: '\u{1F5F3}\uFE0F Indiana Primary', date: '2026-05-05', calendar: 'civic', isAllDay: true, url: 'https://www.in.gov/sos/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Indiana General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.in.gov/sos/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  IA: { name: 'Iowa', pollingUrl: 'https://sos.iowa.gov/elections/voterinformation/pollingplace.html', events: [
+    { title: '\u{1F5F3}\uFE0F Iowa Primary', date: '2026-06-02', calendar: 'civic', isAllDay: true, url: 'https://sos.iowa.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Iowa General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://sos.iowa.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  KS: { name: 'Kansas', pollingUrl: 'https://myvoteinfo.voteks.org/VoterView/', events: [
+    { title: '\u{1F5F3}\uFE0F Kansas Primary', date: '2026-08-04', calendar: 'civic', isAllDay: true, url: 'https://sos.ks.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Kansas General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://sos.ks.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  KY: { name: 'Kentucky', pollingUrl: 'https://vrsws.sos.ky.gov/ovrweb/govoteky', events: [
+    { title: '\u{1F5F3}\uFE0F Kentucky Primary', date: '2026-05-19', calendar: 'civic', isAllDay: true, url: 'https://elect.ky.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Kentucky General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://elect.ky.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  LA: { name: 'Louisiana', pollingUrl: 'https://www.sos.la.gov/ElectionsAndVoting/FindMyPollingLocation/Pages/default.aspx', events: [
+    { title: '\u{1F5F3}\uFE0F Louisiana Primary', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.sos.la.gov/ElectionsAndVoting', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Louisiana uses a jungle primary — all candidates appear on one ballot, and a majority winner avoids a runoff.' },
+    { title: '\u{1F5F3}\uFE0F Louisiana Runoff (if needed)', date: '2026-12-05', calendar: 'civic', isAllDay: true, url: 'https://www.sos.la.gov/ElectionsAndVoting', civicsUseFetchedCandidates: false, civicsBlurb: 'If no candidate received a majority on November 3, the top two finishers face off in a runoff.' }
+  ]},
+  ME: { name: 'Maine', pollingUrl: 'https://www.maine.gov/sos/cec/elec/voter-info/voterportal.html', events: [
+    { title: '\u{1F5F3}\uFE0F Maine Primary', date: '2026-06-09', calendar: 'civic', isAllDay: true, url: 'https://www.maine.gov/sos/cec/elec', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees using ranked-choice voting for federal offices.' },
+    { title: '\u{1F5F3}\uFE0F Maine General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.maine.gov/sos/cec/elec', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Federal races use ranked-choice voting. Voters rank candidates in order of preference.' }
+  ]},
+  MD: { name: 'Maryland', pollingUrl: 'https://voterservices.elections.maryland.gov/PollingPlaceSearch', events: [
+    { title: '\u{1F5F3}\uFE0F Maryland Primary', date: '2026-06-23', calendar: 'civic', isAllDay: true, url: 'https://elections.maryland.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Maryland General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://elections.maryland.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  MA: { name: 'Massachusetts', pollingUrl: 'https://www.sec.state.ma.us/wheredoivotema/bal/MyElectionInfo.aspx', events: [
+    { title: '\u{1F5F3}\uFE0F Massachusetts Primary', date: '2026-09-01', calendar: 'civic', isAllDay: true, url: 'https://www.sec.state.ma.us/ele', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Massachusetts General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.sec.state.ma.us/ele', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  MI: { name: 'Michigan', pollingUrl: 'https://mvic.sos.state.mi.us/', events: [
+    { title: '\u{1F5F3}\uFE0F Michigan Primary', date: '2026-08-04', calendar: 'civic', isAllDay: true, url: 'https://mvic.sos.state.mi.us', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Michigan General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://mvic.sos.state.mi.us', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  MN: { name: 'Minnesota', pollingUrl: 'https://pollfinder.sos.state.mn.us/', events: [
+    { title: '\u{1F5F3}\uFE0F Minnesota Primary', date: '2026-08-11', calendar: 'civic', isAllDay: true, url: 'https://www.sos.state.mn.us/elections-voting', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Minnesota General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.sos.state.mn.us/elections-voting', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  MS: { name: 'Mississippi', pollingUrl: 'https://www.sos.ms.gov/elections-voting/voter-information', events: [
+    { title: '\u{1F5F3}\uFE0F Mississippi Primary', date: '2026-03-10', calendar: 'civic', isAllDay: true, url: 'https://www.sos.ms.gov/elections-voting', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate and House offices.' },
+    { title: '\u{1F5F3}\uFE0F Mississippi General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.sos.ms.gov/elections-voting', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal offices.' }
+  ]},
+  MO: { name: 'Missouri', pollingUrl: 'https://www.sos.mo.gov/elections/goVoteMissouri/pollingplace.aspx', events: [
+    { title: '\u{1F5F3}\uFE0F Missouri Primary', date: '2026-08-04', calendar: 'civic', isAllDay: true, url: 'https://www.sos.mo.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Missouri General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.sos.mo.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  MT: { name: 'Montana', pollingUrl: 'https://app.mt.gov/voterinfo/', events: [
+    { title: '\u{1F5F3}\uFE0F Montana Primary', date: '2026-06-02', calendar: 'civic', isAllDay: true, url: 'https://sos.mt.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Montana General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://sos.mt.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  NE: { name: 'Nebraska', pollingUrl: 'https://www.nebraska.gov/apps-sos-voter-registration/', events: [
+    { title: '\u{1F5F3}\uFE0F Nebraska Primary', date: '2026-05-12', calendar: 'civic', isAllDay: true, url: 'https://sos.nebraska.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Nebraska uses a nonpartisan unicameral legislature primary. Federal offices use a standard partisan primary.' },
+    { title: '\u{1F5F3}\uFE0F Nebraska General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://sos.nebraska.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose candidates for federal offices and the nonpartisan unicameral legislature.' }
+  ]},
+  NV: { name: 'Nevada', pollingUrl: 'https://www.nvsos.gov/sosvoterregwebapi/', events: [
+    { title: '\u{1F5F3}\uFE0F Nevada Primary', date: '2026-06-09', calendar: 'civic', isAllDay: true, url: 'https://www.nvsos.gov/sos/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Nevada General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.nvsos.gov/sos/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  NH: { name: 'New Hampshire', pollingUrl: 'https://app.sos.nh.gov/public/PolingPlaceSearch.aspx', events: [
+    { title: '\u{1F5F3}\uFE0F New Hampshire Primary', date: '2026-09-08', calendar: 'civic', isAllDay: true, url: 'https://www.sos.nh.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F New Hampshire General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.sos.nh.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  NJ: { name: 'New Jersey', pollingUrl: 'https://voter.svrs.nj.gov/polling-place-search', events: [
+    { title: '\u{1F5F3}\uFE0F New Jersey Primary', date: '2026-06-02', calendar: 'civic', isAllDay: true, url: 'https://www.state.nj.us/state/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F New Jersey General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.state.nj.us/state/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  NM: { name: 'New Mexico', pollingUrl: 'https://voterportal.servis.sos.state.nm.us/WhereToVote.aspx', events: [
+    { title: '\u{1F5F3}\uFE0F New Mexico Primary', date: '2026-06-02', calendar: 'civic', isAllDay: true, url: 'https://www.sos.state.nm.us/voting-and-elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F New Mexico General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.sos.state.nm.us/voting-and-elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  NY: { name: 'New York', pollingUrl: 'https://findmypollsite.vote.nyc/', events: [
+    { title: '\u{1F5F3}\uFE0F New York Primary', date: '2026-06-23', calendar: 'civic', isAllDay: true, url: 'https://www.elections.ny.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F New York General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.elections.ny.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  NC: { name: 'North Carolina', pollingUrl: 'https://vt.ncsbe.gov/PPLkup/', events: [
+    { title: '\u{1F5F3}\uFE0F North Carolina Primary', date: '2026-03-03', calendar: 'civic', isAllDay: true, url: 'https://www.ncsbe.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F North Carolina General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.ncsbe.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  ND: { name: 'North Dakota', pollingUrl: 'https://vip.sos.nd.gov/PortalList.aspx', events: [
+    { title: '\u{1F5F3}\uFE0F North Dakota Primary', date: '2026-06-09', calendar: 'civic', isAllDay: true, url: 'https://www.sos.nd.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees. North Dakota has no voter registration requirement.' },
+    { title: '\u{1F5F3}\uFE0F North Dakota General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.sos.nd.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices. No voter registration required.' }
+  ]},
+  OH: { name: 'Ohio', pollingUrl: 'https://www.ohiosos.gov/elections/voters/toolkit/polling-location/', events: [
+    { title: '\u{1F5F3}\uFE0F Ohio Primary', date: '2026-05-05', calendar: 'civic', isAllDay: true, url: 'https://www.ohiosos.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Ohio General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.ohiosos.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  OK: { name: 'Oklahoma', pollingUrl: 'https://www.ok.gov/elections/Voter_Info/Where_to_Vote/', events: [
+    { title: '\u{1F5F3}\uFE0F Oklahoma Primary', date: '2026-06-16', calendar: 'civic', isAllDay: true, url: 'https://www.ok.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Oklahoma General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.ok.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  OR: { name: 'Oregon', pollingUrl: 'https://sos.oregon.gov/voting/Pages/drop-box-locator.aspx', events: [
+    { title: '\u{1F5F3}\uFE0F Oregon Primary', date: '2026-05-19', calendar: 'civic', isAllDay: true, url: 'https://sos.oregon.gov/voting', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees. Oregon votes entirely by mail — ballots are sent to all registered voters.' },
+    { title: '\u{1F5F3}\uFE0F Oregon General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://sos.oregon.gov/voting', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'All registered voters receive a ballot by mail. Return by mail or drop box by Election Day.' }
+  ]},
+  PA: { name: 'Pennsylvania', pollingUrl: 'https://www.vote.pa.gov/Resources/Pages/Contact-Your-Election-Officials.aspx', events: [
+    { title: '\u{1F5F3}\uFE0F Pennsylvania Primary', date: '2026-05-19', calendar: 'civic', isAllDay: true, url: 'https://www.vote.pa.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Pennsylvania General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.vote.pa.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  RI: { name: 'Rhode Island', pollingUrl: 'https://vote.sos.ri.gov/Voter/PollingPlaces', events: [
+    { title: '\u{1F5F3}\uFE0F Rhode Island Primary', date: '2026-09-08', calendar: 'civic', isAllDay: true, url: 'https://vote.sos.ri.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Rhode Island General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://vote.sos.ri.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  SC: { name: 'South Carolina', pollingUrl: 'https://info.scvotes.sc.gov/eng/voterinquiry/VoterInformationRequest.aspx', events: [
+    { title: '\u{1F5F3}\uFE0F South Carolina Primary', date: '2026-06-09', calendar: 'civic', isAllDay: true, url: 'https://www.scvotes.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F South Carolina General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.scvotes.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  SD: { name: 'South Dakota', pollingUrl: 'https://www.sdsos.gov/elections-voting/voting/polling-locations.aspx', events: [
+    { title: '\u{1F5F3}\uFE0F South Dakota Primary', date: '2026-06-02', calendar: 'civic', isAllDay: true, url: 'https://www.sdsos.gov/elections-voting', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F South Dakota General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.sdsos.gov/elections-voting', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  TN: { name: 'Tennessee', pollingUrl: 'https://tnmap.tn.gov/voterlookup/', events: [
+    { title: '\u{1F5F3}\uFE0F Tennessee Primary', date: '2026-08-06', calendar: 'civic', isAllDay: true, url: 'https://sos.tn.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Tennessee General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://sos.tn.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  TX: { name: 'Texas', pollingUrl: 'https://teamrv-mvp.sos.texas.gov/MVP/mvp.do', events: [
+    { title: '\u{1F5F3}\uFE0F Texas Primary', date: '2026-03-03', calendar: 'civic', isAllDay: true, url: 'https://www.sos.state.tx.us/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Texas General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.sos.state.tx.us/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  UT: { name: 'Utah', pollingUrl: 'https://vote.utah.gov/vote/menu/index', events: [
+    { title: '\u{1F5F3}\uFE0F Utah Primary', date: '2026-06-23', calendar: 'civic', isAllDay: true, url: 'https://elections.utah.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees. Utah uses a hybrid caucus-convention and primary system.' },
+    { title: '\u{1F5F3}\uFE0F Utah General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://elections.utah.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices. Most voters receive mail ballots.' }
+  ]},
+  VT: { name: 'Vermont', pollingUrl: 'https://mvp.vermont.gov/', events: [
+    { title: '\u{1F5F3}\uFE0F Vermont Primary', date: '2026-08-11', calendar: 'civic', isAllDay: true, url: 'https://sos.vermont.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Vermont General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://sos.vermont.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  VA: { name: 'Virginia', pollingUrl: 'https://vote.elections.virginia.gov/VoterInformation/Lookup/polling', events: [
+    { title: '\u{1F5F3}\uFE0F Virginia Primary', date: '2026-06-16', calendar: 'civic', isAllDay: true, url: 'https://www.elections.virginia.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Virginia General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.elections.virginia.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  WA: { name: 'Washington', pollingUrl: 'https://voter.votewa.gov/WhereToVote.aspx', events: [
+    { title: '\u{1F5F3}\uFE0F Washington Primary', date: '2026-08-04', calendar: 'civic', isAllDay: true, url: 'https://www.sos.wa.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Washington uses a top-two open primary. All voters receive a mail ballot — the top two finishers advance.' },
+    { title: '\u{1F5F3}\uFE0F Washington General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.sos.wa.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'All registered voters receive a ballot by mail. The top two primary finishers face off regardless of party.' }
+  ]},
+  WV: { name: 'West Virginia', pollingUrl: 'https://apps.sos.wv.gov/elections/voter/find-polling-place.aspx', events: [
+    { title: '\u{1F5F3}\uFE0F West Virginia Primary', date: '2026-05-12', calendar: 'civic', isAllDay: true, url: 'https://sos.wv.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F West Virginia General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://sos.wv.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  WI: { name: 'Wisconsin', pollingUrl: 'https://myvote.wi.gov/en-us/Find-My-Polling-Place', events: [
+    { title: '\u{1F5F3}\uFE0F Wisconsin Spring Primary', date: '2026-02-17', calendar: 'civic', isAllDay: true, url: 'https://elections.wi.gov', civicsUseFetchedCandidates: false, civicsBlurb: 'Voters select nominees for spring local and judicial offices.' },
+    { title: '\u{1F5F3}\uFE0F Wisconsin Primary', date: '2026-08-11', calendar: 'civic', isAllDay: true, url: 'https://elections.wi.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Wisconsin General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://elections.wi.gov', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]},
+  WY: { name: 'Wyoming', pollingUrl: 'https://sos.wyo.gov/elections/voters.aspx', events: [
+    { title: '\u{1F5F3}\uFE0F Wyoming Primary', date: '2026-08-18', calendar: 'civic', isAllDay: true, url: 'https://sos.wyo.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'primary', civicsBlurb: 'Voters select party nominees for Senate, House, Governor, and statewide offices.' },
+    { title: '\u{1F5F3}\uFE0F Wyoming General Election', date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://sos.wyo.gov/elections', civicsUseFetchedCandidates: true, civicsElectionKind: 'general', civicsBlurb: 'Voters choose between party nominees for federal and state offices.' }
+  ]}
+  };
+
+  const CIVICS_STATE_KEY = 'shasta_civics_state';
+  const CIVICS_ZIP_KEY = 'shasta_civics_zip';
+
+  function getCivicsState() {
+    return localStorage.getItem(CIVICS_STATE_KEY) || 'IL';
+  }
+  function getCivicsZip() {
+    return localStorage.getItem(CIVICS_ZIP_KEY) || '';
+  }
+  function saveCivicsZip(val) {
+    localStorage.setItem(CIVICS_ZIP_KEY, String(val || '').trim());
+  }
 
   function getCivicEvents() {
+    const state = getCivicsState();
+    const cfg = CIVIC_STATE_CONFIGS[state] || CIVIC_STATE_CONFIGS['IL'];
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return CIVIC_IL_EVENTS
+    return cfg.events
       .map(ev => ({ ...ev, start: ev.date + 'T12:00:00' }))
       .filter(ev => new Date(ev.start) >= today);
+  }
+
+  function getCivicsPollingUrl() {
+    const zip = getCivicsZip();
+    if (zip) {
+      return 'https://www.google.com/search?q=polling+place+' + encodeURIComponent(zip);
+    }
+    const state = getCivicsState();
+    const cfg = CIVIC_STATE_CONFIGS[state] || CIVIC_STATE_CONFIGS['IL'];
+    return cfg.pollingUrl || 'https://www.vote.org/polling-place-locator/';
   }
 
   // ── CIVICS SCREEN ─────────────────────────────────────────────────
@@ -8681,7 +8917,6 @@
   const CIVICS_CANDIDATE_CACHE_KEY = 'shasta_civics_candidates';
   const CIVICS_CANDIDATE_CACHE_TTL = 24 * 60 * 60 * 1000;
   const CIVICS_NOTES_KEY = 'shasta_civics_notes';
-  const POLLING_URL = 'https://www.mcleancountyil.gov/1593/2026-Elections';
 
   function readCivicsStorageState() {
     try {
@@ -8717,7 +8952,40 @@
     var kind = elEv.civicsElectionKind || 'general';
     if (kind !== 'primary' && kind !== 'general') kind = 'general';
     var date = String(elEv.date || '').slice(0, 10);
-    return kind + '|' + date;
+    return kind + '|' + date + '|' + getCivicsState();
+  }
+
+  function saveCivicsState(val) {
+    localStorage.setItem(CIVICS_STATE_KEY, val);
+    try {
+      var o = readCivicsStorageState();
+      o.buckets = {};
+      writeCivicsStorageState(o);
+    } catch (_) {}
+    if (typeof renderCivicsScreen === 'function') renderCivicsScreen();
+  }
+
+  function renderCivicsStateSelect() {
+    const sel = document.getElementById('civicsStateSelect');
+    const zip = document.getElementById('civicsZipCode');
+    if (!sel) return;
+    const states = Object.keys(CIVIC_STATE_CONFIGS).sort();
+    sel.innerHTML = '<option value="">— Select your state —</option>' +
+      states.map(function(s) {
+        const cfg = CIVIC_STATE_CONFIGS[s];
+        return '<option value="' + s + '"' + (getCivicsState() === s ? ' selected' : '') + '>' +
+          escapeHtml(cfg.name) + '</option>';
+      }).join('');
+    if (zip) {
+      zip.value = getCivicsZip();
+      zip.oninput = function() { saveCivicsZip(zip.value); };
+    }
+  }
+
+  function getCivicsLocationLabel() {
+    const stateCode = getCivicsState();
+    const stateCfg = CIVIC_STATE_CONFIGS[stateCode] || CIVIC_STATE_CONFIGS['IL'];
+    return getCivicsZip() ? getCivicsZip() + ', ' + stateCfg.name : stateCfg.name;
   }
 
   function getMergedCandidatesForSlide(slideIndex) {
@@ -8865,7 +9133,9 @@
   }
 
   function newsUrl(name) {
-    return 'https://news.google.com/search?q=' + encodeURIComponent((name || '') + ' Illinois');
+    var st = getCivicsState();
+    var nm = (CIVIC_STATE_CONFIGS[st] || CIVIC_STATE_CONFIGS['IL']).name;
+    return 'https://news.google.com/search?q=' + encodeURIComponent((name || '') + ' ' + nm);
   }
 
   function showCivicsScreen() {
@@ -8941,6 +9211,7 @@
       const y = isNaN(electionYear) ? new Date().getFullYear() : electionYear;
       const q = '&action=getCandidatesForElection&electionKind=' + encodeURIComponent(kind) +
         '&electionYear=' + encodeURIComponent(String(y)) +
+        '&state=' + encodeURIComponent(getCivicsState()) +
         '&user=' + encodeURIComponent(user);
       const res = await fetch(apiUrlWithUser(API_URL, q), { redirect: 'follow' });
       const data = await res.json();
@@ -9185,7 +9456,7 @@
       : '';
     zoneB.innerHTML = '<div class="civics-quick-card">' +
       '<div class="civics-quick-election">' + escapeHtml(electionDate ? new Date(electionDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' — ' + escapeHtml(typeLabel) : 'Next election') + '</div>' +
-      '<a class="civics-quick-polling" href="' + escapeHtml(POLLING_URL) + '" target="_blank" rel="noopener">Find my polling place</a>' +
+      '<a class="civics-quick-polling" href="' + escapeHtml(getCivicsPollingUrl()) + '" target="_blank" rel="noopener">Find my polling place</a>' +
       '<div class="civics-quick-chips">' + candidateChips + '</div>' + filterRow + '</div>';
 
     if (!elEv && nextCandidates.length === 0) {
@@ -9283,9 +9554,10 @@
   function civicsAskBlathersAboutElection() {
     const group = civicsElectionGroups[civicsCurrentSlide];
     const elEv = group ? group.electionEvent : null;
-    const name = elEv ? elEv.title.replace(/[\u{1F000}-\u{1FFFF}]|[\u2600-\u27FF]/gu, '').trim() : 'the upcoming Illinois election';
+    const name = elEv ? elEv.title.replace(/[\u{1F000}-\u{1FFFF}]|[\u2600-\u27FF]/gu, '').trim() : 'the upcoming election';
     const elDate = elEv ? new Date(elEv.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '';
-    const prompt = 'Please give me a neutral overview of ' + name + (elDate ? ' on ' + elDate : '') + '. What offices are on the ballot in McLean County, IL? Who are the key candidates and what should I know about them going in?';
+    const loc = getCivicsLocationLabel();
+    const prompt = 'Please give me a neutral overview of ' + name + (elDate ? ' on ' + elDate : '') + '. What offices are on the ballot for voters in ' + loc + '? Who are the key candidates and what should I know about them going in?';
     openBlatherBookPanel();
     setTimeout(function() { sendCivicsBlathersMessage(prompt); }, 300);
   }
@@ -9293,9 +9565,10 @@
   async function civicsAskBlathersAboutElectionInline() {
     const group = civicsElectionGroups[civicsCurrentSlide];
     const elEv = group ? group.electionEvent : null;
-    const name = elEv ? elEv.title.replace(/[\u{1F000}-\u{1FFFF}]|[\u2600-\u27FF]/gu, '').trim() : 'the upcoming Illinois election';
+    const name = elEv ? elEv.title.replace(/[\u{1F000}-\u{1FFFF}]|[\u2600-\u27FF]/gu, '').trim() : 'the upcoming election';
     const elDate = elEv ? new Date(elEv.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '';
-    const prompt = 'Please give me a neutral overview of ' + name + (elDate ? ' on ' + elDate : '') + '. What offices are on the ballot in McLean County, IL? Who are the key candidates and what should I know about them going in?';
+    const loc = getCivicsLocationLabel();
+    const prompt = 'Please give me a neutral overview of ' + name + (elDate ? ' on ' + elDate : '') + '. What offices are on the ballot for voters in ' + loc + '? Who are the key candidates and what should I know about them going in?';
 
     var askScope = null;
     var askTrack = document.getElementById('civicsCarouselTrack');
@@ -9326,7 +9599,9 @@
         history: [],
         nickname: getDisplayName(),
         dumbMode: !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true'),
-        civicsSources: civicsSources
+        civicsSources: civicsSources,
+        state: getCivicsState(),
+        locationLabel: getCivicsLocationLabel()
       };
       const res = await fetch(AI_URL, {
         method: 'POST',
@@ -9486,7 +9761,9 @@
         action: 'getCivicsResearch',
         user: getApiUser(),
         candidate: { name, office, level },
-        civicsSources: getCivicsSources().filter(s => s.enabled)
+        civicsSources: getCivicsSources().filter(s => s.enabled),
+        state: getCivicsState(),
+        locationLabel: getCivicsLocationLabel()
       };
       const res = await fetch(AI_URL, {
         method: 'POST',
@@ -9526,10 +9803,7 @@
     const zoneC = document.getElementById('civicsZoneC');
     if (!zoneA || !zoneB || !zoneC) return;
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const allEvents = CIVIC_IL_EVENTS.map(ev => ({ ...ev, start: ev.date + 'T12:00:00' }));
-    const allUpcoming = allEvents.filter(ev => new Date(ev.start) >= today);
+    const allUpcoming = getCivicEvents();
 
     const electionDays = allUpcoming.filter(ev => (ev.title || '').includes('🗳️'));
 
@@ -9578,7 +9852,7 @@
       ['FEC', fecUrl(name)],
       ['News', newsUrl(name)]
     ];
-    if (level === 'state') {
+    if (level === 'state' && getCivicsState() === 'IL') {
       links.splice(2, 0, ['IL Legislature', 'https://ilga.gov']);
     }
     const linkIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
@@ -10616,7 +10890,9 @@
         history: [],
         nickname: getDisplayName(),
         dumbMode: !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true'),
-        civicsSources: civicsSources
+        civicsSources: civicsSources,
+        state: getCivicsState(),
+        locationLabel: getCivicsLocationLabel()
       };
       const res = await fetch(AI_URL, {
         method: 'POST',
