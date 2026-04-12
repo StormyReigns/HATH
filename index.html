@@ -1650,6 +1650,17 @@
     }
     html.dark-mode .civics-carousel-dot { background: rgba(90,143,216,0.25); }
     html.dark-mode .civics-carousel-dot.active { background: rgba(90,143,216,0.7); }
+    .civics-filter-row {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px;
+    }
+    .civics-filter-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); width: 100%; }
+    .civics-filter-btn {
+      font-size: 12px; font-family: inherit; padding: 6px 12px; border-radius: 999px;
+      border: 1px solid rgba(42,91,168,0.28); background: transparent; color: var(--text2); cursor: pointer;
+    }
+    .civics-filter-btn:active { opacity: 0.85; }
+    .civics-filter-btn.active { background: rgba(42,91,168,0.18); border-color: rgba(42,91,168,0.45); color: #1e4a96; font-weight: 600; }
+    html.dark-mode .civics-filter-btn.active { color: #8ab4f8; border-color: rgba(90,143,216,0.5); background: rgba(90,143,216,0.15); }
     .civics-carousel-hint {
       display: flex; align-items: center; justify-content: center; gap: 6px;
       font-size: 11px; color: var(--muted);
@@ -3261,8 +3272,9 @@
       overflow: hidden; padding: 0; position: relative;
       min-height: 0; min-width: 100%;
     }
+    /* Fixed ocean strip is out of flow — reserve space with spacer after quote (not huge padding below quote). */
     .app.in-project-view .projects-view {
-      padding-bottom: calc(88px + 52px + 12px + env(safe-area-inset-bottom, 0px));
+      padding-bottom: 0;
     }
     .projects-view-header {
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -3338,9 +3350,12 @@
       position: relative;
       padding-bottom: 16px;
     }
+    .app.in-project-view .projects-phase-cards-wrap {
+      padding-bottom: 0;
+    }
     .projects-phase-cards {
-      flex: 1 1 auto;
-      min-height: 160px;
+      flex: 1 1 0;
+      min-height: 0;
       overflow-x: auto;
       overflow-y: hidden;
       display: flex;
@@ -3647,6 +3662,15 @@
       font-style: normal; font-weight: 700;
       color: rgba(192,122,74,0.42);
       pointer-events: none;
+    }
+    /* In-flow gap above fixed ocean (matches strip height + breathing room). */
+    .projects-ocean-strip-spacer {
+      flex-shrink: 0;
+      width: 100%;
+      pointer-events: none;
+    }
+    .app.in-project-view .projects-ocean-strip-spacer {
+      height: calc(12px + 88px + env(safe-area-inset-bottom, 0px));
     }
     .projects-korl-quote {
       position: relative;
@@ -5479,7 +5503,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.10.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.10.6';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -8335,34 +8359,36 @@
 
   // McLean County, IL — key civic/election dates through 2028 presidential cycle
   // Sources: IL State Board of Elections (elections.il.gov) + McLean County Clerk
+  // civicsUseFetchedCandidates: true = carousel slide shows the list from getCandidatesForElection
+  // (federal + Illinois state general races). false = primaries, consolidated, local — use manual add / Blathers.
   const CIVIC_IL_EVENTS = [
     // ── 2026 Primary ──────────────────────────────────────────────
     { title: 'Last Day: Early Voting — IL Primary',          date: '2026-03-16', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
-    { title: '🗳️ Illinois Primary Election Day',             date: '2026-03-17', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
+    { title: '🗳️ Illinois Primary Election Day',             date: '2026-03-17', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: false },
     // ── 2026 General ──────────────────────────────────────────────
     { title: 'Voter Registration Deadline — General',        date: '2026-10-06', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
     { title: 'Early Voting Opens — IL General Election',     date: '2026-10-19', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
     { title: 'Mail Ballot Request Deadline — General',       date: '2026-10-29', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
     { title: 'Last Day: Early Voting — IL General',          date: '2026-11-02', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
-    { title: '🗳️ Illinois General Election Day',             date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
+    { title: '🗳️ Illinois General Election Day',             date: '2026-11-03', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: true },
     // ── 2027 Consolidated Primary ─────────────────────────────────
     { title: 'Voter Registration Deadline — Consol. Primary', date: '2027-01-26', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
     { title: 'Last Day: Early Voting — Consol. Primary',     date: '2027-02-22', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
-    { title: '🗳️ IL Consolidated Primary Election',          date: '2027-02-23', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
+    { title: '🗳️ IL Consolidated Primary Election',          date: '2027-02-23', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: false },
     // ── 2027 Consolidated Election ────────────────────────────────
     { title: 'Voter Registration Deadline — Consol. Election', date: '2027-03-09', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
     { title: 'Last Day: Early Voting — Consol. Election',    date: '2027-04-05', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
-    { title: '🗳️ IL Consolidated Election Day',              date: '2027-04-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
+    { title: '🗳️ IL Consolidated Election Day',              date: '2027-04-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: false },
     // ── 2028 Presidential Primary ─────────────────────────────────
     { title: 'Voter Registration Deadline — Pres. Primary',  date: '2028-02-22', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
     { title: 'Early Voting Opens — Presidential Primary',    date: '2028-02-10', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
     { title: 'Last Day: Early Voting — Pres. Primary',       date: '2028-03-20', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
-    { title: '🗳️ Illinois Presidential Primary',             date: '2028-03-21', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
+    { title: '🗳️ Illinois Presidential Primary',             date: '2028-03-21', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: false },
     // ── 2028 Presidential General ─────────────────────────────────
     { title: 'Voter Registration Deadline — Pres. General',  date: '2028-10-10', calendar: 'civic', isAllDay: true, url: 'https://elections.il.gov/votinginformation/registertovote.aspx' },
     { title: 'Early Voting Opens — Presidential General',    date: '2028-09-28', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
     { title: 'Last Day: Early Voting — Pres. General',       date: '2028-11-06', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
-    { title: '🗳️ Presidential General Election',             date: '2028-11-07', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections' },
+    { title: '🗳️ Presidential General Election',             date: '2028-11-07', calendar: 'civic', isAllDay: true, url: 'https://www.mcleancountyil.gov/1593/2026-Elections', civicsUseFetchedCandidates: true },
   ];
 
   function getCivicEvents() {
@@ -8375,6 +8401,7 @@
 
   // ── CIVICS SCREEN ─────────────────────────────────────────────────
   let civicsCandidateCache = null;
+  let civicsPartyFilter = 'all';
   const CIVICS_CANDIDATE_CACHE_KEY = 'shasta_civics_candidates';
   const CIVICS_CANDIDATE_CACHE_TTL = 24 * 60 * 60 * 1000;
   const CIVICS_NOTES_KEY = 'shasta_civics_notes';
@@ -8431,6 +8458,26 @@
     if (p.includes('democrat') || p.includes('dem')) return 'dem';
     if (p.includes('republican') || p.includes('rep')) return 'rep';
     return 'other';
+  }
+
+  function civicsSlideShowsFetchedCandidateList(elEv) {
+    if (!elEv) return false;
+    if (elEv.civicsUseFetchedCandidates === true) return true;
+    if (elEv.civicsUseFetchedCandidates === false) return false;
+    const t = (elEv.title || '').replace(/[\u{1F000}-\u{1FFFF}]|[\u2600-\u27FF]/gu, '').trim().toLowerCase();
+    if (t.indexOf('consolidated') !== -1) return false;
+    if (t.indexOf('primary') !== -1) return false;
+    return t.indexOf('general') !== -1;
+  }
+
+  function filterCivicsCandidatesByParty(list, filter) {
+    if (!filter || filter === 'all') return list.slice();
+    return list.filter(function(c) { return getPartyClass(c.party) === filter; });
+  }
+
+  function setCivicsPartyFilter(f) {
+    civicsPartyFilter = f || 'all';
+    renderCivicsZoneBC(typeof civicsCurrentSlide === 'number' ? civicsCurrentSlide : 0);
   }
 
   function getCivicsNotes(candidateId) {
@@ -8683,10 +8730,11 @@
     const elEv = group ? group.electionEvent : null;
 
     const cache = civicsCandidateCache || { candidates: [] };
-    const candidates = cache.candidates || [];
-    const nextElectionDate = elEv ? String(elEv.date || '').slice(0, 10) : null;
-    const isNov2026 = nextElectionDate === '2026-11-03';
-    const nextCandidates = isNov2026 ? candidates : [];
+    const allList = cache.candidates || [];
+    const useFetched = civicsSlideShowsFetchedCandidateList(elEv);
+    const manualOnly = allList.filter(function(c) { return c.source === 'manual'; });
+    const rawPool = useFetched ? allList.slice() : manualOnly.slice();
+    const nextCandidates = filterCivicsCandidatesByParty(rawPool, civicsPartyFilter);
 
     const electionName = (elEv && (elEv.title || '').replace(/🗳️\s*/g, '').trim()) || 'upcoming election';
     const electionType = elEv && elEv.title || '';
@@ -8701,16 +8749,63 @@
           return '<span class="civics-party-chip ' + cls + '">' + escapeHtml(c.name || '') + '</span>';
         }).join('')
       : '<span class="civics-party-chip other">No candidates</span>';
+    const filterRow = rawPool.length > 0
+      ? '<div class="civics-filter-row" role="group" aria-label="Filter by party">' +
+        '<span class="civics-filter-label">Quick filter</span>' +
+        '<button type="button" class="civics-filter-btn' + (civicsPartyFilter === 'all' ? ' active' : '') + '" onclick="setCivicsPartyFilter(\'all\')">All</button>' +
+        '<button type="button" class="civics-filter-btn' + (civicsPartyFilter === 'dem' ? ' active' : '') + '" onclick="setCivicsPartyFilter(\'dem\')">Dem</button>' +
+        '<button type="button" class="civics-filter-btn' + (civicsPartyFilter === 'rep' ? ' active' : '') + '" onclick="setCivicsPartyFilter(\'rep\')">Rep</button>' +
+        '<button type="button" class="civics-filter-btn' + (civicsPartyFilter === 'other' ? ' active' : '') + '" onclick="setCivicsPartyFilter(\'other\')">Other</button>' +
+        '</div>'
+      : '';
     zoneB.innerHTML = '<div class="civics-quick-card">' +
       '<div class="civics-quick-election">' + escapeHtml(electionDate ? new Date(electionDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' — ' + escapeHtml(typeLabel) : 'Next election') + '</div>' +
       '<a class="civics-quick-polling" href="' + escapeHtml(POLLING_URL) + '" target="_blank" rel="noopener">Find my polling place</a>' +
-      '<div class="civics-quick-chips">' + candidateChips + '</div></div>';
+      '<div class="civics-quick-chips">' + candidateChips + '</div>' + filterRow + '</div>';
 
     if (!elEv && nextCandidates.length === 0) {
       zoneC.innerHTML = '<div class="civics-ask-inline">' +
         '<img class="civics-empty-char" src="https://stormyreigns.github.io/HATH/LaytonHuh.png" alt="" loading="lazy">' +
         '<div class="civics-ask-inline-title">No upcoming election data</div>' +
         '<div class="civics-ask-inline-text">Check back closer to the next election.</div></div>';
+      return;
+    }
+
+    if (elEv && !useFetched) {
+      if (rawPool.length === 0) {
+        zoneC.innerHTML = '<div class="civics-ask-inline">' +
+          '<img class="civics-empty-char" src="https://stormyreigns.github.io/HATH/LaytonHuh.png" alt="" loading="lazy">' +
+          '<div class="civics-ask-inline-title">Primary or local election</div>' +
+          '<div class="civics-ask-inline-text">The auto-loaded list is for Illinois and presidential general elections. For this date, add candidates with "+ Add candidate manually" below, or ask Blathers for an overview. You can still refresh the general-election list for when you swipe to that carousel slide.</div>' +
+          '<button type="button" class="civics-refresh-btn civics-get-candidates-inline" onclick="loadCivicsCandidates(true)" title="Refresh general-election list" aria-label="Refresh general-election list">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>' +
+          '<span>Refresh general list</span></button>' +
+          '<button type="button" class="civics-ask-blathers-btn" id="civicsAskElectionBtn" onclick="civicsAskBlathersAboutElectionInline()">' +
+          '\uD83E\uDD89 Ask Blathers about this election</button>' +
+          '<div class="civics-ask-inline-response" id="civicsAskInlineResponse"></div></div>';
+        return;
+      }
+    }
+
+    if (elEv && useFetched && rawPool.length === 0) {
+      zoneC.innerHTML = '<div class="civics-ask-inline">' +
+        '<img class="civics-empty-char" src="https://stormyreigns.github.io/HATH/LaytonHuh.png" alt="" loading="lazy">' +
+        '<div class="civics-ask-inline-title">No candidate data yet</div>' +
+        '<div class="civics-ask-inline-text">Ask Blathers about this election to get an overview of offices, candidates, and what to know.</div>' +
+        '<button type="button" class="civics-refresh-btn civics-get-candidates-inline" onclick="loadCivicsCandidates(true)" title="Get candidates" aria-label="Get candidates">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>' +
+        '<span>Get Candidates</span></button>' +
+        '<button type="button" class="civics-ask-blathers-btn" id="civicsAskElectionBtn" onclick="civicsAskBlathersAboutElectionInline()">' +
+        '\uD83E\uDD89 Ask Blathers about this election</button>' +
+        '<div class="civics-ask-inline-response" id="civicsAskInlineResponse"></div></div>';
+      return;
+    }
+
+    if (rawPool.length > 0 && nextCandidates.length === 0) {
+      zoneC.innerHTML = '<div class="civics-ask-inline">' +
+        '<div class="civics-ask-inline-title">No candidates match this filter</div>' +
+        '<div class="civics-ask-inline-text">Try another party or tap All.</div>' +
+        '<button type="button" class="civics-ask-blathers-btn" onclick="setCivicsPartyFilter(\'all\')">Show all</button></div>';
       return;
     }
 
@@ -8788,7 +8883,6 @@
         history: [],
         nickname: getDisplayName(),
         dumbMode: !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true'),
-        civicsMode: true,
         civicsSources: civicsSources
       };
       const res = await fetch(AI_URL, {
@@ -8824,6 +8918,7 @@
   async function civicsAskBlathersAboutCandidate(btn) {
     const name = (btn.getAttribute('data-name') || '').trim();
     const office = (btn.getAttribute('data-office') || '').trim();
+    const level = (btn.getAttribute('data-level') || '').trim();
     if (!name) return;
     const card = btn.closest('.civics-card');
     const researchEl = card && card.querySelector('.civics-card-research');
@@ -8859,7 +8954,7 @@
       const body = {
         action: 'getCivicsResearch',
         user: getApiUser(),
-        candidate: { name, office },
+        candidate: { name, office, level },
         civicsSources: getCivicsSources().filter(s => s.enabled)
       };
       const res = await fetch(AI_URL, {
@@ -8933,7 +9028,7 @@
     const partyChip = '<span class="civics-party-chip ' + partyCls + '">' + escapeHtml(party || 'Nonpartisan') + '</span>';
 
     const ballotpediaLink = '<a class="civics-link-btn" href="' + escapeHtml(ballotpediaUrl(name)) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔍 Find on Ballotpedia</a>';
-    const askBlathersBtn = '<button type="button" class="civics-ask-blathers-btn civics-research-btn" data-name="' + escapeHtml(name) + '" data-office="' + escapeHtml(office) + '" onclick="event.stopPropagation(); civicsAskBlathersAboutCandidate(this)">🦉 Ask Blathers</button>';
+    const askBlathersBtn = '<button type="button" class="civics-ask-blathers-btn civics-research-btn" data-name="' + escapeHtml(name) + '" data-office="' + escapeHtml(office) + '" data-level="' + escapeHtml(level) + '" onclick="event.stopPropagation(); civicsAskBlathersAboutCandidate(this)">🦉 Ask Blathers</button>';
 
     const integritySlug = (name || '').replace(/\s+/g, '-').toLowerCase().replace(/[^\w\-]/g, '') || 'explore';
     const links = [
@@ -9908,7 +10003,6 @@
         history: [],
         nickname: getDisplayName(),
         dumbMode: !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true'),
-        civicsMode: true,
         civicsSources: civicsSources
       };
       const res = await fetch(AI_URL, {
