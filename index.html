@@ -1679,19 +1679,29 @@
     .civics-carousel-track { display: flex; transition: transform 0.28s ease; will-change: transform; }
     .civics-carousel-slide {
       min-width: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+    }
+    .civics-slide-hero {
       background: rgba(42,91,168,0.08);
       border-left: 3px solid #2a5ba8;
       border-radius: 14px;
       padding: 14px 16px;
       box-sizing: border-box;
+      flex-shrink: 0;
     }
+    .civics-slide-zone-b { flex-shrink: 0; margin-top: 12px; padding: 0 2px; }
+    .civics-slide-zone-c { flex-shrink: 0; margin-top: 4px; padding: 0 2px 4px; }
     .civics-slide-title { font-weight: 600; color: #1e4a96; font-size: 15px; }
     .civics-slide-days { font-size: 12px; color: var(--muted); margin: 2px 0 10px; }
     .civics-slide-dates { display: flex; flex-direction: column; gap: 5px; }
     .civics-slide-date-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--text2); }
     .civics-slide-date-row--election { color: var(--text); font-weight: 500; }
     .civics-slide-date-val { color: var(--text); font-size: 13px; }
-    html.dark-mode .civics-carousel-slide { background: rgba(42,91,168,0.12); border-left-color: #5a8fd8; }
+    html.dark-mode .civics-slide-hero { background: rgba(42,91,168,0.12); border-left-color: #5a8fd8; }
     html.dark-mode .civics-slide-title { color: #8ab4f8; }
     html.dark-mode .civics-carousel-edge--right { background: linear-gradient(to left, rgba(42,91,168,0.25), transparent); }
     html.dark-mode .civics-carousel-edge--left { background: linear-gradient(to right, rgba(42,91,168,0.25), transparent); }
@@ -1829,11 +1839,28 @@
       cursor: pointer;
       position: relative;
       padding-right: 28px;
-      border-radius: 8px;
+      border-radius: 10px;
       margin: -4px;
+      padding: 6px 30px 6px 8px;
+      border: 1px dashed rgba(192,122,74,0.38);
+      background: rgba(192,122,74,0.05);
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .civics-card.expanded .civics-card-summary {
+      border: 1px solid transparent;
+      background: transparent;
       padding: 4px 28px 4px 4px;
     }
-    .civics-card-summary:active { background: rgba(192,122,74,0.06); }
+    .civics-card-summary:active { background: rgba(192,122,74,0.09); }
+    .civics-card-expand-hint {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      width: 100%;
+      margin-top: 6px;
+      padding-left: 2px;
+    }
+    .civics-card.expanded .civics-card-expand-hint { display: none; }
     .civics-card-chevron {
       position: absolute; right: 2px; top: 50%;
       transform: translateY(-50%);
@@ -1901,6 +1928,10 @@
     html.dark-mode .civics-quick-card,
     html.dark-mode .civics-card { background: #252220; border-color: rgba(255,255,255,0.06); }
     html.dark-mode .civics-card-notes textarea { border-color: rgba(192,122,74,0.4); }
+    html.dark-mode .civics-card:not(.expanded) .civics-card-summary {
+      border-color: rgba(192,122,74,0.42);
+      background: rgba(192,122,74,0.07);
+    }
 
     /* ── Recipes screen ─────────────────────────────────────── */
     #recipesScreen { position: relative; flex-direction: column; padding: 0; overflow: hidden; }
@@ -5042,9 +5073,11 @@
             </div>
           </div>
         </div>
-        <div class="civics-zone-b" id="civicsZoneB"></div>
-        <div class="civics-zone-c-wrap">
+        <div class="civics-below-carousel" id="civicsBelowCarousel">
+          <div class="civics-zone-b" id="civicsZoneB"></div>
           <div class="civics-zone-c" id="civicsZoneC"></div>
+        </div>
+        <div class="civics-zone-c-wrap">
           <div class="civics-manual-add" id="civicsManualAdd">
             <button type="button" class="civics-manual-add-toggle" onclick="toggleCivicsManualAdd()">+ Add candidate manually</button>
             <div class="civics-manual-add-form" id="civicsManualAddForm" style="display:none">
@@ -5529,7 +5562,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.12.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.12.1';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -8551,9 +8584,34 @@
     return list.filter(function(c) { return getPartyClass(c.party) === filter; });
   }
 
+  function getCivicsZoneBCElements(slideIndex) {
+    var track = document.getElementById('civicsCarouselTrack');
+    if (civicsElectionGroups.length > 0 && track && track.children[slideIndex]) {
+      var slide = track.children[slideIndex];
+      return {
+        zoneB: slide.querySelector('.civics-slide-zone-b'),
+        zoneC: slide.querySelector('.civics-slide-zone-c')
+      };
+    }
+    return {
+      zoneB: document.getElementById('civicsZoneB'),
+      zoneC: document.getElementById('civicsZoneC')
+    };
+  }
+
+  function refreshAllCivicsSlidesZoneBC() {
+    if (!civicsElectionGroups || civicsElectionGroups.length === 0) {
+      renderCivicsZoneBC(0);
+      return;
+    }
+    for (var i = 0; i < civicsElectionGroups.length; i++) {
+      renderCivicsZoneBC(i);
+    }
+  }
+
   function setCivicsPartyFilter(f) {
     civicsPartyFilter = f || 'all';
-    renderCivicsZoneBC(typeof civicsCurrentSlide === 'number' ? civicsCurrentSlide : 0);
+    refreshAllCivicsSlidesZoneBC();
   }
 
   function getCivicsNotes(candidateId) {
@@ -8625,7 +8683,7 @@
 
     document.getElementById('civicsManualName').value = '';
     document.getElementById('civicsManualOffice').value = '';
-    renderCivicsZoneBC(civicsCurrentSlide);
+    refreshAllCivicsSlidesZoneBC();
     showDocsToast('Candidate added');
   }
 
@@ -8650,11 +8708,12 @@
     }
     if (!bucketId) {
       showDocsToast('Add candidates manually for this election');
-      renderCivicsZoneBC(civicsCurrentSlide);
+      refreshAllCivicsSlidesZoneBC();
       return;
     }
 
-    const zoneC = document.getElementById('civicsZoneC');
+    var loadEls = getCivicsZoneBCElements(civicsCurrentSlide);
+    const zoneC = loadEls.zoneC;
     if (zoneC) zoneC.innerHTML = '<div class="civics-loading">Loading…</div>';
 
     try {
@@ -8688,11 +8747,16 @@
     const carousel = document.getElementById('civicsCarousel');
     if (!track || !carousel) return;
 
+    var belowCarousel = document.getElementById('civicsBelowCarousel');
     if (groups.length === 0) {
       carousel.style.display = 'none';
+      track.innerHTML = '';
+      carousel._civicsGroups = [];
+      if (belowCarousel) belowCarousel.style.display = '';
       return;
     }
     carousel.style.display = '';
+    if (belowCarousel) belowCarousel.style.display = 'none';
 
     const targetSlide = typeof preserveSlide === 'number' && preserveSlide >= 0
       ? Math.min(preserveSlide, groups.length - 1)
@@ -8702,7 +8766,7 @@
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    track.innerHTML = groups.map(function(g) {
+    track.innerHTML = groups.map(function(g, slideIdx) {
       const election = g.electionEvent;
       const electionDate = new Date(election.date + 'T12:00:00');
       electionDate.setHours(0, 0, 0, 0);
@@ -8723,10 +8787,13 @@
           '<span class="civics-slide-date-val">' + escapeHtml(val) + '</span></div>';
       }).join('');
 
-      return '<div class="civics-carousel-slide">' +
+      return '<div class="civics-carousel-slide" data-civics-slide-index="' + slideIdx + '">' +
+        '<div class="civics-slide-hero">' +
         '<div class="civics-slide-title">' + escapeHtml(titleClean) + '</div>' +
         '<div class="civics-slide-days">' + escapeHtml(daysText) + '</div>' +
-        '<div class="civics-slide-dates">' + dateRows + '</div></div>';
+        '<div class="civics-slide-dates">' + dateRows + '</div></div>' +
+        '<div class="civics-slide-zone-b"></div>' +
+        '<div class="civics-slide-zone-c"></div></div>';
     }).join('');
 
     track.style.transform = 'translateX(-' + (civicsCurrentSlide * 100) + '%)';
@@ -8755,7 +8822,9 @@
       }
     }
 
-    renderCivicsZoneBC(civicsCurrentSlide);
+    for (var si = 0; si < groups.length; si++) {
+      renderCivicsZoneBC(si);
+    }
   }
 
   function updateCivicsCarouselEdges() {
@@ -8800,7 +8869,6 @@
       var hintEl = document.getElementById('civicsCarouselHint');
       if (hintEl) hintEl.classList.add('hidden');
       updateCivicsCarouselEdges();
-      renderCivicsZoneBC(civicsCurrentSlide);
     }
 
     screen.addEventListener('touchstart', function(e) {
@@ -8858,8 +8926,9 @@
   }
 
   function renderCivicsZoneBC(slideIndex) {
-    const zoneB = document.getElementById('civicsZoneB');
-    const zoneC = document.getElementById('civicsZoneC');
+    var z = getCivicsZoneBCElements(slideIndex);
+    const zoneB = z.zoneB;
+    const zoneC = z.zoneC;
     if (!zoneB || !zoneC) return;
 
     const group = civicsElectionGroups[slideIndex];
@@ -8915,9 +8984,9 @@
           '<button type="button" class="civics-refresh-btn civics-get-candidates-inline" onclick="loadCivicsCandidates(true)" title="Refresh general-election list" aria-label="Refresh general-election list">' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>' +
           '<span>Refresh candidates</span></button>' +
-          '<button type="button" class="civics-ask-blathers-btn" id="civicsAskElectionBtn" onclick="civicsAskBlathersAboutElectionInline()">' +
+          '<button type="button" class="civics-ask-blathers-btn civics-ask-election-btn" onclick="civicsAskBlathersAboutElectionInline()">' +
           '\uD83E\uDD89 Ask Blathers about this election</button>' +
-          '<div class="civics-ask-inline-response" id="civicsAskInlineResponse"></div></div>';
+          '<div class="civics-ask-inline-response"></div></div>';
         return;
       }
     }
@@ -8930,9 +8999,9 @@
         '<button type="button" class="civics-refresh-btn civics-get-candidates-inline" onclick="loadCivicsCandidates(true)" title="Get candidates" aria-label="Get candidates">' +
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>' +
         '<span>Get Candidates</span></button>' +
-        '<button type="button" class="civics-ask-blathers-btn" id="civicsAskElectionBtn" onclick="civicsAskBlathersAboutElectionInline()">' +
+        '<button type="button" class="civics-ask-blathers-btn civics-ask-election-btn" onclick="civicsAskBlathersAboutElectionInline()">' +
         '\uD83E\uDD89 Ask Blathers about this election</button>' +
-        '<div class="civics-ask-inline-response" id="civicsAskInlineResponse"></div></div>';
+        '<div class="civics-ask-inline-response"></div></div>';
       return;
     }
 
@@ -8952,9 +9021,9 @@
         '<button type="button" class="civics-refresh-btn civics-get-candidates-inline" onclick="loadCivicsCandidates(true)" title="Get candidates" aria-label="Get candidates">' +
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>' +
         '<span>Get Candidates</span></button>' +
-        '<button type="button" class="civics-ask-blathers-btn" id="civicsAskElectionBtn" onclick="civicsAskBlathersAboutElectionInline()">' +
+        '<button type="button" class="civics-ask-blathers-btn civics-ask-election-btn" onclick="civicsAskBlathersAboutElectionInline()">' +
         '🦉 Ask Blathers about this election</button>' +
-        '<div class="civics-ask-inline-response" id="civicsAskInlineResponse"></div></div>';
+        '<div class="civics-ask-inline-response"></div></div>';
       return;
     }
 
@@ -9007,8 +9076,15 @@
     const elDate = elEv ? new Date(elEv.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '';
     const prompt = 'Please give me a neutral overview of ' + name + (elDate ? ' on ' + elDate : '') + '. What offices are on the ballot in McLean County, IL? Who are the key candidates and what should I know about them going in?';
 
-    const btn = document.getElementById('civicsAskElectionBtn');
-    const respEl = document.getElementById('civicsAskInlineResponse');
+    var askScope = null;
+    var askTrack = document.getElementById('civicsCarouselTrack');
+    if (civicsElectionGroups.length > 0 && askTrack && askTrack.children[civicsCurrentSlide]) {
+      askScope = askTrack.children[civicsCurrentSlide];
+    } else {
+      askScope = document.getElementById('civicsZoneC');
+    }
+    const btn = askScope && askScope.querySelector('.civics-ask-election-btn');
+    const respEl = askScope && askScope.querySelector('.civics-ask-inline-response');
     if (!respEl) return;
     if (btn) btn.style.display = 'none';
 
@@ -9209,6 +9285,7 @@
       '<div class="civics-card-header">' +
       '<span class="civics-card-name">' + escapeHtml(name) + '</span>' + partyChip + '</div>' +
       (office ? '<div class="civics-card-office">' + escapeHtml(office) + '</div>' : '') +
+      '<div class="civics-card-expand-hint">Tap to expand · links, Ask Blathers, notes</div>' +
       summaryChevron + '</div>' +
       '<div class="civics-card-body">' +
       '<div class="civics-card-actions">' + ballotpediaLink + askBlathersBtn + '</div>' +
