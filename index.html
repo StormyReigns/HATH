@@ -1276,7 +1276,7 @@
       pointer-events: none;
     }
     .drawer-auth {
-      padding: 12px 26px 0;
+      padding: 12px 26px 26px;
       border-top: 1px solid rgba(0,0,0,0.06);
       margin-top: auto;
     }
@@ -2747,6 +2747,23 @@
     .schedule-title {
       font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 400;
       color: var(--text); letter-spacing: 0.02em;
+    }
+    .schedule-header-right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-shrink: 0;
+      margin-left: auto;
+      min-height: 44px;
+    }
+    .schedule-guest-signin-hint {
+      font-size: 11px;
+      color: var(--muted);
+      font-style: italic;
+      text-align: right;
+      max-width: 155px;
+      line-height: 1.25;
     }
     .schedule-header-actions { display: flex; align-items: center; gap: 6px; }
     .schedule-icon-btn, .schedule-calendar-btn {
@@ -5224,13 +5241,16 @@
           <h2 class="schedule-title">Schedule</h2>
           <span class="section-version-label"></span>
         </div>
-        <div class="schedule-header-actions">
-          <button type="button" class="schedule-icon-btn" onclick="openScheduleCalendarsModal()" title="Calendars" aria-label="Manage calendars">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-          </button>
-          <button type="button" class="schedule-icon-btn" id="scheduleCalendarBtn" onclick="toggleScheduleMiniCalendar()" title="Calendar" aria-label="Toggle calendar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          </button>
+        <div class="schedule-header-right">
+          <div class="schedule-guest-signin-hint" id="scheduleGuestSigninHint" style="display:none" aria-live="polite">You're not signed in</div>
+          <div class="schedule-header-actions">
+            <button type="button" class="schedule-icon-btn" onclick="openScheduleCalendarsModal()" title="Calendars" aria-label="Manage calendars">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            </button>
+            <button type="button" class="schedule-icon-btn" id="scheduleCalendarBtn" onclick="toggleScheduleMiniCalendar()" title="Calendar" aria-label="Toggle calendar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </button>
+          </div>
         </div>
       </div>
       <div class="schedule-filters-wrap">
@@ -5449,7 +5469,7 @@
       <svg class="drawer-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/><path d="M9 21v-7h6v7"/></svg>
       Home
     </div>
-    <div class="drawer-item" data-guest-lock onclick="drawerNavTap(this, ()=>{ closeDrawer(); showProjectsScreen(); })">
+    <div class="drawer-item" onclick="drawerNavTap(this, ()=>{ closeDrawer(); showProjectsScreen(); })">
       <img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/WWChest1.png" alt="" loading="lazy">
       Projects
     </div>
@@ -5685,7 +5705,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.13.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.13.1';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -5722,6 +5742,8 @@
 
     var schedActions = document.querySelector('#scheduleScreen .schedule-header-actions');
     if (schedActions) schedActions.style.display = hasUser ? '' : 'none';
+    var schedSigninHint = document.getElementById('scheduleGuestSigninHint');
+    if (schedSigninHint) schedSigninHint.style.display = hasUser ? 'none' : '';
 
     if (!hasUser) {
       var wb = document.getElementById('wellbeing');
@@ -5732,8 +5754,7 @@
       if (mn) { mn.innerHTML = ''; mn.classList.remove('loaded'); }
       var ua = document.getElementById('updatedAt');
       if (ua) { ua.textContent = ''; ua.classList.remove('loaded'); ua.style.display = 'none'; }
-      var hps = document.getElementById('homeProjectsScroller');
-      if (hps) hps.style.display = 'none';
+      renderHomeProjectsScroller();
     } else {
       var wb2 = document.getElementById('wellbeing');
       if (wb2) wb2.style.display = '';
@@ -6381,10 +6402,8 @@
         }
       }
     }
-    // Persist to localStorage
-    const user = localStorage.getItem('shasta_user');
-    if (!user) return;
-    const key = PROJECTS_STORAGE_KEY + '_' + user;
+    // Persist to localStorage (per signed-in user or local guest bucket)
+    const key = getProjectsStorageKey();
     try {
       const all = JSON.parse(localStorage.getItem(key)) || [];
       const projIdx = all.findIndex(function(x) { return x.id === p.id; });
@@ -6833,6 +6852,9 @@
 
   // ── PROJECTS ─────────────────────────────────────────────────
   const PROJECTS_STORAGE_KEY = 'shasta_projects';
+  function getProjectsStorageKey() {
+    return PROJECTS_STORAGE_KEY + '_' + (getApiUser() || 'guest');
+  }
   let projectsEditing = null;
   let projectsViewing = null;
   let projectsCurrentPhaseIndex = 0;
@@ -6942,10 +6964,8 @@
   function hapticDoublePulse() { try { if (navigator.vibrate) navigator.vibrate([18, 50, 18]); } catch (_) {} }
 
   function getProjects() {
-    const user = localStorage.getItem('shasta_user');
-    if (!user) return [];
     try {
-      const key = PROJECTS_STORAGE_KEY + '_' + user;
+      const key = getProjectsStorageKey();
       let raw = localStorage.getItem(key);
       if (!raw) {
         raw = localStorage.getItem(PROJECTS_STORAGE_KEY);
@@ -6963,9 +6983,7 @@
   }
 
   function saveProjects(arr) {
-    const user = localStorage.getItem('shasta_user');
-    if (!user) return;
-    localStorage.setItem(PROJECTS_STORAGE_KEY + '_' + user, JSON.stringify(arr));
+    localStorage.setItem(getProjectsStorageKey(), JSON.stringify(arr));
   }
 
   function genId() { return 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9); }
@@ -10803,7 +10821,8 @@
       const rootData = docsFolderCache[DOCS_FOLDER_ID];
       const recFolder = (rootData && rootData.folders || []).find(f => f.name === RECIPES_FOLDER_NAME);
       if (!recFolder) {
-        document.getElementById('recipesCarousel').innerHTML = '<div class="recipes-loading">No "Recipes" folder found in Documents.</div>';
+        var recMsg = getApiUser() ? 'No "Recipes" folder found in Documents.' : "You're not signed in";
+        document.getElementById('recipesCarousel').innerHTML = '<div class="recipes-loading">' + recMsg + '</div>';
         recipesState.loading = false;
         return;
       }
