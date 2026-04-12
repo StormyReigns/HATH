@@ -1927,8 +1927,8 @@
     .civics-card-research { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.06); }
     html.dark-mode .civics-card-research { border-top-color: rgba(255,255,255,0.08); }
     .civics-fec-chart {
-      margin-bottom: 16px;
-      padding: 12px 14px;
+      margin-bottom: 12px;
+      padding: 10px 12px;
       border-radius: 12px;
       background: rgba(42,91,168,0.06);
       border: 1px solid rgba(42,91,168,0.14);
@@ -1938,25 +1938,38 @@
       border-color: rgba(90,143,216,0.22);
     }
     .civics-fec-chart-title {
-      font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
-      color: var(--muted); margin-bottom: 10px;
+      font-size: 13px; font-weight: 600; color: var(--text);
+      margin-bottom: 8px; line-height: 1.25; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
     }
-    .civics-fec-chart-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-    .civics-fec-donut { width: 140px; height: 140px; flex-shrink: 0; }
+    .civics-fec-cycle { font-weight: 500; color: var(--muted); }
+    .civics-fec-chart-row {
+      display: flex; align-items: center; gap: 12px;
+      flex-wrap: nowrap;
+    }
+    .civics-fec-donut { width: 112px; height: 112px; flex-shrink: 0; }
     .civics-fec-donut-hole { fill: #fdf8f1; }
     html.dark-mode .civics-fec-donut-hole { fill: #252220; }
-    .civics-fec-legend { flex: 1; min-width: 140px; font-size: 13px; color: var(--text2); }
+    .civics-fec-right {
+      flex: 1; min-width: 0;
+      display: flex; flex-direction: column; gap: 6px;
+      justify-content: center;
+    }
+    .civics-fec-legend { font-size: 12px; color: var(--text2); }
     .civics-fec-legend-row {
-      display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 6px; margin-bottom: 3px;
     }
-    .civics-fec-swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+    .civics-fec-legend-row:last-child { margin-bottom: 0; }
+    .civics-fec-swatch { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
     .civics-fec-legend-row span:nth-child(2) { flex: 1; min-width: 0; }
-    .civics-fec-legend-amt { font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+    .civics-fec-legend-amt { font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; font-size: 11px; }
     .civics-fec-totals {
-      display: flex; flex-wrap: wrap; gap: 10px 16px; margin-top: 12px;
-      padding-top: 10px; border-top: 1px solid rgba(42,91,168,0.12);
-      font-size: 12px; color: var(--text2); font-variant-numeric: tabular-nums;
+      display: flex; flex-wrap: wrap; align-items: center;
+      gap: 2px 6px; margin: 0; padding-top: 6px;
+      border-top: 1px solid rgba(42,91,168,0.12);
+      font-size: 11px; color: var(--text2); font-variant-numeric: tabular-nums; line-height: 1.35;
     }
+    .civics-fec-totals-sep { color: var(--muted); padding: 0 2px; user-select: none; }
     html.dark-mode .civics-fec-totals { border-top-color: rgba(90,143,216,0.2); }
     .civics-card-notes { margin-top: 12px; }
     .civics-card-notes-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px; }
@@ -5608,7 +5621,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.12.3';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.12.4';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -9229,15 +9242,17 @@
       return '<div class="civics-fec-legend-row"><span class="civics-fec-swatch" style="background:' + s.c + '"></span>' +
         '<span>' + escapeHtml(s.label) + '</span><span class="civics-fec-legend-amt">' + formatCivicsUSD(s.v) + '</span></div>';
     }).join('');
-    return '<div class="civics-fec-chart" role="img" aria-label="FEC fundraising breakdown, cycle ' + escapeHtml(String(cy)) + '">' +
-      '<div class="civics-fec-chart-title">Where the money came from (FEC)</div>' +
+    var titleLine = 'Cashflow per FEC' + (cy ? ' <span class="civics-fec-cycle">· ' + escapeHtml(String(cy)) + '</span>' : '');
+    return '<div class="civics-fec-chart" role="img" aria-label="FEC cashflow, cycle ' + escapeHtml(String(cy || '')) + '">' +
+      '<div class="civics-fec-chart-title">' + titleLine + '</div>' +
       '<div class="civics-fec-chart-row">' +
       '<svg class="civics-fec-donut" viewBox="0 0 200 200" aria-hidden="true">' + paths.join('') + '</svg>' +
-      '<div class="civics-fec-legend">' + leg + '</div></div>' +
+      '<div class="civics-fec-right">' +
+      '<div class="civics-fec-legend">' + leg + '</div>' +
       '<div class="civics-fec-totals">' +
-      '<span>Raised ' + formatCivicsUSD(fin.totalRaised) + '</span>' +
-      '<span>Spent ' + formatCivicsUSD(fin.totalSpent) + '</span>' +
-      '<span>Cash on hand ' + formatCivicsUSD(fin.cashOnHand) + '</span></div></div>';
+      '<span>Raised ' + formatCivicsUSD(fin.totalRaised) + '</span><span class="civics-fec-totals-sep">·</span>' +
+      '<span>Spent ' + formatCivicsUSD(fin.totalSpent) + '</span><span class="civics-fec-totals-sep">·</span>' +
+      '<span>Cash ' + formatCivicsUSD(fin.cashOnHand) + '</span></div></div></div></div>';
   }
 
   function mergeCivicsResearchDisplay(fecFinance, proseHtml) {
