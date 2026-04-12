@@ -5686,7 +5686,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.14.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.14.1';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -9368,18 +9368,19 @@
     var personal = Math.max(0, Number(t.individual) || 0);
     var pac = Math.max(0, Number(t.pac) || 0);
     var selfAmt = Math.max(0, Number(t.selfFunding) || 0);
-    var total = personal + pac + selfAmt;
+    var otherAmt = Math.max(0, Number(t.other) || 0);
+    var total = personal + pac + selfAmt + otherAmt;
     if (total === 0) return '';
 
-    var pPct = Math.floor((personal / total) * 100);
-    var pacPct = Math.floor((pac / total) * 100);
-    var selfPct = Math.max(0, 100 - pPct - pacPct);
+    var c1 = (personal / total) * 100;
+    var c2 = c1 + (pac / total) * 100;
+    var c3 = c2 + (selfAmt / total) * 100;
 
     var stops = [];
-    var cursor = 0;
-    if (pPct > 0) { stops.push('#4a90d9 ' + cursor + '% ' + (cursor + pPct) + '%'); cursor += pPct; }
-    if (pacPct > 0) { stops.push('#e07070 ' + cursor + '% ' + (cursor + pacPct) + '%'); cursor += pacPct; }
-    if (selfPct > 0 && selfAmt > 0) { stops.push('#c0a060 ' + cursor + '% 100%'); }
+    if (personal > 0) stops.push('#4a90d9 0% ' + c1 + '%');
+    if (pac > 0) stops.push('#e07070 ' + c1 + '% ' + c2 + '%');
+    if (selfAmt > 0) stops.push('#c0a060 ' + c2 + '% ' + c3 + '%');
+    if (otherAmt > 0) stops.push('#7a8a99 ' + c3 + '% 100%');
 
     if (!stops.length) return '';
 
@@ -9392,25 +9393,46 @@
       return '$' + Math.round(n);
     };
 
+    var legPct = function(n) {
+      return Math.round((n / total) * 100);
+    };
+
     return '<div class="civics-funding-chart" role="img" aria-label="Campaign funding breakdown">' +
       '<div class="civics-funding-donut" style="background:' + gradient + '"><div class="civics-funding-donut-hole"></div></div>' +
       '<div class="civics-funding-legend">' +
-      (personal > 0 && pPct > 0 ? '<div class="civics-funding-legend-row"><span class="civics-funding-dot" style="background:#4a90d9"></span><span class="civics-funding-legend-label">Personal</span><span class="civics-funding-legend-val">' + fmt(personal) + ' (' + pPct + '%)</span></div>' : '') +
-      (pac > 0 && pacPct > 0 ? '<div class="civics-funding-legend-row"><span class="civics-funding-dot" style="background:#e07070"></span><span class="civics-funding-legend-label">PAC</span><span class="civics-funding-legend-val">' + fmt(pac) + ' (' + pacPct + '%)</span></div>' : '') +
-      (selfAmt > 0 && selfPct > 0 ? '<div class="civics-funding-legend-row"><span class="civics-funding-dot" style="background:#c0a060"></span><span class="civics-funding-legend-label">Self</span><span class="civics-funding-legend-val">' + fmt(selfAmt) + ' (' + selfPct + '%)</span></div>' : '') +
+      (personal > 0 ? '<div class="civics-funding-legend-row"><span class="civics-funding-dot" style="background:#4a90d9"></span><span class="civics-funding-legend-label">Personal</span><span class="civics-funding-legend-val">' + fmt(personal) + ' (' + legPct(personal) + '%)</span></div>' : '') +
+      (pac > 0 ? '<div class="civics-funding-legend-row"><span class="civics-funding-dot" style="background:#e07070"></span><span class="civics-funding-legend-label">PAC</span><span class="civics-funding-legend-val">' + fmt(pac) + ' (' + legPct(pac) + '%)</span></div>' : '') +
+      (selfAmt > 0 ? '<div class="civics-funding-legend-row"><span class="civics-funding-dot" style="background:#c0a060"></span><span class="civics-funding-legend-label">Self</span><span class="civics-funding-legend-val">' + fmt(selfAmt) + ' (' + legPct(selfAmt) + '%)</span></div>' : '') +
+      (otherAmt > 0 ? '<div class="civics-funding-legend-row"><span class="civics-funding-dot" style="background:#7a8a99"></span><span class="civics-funding-legend-label">Other</span><span class="civics-funding-legend-val">' + fmt(otherAmt) + ' (' + legPct(otherAmt) + '%)</span></div>' : '') +
       '</div></div>';
   }
 
   function normalizeCivicsFecTotalsFromData(data) {
     if (!data || typeof data !== 'object') return null;
-    if (data.fecTotals && typeof data.fecTotals === 'object') return data.fecTotals;
-    if (data.fecFinance && typeof data.fecFinance === 'object' && data.fecFinance.individualContributions != null) {
+    function rowFrom(ind, pac, selfF, other) {
       return {
-        individual: data.fecFinance.individualContributions,
-        pac: data.fecFinance.pacContributions,
-        selfFunding: data.fecFinance.selfFunding
+        individual: Math.max(0, Number(ind) || 0),
+        pac: Math.max(0, Number(pac) || 0),
+        selfFunding: Math.max(0, Number(selfF) || 0),
+        other: Math.max(0, Number(other) || 0)
       };
     }
+    function enrichOther(ft, ffin) {
+      var ind = ft.individual != null ? ft.individual : (ffin && ffin.individualContributions);
+      var pac = ft.pac != null ? ft.pac : (ffin && ffin.pacContributions);
+      var selfF = ft.selfFunding != null ? ft.selfFunding : (ffin && ffin.selfFunding);
+      var o = ft.other;
+      if (o == null && ffin && ffin.otherContributions != null) o = ffin.otherContributions;
+      if (o == null && ffin && ffin.totalRaised != null) {
+        o = Math.max(0, Number(ffin.totalRaised) - Number(ind || 0) - Number(pac || 0) - Number(selfF || 0));
+      }
+      if (o == null) o = 0;
+      return rowFrom(ind, pac, selfF, o);
+    }
+    if (data.fecTotals && typeof data.fecTotals === 'object')
+      return enrichOther(data.fecTotals, data.fecFinance);
+    if (data.fecFinance && typeof data.fecFinance === 'object' && data.fecFinance.individualContributions != null)
+      return enrichOther({}, data.fecFinance);
     return null;
   }
 
