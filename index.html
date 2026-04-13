@@ -4919,15 +4919,17 @@
     .gj-entry-btn span:not(.gj-entry-flame) {
       position: relative; z-index: 1;
     }
-    .home-gj-btn {
-      border-radius: 14px; padding: 12px 16px; cursor: pointer;
-      opacity: 0; transition: opacity 0.4s; margin-top: 6px;
-      width: 100%; max-width: 300px; text-align: center;
-      background: rgba(255,255,255,0.5); border: 1px solid rgba(192,122,74,0.2);
-      font-size: 14px; font-weight: 500; color: var(--text2);
+    /* Same Gordon entry as Recipes; fades in when recipe list is ready */
+    #homeGjBtn.gj-entry-btn {
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+      margin-top: 6px;
     }
-    .home-gj-btn.visible { opacity: 1; }
-    .home-gj-label { display: block; }
+    #homeGjBtn.gj-entry-btn.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
   </style>
 </head>
 <body>
@@ -4997,9 +4999,11 @@
         <div class="upcoming-events-list" id="upcomingEventsList"></div>
       </div>
 
-      <div class="home-gj-btn" id="homeGjBtn" onclick="openGordonsJudgement()" role="button" tabindex="0" aria-label="Gordon's Judgement">
-        <span class="home-gj-label">🎲 What's for dinner?</span>
-      </div>
+      <button type="button" class="gj-entry-btn" id="homeGjBtn" onclick="openGordonsJudgement()" aria-label="Gordon's Judgement">
+        <span class="gj-entry-flame"></span>
+        <img class="gj-entry-icon" src="https://stormyreigns.github.io/HATH/HKChefKnife.png" alt="">
+        <span>Gordon's Judgement</span>
+      </button>
 
       <div class="matt-note" id="mattNote"></div>
     </div>
@@ -5765,7 +5769,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.17.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.17.2';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
