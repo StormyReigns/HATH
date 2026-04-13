@@ -5168,6 +5168,66 @@
       font-style: italic;
       margin-top: -6px;
     }
+    .pjw-desc-wrap {
+      margin-top: 22px;
+    }
+    .pjw-desc-toggle {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 16px;
+      margin: 0;
+      box-sizing: border-box;
+      font-family: inherit;
+      cursor: pointer;
+      text-align: left;
+      border: 1px solid rgba(192,122,74,0.1);
+      border-radius: 16px;
+      background: rgba(255,255,253,0.88);
+      box-shadow: 0 2px 14px rgba(0,0,0,0.05);
+      -webkit-tap-highlight-color: transparent;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    }
+    .pjw-desc-toggle:active {
+      background: rgba(255,255,253,0.96);
+    }
+    .pjw-desc-toggle-copy {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 3px;
+      flex: 1;
+      min-width: 0;
+    }
+    .pjw-desc-toggle-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .pjw-desc-toggle-note {
+      font-size: 13px;
+      font-style: italic;
+      color: rgba(80,60,45,0.52);
+      line-height: 1.35;
+    }
+    .pjw-desc-chevron {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      color: var(--accent);
+      opacity: 0.85;
+      transition: transform 0.25s ease;
+    }
+    .pjw-desc-chevron.pjw-desc-chevron-open {
+      transform: rotate(180deg);
+    }
+    .pjw-desc-textarea {
+      margin-top: 12px;
+    }
     .pjw-label {
       display: block;
       font-size: 11px;
@@ -5605,6 +5665,17 @@
       color: rgba(220,200,180,0.42);
     }
     html.dark-mode .pjw-prompt-note { color: rgba(220,200,180,0.45); }
+    html.dark-mode .pjw-desc-toggle {
+      background: rgba(40,36,34,0.82);
+      border-color: rgba(255,255,255,0.08);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    }
+    html.dark-mode .pjw-desc-toggle:active {
+      background: rgba(44,40,38,0.9);
+    }
+    html.dark-mode .pjw-desc-toggle-note {
+      color: rgba(220,200,180,0.48);
+    }
     html.dark-mode .pjw-mode-pill {
       background: rgba(255,255,255,0.06);
       border-color: rgba(255,255,255,0.12);
@@ -6700,7 +6771,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.19.5';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.19.6';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -8917,6 +8988,23 @@
     });
   }
 
+  function projectWizardPhaseDescExpanded(ph) {
+    if (!ph) return false;
+    if (ph._wizardDescOpen === true) return true;
+    if (ph._wizardDescOpen === false) return false;
+    return !!(ph.description && ph.description.trim());
+  }
+
+  function projectWizardTogglePhaseDesc() {
+    if (projectWizardStep < 3) return;
+    projectWizardSyncCurrentPhaseFromDom();
+    const pi = projectWizardStep - 3;
+    const ph = projectsEditing && projectsEditing.phases[pi];
+    if (!ph) return;
+    ph._wizardDescOpen = !projectWizardPhaseDescExpanded(ph);
+    projectWizardRender();
+  }
+
   function renderPhaseWizardHtml(pi) {
     const ph = projectsEditing.phases[pi];
     const N = projectWizardPhaseCount;
@@ -8934,14 +9022,27 @@
     let singleVal = '';
     if (mode === 'single' && ph.checklist && ph.checklist.length === 1) singleVal = ph.checklist[0].text || '';
     const modeQuestion = pi === 0 ? 'Is this first phase…' : 'Is this phase…';
+    const descExpanded = projectWizardPhaseDescExpanded(ph);
+    const descChevron = '<svg class="pjw-desc-chevron' + (descExpanded ? ' pjw-desc-chevron-open' : '') + '" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    const descBlock =
+      '<div class="pjw-desc-wrap">' +
+      '<button type="button" class="pjw-desc-toggle" onclick="projectWizardTogglePhaseDesc()" aria-expanded="' + (descExpanded ? 'true' : 'false') + '">' +
+      '<span class="pjw-desc-toggle-copy">' +
+      '<span class="pjw-desc-toggle-title">Add a Description?</span>' +
+      '<span class="pjw-desc-toggle-note">*Optional</span>' +
+      '</span>' +
+      descChevron +
+      '</button>' +
+      (descExpanded
+        ? '<textarea class="pjw-textarea pjw-desc-textarea" id="pjwPhaseDesc" rows="3" placeholder="A little context for future-you.">' + escapeHtml(ph.description || '') + '</textarea>'
+        : '') +
+      '</div>';
     const calInner = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.75"/><path d="M3 10h18M8 2v4M16 2v4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>';
     return (
       '<div class="pjw-phase-block">' +
       '<p class="pjw-prompt">' + firstPrompt + '</p>' +
       '<input type="text" class="pjw-input" id="pjwPhaseTitle" autocomplete="off" placeholder="Short name for this stretch" value="' + escapeHtml(ph.title || '') + '">' +
-      '<p class="pjw-prompt" style="margin-top:22px">Describe it</p>' +
-      '<p class="pjw-prompt-note pjw-optional-note">*Optional</p>' +
-      '<textarea class="pjw-textarea" id="pjwPhaseDesc" rows="3" placeholder="A little context for future-you.">' + escapeHtml(ph.description || '') + '</textarea>' +
+      descBlock +
       '<p class="pjw-mode-question">' + modeQuestion + '</p>' +
       '<div class="pjw-mode-inline">' +
       '<button type="button" class="pjw-mode-pill' + (mode === 'single' ? ' selected' : '') + '" onclick="projectWizardSelectPhaseMode(\'single\')">One Big Step?</button>' +
