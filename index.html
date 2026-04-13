@@ -5093,6 +5093,7 @@
       align-items: center;
       justify-content: center;
       padding: 12px 0 20px;
+      will-change: transform;
     }
     .pjw-center-inner {
       width: 100%;
@@ -5252,6 +5253,77 @@
       height: 1px;
       opacity: 0;
     }
+    /* Native date input covers icon — reliable on iOS (tap is directly on input) */
+    .pjw-cal-hit {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, rgba(192,122,74,0.2), rgba(192,122,74,0.08));
+      border: 1px solid rgba(192,122,74,0.28);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pjw-cal-hit-visual {
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+    }
+    .pjw-cal-hit-visual svg {
+      width: 26px;
+      height: 26px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.75;
+    }
+    .pjw-date-sheet-input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      min-width: 48px;
+      height: 100%;
+      min-height: 48px;
+      opacity: 0.001;
+      cursor: pointer;
+      font-size: 22px;
+      margin: 0;
+      padding: 0;
+      border: none;
+      background: transparent;
+      z-index: 2;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .pjw-finish-inline {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.12);
+      flex-wrap: wrap;
+    }
+    .pjw-finish-inline-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: rgba(255,230,215,0.48);
+      width: 100%;
+      margin-bottom: 2px;
+    }
+    .pjw-finish-inline-value {
+      font-size: 15px;
+      color: rgba(255,245,235,0.78);
+      flex: 1;
+      min-width: 0;
+      line-height: 1.35;
+    }
     .pjw-due-compact {
       margin-top: 20px;
       padding-top: 16px;
@@ -5265,62 +5337,51 @@
       color: rgba(100,72,48,0.42);
       margin-bottom: 10px;
     }
-    .pjw-due-open {
-      display: inline-flex;
+    .pjw-due-row-inner {
+      display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 12px 16px;
-      font-size: 15px;
-      font-family: inherit;
-      color: var(--text);
-      background: rgba(255,255,255,0.75);
-      border: 1px dashed rgba(192,122,74,0.35);
-      border-radius: 12px;
-      cursor: pointer;
-      width: 100%;
-      justify-content: flex-start;
-      box-sizing: border-box;
+      gap: 12px;
+      flex-wrap: wrap;
     }
-    .pjw-due-open svg {
-      width: 22px;
-      height: 22px;
-      stroke: var(--accent);
-      fill: none;
-      stroke-width: 1.75;
-      flex-shrink: 0;
+    .pjw-due-row-inner .pjw-cal-hit {
+      background: rgba(255,255,255,0.85);
+      border-color: rgba(192,122,74,0.25);
+    }
+    .pjw-due-display-text {
+      font-size: 15px;
+      color: var(--text);
+      flex: 1;
+      min-width: 0;
+      line-height: 1.35;
     }
     .pjw-mode-row {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       gap: 10px;
-      margin: 16px 0 14px;
+      margin: 14px 0 14px;
+      align-items: stretch;
     }
-    .pjw-mode-chip {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px 18px;
-      font-size: 15px;
+    .pjw-mode-pill {
+      flex: 1;
+      min-width: 0;
+      padding: 12px 10px;
+      font-size: 13px;
       font-weight: 600;
       font-family: inherit;
+      line-height: 1.3;
+      text-align: center;
       color: var(--text);
       background: rgba(255,255,255,0.55);
       border: 2px solid rgba(192,122,74,0.18);
-      border-radius: 14px;
+      border-radius: 12px;
       cursor: pointer;
       transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      -webkit-tap-highlight-color: transparent;
     }
-    .pjw-mode-chip.selected {
+    .pjw-mode-pill.selected {
       border-color: rgba(192,122,74,0.55);
-      background: rgba(192,122,74,0.12);
-      box-shadow: 0 0 0 1px rgba(192,122,74,0.15);
-    }
-    .pjw-mode-chip-desc {
-      display: block;
-      font-size: 12px;
-      font-weight: 400;
-      color: rgba(80,60,45,0.55);
-      margin-top: 4px;
+      background: rgba(192,122,74,0.14);
+      box-shadow: 0 0 0 1px rgba(192,122,74,0.12);
     }
     .pjw-checklist-list { display: flex; flex-direction: column; gap: 10px; }
     .pjw-checklist-row {
@@ -5461,23 +5522,27 @@
       border-color: rgba(255,255,255,0.1);
     }
     html.dark-mode .pjw-prompt-note { color: rgba(220,200,180,0.45); }
-    html.dark-mode .pjw-mode-chip {
+    html.dark-mode .pjw-mode-pill {
       background: rgba(255,255,255,0.06);
       border-color: rgba(255,255,255,0.12);
       color: var(--text);
     }
-    html.dark-mode .pjw-mode-chip.selected {
-      background: rgba(192,122,74,0.2);
+    html.dark-mode .pjw-mode-pill.selected {
+      background: rgba(192,122,74,0.22);
       border-color: rgba(224,152,104,0.45);
+    }
+    html.dark-mode .pjw-cal-hit {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.15);
+    }
+    html.dark-mode .pjw-finish-inline-value { color: rgba(255,235,220,0.72); }
+    html.dark-mode .pjw-due-row-inner .pjw-cal-hit {
+      background: rgba(40,36,34,0.9);
+      border-color: rgba(255,255,255,0.12);
     }
     html.dark-mode .pjw-checklist-input {
       background: rgba(32,28,26,0.92);
       border-color: rgba(255,255,255,0.12);
-      color: var(--text);
-    }
-    html.dark-mode .pjw-due-open {
-      background: rgba(255,255,255,0.06);
-      border-color: rgba(255,255,255,0.15);
       color: var(--text);
     }
     .gj-randomizer-card-wrap {
@@ -6361,7 +6426,7 @@
       <h2 class="pjw-heading" id="pjwHeading">Begin something new</h2>
       <p class="pjw-lead" id="pjwLead"></p>
     </div>
-    <div class="pjw-center-wrap">
+    <div class="pjw-center-wrap" id="pjwSwipeSurface">
       <div class="pjw-center-inner">
         <div class="pjw-body" id="pjwBody"></div>
       </div>
@@ -6532,7 +6597,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.19.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.19.2';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -8662,7 +8727,7 @@
   }
 
   function projectWizardFormatDateDisplay(iso) {
-    if (!iso) return 'Tap to add a date';
+    if (!iso) return 'No date yet';
     try {
       const d = new Date(iso + 'T12:00:00');
       return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
@@ -8679,45 +8744,15 @@
     if (disp) disp.textContent = projectWizardFormatDateDisplay(projectsEditing.finishDate);
   }
 
-  function projectWizardOpenFinishDate() {
-    const inp = document.getElementById('pjwFinish');
-    if (!inp) return;
-    if (typeof inp.showPicker === 'function') {
-      try {
-        inp.showPicker();
-        return;
-      } catch (e) { /* fall through */ }
-    }
-    inp.focus();
-    try {
-      inp.click();
-    } catch (e2) { /* ignore */ }
-  }
-
   function projectWizardOnPhaseDueChange() {
     const inp = document.getElementById('pjwPhaseDue');
     const disp = document.getElementById('pjwPhaseDueDisplay');
-    if (!inp || projectWizardStep < 4) return;
-    const pi = projectWizardStep - 4;
+    if (!inp || projectWizardStep < 3) return;
+    const pi = projectWizardStep - 3;
     const ph = projectsEditing.phases[pi];
     if (!ph) return;
     ph.completionDate = inp.value || null;
     if (disp) disp.textContent = projectWizardFormatDateDisplay(ph.completionDate);
-  }
-
-  function projectWizardOpenPhaseDue() {
-    const inp = document.getElementById('pjwPhaseDue');
-    if (!inp) return;
-    if (typeof inp.showPicker === 'function') {
-      try {
-        inp.showPicker();
-        return;
-      } catch (e) { /* fall through */ }
-    }
-    inp.focus();
-    try {
-      inp.click();
-    } catch (e2) { /* ignore */ }
   }
 
   function projectWizardGetPhaseMode(ph) {
@@ -8728,9 +8763,9 @@
   }
 
   function projectWizardSelectPhaseMode(mode) {
-    if (projectWizardStep < 4) return;
+    if (projectWizardStep < 3) return;
     projectWizardSyncCurrentPhaseFromDom();
-    const pi = projectWizardStep - 4;
+    const pi = projectWizardStep - 3;
     const ph = projectsEditing.phases[pi];
     if (!ph) return;
     if (mode === 'single') {
@@ -8751,9 +8786,9 @@
   }
 
   function projectWizardAddChecklistRow() {
-    if (projectWizardStep < 4) return;
+    if (projectWizardStep < 3) return;
     projectWizardSyncCurrentPhaseFromDom();
-    const pi = projectWizardStep - 4;
+    const pi = projectWizardStep - 3;
     const ph = projectsEditing.phases[pi];
     if (!ph) return;
     if (!ph.checklist) ph.checklist = [];
@@ -8777,7 +8812,7 @@
     }
     let singleVal = '';
     if (mode === 'single' && ph.checklist && ph.checklist.length === 1) singleVal = ph.checklist[0].text || '';
-    const calSvg = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.75"/><path d="M3 10h18M8 2v4M16 2v4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>';
+    const calInner = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.75"/><path d="M3 10h18M8 2v4M16 2v4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>';
     return (
       '<div class="pjw-phase-block">' +
       '<p class="pjw-prompt">' + firstPrompt + '</p>' +
@@ -8785,35 +8820,36 @@
       '<p class="pjw-prompt" style="margin-top:22px">Describe this step</p>' +
       '<p class="pjw-prompt-note">What does “done” look like? Totally optional.</p>' +
       '<textarea class="pjw-textarea" id="pjwPhaseDesc" rows="3" placeholder="A little context for future-you.">' + escapeHtml(ph.description || '') + '</textarea>' +
-      '<p class="pjw-prompt" style="margin-top:10px">One step, or a checklist?</p>' +
-      '<p class="pjw-prompt-note">Choose what matches how your brain works—you can edit later.</p>' +
+      '<p class="pjw-prompt-note" style="margin-top:14px;margin-bottom:6px">Is this one step, or a checklist?</p>' +
       '<div class="pjw-mode-row">' +
-      '<button type="button" class="pjw-mode-chip' + (mode === 'single' ? ' selected' : '') + '" onclick="projectWizardSelectPhaseMode(\'single\')">Just one step<span class="pjw-mode-chip-desc">One clear to-do in plain language</span></button>' +
-      '<button type="button" class="pjw-mode-chip' + (mode === 'checklist' ? ' selected' : '') + '" onclick="projectWizardSelectPhaseMode(\'checklist\')">A checklist<span class="pjw-mode-chip-desc">Several smaller items to tick off</span></button>' +
+      '<button type="button" class="pjw-mode-pill' + (mode === 'single' ? ' selected' : '') + '" onclick="projectWizardSelectPhaseMode(\'single\')">Is this one step?</button>' +
+      '<button type="button" class="pjw-mode-pill' + (mode === 'checklist' ? ' selected' : '') + '" onclick="projectWizardSelectPhaseMode(\'checklist\')">Is this a checklist?</button>' +
       '</div>' +
       (mode === 'single'
         ? '<div class="pjw-field"><label class="pjw-label" for="pjwSingleStep">The one thing to do</label><input type="text" class="pjw-input" id="pjwSingleStep" placeholder="e.g. Call the plumber, file the form…" value="' + escapeHtml(singleVal) + '"></div>'
         : '<div class="pjw-field"><span class="pjw-label">Checklist</span><div class="pjw-checklist-list" id="pjwChecklistList">' + checklistRows + '</div><button type="button" class="pjw-add-line" onclick="projectWizardAddChecklistRow()">+ Add another line</button></div>') +
       '<div class="pjw-due-compact">' +
       '<div class="pjw-due-compact-label">Due by (optional)</div>' +
-      '<button type="button" class="pjw-due-open" onclick="projectWizardOpenPhaseDue()">' + calSvg + '<span id="pjwPhaseDueDisplay">' + escapeHtml(projectWizardFormatDateDisplay(ph.completionDate || null)) + '</span></button>' +
-      '<div class="pjw-date-native-wrap"><input type="date" class="pjw-date-native" id="pjwPhaseDue" value="' + escapeHtml(ph.completionDate || '') + '" onchange="projectWizardOnPhaseDueChange()"></div>' +
-      '</div></div>'
+      '<div class="pjw-due-row-inner">' +
+      '<label class="pjw-cal-hit" aria-label="Pick due date">' +
+      '<span class="pjw-cal-hit-visual">' + calInner + '</span>' +
+      '<input type="date" class="pjw-date-sheet-input" id="pjwPhaseDue" value="' + escapeHtml(ph.completionDate || '') + '" onchange="projectWizardOnPhaseDueChange()"></label>' +
+      '<span class="pjw-due-display-text" id="pjwPhaseDueDisplay">' + escapeHtml(projectWizardFormatDateDisplay(ph.completionDate || null)) + '</span></div></div></div>'
     );
   }
 
   function projectWizardSelectCount(n) {
     projectWizardPhaseCount = n;
-    if (projectWizardStep === 3) projectWizardRender();
+    if (projectWizardStep === 2) projectWizardRender();
   }
 
   function projectWizardRenderDots() {
     const dotsEl = document.getElementById('pjwDots');
     if (!dotsEl) return;
-    if (projectWizardStep <= 2) {
+    if (projectWizardStep <= 1) {
       dotsEl.hidden = false;
       let html = '';
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 2; i++) {
         let cls = 'pjw-dot';
         if (i < projectWizardStep) cls += ' done';
         else if (i === projectWizardStep) cls += ' current';
@@ -8823,7 +8859,7 @@
       return;
     }
     const N = projectWizardPhaseCount;
-    const total = 4 + N;
+    const total = 3 + N;
     dotsEl.hidden = false;
     let html2 = '';
     for (let j = 0; j < total; j++) {
@@ -8836,8 +8872,8 @@
   }
 
   function projectWizardSyncCurrentPhaseFromDom() {
-    if (projectWizardStep < 4) return;
-    const pi = projectWizardStep - 4;
+    if (projectWizardStep < 3) return;
+    const pi = projectWizardStep - 3;
     const ph = projectsEditing && projectsEditing.phases[pi];
     if (!ph) return;
     const titleEl = document.getElementById('pjwPhaseTitle');
@@ -8869,7 +8905,74 @@
     }
   }
 
+  function projectWizardResetSwipeSurface() {
+    const s = document.getElementById('pjwSwipeSurface');
+    if (!s) return;
+    s.style.transition = 'none';
+    s.style.transform = 'translateX(0)';
+  }
+
+  function projectWizardTryAdvance() {
+    if (projectWizardStep === 0) {
+      const tEl = document.getElementById('pjwTitle');
+      const t = tEl ? tEl.value.trim() : '';
+      if (!t) {
+        if (tEl) {
+          tEl.classList.add('pjw-shake');
+          setTimeout(function() { tEl.classList.remove('pjw-shake'); }, 500);
+        }
+        return false;
+      }
+      projectsEditing.title = t;
+      projectWizardStep = 1;
+      return true;
+    }
+    if (projectWizardStep === 1) {
+      const dEl = document.getElementById('pjwDesc');
+      projectsEditing.description = dEl ? dEl.value.trim() : '';
+      const fEl = document.getElementById('pjwFinish');
+      projectsEditing.finishDate = fEl && fEl.value ? fEl.value : null;
+      projectWizardStep = 2;
+      return true;
+    }
+    if (projectWizardStep === 2) {
+      projectWizardApplyPhaseCount(projectWizardPhaseCount);
+      projectWizardStep = 3;
+      return true;
+    }
+    projectWizardSyncCurrentPhaseFromDom();
+    const pi = projectWizardStep - 3;
+    if (pi >= projectWizardPhaseCount - 1) {
+      saveProjectWizardFinal();
+      return false;
+    }
+    projectWizardStep++;
+    return true;
+  }
+
+  function projectWizardCanGoNext() {
+    if (projectWizardStep === 0) {
+      const tEl = document.getElementById('pjwTitle');
+      return !!(tEl && tEl.value.trim());
+    }
+    return true;
+  }
+
+  function projectWizardPerformBack() {
+    if (projectWizardStep >= 3) {
+      projectWizardSyncCurrentPhaseFromDom();
+    } else if (projectWizardStep === 1) {
+      const dEl = document.getElementById('pjwDesc');
+      if (dEl) projectsEditing.description = dEl.value.trim();
+      const fEl = document.getElementById('pjwFinish');
+      if (fEl) projectsEditing.finishDate = fEl.value || null;
+    }
+    projectWizardStep--;
+  }
+
   function projectWizardRender() {
+    if (!projectsEditing) return;
+    projectWizardResetSwipeSurface();
     const progressEl = document.getElementById('pjwProgress');
     const headingEl = document.getElementById('pjwHeading');
     const leadEl = document.getElementById('pjwLead');
@@ -8877,13 +8980,13 @@
     const nextBtn = document.getElementById('pjwNext');
     const backBtn = document.getElementById('pjwBack');
     const N = projectWizardPhaseCount;
-    const total = 4 + N;
-    const calSvg = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.75"/><path d="M3 10h18M8 2v4M16 2v4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>';
+    const total = 3 + N;
+    const calInner = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.75"/><path d="M3 10h18M8 2v4M16 2v4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>';
 
     projectWizardRenderDots();
 
     if (projectWizardStep === 0) {
-      if (progressEl) progressEl.textContent = '1 of 3 · Name';
+      if (progressEl) progressEl.textContent = '1 of 2 · Name';
       if (headingEl) headingEl.textContent = 'What should we call this?';
       if (leadEl) leadEl.textContent = 'Give it a name you’ll like seeing on your map.';
       if (bodyEl) {
@@ -8893,33 +8996,23 @@
       if (backBtn) backBtn.textContent = 'Exit';
       if (nextBtn) nextBtn.textContent = 'Continue';
     } else if (projectWizardStep === 1) {
-      if (progressEl) progressEl.textContent = '2 of 3 · Heart';
+      if (progressEl) progressEl.textContent = '2 of 2 · Details';
       if (headingEl) headingEl.textContent = 'Why it matters, if you like';
-      if (leadEl) leadEl.textContent = 'Soft and optional—a single line for future-you.';
+      if (leadEl) leadEl.textContent = 'Soft and optional—then tap the calendar if you want a target date.';
+      const fin = projectsEditing.finishDate || '';
       if (bodyEl) {
         bodyEl.innerHTML =
-          '<textarea class="pjw-textarea" id="pjwDesc" rows="5" placeholder="What pulled you into this project?">' + escapeHtml(projectsEditing.description || '') + '</textarea>';
+          '<textarea class="pjw-textarea" id="pjwDesc" rows="5" placeholder="What pulled you into this project?">' + escapeHtml(projectsEditing.description || '') + '</textarea>' +
+          '<div class="pjw-finish-inline">' +
+          '<span class="pjw-finish-inline-label">Hope to wrap up by (optional)</span>' +
+          '<label class="pjw-cal-hit" aria-label="Pick target finish date">' +
+          '<span class="pjw-cal-hit-visual">' + calInner + '</span>' +
+          '<input type="date" class="pjw-date-sheet-input" id="pjwFinish" value="' + escapeHtml(fin) + '" onchange="projectWizardOnFinishInput()"></label>' +
+          '<span class="pjw-finish-inline-value" id="pjwFinishDisplay">' + escapeHtml(projectWizardFormatDateDisplay(fin || null)) + '</span></div>';
       }
       if (backBtn) backBtn.textContent = 'Back';
       if (nextBtn) nextBtn.textContent = 'Continue';
     } else if (projectWizardStep === 2) {
-      if (progressEl) progressEl.textContent = '3 of 3 · When';
-      if (headingEl) headingEl.textContent = 'Hope to wrap up by';
-      if (leadEl) leadEl.textContent = 'Optional. Pick a day on the calendar, or skip ahead.';
-      const fin = projectsEditing.finishDate || '';
-      if (bodyEl) {
-        bodyEl.innerHTML =
-          '<button type="button" class="pjw-date-card" onclick="projectWizardOpenFinishDate()">' +
-          '<div class="pjw-date-card-icon">' + calSvg + '</div>' +
-          '<div class="pjw-date-card-text">' +
-          '<div class="pjw-date-card-kicker">Target date</div>' +
-          '<div class="pjw-date-card-value" id="pjwFinishDisplay">' + escapeHtml(projectWizardFormatDateDisplay(fin || null)) + '</div>' +
-          '</div></button>' +
-          '<div class="pjw-date-native-wrap"><input type="date" class="pjw-date-native" id="pjwFinish" value="' + escapeHtml(fin) + '" onchange="projectWizardOnFinishInput()"></div>';
-      }
-      if (backBtn) backBtn.textContent = 'Back';
-      if (nextBtn) nextBtn.textContent = 'Continue';
-    } else if (projectWizardStep === 3) {
       if (progressEl) progressEl.textContent = 'Your map · Phases';
       if (headingEl) headingEl.textContent = 'How many steps or phases feels right?';
       if (leadEl) {
@@ -8936,7 +9029,7 @@
       if (backBtn) backBtn.textContent = 'Back';
       if (nextBtn) nextBtn.textContent = 'Continue';
     } else {
-      const pi = projectWizardStep - 4;
+      const pi = projectWizardStep - 3;
       if (progressEl) progressEl.textContent = 'Leg ' + (pi + 1) + ' of ' + N + ' · Step ' + (projectWizardStep + 1) + ' of ' + total;
       if (headingEl) headingEl.textContent = 'Shape this leg';
       if (leadEl) {
@@ -8953,39 +9046,7 @@
   }
 
   function projectWizardNext() {
-    if (projectWizardStep === 0) {
-      const tEl = document.getElementById('pjwTitle');
-      const t = tEl ? tEl.value.trim() : '';
-      if (!t) {
-        if (tEl) {
-          tEl.classList.add('pjw-shake');
-          setTimeout(function() { tEl.classList.remove('pjw-shake'); }, 500);
-        }
-        return;
-      }
-      projectsEditing.title = t;
-      projectWizardStep = 1;
-    } else if (projectWizardStep === 1) {
-      const dEl = document.getElementById('pjwDesc');
-      projectsEditing.description = dEl ? dEl.value.trim() : '';
-      projectWizardStep = 2;
-    } else if (projectWizardStep === 2) {
-      const fEl = document.getElementById('pjwFinish');
-      projectsEditing.finishDate = fEl && fEl.value ? fEl.value : null;
-      projectWizardStep = 3;
-    } else if (projectWizardStep === 3) {
-      projectWizardApplyPhaseCount(projectWizardPhaseCount);
-      projectWizardStep = 4;
-    } else {
-      projectWizardSyncCurrentPhaseFromDom();
-      const pi = projectWizardStep - 4;
-      if (pi >= projectWizardPhaseCount - 1) {
-        saveProjectWizardFinal();
-        return;
-      }
-      projectWizardStep++;
-    }
-    projectWizardRender();
+    if (projectWizardTryAdvance()) projectWizardRender();
   }
 
   function projectWizardBack() {
@@ -8993,43 +9054,107 @@
       closeProjectWizard();
       return;
     }
-    if (projectWizardStep >= 4) {
-      projectWizardSyncCurrentPhaseFromDom();
-    } else if (projectWizardStep === 2) {
-      const fEl = document.getElementById('pjwFinish');
-      if (fEl) projectsEditing.finishDate = fEl.value || null;
-    } else if (projectWizardStep === 1) {
-      const dEl = document.getElementById('pjwDesc');
-      if (dEl) projectsEditing.description = dEl.value.trim();
-    }
-    projectWizardStep--;
+    projectWizardPerformBack();
     projectWizardRender();
   }
 
-  const projectWizardSwipe = { x0: 0, y0: 0, active: false };
+  const projectWizardSwipe = { x0: 0, y0: 0, active: false, horizontal: false };
 
   function projectWizardTouchStart(ev) {
     const o = document.getElementById('projectWizardOverlay');
     if (!o || !o.classList.contains('open')) return;
     const t = ev.target;
-    if (t.closest && t.closest('input, textarea, button, select, a, .pjw-date-card, .pjw-due-open, .pjw-checklist-input')) return;
+    if (t.closest && t.closest('input, textarea, button, select, a, .pjw-cal-hit, .pjw-checklist-input, .pjw-date-card')) return;
     if (ev.touches.length !== 1) return;
     projectWizardSwipe.active = true;
+    projectWizardSwipe.horizontal = false;
     projectWizardSwipe.x0 = ev.touches[0].clientX;
     projectWizardSwipe.y0 = ev.touches[0].clientY;
   }
 
-  function projectWizardTouchEnd(ev) {
+  function projectWizardTouchMove(ev) {
     if (!projectWizardSwipe.active) return;
+    if (ev.touches.length !== 1) return;
+    const x = ev.touches[0].clientX;
+    const y = ev.touches[0].clientY;
+    const dx = x - projectWizardSwipe.x0;
+    const dy = y - projectWizardSwipe.y0;
+    if (!projectWizardSwipe.horizontal) {
+      if (Math.abs(dx) < 12 && Math.abs(dy) < 12) return;
+      if (Math.abs(dy) > Math.abs(dx) * 1.12) {
+        projectWizardSwipe.active = false;
+        projectWizardResetSwipeSurface();
+        return;
+      }
+      projectWizardSwipe.horizontal = true;
+    }
+    const surf = document.getElementById('pjwSwipeSurface');
+    if (surf) {
+      surf.style.transition = 'none';
+      surf.style.transform = 'translateX(' + dx + 'px)';
+    }
+  }
+
+  function projectWizardTouchEnd(ev) {
+    const wasActive = projectWizardSwipe.active;
+    const wasH = projectWizardSwipe.horizontal;
     projectWizardSwipe.active = false;
+    projectWizardSwipe.horizontal = false;
+    if (!wasActive && !wasH) return;
+    if (!wasH) return;
     const o = document.getElementById('projectWizardOverlay');
     if (!o || !o.classList.contains('open')) return;
     if (ev.changedTouches.length !== 1) return;
     const dx = ev.changedTouches[0].clientX - projectWizardSwipe.x0;
-    const dy = ev.changedTouches[0].clientY - projectWizardSwipe.y0;
-    if (Math.abs(dx) < 56 || Math.abs(dx) < Math.abs(dy) * 1.15) return;
-    if (dx < 0) projectWizardNext();
-    else projectWizardBack();
+    const surf = document.getElementById('pjwSwipeSurface');
+    const w = Math.min(window.innerWidth || 400, 520);
+    if (Math.abs(dx) < 48) {
+      if (surf) {
+        surf.style.transition = 'transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1)';
+        surf.style.transform = 'translateX(0)';
+      }
+      return;
+    }
+    if (dx < 0) {
+      if (!projectWizardCanGoNext()) {
+        if (surf) {
+          surf.style.transition = 'transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1)';
+          surf.style.transform = 'translateX(0)';
+        }
+        return;
+      }
+      if (surf) {
+        surf.style.transition = 'transform 0.22s ease-out';
+        surf.style.transform = 'translateX(-' + w + 'px)';
+        setTimeout(function() {
+          projectWizardTryAdvance();
+          if (projectsEditing) projectWizardRender();
+        }, 210);
+      } else {
+        projectWizardTryAdvance();
+        if (projectsEditing) projectWizardRender();
+      }
+    } else {
+      if (projectWizardStep === 0) {
+        if (surf) {
+          surf.style.transition = 'transform 0.22s ease-out';
+          surf.style.transform = 'translateX(' + w + 'px)';
+          setTimeout(function() { closeProjectWizard(); }, 210);
+        } else closeProjectWizard();
+        return;
+      }
+      if (surf) {
+        surf.style.transition = 'transform 0.22s ease-out';
+        surf.style.transform = 'translateX(' + w + 'px)';
+        setTimeout(function() {
+          projectWizardPerformBack();
+          if (projectsEditing) projectWizardRender();
+        }, 210);
+      } else {
+        projectWizardPerformBack();
+        if (projectsEditing) projectWizardRender();
+      }
+    }
   }
 
   (function projectWizardInitSwipe() {
@@ -9037,6 +9162,7 @@
     if (!el || el.dataset.pjwSwipe === '1') return;
     el.dataset.pjwSwipe = '1';
     el.addEventListener('touchstart', projectWizardTouchStart, { passive: true });
+    el.addEventListener('touchmove', projectWizardTouchMove, { passive: true });
     el.addEventListener('touchend', projectWizardTouchEnd, { passive: true });
   })();
 
