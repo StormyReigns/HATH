@@ -3103,15 +3103,9 @@
     .schedule-mini-cal-day.today.has-events::after { background: var(--text); }
 
     /* Settings screen */
-    /* No padding-bottom here: it sat below the sticky scroll-fade and read as a ~24px black/white band */
     #settingsScreen {
-      padding: 8px 0 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
+      padding: 8px 0 24px; overflow-y: auto; -webkit-overflow-scrolling: touch;
       flex: 1; min-height: 0; display: flex; flex-direction: column;
-    }
-    #settingsScreen > .scroll-fade-bottom {
-      height: 76px;
-      margin-top: -76px;
-      margin-bottom: 24px;
     }
     #settingsScreen.visible { display: flex !important; }
     .settings-section { padding: 16px 0; border-bottom: 1px solid rgba(0,0,0,0.06); flex-shrink: 0; }
@@ -5163,8 +5157,8 @@
       </div>
       <div class="settings-section" id="settingsSectionNickname">
         <div class="settings-label">Nickname</div>
-        <input type="text" class="settings-input" id="settingsNickname" placeholder="What should we call you?" maxlength="30">
-        <div class="settings-hint">Used in greetings and by the AI</div>
+        <input type="text" class="settings-input" id="settingsNickname" placeholder="Homie" maxlength="30">
+        <div class="settings-hint">Default is Homie; used in greetings and by the AI</div>
       </div>
       <div class="settings-section">
         <div class="settings-label">Font Size</div>
@@ -5725,7 +5719,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.16.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.16.4';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -5797,9 +5791,7 @@
   function applyGuestSettingsSectionsVisibility() {
     var guest = !getApiUser();
     var dumbSec = document.getElementById('settingsSectionDumb');
-    var civSec = document.getElementById('civicsSourcesSection');
     if (dumbSec) dumbSec.style.display = guest ? 'none' : '';
-    if (civSec) civSec.style.display = guest ? 'none' : '';
   }
 
   function handleCredentialResponse(response) {
@@ -5865,14 +5857,18 @@
   }
 
   function initScrollFades() {
+    var settingsScr = document.getElementById('settingsScreen');
+    if (settingsScr) {
+      var staleFade = settingsScr.querySelector('.scroll-fade-bottom');
+      if (staleFade) staleFade.remove();
+    }
     const SCROLL_CONTAINERS = [
       '.civics-content',
       '#docsList',
       '#scheduleList',
       '.recipes-list-wrap',
       '#projectsInProgressList',
-      '.blatherbook-messages',
-      '#settingsScreen'
+      '.blatherbook-messages'
     ];
 
     SCROLL_CONTAINERS.forEach(function(selector) {
@@ -6151,13 +6147,14 @@
     ]}
   ];
 
+  const DEFAULT_DISPLAY_NAME = 'Homie';
+
   function getDisplayName() {
     const user = localStorage.getItem('shasta_user');
     const settingsKey = user || 'guest';
     const nick = localStorage.getItem('shasta_nickname_' + settingsKey);
     if (nick && nick.trim()) return nick.trim();
-    if (!user) return 'there';
-    return user === 'jessicafisher407@gmail.com' ? 'Blaisie' : 'Matt';
+    return DEFAULT_DISPLAY_NAME;
   }
 
   function getRandomGreeting() {
