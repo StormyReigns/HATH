@@ -5769,7 +5769,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.17.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.17.3';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -9327,14 +9327,12 @@
     if (zoneC) zoneC.innerHTML = '<div class="civics-loading">Loading…</div>';
 
     try {
-      const user = localStorage.getItem('shasta_user');
       const electionYear = parseInt(String(elEv.date || '').slice(0, 4), 10);
       const kind = elEv.civicsElectionKind || 'general';
       const y = isNaN(electionYear) ? new Date().getFullYear() : electionYear;
       const q = '&action=getCandidatesForElection&electionKind=' + encodeURIComponent(kind) +
         '&electionYear=' + encodeURIComponent(String(y)) +
-        '&state=' + encodeURIComponent(getCivicsState()) +
-        '&user=' + encodeURIComponent(user);
+        '&state=' + encodeURIComponent(getCivicsState());
       const res = await fetch(apiUrlWithUser(API_URL, q), { redirect: 'follow' });
       const data = await res.json();
       const fetched = data.candidates || [];
