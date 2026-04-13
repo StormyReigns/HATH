@@ -4975,6 +4975,265 @@
       transition: background 0.2s, border-color 0.2s;
     }
     .gj-mode-btn:hover, .gj-mode-btn:active { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.35); }
+
+    /* ── Project creation wizard (full screen, Gordon-style) ── */
+    .project-wizard-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 390;
+      background: rgba(32,26,22,0.76);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.32s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: max(env(safe-area-inset-top), 16px) 20px max(env(safe-area-inset-bottom), 20px);
+      overflow: hidden;
+    }
+    .project-wizard-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .pjw-close {
+      position: absolute;
+      top: max(env(safe-area-inset-top), 14px);
+      right: max(env(safe-area-inset-right), 16px);
+      background: none;
+      border: none;
+      font-size: 26px;
+      color: rgba(255,255,255,0.45);
+      cursor: pointer;
+      padding: 10px;
+      line-height: 1;
+      z-index: 2;
+    }
+    .pjw-close:active { color: rgba(255,255,255,0.7); }
+    .pjw-inner {
+      width: 100%;
+      max-width: 400px;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .pjw-progress {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,248,240,0.42);
+      text-align: center;
+      margin-bottom: 14px;
+      flex-shrink: 0;
+    }
+    .pjw-dots {
+      display: flex;
+      justify-content: center;
+      gap: 7px;
+      margin-bottom: 18px;
+      flex-shrink: 0;
+    }
+    .pjw-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      transition: background 0.25s, transform 0.25s;
+    }
+    .pjw-dot.done { background: rgba(255,220,180,0.75); transform: scale(1.1); }
+    .pjw-dot.current { background: var(--accent); box-shadow: 0 0 10px rgba(192,122,74,0.5); }
+    .pjw-icon-wrap {
+      text-align: center;
+      margin-bottom: 10px;
+      flex-shrink: 0;
+    }
+    .pjw-icon {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      filter: drop-shadow(0 3px 12px rgba(0,0,0,0.35));
+      opacity: 0.95;
+    }
+    .pjw-heading {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 500;
+      color: rgba(255,252,248,0.96);
+      text-align: center;
+      margin: 0 0 12px;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+      flex-shrink: 0;
+    }
+    .pjw-lead {
+      font-size: 15px;
+      line-height: 1.6;
+      color: rgba(255,245,235,0.72);
+      text-align: center;
+      margin: 0 0 20px;
+      max-width: 340px;
+      align-self: center;
+      flex-shrink: 0;
+    }
+    .pjw-lead-note {
+      display: block;
+      margin-top: 12px;
+      padding: 12px 14px;
+      font-size: 13px;
+      line-height: 1.55;
+      color: rgba(255,235,215,0.65);
+      background: rgba(255,255,255,0.06);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      text-align: left;
+    }
+    .pjw-body {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding: 4px 2px 16px;
+      margin: 0 -2px;
+    }
+    .pjw-body::-webkit-scrollbar { display: none; }
+    .pjw-field {
+      margin-bottom: 18px;
+    }
+    .pjw-field:last-child { margin-bottom: 8px; }
+    .pjw-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(255,230,210,0.55);
+      margin-bottom: 8px;
+    }
+    .pjw-input,
+    .pjw-textarea {
+      width: 100%;
+      padding: 14px 14px;
+      font-size: 16px;
+      font-family: inherit;
+      color: var(--text);
+      background: rgba(255,255,253,0.97);
+      border: 1px solid rgba(192,122,74,0.22);
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
+    }
+    .pjw-textarea {
+      min-height: 100px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+    .pjw-input:focus,
+    .pjw-textarea:focus {
+      outline: none;
+      border-color: rgba(192,122,74,0.55);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.14), 0 0 0 3px rgba(192,122,74,0.18);
+    }
+    .pjw-input::placeholder,
+    .pjw-textarea::placeholder { color: rgba(100,80,65,0.45); }
+    .pjw-count-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .pjw-count-chip {
+      padding: 16px 8px;
+      font-size: 20px;
+      font-weight: 700;
+      font-family: 'Playfair Display', serif;
+      color: rgba(255,250,245,0.85);
+      background: rgba(255,255,255,0.08);
+      border: 1.5px solid rgba(255,255,255,0.18);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    }
+    .pjw-count-chip:active { transform: scale(0.97); }
+    .pjw-count-chip.selected {
+      background: rgba(192,122,74,0.35);
+      border-color: rgba(255,200,160,0.45);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(192,122,74,0.25);
+    }
+    .pjw-body .project-phase-editor {
+      background: rgba(255,255,253,0.96);
+      border: 1px solid rgba(192,122,74,0.18);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.14);
+      margin-bottom: 0;
+    }
+    .pjw-body .project-phase-editor .project-phase-part-title {
+      color: var(--text);
+    }
+    .pjw-body .project-phase-editor input,
+    .pjw-body .project-phase-editor textarea {
+      background: rgba(255,255,255,0.92);
+    }
+    .pjw-nav {
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 16px;
+      margin-top: auto;
+      flex-shrink: 0;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .pjw-btn {
+      padding: 14px 22px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.12s;
+      border: none;
+    }
+    .pjw-btn:active { transform: scale(0.98); }
+    .pjw-btn-back {
+      background: transparent;
+      color: rgba(255,240,230,0.65);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .pjw-btn-next {
+      flex: 1;
+      max-width: 220px;
+      margin-left: auto;
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(192,122,74,0.35);
+    }
+    .pjw-shake { animation: pjw-shake 0.5s ease; }
+    @keyframes pjw-shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+    html.dark-mode .pjw-input,
+    html.dark-mode .pjw-textarea {
+      background: rgba(40,36,34,0.95);
+      color: var(--text);
+      border-color: rgba(255,255,255,0.12);
+    }
+    html.dark-mode .pjw-body .project-phase-editor {
+      background: rgba(38,34,32,0.96);
+      border-color: rgba(255,255,255,0.1);
+    }
+    html.dark-mode .pjw-body .project-phase-editor input,
+    html.dark-mode .pjw-body .project-phase-editor textarea {
+      background: rgba(32,28,26,0.9);
+    }
     .gj-randomizer-card-wrap {
       width: 78vw; max-width: 320px; height: 58vw; max-height: 240px;
       margin: 16px 0; position: relative; border-radius: 18px;
@@ -5843,6 +6102,25 @@
   </div>
 </div>
 
+<!-- Project creation wizard (full screen; edit still uses modal above) -->
+<div class="project-wizard-overlay" id="projectWizardOverlay" aria-hidden="true">
+  <button type="button" class="pjw-close" onclick="closeProjectWizard()" aria-label="Close">&times;</button>
+  <div class="pjw-inner">
+    <div class="pjw-progress" id="pjwProgress"></div>
+    <div class="pjw-dots" id="pjwDots" hidden></div>
+    <div class="pjw-icon-wrap">
+      <img class="pjw-icon" src="https://stormyreigns.github.io/HATH/Triforce.webp" alt="" width="40" height="40" loading="lazy">
+    </div>
+    <h2 class="pjw-heading" id="pjwHeading">Begin something new</h2>
+    <p class="pjw-lead" id="pjwLead"></p>
+    <div class="pjw-body" id="pjwBody"></div>
+    <div class="pjw-nav">
+      <button type="button" class="pjw-btn pjw-btn-back" id="pjwBack" onclick="projectWizardBack()">Exit</button>
+      <button type="button" class="pjw-btn pjw-btn-next" id="pjwNext" onclick="projectWizardNext()">Continue</button>
+    </div>
+  </div>
+</div>
+
 <!-- Phase editor (inline in modal) - template structure added via JS -->
 
 <!-- Documents add drawer -->
@@ -6002,7 +6280,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.17.4';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.18.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -7169,6 +7447,8 @@
   let projectsEditing = null;
   let projectsViewing = null;
   let projectsCurrentPhaseIndex = 0;
+  let projectWizardStep = 0;
+  let projectWizardPhaseCount = 3;
 
   const PHASE_QUOTES = {
     makingProgress: [
@@ -7937,26 +8217,22 @@
   }
 
   function openCreateProjectModal(editId) {
-    if (editId) {
-      projectsEditing = getProjects().find(p => p.id === editId) || null;
-    } else {
-      projectsEditing = { id: genId(), title: '', description: '', phases: [{ id: genId(), title: '', description: '', checklist: null, completionDate: null, completed: false }], createdAt: Date.now(), modifiedAt: Date.now() };
+    if (!editId) {
+      openProjectWizard();
+      return;
     }
-    document.getElementById('projectModalTitle').textContent = editId ? 'Shape this journey' : 'Begin something new';
+    projectsEditing = getProjects().find(p => p.id === editId) || null;
+    document.getElementById('projectModalTitle').textContent = 'Shape this journey';
     const subEl = document.getElementById('projectModalSub');
     if (subEl) {
-      subEl.textContent = editId
-        ? 'Change the details whenever you like—this is your map, not a deadline.'
-        : 'There’s no rush—jot what matters; you can refine it anytime.';
+      subEl.textContent = 'Change the details whenever you like—this is your map, not a deadline.';
     }
     const leadEl = document.getElementById('projectPhasesLead');
     if (leadEl) {
-      leadEl.textContent = editId
-        ? 'Adjust the legs of the voyage whenever the plan shifts.'
-        : 'Break the voyage into legs if it helps—you can rename or reorder later.';
+      leadEl.textContent = 'Adjust the legs of the voyage whenever the plan shifts.';
     }
     const saveBtn = document.getElementById('projectModalSaveBtn');
-    if (saveBtn) saveBtn.textContent = editId ? 'Save changes' : 'Save';
+    if (saveBtn) saveBtn.textContent = 'Save changes';
     const deleteBtn = document.getElementById('projectModalDeleteBtn');
     if (deleteBtn) deleteBtn.style.display = editId ? 'block' : 'none';
     document.getElementById('projectTitleInput').value = projectsEditing ? projectsEditing.title : '';
@@ -7981,25 +8257,30 @@
     projectsConfirmDelete(id);
   }
 
+  function syncProjectPhaseFromEditorDiv(ed, ph) {
+    if (!ed || !ph) return;
+    ph.title = (ed.querySelector('.phase-editor-title')?.value || '').trim();
+    ph.description = (ed.querySelector('.phase-editor-desc')?.value || '').trim();
+    ph.completionDate = ed.querySelector('.phase-editor-date')?.value || null;
+    const listRaw = (ed.querySelector('.phase-editor-checklist')?.value || '').trim();
+    if (listRaw) {
+      const lines = listRaw.split('\n').filter(Boolean);
+      ph.checklist = lines.map((text, j) => {
+        const prev = ph.checklist && ph.checklist[j];
+        return prev ? { ...prev, text: text.trim() } : { id: genId(), text: text.trim(), done: false };
+      });
+    } else {
+      ph.checklist = null;
+    }
+  }
+
   function syncPhaseEditorsToState() {
     if (!projectsEditing || !projectsEditing.phases) return;
     const editors = document.querySelectorAll('.project-phase-editor');
     editors.forEach((ed, i) => {
       const ph = projectsEditing.phases[i];
       if (!ph) return;
-      ph.title = (ed.querySelector('.phase-editor-title')?.value || '').trim();
-      ph.description = (ed.querySelector('.phase-editor-desc')?.value || '').trim();
-      ph.completionDate = ed.querySelector('.phase-editor-date')?.value || null;
-      const listRaw = (ed.querySelector('.phase-editor-checklist')?.value || '').trim();
-      if (listRaw) {
-        const lines = listRaw.split('\n').filter(Boolean);
-        ph.checklist = lines.map((text, j) => {
-          const prev = ph.checklist && ph.checklist[j];
-          return prev ? { ...prev, text: text.trim() } : { id: genId(), text: text.trim(), done: false };
-        });
-      } else {
-        ph.checklist = null;
-      }
+      syncProjectPhaseFromEditorDiv(ed, ph);
     });
   }
 
@@ -8009,10 +8290,12 @@
     list.innerHTML = phases.map((ph, i) => renderPhaseEditor(ph, i)).join('');
   }
 
-  function renderPhaseEditor(ph, idx) {
+  function renderPhaseEditor(ph, idx, opts) {
+    const wizard = opts && opts.wizard;
     const checklistStr = ph.checklist && ph.checklist.length > 0
       ? ph.checklist.map(c => escapeHtml(c.text)).join('\n')
       : '';
+    const removeBtn = wizard ? '' : `<button type="button" class="project-phase-remove" onclick="removePhaseFromProject(${idx})">Remove this leg</button>`;
     return `<div class="project-phase-editor" data-phase-idx="${idx}">
       <h4 class="project-phase-part-title">Part ${idx + 1}</h4>
       <input type="text" class="phase-editor-title" placeholder="What happens in this stretch?" value="${escapeHtml(ph.title || '')}">
@@ -8023,7 +8306,7 @@
       </div>
       <label class="project-date-label">Small steps—one per line</label>
       <textarea class="phase-editor-checklist" placeholder="Pick up supplies&#10;Book the appointment" rows="3">${checklistStr}</textarea>
-      <button type="button" class="project-phase-remove" onclick="removePhaseFromProject(${idx})">Remove this leg</button>
+      ${removeBtn}
     </div>`;
   }
 
@@ -8047,6 +8330,246 @@
     syncPhaseEditorsToState();
     projectsEditing.phases.splice(idx, 1);
     renderProjectPhasesEditors();
+  }
+
+  function persistProjectRecord(title, desc, finishDate, phases) {
+    if (phases.length === 0) {
+      phases.push({ id: genId(), title: 'Phase 1', description: '', checklist: null, completionDate: null, completed: false });
+    }
+    const all = getProjects();
+    const now = Date.now();
+    const newProj = {
+      id: projectsEditing ? projectsEditing.id : genId(),
+      title,
+      description: desc,
+      finishDate,
+      phases,
+      createdAt: projectsEditing ? projectsEditing.createdAt : now,
+      modifiedAt: now,
+      completedAt: null
+    };
+    if (isProjectCompleted(newProj)) newProj.completedAt = now;
+    else if (projectsEditing && projectsEditing.completedAt) newProj.completedAt = projectsEditing.completedAt;
+    if (projectsEditing && projectsEditing.completeQuote) newProj.completeQuote = projectsEditing.completeQuote;
+
+    const idx = projectsEditing ? all.findIndex(p => p.id === projectsEditing.id) : -1;
+    if (idx >= 0) {
+      all[idx] = newProj;
+    } else {
+      all.push(newProj);
+    }
+    saveProjects(all);
+    renderProjectsLanding();
+    if (projectsViewing && projectsEditing && projectsViewing.id === projectsEditing.id) {
+      projectsViewing = newProj;
+      renderProjectsView();
+    }
+  }
+
+  function openProjectWizard() {
+    projectsEditing = {
+      id: genId(),
+      title: '',
+      description: '',
+      finishDate: null,
+      phases: [{ id: genId(), title: '', description: '', checklist: null, completionDate: null, completed: false }],
+      createdAt: Date.now(),
+      modifiedAt: Date.now()
+    };
+    projectWizardStep = 0;
+    projectWizardPhaseCount = 3;
+    const o = document.getElementById('projectWizardOverlay');
+    if (o) {
+      o.classList.add('open');
+      o.setAttribute('aria-hidden', 'false');
+    }
+    projectWizardRender();
+  }
+
+  function closeProjectWizard() {
+    const o = document.getElementById('projectWizardOverlay');
+    if (o) {
+      o.classList.remove('open');
+      o.setAttribute('aria-hidden', 'true');
+    }
+    projectsEditing = null;
+    projectWizardStep = 0;
+  }
+
+  function projectWizardApplyPhaseCount(n) {
+    const prev = projectsEditing.phases || [];
+    const next = [];
+    for (let i = 0; i < n; i++) {
+      if (prev[i]) {
+        next.push(prev[i]);
+      } else {
+        next.push({ id: genId(), title: '', description: '', checklist: null, completionDate: null, completed: false });
+      }
+    }
+    projectsEditing.phases = next;
+  }
+
+  function projectWizardSelectCount(n) {
+    projectWizardPhaseCount = n;
+    if (projectWizardStep === 1) projectWizardRender();
+  }
+
+  function projectWizardSyncCurrentPhaseFromDom() {
+    if (projectWizardStep < 2) return;
+    const pi = projectWizardStep - 2;
+    const el = document.querySelector('#pjwBody .project-phase-editor');
+    const ph = projectsEditing && projectsEditing.phases[pi];
+    if (el && ph) syncProjectPhaseFromEditorDiv(el, ph);
+  }
+
+  function projectWizardRender() {
+    const progressEl = document.getElementById('pjwProgress');
+    const headingEl = document.getElementById('pjwHeading');
+    const leadEl = document.getElementById('pjwLead');
+    const bodyEl = document.getElementById('pjwBody');
+    const nextBtn = document.getElementById('pjwNext');
+    const backBtn = document.getElementById('pjwBack');
+    const dotsEl = document.getElementById('pjwDots');
+    const N = projectWizardPhaseCount;
+    const total = 2 + N;
+
+    if (projectWizardStep === 0) {
+      if (progressEl) progressEl.textContent = 'Step 1 · The basics';
+      if (dotsEl) dotsEl.hidden = true;
+      if (headingEl) headingEl.textContent = 'First, the heart of it';
+      if (leadEl) leadEl.innerHTML = 'Name what you’re setting out to do. Everything else can wait.';
+      if (bodyEl) {
+        bodyEl.innerHTML =
+          '<div class="pjw-field"><label class="pjw-label" for="pjwTitle">What should we call this?</label>' +
+          '<input type="text" class="pjw-input" id="pjwTitle" autocomplete="off" placeholder="Kitchen refresh, taxes, the guest room…" value="' + escapeHtml(projectsEditing.title || '') + '"></div>' +
+          '<div class="pjw-field"><label class="pjw-label" for="pjwDesc">Why it matters, if you like</label>' +
+          '<textarea class="pjw-textarea" id="pjwDesc" placeholder="A line so future-you remembers what pulled you in.">' + escapeHtml(projectsEditing.description || '') + '</textarea></div>' +
+          '<div class="pjw-field"><label class="pjw-label" for="pjwFinish">Hope to wrap up by</label>' +
+          '<input type="date" class="pjw-input" id="pjwFinish" value="' + escapeHtml(projectsEditing.finishDate || '') + '"></div>';
+      }
+      if (backBtn) backBtn.textContent = 'Exit';
+      if (nextBtn) nextBtn.textContent = 'Continue';
+    } else if (projectWizardStep === 1) {
+      if (progressEl) progressEl.textContent = 'Step 2 · Shape of the voyage';
+      if (dotsEl) {
+        dotsEl.hidden = false;
+        let dotsHtml = '';
+        for (let i = 0; i < total; i++) {
+          let cls = 'pjw-dot';
+          if (i < projectWizardStep) cls += ' done';
+          else if (i === projectWizardStep) cls += ' current';
+          dotsHtml += '<span class="' + cls + '" role="presentation"></span>';
+        }
+        dotsEl.innerHTML = dotsHtml;
+      }
+      if (headingEl) headingEl.textContent = 'How many steps or phases feels right?';
+      if (leadEl) {
+        leadEl.innerHTML = 'Don’t worry—you can add or remove legs anytime.' +
+          '<span class="pjw-lead-note">Note: each phase can be a single task, or you can add a checklist of smaller steps on the next screens.</span>';
+      }
+      if (bodyEl) {
+        let chips = '';
+        for (let c = 1; c <= 8; c++) {
+          chips += '<button type="button" class="pjw-count-chip' + (c === projectWizardPhaseCount ? ' selected' : '') + '" onclick="projectWizardSelectCount(' + c + ')">' + c + '</button>';
+        }
+        bodyEl.innerHTML = '<div class="pjw-count-grid">' + chips + '</div>';
+      }
+      if (backBtn) backBtn.textContent = 'Back';
+      if (nextBtn) nextBtn.textContent = 'Continue';
+    } else {
+      const pi = projectWizardStep - 2;
+      if (progressEl) progressEl.textContent = 'Leg ' + (pi + 1) + ' of ' + N + ' · Step ' + (projectWizardStep + 1) + ' of ' + total;
+      if (dotsEl) {
+        dotsEl.hidden = false;
+        let dotsHtml = '';
+        for (let i = 0; i < total; i++) {
+          let cls = 'pjw-dot';
+          if (i < projectWizardStep) cls += ' done';
+          else if (i === projectWizardStep) cls += ' current';
+          dotsHtml += '<span class="' + cls + '" role="presentation"></span>';
+        }
+        dotsEl.innerHTML = dotsHtml;
+      }
+      if (headingEl) headingEl.textContent = 'Part ' + (pi + 1) + ' of ' + N;
+      if (leadEl) {
+        leadEl.textContent = pi === 0
+          ? 'Each leg can be one simple thing—or use a checklist below for smaller steps.'
+          : 'Optional fields stay optional. You can always edit later.';
+      }
+      const ph = projectsEditing.phases[pi];
+      if (bodyEl) bodyEl.innerHTML = ph ? renderPhaseEditor(ph, pi, { wizard: true }) : '';
+      if (backBtn) backBtn.textContent = 'Back';
+      const isLast = pi >= N - 1;
+      if (nextBtn) nextBtn.textContent = isLast ? 'Save' : 'Continue';
+    }
+  }
+
+  function projectWizardNext() {
+    if (projectWizardStep === 0) {
+      const tEl = document.getElementById('pjwTitle');
+      const t = tEl ? tEl.value.trim() : '';
+      if (!t) {
+        if (tEl) {
+          tEl.classList.add('pjw-shake');
+          setTimeout(function() { tEl.classList.remove('pjw-shake'); }, 500);
+        }
+        return;
+      }
+      projectsEditing.title = t;
+      projectsEditing.description = (document.getElementById('pjwDesc') && document.getElementById('pjwDesc').value || '').trim();
+      projectsEditing.finishDate = (document.getElementById('pjwFinish') && document.getElementById('pjwFinish').value) || null;
+      projectWizardStep = 1;
+    } else if (projectWizardStep === 1) {
+      projectWizardApplyPhaseCount(projectWizardPhaseCount);
+      projectWizardStep = 2;
+    } else {
+      projectWizardSyncCurrentPhaseFromDom();
+      const pi = projectWizardStep - 2;
+      if (pi >= projectWizardPhaseCount - 1) {
+        saveProjectWizardFinal();
+        return;
+      }
+      projectWizardStep++;
+    }
+    projectWizardRender();
+  }
+
+  function projectWizardBack() {
+    if (projectWizardStep === 0) {
+      closeProjectWizard();
+      return;
+    }
+    if (projectWizardStep >= 2) {
+      projectWizardSyncCurrentPhaseFromDom();
+    }
+    projectWizardStep--;
+    projectWizardRender();
+  }
+
+  function saveProjectWizardFinal() {
+    projectWizardSyncCurrentPhaseFromDom();
+    const title = (projectsEditing.title || '').trim();
+    if (!title) return;
+    const desc = projectsEditing.description || '';
+    const finishDate = projectsEditing.finishDate || null;
+    const phases = projectsEditing.phases.map((existing, i) => {
+      const t = (existing.title || '').trim();
+      const d = (existing.description || '').trim();
+      const dateVal = existing.completionDate || null;
+      let checklist = existing.checklist;
+      if (checklist && checklist.length === 0) checklist = null;
+      return {
+        id: existing.id,
+        title: t || ('Phase ' + (i + 1)),
+        description: d,
+        checklist: checklist || null,
+        completionDate: dateVal,
+        completed: !!existing.completed,
+        quote: existing.quote ? existing.quote : undefined
+      };
+    });
+    persistProjectRecord(title, desc, finishDate, phases);
+    closeProjectWizard();
   }
 
   function saveProjectFromModal() {
@@ -8083,36 +8606,8 @@
     if (phases.length === 0) {
       phases.push({ id: genId(), title: 'Phase 1', description: '', checklist: null, completionDate: null, completed: false });
     }
-
-    const all = getProjects();
-    const now = Date.now();
-    const newProj = {
-      id: projectsEditing ? projectsEditing.id : genId(),
-      title,
-      description: desc,
-      finishDate,
-      phases,
-      createdAt: projectsEditing ? projectsEditing.createdAt : now,
-      modifiedAt: now,
-      completedAt: null
-    };
-    if (isProjectCompleted(newProj)) newProj.completedAt = now;
-    else if (projectsEditing && projectsEditing.completedAt) newProj.completedAt = projectsEditing.completedAt;
-    if (projectsEditing && projectsEditing.completeQuote) newProj.completeQuote = projectsEditing.completeQuote;
-
-    const idx = projectsEditing ? all.findIndex(p => p.id === projectsEditing.id) : -1;
-    if (idx >= 0) {
-      all[idx] = newProj;
-    } else {
-      all.push(newProj);
-    }
-    saveProjects(all);
+    persistProjectRecord(title, desc, finishDate, phases);
     closeProjectModal();
-    renderProjectsLanding();
-    if (projectsViewing && projectsEditing && projectsViewing.id === projectsEditing.id) {
-      projectsViewing = newProj;
-      renderProjectsView();
-    }
   }
 
   function getCurrentDocsFolderId() {
