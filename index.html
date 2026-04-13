@@ -4174,13 +4174,21 @@
       padding: 14px;
       margin-bottom: 12px;
     }
-    .project-phase-editor h4 { font-size: 13px; margin: 0 0 8px; color: var(--text2); }
     .project-phase-editor input, .project-phase-editor textarea {
-      width: 100%; padding: 8px 10px;
-      font-size: 14px; font-family: inherit;
-      border: 1px solid rgba(0,0,0,0.08);
-      border-radius: 6px;
-      margin-bottom: 8px;
+      width: 100%; padding: 11px 12px;
+      font-size: 15px; font-family: inherit;
+      border: 1px solid rgba(192,122,74,0.14);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      background: rgba(255,255,255,0.65);
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.5);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .project-phase-editor input:focus,
+    .project-phase-editor textarea:focus {
+      outline: none;
+      border-color: rgba(192,122,74,0.45);
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.5), 0 0 0 3px rgba(192,122,74,0.12);
     }
     .project-phase-editor textarea { min-height: 60px; resize: vertical; }
     .projects-modal .paste-content { min-height: 80px; }
@@ -4192,7 +4200,219 @@
       overscroll-behavior-y: auto;
       overscroll-behavior-x: none;
       touch-action: pan-y pinch-zoom;
+      padding-top: 28px;
+      background: linear-gradient(180deg, #fffefb 0%, #fdf8f4 48%, #faf6f0 100%);
+      border: 1px solid rgba(192,122,74,0.12);
+      border-bottom: none;
+      box-shadow: 0 -8px 32px rgba(58,46,40,0.08), inset 0 1px 0 rgba(255,255,255,0.85);
     }
+    .project-modal-hero {
+      text-align: center;
+      margin-bottom: 22px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(192,122,74,0.14);
+    }
+    .project-modal-hero-icon {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto 12px;
+      filter: drop-shadow(0 2px 6px rgba(192,122,74,0.25));
+      opacity: 0.92;
+    }
+    .projects-modal h3 {
+      margin-bottom: 8px;
+      font-size: 22px;
+      letter-spacing: -0.02em;
+    }
+    .project-modal-sub {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--text2);
+      line-height: 1.55;
+      margin: 0 auto;
+      max-width: 320px;
+      opacity: 0.92;
+    }
+    .project-modal-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .project-field-group { display: flex; flex-direction: column; gap: 7px; }
+    .project-field-hint {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: rgba(100,72,48,0.55);
+      margin: 0;
+    }
+    html.dark-mode .project-field-hint { color: rgba(220,200,175,0.5); }
+    .projects-modal .project-field-group .paste-filename,
+    .projects-modal .project-field-group .paste-content {
+      margin-bottom: 0;
+    }
+    .projects-modal .paste-filename,
+    .projects-modal .paste-content,
+    .projects-modal .project-date-input {
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(192,122,74,0.16);
+      border-radius: 12px;
+      padding: 14px 14px;
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.6);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .projects-modal .paste-filename:focus,
+    .projects-modal .paste-content:focus,
+    .projects-modal .project-date-input:focus {
+      outline: none;
+      border-color: rgba(192,122,74,0.45);
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.6), 0 0 0 3px rgba(192,122,74,0.14);
+    }
+    .projects-modal .project-date-input { margin-bottom: 0; }
+    .project-phases-lead {
+      font-size: 14px;
+      color: var(--text2);
+      line-height: 1.5;
+      margin: 0 0 14px;
+    }
+    .project-phases-section {
+      border-top: none;
+      padding-top: 8px;
+      margin-bottom: 8px;
+      margin-top: 4px;
+      padding: 18px 16px 16px;
+      background: rgba(255,255,255,0.45);
+      border-radius: 14px;
+      border: 1px solid rgba(192,122,74,0.12);
+    }
+    .project-phases-label {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 500;
+      color: var(--text);
+      text-transform: none;
+      letter-spacing: 0;
+      margin: 0 0 12px;
+    }
+    .project-add-phase-btn {
+      margin-top: 14px;
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 500;
+      background: rgba(255,255,255,0.65);
+      color: var(--accent);
+      border: 1px dashed rgba(192,122,74,0.35);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .project-add-phase-btn:active {
+      opacity: 1;
+      background: rgba(192,122,74,0.08);
+      border-color: rgba(192,122,74,0.5);
+    }
+    .project-phase-editor {
+      background: rgba(255,255,255,0.55);
+      border: 1px solid rgba(192,122,74,0.1);
+      box-shadow: 0 2px 12px rgba(58,46,40,0.04);
+    }
+    .project-phase-editor .project-phase-part-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+      margin: 0 0 10px;
+    }
+    .project-phase-editor .project-date-label {
+      font-size: 11px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: rgba(100,72,48,0.5);
+    }
+    .project-phase-remove {
+      margin-top: 10px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-family: inherit;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: rgba(192,80,80,0.9);
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+    }
+    .project-phase-remove:active { background: rgba(192,80,80,0.08); }
+    .projects-modal .project-modal-actions {
+      margin-top: 8px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(192,122,74,0.12);
+    }
+    .project-modal-primary {
+      padding-left: 22px;
+      padding-right: 22px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(192,122,74,0.25);
+    }
+    html.dark-mode .projects-modal {
+      background: linear-gradient(180deg, #2c2826 0%, #252220 55%, #221f1d 100%);
+      border-color: rgba(255,255,255,0.08);
+      box-shadow: 0 -8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+    html.dark-mode .project-modal-hero {
+      border-bottom-color: rgba(255,255,255,0.1);
+    }
+    html.dark-mode .project-modal-sub { color: var(--text2); }
+    html.dark-mode .projects-modal .paste-filename,
+    html.dark-mode .projects-modal .paste-content,
+    html.dark-mode .projects-modal .project-date-input {
+      background: rgba(40,36,34,0.85);
+      border-color: rgba(255,255,255,0.12);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
+    }
+    html.dark-mode .projects-modal .paste-filename:focus,
+    html.dark-mode .projects-modal .paste-content:focus,
+    html.dark-mode .projects-modal .project-date-input:focus {
+      border-color: rgba(224,152,104,0.45);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.2), 0 0 0 3px rgba(224,152,104,0.12);
+    }
+    html.dark-mode .project-phases-section {
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.08);
+    }
+    html.dark-mode .project-phase-editor {
+      background: rgba(0,0,0,0.2);
+      border-color: rgba(255,255,255,0.08);
+    }
+    html.dark-mode .project-phase-editor input,
+    html.dark-mode .project-phase-editor textarea {
+      background: rgba(40,36,34,0.85);
+      border-color: rgba(255,255,255,0.12);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
+    }
+    html.dark-mode .project-phase-editor input:focus,
+    html.dark-mode .project-phase-editor textarea:focus {
+      border-color: rgba(224,152,104,0.45);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.2), 0 0 0 3px rgba(224,152,104,0.12);
+    }
+    html.dark-mode .project-add-phase-btn {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.15);
+    }
+    html.dark-mode .project-add-phase-btn:active { background: rgba(255,255,255,0.08); }
+    html.dark-mode .projects-modal .project-modal-actions {
+      border-top-color: rgba(255,255,255,0.1);
+    }
+    html.dark-mode .project-phase-remove { color: #e08080; }
+    html.dark-mode .project-phase-remove:active { background: rgba(220,80,80,0.15); }
     html.dark-mode .projects-phase-card { background: rgba(45,40,38,0.6); border-color: rgba(255,255,255,0.08); }
     html.dark-mode .phase-peel-corner::after {
       background: linear-gradient(225deg, #4a3620 0%, #382a14 55%, #28200e 100%);
@@ -5588,23 +5808,36 @@
 <!-- Create/Edit Project modal -->
 <div class="paste-modal-overlay" id="projectModalOverlay" onclick="closeProjectModal(event)">
   <div class="paste-modal projects-modal" id="projectModal" onclick="event.stopPropagation()">
-    <h3 id="projectModalTitle">New Project</h3>
-    <input type="text" class="paste-filename" id="projectTitleInput" placeholder="Project title">
-    <textarea class="paste-content" id="projectDescInput" placeholder="Description (optional)" rows="2"></textarea>
-    <div class="project-date-row">
-      <label class="project-date-label">Finish date (optional)</label>
-      <input type="date" id="projectFinishDateInput" class="project-date-input">
+    <div class="project-modal-hero">
+      <img class="project-modal-hero-icon" src="https://stormyreigns.github.io/HATH/Triforce.webp" alt="" loading="lazy" width="36" height="36">
+      <h3 id="projectModalTitle">Begin something new</h3>
+      <p class="project-modal-sub" id="projectModalSub">There’s no rush—jot what matters; you can refine it anytime.</p>
+    </div>
+    <div class="project-modal-fields">
+      <div class="project-field-group">
+        <label class="project-field-hint" for="projectTitleInput">Name this quest</label>
+        <input type="text" class="paste-filename" id="projectTitleInput" placeholder="Kitchen refresh, taxes, the guest room…" autocomplete="off">
+      </div>
+      <div class="project-field-group">
+        <label class="project-field-hint" for="projectDescInput">Why it matters, if you like</label>
+        <textarea class="paste-content" id="projectDescInput" placeholder="A line so future-you remembers what pulled you in." rows="3"></textarea>
+      </div>
+      <div class="project-field-group">
+        <label class="project-field-hint" for="projectFinishDateInput">Hope to wrap up by</label>
+        <input type="date" id="projectFinishDateInput" class="project-date-input">
+      </div>
     </div>
     <div class="project-phases-section">
-      <h4 class="project-phases-label">Phases</h4>
+      <p class="project-phases-lead" id="projectPhasesLead">Break the voyage into legs if it helps—you can rename or reorder later.</p>
+      <h4 class="project-phases-label">Stops along the way</h4>
       <div class="project-phases-list" id="projectPhasesList"></div>
-      <button type="button" class="project-add-phase-btn" onclick="addPhaseToProject()">+ Add next phase</button>
+      <button type="button" class="project-add-phase-btn" onclick="addPhaseToProject()">+ Add another leg</button>
     </div>
     <div class="paste-modal-actions project-modal-actions">
       <button type="button" class="project-delete-btn" id="projectModalDeleteBtn" onclick="deleteProjectFromEditor()" style="display:none">Delete</button>
       <div class="project-modal-actions-right">
-        <button type="button" class="paste-cancel-btn" onclick="closeProjectModal()">Cancel</button>
-        <button type="button" class="paste-save-btn" onclick="saveProjectFromModal()">Save</button>
+        <button type="button" class="paste-cancel-btn" onclick="closeProjectModal()">Close</button>
+        <button type="button" class="paste-save-btn project-modal-primary" id="projectModalSaveBtn" onclick="saveProjectFromModal()">Save</button>
       </div>
     </div>
   </div>
@@ -5769,7 +6002,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.17.3';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.17.4';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -7709,7 +7942,21 @@
     } else {
       projectsEditing = { id: genId(), title: '', description: '', phases: [{ id: genId(), title: '', description: '', checklist: null, completionDate: null, completed: false }], createdAt: Date.now(), modifiedAt: Date.now() };
     }
-    document.getElementById('projectModalTitle').textContent = editId ? 'Edit Project' : 'New Project';
+    document.getElementById('projectModalTitle').textContent = editId ? 'Shape this journey' : 'Begin something new';
+    const subEl = document.getElementById('projectModalSub');
+    if (subEl) {
+      subEl.textContent = editId
+        ? 'Change the details whenever you like—this is your map, not a deadline.'
+        : 'There’s no rush—jot what matters; you can refine it anytime.';
+    }
+    const leadEl = document.getElementById('projectPhasesLead');
+    if (leadEl) {
+      leadEl.textContent = editId
+        ? 'Adjust the legs of the voyage whenever the plan shifts.'
+        : 'Break the voyage into legs if it helps—you can rename or reorder later.';
+    }
+    const saveBtn = document.getElementById('projectModalSaveBtn');
+    if (saveBtn) saveBtn.textContent = editId ? 'Save changes' : 'Save';
     const deleteBtn = document.getElementById('projectModalDeleteBtn');
     if (deleteBtn) deleteBtn.style.display = editId ? 'block' : 'none';
     document.getElementById('projectTitleInput').value = projectsEditing ? projectsEditing.title : '';
@@ -7767,16 +8014,16 @@
       ? ph.checklist.map(c => escapeHtml(c.text)).join('\n')
       : '';
     return `<div class="project-phase-editor" data-phase-idx="${idx}">
-      <h4>Phase ${idx + 1}</h4>
-      <input type="text" class="phase-editor-title" placeholder="Title" value="${escapeHtml(ph.title || '')}">
-      <textarea class="phase-editor-desc" placeholder="Description (optional)" rows="2">${escapeHtml(ph.description || '')}</textarea>
+      <h4 class="project-phase-part-title">Part ${idx + 1}</h4>
+      <input type="text" class="phase-editor-title" placeholder="What happens in this stretch?" value="${escapeHtml(ph.title || '')}">
+      <textarea class="phase-editor-desc" placeholder="Notes for this leg (optional)" rows="2">${escapeHtml(ph.description || '')}</textarea>
       <div class="project-date-row">
-        <label class="project-date-label">Completion date (optional)</label>
+        <label class="project-date-label">Aim to finish by</label>
         <input type="date" class="phase-editor-date" value="${ph.completionDate || ''}">
       </div>
-      <label class="project-date-label">Checklist (optional, one item per line)</label>
-      <textarea class="phase-editor-checklist" placeholder="Item 1&#10;Item 2" rows="3">${checklistStr}</textarea>
-      <button type="button" class="paste-cancel-btn" style="margin-top:8px" onclick="removePhaseFromProject(${idx})">Remove phase</button>
+      <label class="project-date-label">Small steps—one per line</label>
+      <textarea class="phase-editor-checklist" placeholder="Pick up supplies&#10;Book the appointment" rows="3">${checklistStr}</textarea>
+      <button type="button" class="project-phase-remove" onclick="removePhaseFromProject(${idx})">Remove this leg</button>
     </div>`;
   }
 
