@@ -1819,20 +1819,61 @@
     }
     .settings-sources-toggle {
       display: flex; align-items: center; justify-content: space-between;
-      width: 100%; gap: 10px; padding: 0 0 10px; margin: 0;
-      background: none; border: none; cursor: pointer; font-family: inherit; text-align: left;
+      width: 100%; gap: 14px; padding: 14px 16px; margin: 0 0 4px;
+      background: rgba(255,255,255,0.65);
+      border: 2px solid rgba(0,0,0,0.1);
+      border-radius: 14px;
+      cursor: pointer; font-family: inherit; text-align: left;
       -webkit-tap-highlight-color: transparent;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      transition: border-color 0.15s ease, background 0.15s ease;
     }
-    .settings-sources-toggle:active { opacity: 0.85; }
-    .settings-sources-toggle .settings-section-title { margin-bottom: 0; flex: 1; }
-    .settings-sources-toggle-chevron {
-      font-size: 11px; color: var(--muted); flex-shrink: 0;
-      transition: transform 0.2s ease;
+    .settings-sources-toggle:hover, .settings-sources-toggle:focus-visible {
+      outline: none;
+      border-color: rgba(192,122,74,0.45);
+      background: rgba(192,122,74,0.06);
     }
-    #civicsSourcesSection.civics-sources-settings-open .settings-sources-toggle-chevron {
+    .settings-sources-toggle:active { opacity: 0.92; transform: scale(0.995); }
+    .settings-sources-toggle-text {
+      display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0;
+    }
+    .settings-sources-toggle-heading {
+      font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.25; margin: 0;
+    }
+    .settings-sources-toggle-hint {
+      font-size: 13px; font-weight: 400; color: var(--muted); line-height: 1.4; margin: 0;
+    }
+    .settings-sources-toggle-chevron-wrap {
+      flex-shrink: 0;
+      width: 48px; height: 48px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 12px;
+      background: rgba(192,122,74,0.12);
+      border: 1px solid rgba(192,122,74,0.28);
+      color: var(--accent);
+    }
+    .settings-sources-toggle-chevron-svg {
+      width: 26px; height: 26px;
+      transition: transform 0.22s ease;
+    }
+    #civicsSourcesSection.civics-sources-settings-open .settings-sources-toggle-chevron-svg {
       transform: rotate(90deg);
     }
-    #civicsSourcesSection .civics-sources-settings-inner { display: none; }
+    html.dark-mode .settings-sources-toggle {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.1);
+      box-shadow: none;
+    }
+    html.dark-mode .settings-sources-toggle:hover, html.dark-mode .settings-sources-toggle:focus-visible {
+      border-color: rgba(192,122,74,0.5);
+      background: rgba(192,122,74,0.1);
+    }
+    html.dark-mode .settings-sources-toggle-chevron-wrap {
+      background: rgba(90,143,216,0.12);
+      border-color: rgba(90,143,216,0.35);
+      color: #8ab4f8;
+    }
+    #civicsSourcesSection .civics-sources-settings-inner { display: none; margin-top: 4px; }
     #civicsSourcesSection.civics-sources-settings-open .civics-sources-settings-inner { display: block; }
     .civics-source-row {
       display: flex; align-items: center; gap: 10px;
@@ -5180,9 +5221,14 @@
         <input type="text" class="settings-input" id="civicsZipCode" placeholder="ZIP code (for polling place lookup)" maxlength="10">
       </div>
       <div class="settings-section" id="civicsSourcesSection">
-        <button type="button" class="settings-sources-toggle" id="civicsSourcesToggle" aria-expanded="false" aria-controls="civicsSourcesSettingsInner" onclick="toggleCivicsSourcesSettings()">
-          <span class="settings-section-title">Civics Research Sources</span>
-          <span class="settings-sources-toggle-chevron" aria-hidden="true">▸</span>
+        <button type="button" class="settings-sources-toggle" id="civicsSourcesToggle" aria-expanded="false" aria-controls="civicsSourcesSettingsInner" aria-label="Show Civics research source URLs" onclick="toggleCivicsSourcesSettings()">
+          <span class="settings-sources-toggle-text">
+            <span class="settings-sources-toggle-heading">Civics Research Sources</span>
+            <span class="settings-sources-toggle-hint">Tap to open or close the list of URLs Blathers can use</span>
+          </span>
+          <span class="settings-sources-toggle-chevron-wrap" aria-hidden="true">
+            <svg class="settings-sources-toggle-chevron-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </span>
         </button>
         <div class="civics-sources-settings-inner" id="civicsSourcesSettingsInner">
           <div id="civicsSourcesList"></div>
@@ -5719,13 +5765,15 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.16.4';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.17.1';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
   const ALLOWED_USERS = ['whiskerwallmatt@gmail.com', 'jessicafisher407@gmail.com'];
 
   let _lastPreloadBalance = null;
+  /** After forceAppUpdate reload, launchApp() runs goHome() so the user is not left on a stale sub-screen. */
+  const SHASTA_POST_RELOAD_ROUTE_KEY = 'shasta_after_reload_route';
   let _appShellInitialized = false;
   let _gsiInitialized = false;
   let _lastAuthUiHadUser;
@@ -5807,6 +5855,7 @@
       applyBgScheme(localStorage.getItem('shasta_bg_' + email) || 'peach');
       applyFontSize(localStorage.getItem('shasta_font_' + email) || 'default');
       updateAuthUI(email);
+      goHome();
       loadData(_lastPreloadBalance).then(function() { updateAuthUI(email); });
     } else {
       var d = document.getElementById('drawerAuthDenied');
@@ -5827,6 +5876,13 @@
 
   function launchApp(email, preloadedBalance) {
     var settingsKey = email || 'guest';
+    var goHomeAfterReload = false;
+    try {
+      if (sessionStorage.getItem(SHASTA_POST_RELOAD_ROUTE_KEY) === 'home') {
+        sessionStorage.removeItem(SHASTA_POST_RELOAD_ROUTE_KEY);
+        goHomeAfterReload = true;
+      }
+    } catch (e) {}
     document.getElementById('loginScreen').style.display  = 'none';
     document.getElementById('appScreen').style.display    = 'block';
     const vEl = document.getElementById('versionLabel');
@@ -5854,6 +5910,7 @@
       }
     });
     updateAuthUI(email);
+    if (goHomeAfterReload) goHome();
   }
 
   function initScrollFades() {
@@ -6326,6 +6383,7 @@
 
   /** Forces a full app reload with cache busting — use when PWA is stuck on an old cached version. */
   function forceAppUpdate() {
+    try { sessionStorage.setItem(SHASTA_POST_RELOAD_ROUTE_KEY, 'home'); } catch (e) {}
     const base = location.origin + location.pathname;
     location.replace(base + (base.includes('?') ? '&' : '?') + 'v=' + Date.now());
   }
@@ -8624,12 +8682,18 @@
     renderCivicsSourcesList();
   }
 
+  function syncCivicsSourcesToggleA11y(btn, open) {
+    if (!btn) return;
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.setAttribute('aria-label', open ? 'Hide Civics research source URLs' : 'Show Civics research source URLs');
+  }
+
   function toggleCivicsSourcesSettings() {
     var sec = document.getElementById('civicsSourcesSection');
     var btn = document.getElementById('civicsSourcesToggle');
     if (!sec || !btn) return;
     var open = sec.classList.toggle('civics-sources-settings-open');
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    syncCivicsSourcesToggleA11y(btn, open);
     try {
       localStorage.setItem(CIVICS_SOURCES_PANEL_OPEN_KEY, open ? '1' : '');
     } catch (e) {}
@@ -8642,7 +8706,7 @@
     var open = false;
     try { open = localStorage.getItem(CIVICS_SOURCES_PANEL_OPEN_KEY) === '1'; } catch (e) {}
     sec.classList.toggle('civics-sources-settings-open', open);
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    syncCivicsSourcesToggleA11y(btn, open);
   }
 
   function showSettingsScreen() {
