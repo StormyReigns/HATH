@@ -4991,7 +4991,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      padding: max(env(safe-area-inset-top), 16px) 20px max(env(safe-area-inset-bottom), 20px);
+      padding: max(env(safe-area-inset-top), 16px) max(22px, env(safe-area-inset-left)) max(env(safe-area-inset-bottom), 20px) max(22px, env(safe-area-inset-right));
       overflow: hidden;
     }
     .project-wizard-overlay.open {
@@ -5014,7 +5014,7 @@
     .pjw-close:active { color: rgba(255,255,255,0.7); }
     .pjw-inner {
       width: 100%;
-      max-width: 400px;
+      max-width: 420px;
       flex: 1;
       min-height: 0;
       display: flex;
@@ -5059,26 +5059,48 @@
       filter: drop-shadow(0 3px 12px rgba(0,0,0,0.35));
       opacity: 0.95;
     }
+    .pjw-top {
+      flex-shrink: 0;
+      padding: 0 4px 8px;
+      text-align: center;
+    }
     .pjw-heading {
       font-family: 'Playfair Display', serif;
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 500;
-      color: rgba(255,252,248,0.96);
+      color: rgba(255,252,248,0.98);
       text-align: center;
-      margin: 0 0 12px;
-      line-height: 1.25;
+      margin: 0 0 10px;
+      line-height: 1.3;
       letter-spacing: -0.02em;
-      flex-shrink: 0;
     }
     .pjw-lead {
-      font-size: 15px;
-      line-height: 1.6;
-      color: rgba(255,245,235,0.72);
+      font-size: 14px;
+      line-height: 1.55;
+      color: rgba(255,235,220,0.52);
       text-align: center;
-      margin: 0 0 20px;
+      margin: 0;
       max-width: 340px;
-      align-self: center;
-      flex-shrink: 0;
+      margin-left: auto;
+      margin-right: auto;
+      font-weight: 400;
+    }
+    .pjw-center-wrap {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 0 20px;
+    }
+    .pjw-center-inner {
+      width: 100%;
+      max-width: 380px;
+      min-height: 0;
+      max-height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     .pjw-lead-note {
       display: block;
@@ -5098,53 +5120,269 @@
       overflow-y: auto;
       overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
-      padding: 4px 2px 16px;
-      margin: 0 -2px;
+      padding: 8px 12px;
+      overscroll-behavior-y: contain;
     }
     .pjw-body::-webkit-scrollbar { display: none; }
     .pjw-field {
-      margin-bottom: 18px;
+      margin-bottom: 20px;
     }
-    .pjw-field:last-child { margin-bottom: 8px; }
+    .pjw-field:last-child { margin-bottom: 0; }
+    .pjw-prompt {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 500;
+      color: var(--text);
+      margin: 0 0 10px;
+      line-height: 1.35;
+    }
+    .pjw-prompt-note {
+      font-size: 13px;
+      color: rgba(80,60,45,0.55);
+      margin: -4px 0 12px;
+      line-height: 1.45;
+    }
     .pjw-label {
       display: block;
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: rgba(255,230,210,0.55);
+      color: rgba(100,72,48,0.45);
       margin-bottom: 8px;
     }
     .pjw-input,
     .pjw-textarea {
       width: 100%;
-      padding: 14px 14px;
-      font-size: 16px;
+      max-width: 100%;
+      box-sizing: border-box;
+      padding: 16px 16px;
+      font-size: 17px;
       font-family: inherit;
       color: var(--text);
-      background: rgba(255,255,253,0.97);
-      border: 1px solid rgba(192,122,74,0.22);
-      border-radius: 14px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
+      background: rgba(255,255,253,0.98);
+      border: 1px solid rgba(192,122,74,0.2);
+      border-radius: 16px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.92);
+    }
+    .pjw-input-hero {
+      font-size: 19px;
+      padding: 18px 18px;
+      border-radius: 18px;
+      letter-spacing: -0.01em;
     }
     .pjw-textarea {
-      min-height: 100px;
+      min-height: 120px;
       resize: vertical;
-      line-height: 1.5;
+      line-height: 1.55;
     }
     .pjw-input:focus,
     .pjw-textarea:focus {
       outline: none;
-      border-color: rgba(192,122,74,0.55);
-      box-shadow: 0 4px 24px rgba(0,0,0,0.14), 0 0 0 3px rgba(192,122,74,0.18);
+      border-color: rgba(192,122,74,0.5);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.12), 0 0 0 3px rgba(192,122,74,0.16);
     }
     .pjw-input::placeholder,
-    .pjw-textarea::placeholder { color: rgba(100,80,65,0.45); }
+    .pjw-textarea::placeholder { color: rgba(100,80,65,0.42); }
+    .pjw-date-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      padding: 18px 18px;
+      background: rgba(255,255,253,0.98);
+      border: 1px solid rgba(192,122,74,0.22);
+      border-radius: 18px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+      cursor: pointer;
+      text-align: left;
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.12s, box-shadow 0.2s;
+    }
+    .pjw-date-card:active { transform: scale(0.99); }
+    .pjw-date-card-icon {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+      border-radius: 14px;
+      background: linear-gradient(145deg, rgba(192,122,74,0.18), rgba(192,122,74,0.06));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+    }
+    .pjw-date-card-icon svg {
+      width: 26px;
+      height: 26px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.75;
+    }
+    .pjw-date-card-text { min-width: 0; flex: 1; }
+    .pjw-date-card-kicker {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(100,72,48,0.45);
+      margin-bottom: 4px;
+    }
+    .pjw-date-card-value {
+      font-size: 17px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.35;
+    }
+    .pjw-date-native-wrap {
+      position: relative;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .pjw-date-native {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+    }
+    .pjw-due-compact {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(192,122,74,0.12);
+    }
+    .pjw-due-compact-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: rgba(100,72,48,0.42);
+      margin-bottom: 10px;
+    }
+    .pjw-due-open {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--text);
+      background: rgba(255,255,255,0.75);
+      border: 1px dashed rgba(192,122,74,0.35);
+      border-radius: 12px;
+      cursor: pointer;
+      width: 100%;
+      justify-content: flex-start;
+      box-sizing: border-box;
+    }
+    .pjw-due-open svg {
+      width: 22px;
+      height: 22px;
+      stroke: var(--accent);
+      fill: none;
+      stroke-width: 1.75;
+      flex-shrink: 0;
+    }
+    .pjw-mode-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 16px 0 14px;
+    }
+    .pjw-mode-chip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 18px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--text);
+      background: rgba(255,255,255,0.55);
+      border: 2px solid rgba(192,122,74,0.18);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    }
+    .pjw-mode-chip.selected {
+      border-color: rgba(192,122,74,0.55);
+      background: rgba(192,122,74,0.12);
+      box-shadow: 0 0 0 1px rgba(192,122,74,0.15);
+    }
+    .pjw-mode-chip-desc {
+      display: block;
+      font-size: 12px;
+      font-weight: 400;
+      color: rgba(80,60,45,0.55);
+      margin-top: 4px;
+    }
+    .pjw-checklist-list { display: flex; flex-direction: column; gap: 10px; }
+    .pjw-checklist-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pjw-checklist-num {
+      width: 26px;
+      height: 26px;
+      flex-shrink: 0;
+      border-radius: 8px;
+      background: rgba(192,122,74,0.15);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pjw-checklist-input {
+      flex: 1;
+      min-width: 0;
+      padding: 12px 14px;
+      font-size: 16px;
+      font-family: inherit;
+      border: 1px solid rgba(192,122,74,0.18);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.92);
+      box-sizing: border-box;
+    }
+    .pjw-checklist-input:focus {
+      outline: none;
+      border-color: rgba(192,122,74,0.45);
+      box-shadow: 0 0 0 3px rgba(192,122,74,0.12);
+    }
+    .pjw-add-line {
+      margin-top: 12px;
+      width: 100%;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--accent);
+      background: rgba(192,122,74,0.08);
+      border: 1px dashed rgba(192,122,74,0.35);
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .pjw-phase-block {
+      background: rgba(255,255,253,0.96);
+      border: 1px solid rgba(192,122,74,0.14);
+      border-radius: 18px;
+      padding: 18px 16px 16px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.08);
+    }
     .pjw-count-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-top: 8px;
+      gap: 12px;
+      margin-top: 4px;
+      width: 100%;
     }
     .pjw-count-chip {
       padding: 16px 8px;
@@ -5164,19 +5402,6 @@
       border-color: rgba(255,200,160,0.45);
       color: #fff;
       box-shadow: 0 0 20px rgba(192,122,74,0.25);
-    }
-    .pjw-body .project-phase-editor {
-      background: rgba(255,255,253,0.96);
-      border: 1px solid rgba(192,122,74,0.18);
-      box-shadow: 0 8px 28px rgba(0,0,0,0.14);
-      margin-bottom: 0;
-    }
-    .pjw-body .project-phase-editor .project-phase-part-title {
-      color: var(--text);
-    }
-    .pjw-body .project-phase-editor input,
-    .pjw-body .project-phase-editor textarea {
-      background: rgba(255,255,255,0.92);
     }
     .pjw-nav {
       display: flex;
@@ -5226,13 +5451,34 @@
       color: var(--text);
       border-color: rgba(255,255,255,0.12);
     }
-    html.dark-mode .pjw-body .project-phase-editor {
-      background: rgba(38,34,32,0.96);
+    html.dark-mode .pjw-date-card {
+      background: rgba(40,36,34,0.96);
+      border-color: rgba(255,255,255,0.12);
+    }
+    html.dark-mode .pjw-date-card-value { color: var(--text); }
+    html.dark-mode .pjw-phase-block {
+      background: rgba(38,34,32,0.94);
       border-color: rgba(255,255,255,0.1);
     }
-    html.dark-mode .pjw-body .project-phase-editor input,
-    html.dark-mode .pjw-body .project-phase-editor textarea {
-      background: rgba(32,28,26,0.9);
+    html.dark-mode .pjw-prompt-note { color: rgba(220,200,180,0.45); }
+    html.dark-mode .pjw-mode-chip {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.12);
+      color: var(--text);
+    }
+    html.dark-mode .pjw-mode-chip.selected {
+      background: rgba(192,122,74,0.2);
+      border-color: rgba(224,152,104,0.45);
+    }
+    html.dark-mode .pjw-checklist-input {
+      background: rgba(32,28,26,0.92);
+      border-color: rgba(255,255,255,0.12);
+      color: var(--text);
+    }
+    html.dark-mode .pjw-due-open {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.15);
+      color: var(--text);
     }
     .gj-randomizer-card-wrap {
       width: 78vw; max-width: 320px; height: 58vw; max-height: 240px;
@@ -6111,9 +6357,15 @@
     <div class="pjw-icon-wrap">
       <img class="pjw-icon" src="https://stormyreigns.github.io/HATH/Triforce.webp" alt="" width="40" height="40" loading="lazy">
     </div>
-    <h2 class="pjw-heading" id="pjwHeading">Begin something new</h2>
-    <p class="pjw-lead" id="pjwLead"></p>
-    <div class="pjw-body" id="pjwBody"></div>
+    <div class="pjw-top">
+      <h2 class="pjw-heading" id="pjwHeading">Begin something new</h2>
+      <p class="pjw-lead" id="pjwLead"></p>
+    </div>
+    <div class="pjw-center-wrap">
+      <div class="pjw-center-inner">
+        <div class="pjw-body" id="pjwBody"></div>
+      </div>
+    </div>
     <div class="pjw-nav">
       <button type="button" class="pjw-btn pjw-btn-back" id="pjwBack" onclick="projectWizardBack()">Exit</button>
       <button type="button" class="pjw-btn pjw-btn-next" id="pjwNext" onclick="projectWizardNext()">Continue</button>
@@ -6280,7 +6532,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.18.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.19.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -8372,7 +8624,7 @@
       title: '',
       description: '',
       finishDate: null,
-      phases: [{ id: genId(), title: '', description: '', checklist: null, completionDate: null, completed: false }],
+      phases: [{ id: genId(), title: '', description: '', checklist: null, completionDate: null, completed: false, _wizardMode: 'single' }],
       createdAt: Date.now(),
       modifiedAt: Date.now()
     };
@@ -8403,23 +8655,218 @@
       if (prev[i]) {
         next.push(prev[i]);
       } else {
-        next.push({ id: genId(), title: '', description: '', checklist: null, completionDate: null, completed: false });
+        next.push({ id: genId(), title: '', description: '', checklist: null, completionDate: null, completed: false, _wizardMode: 'single' });
       }
     }
     projectsEditing.phases = next;
   }
 
+  function projectWizardFormatDateDisplay(iso) {
+    if (!iso) return 'Tap to add a date';
+    try {
+      const d = new Date(iso + 'T12:00:00');
+      return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    } catch (e) {
+      return iso;
+    }
+  }
+
+  function projectWizardOnFinishInput() {
+    const inp = document.getElementById('pjwFinish');
+    const disp = document.getElementById('pjwFinishDisplay');
+    if (!inp) return;
+    projectsEditing.finishDate = inp.value || null;
+    if (disp) disp.textContent = projectWizardFormatDateDisplay(projectsEditing.finishDate);
+  }
+
+  function projectWizardOpenFinishDate() {
+    const inp = document.getElementById('pjwFinish');
+    if (!inp) return;
+    if (typeof inp.showPicker === 'function') {
+      try {
+        inp.showPicker();
+        return;
+      } catch (e) { /* fall through */ }
+    }
+    inp.focus();
+    try {
+      inp.click();
+    } catch (e2) { /* ignore */ }
+  }
+
+  function projectWizardOnPhaseDueChange() {
+    const inp = document.getElementById('pjwPhaseDue');
+    const disp = document.getElementById('pjwPhaseDueDisplay');
+    if (!inp || projectWizardStep < 4) return;
+    const pi = projectWizardStep - 4;
+    const ph = projectsEditing.phases[pi];
+    if (!ph) return;
+    ph.completionDate = inp.value || null;
+    if (disp) disp.textContent = projectWizardFormatDateDisplay(ph.completionDate);
+  }
+
+  function projectWizardOpenPhaseDue() {
+    const inp = document.getElementById('pjwPhaseDue');
+    if (!inp) return;
+    if (typeof inp.showPicker === 'function') {
+      try {
+        inp.showPicker();
+        return;
+      } catch (e) { /* fall through */ }
+    }
+    inp.focus();
+    try {
+      inp.click();
+    } catch (e2) { /* ignore */ }
+  }
+
+  function projectWizardGetPhaseMode(ph) {
+    if (!ph) return 'single';
+    if (ph._wizardMode === 'checklist' || ph._wizardMode === 'single') return ph._wizardMode;
+    if (ph.checklist && ph.checklist.length > 1) return 'checklist';
+    return 'single';
+  }
+
+  function projectWizardSelectPhaseMode(mode) {
+    if (projectWizardStep < 4) return;
+    projectWizardSyncCurrentPhaseFromDom();
+    const pi = projectWizardStep - 4;
+    const ph = projectsEditing.phases[pi];
+    if (!ph) return;
+    if (mode === 'single') {
+      if (ph.checklist && ph.checklist.length > 1) {
+        const first = ph.checklist.find(function(c) { return c.text && c.text.trim(); });
+        ph.checklist = first ? [{ id: first.id, text: first.text.trim(), done: false }] : null;
+      }
+      ph._wizardMode = 'single';
+    } else {
+      ph._wizardMode = 'checklist';
+      if (!ph.checklist || ph.checklist.length === 0) {
+        ph.checklist = [{ id: genId(), text: '', done: false }];
+      } else if (ph.checklist.length === 1) {
+        ph.checklist = ph.checklist.concat([{ id: genId(), text: '', done: false }]);
+      }
+    }
+    projectWizardRender();
+  }
+
+  function projectWizardAddChecklistRow() {
+    if (projectWizardStep < 4) return;
+    projectWizardSyncCurrentPhaseFromDom();
+    const pi = projectWizardStep - 4;
+    const ph = projectsEditing.phases[pi];
+    if (!ph) return;
+    if (!ph.checklist) ph.checklist = [];
+    ph.checklist.push({ id: genId(), text: '', done: false });
+    projectWizardRender();
+  }
+
+  function renderPhaseWizardHtml(pi) {
+    const ph = projectsEditing.phases[pi];
+    const N = projectWizardPhaseCount;
+    const mode = projectWizardGetPhaseMode(ph);
+    let firstPrompt = "What's next to tackle?";
+    if (pi === 0) firstPrompt = "What's the first thing you need to accomplish?";
+    else if (pi === N - 1 && N > 1) firstPrompt = "What's the last piece of this voyage?";
+    let checklistRows = '';
+    if (mode === 'checklist') {
+      const items = ph.checklist && ph.checklist.length ? ph.checklist : [{ id: genId(), text: '', done: false }];
+      for (let r = 0; r < items.length; r++) {
+        checklistRows += '<div class="pjw-checklist-row"><span class="pjw-checklist-num">' + (r + 1) + '</span><input type="text" class="pjw-checklist-input" value="' + escapeHtml(items[r].text || '') + '" placeholder="Something to check off"></div>';
+      }
+    }
+    let singleVal = '';
+    if (mode === 'single' && ph.checklist && ph.checklist.length === 1) singleVal = ph.checklist[0].text || '';
+    const calSvg = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.75"/><path d="M3 10h18M8 2v4M16 2v4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>';
+    return (
+      '<div class="pjw-phase-block">' +
+      '<p class="pjw-prompt">' + firstPrompt + '</p>' +
+      '<input type="text" class="pjw-input" id="pjwPhaseTitle" autocomplete="off" placeholder="Short name for this stretch" value="' + escapeHtml(ph.title || '') + '">' +
+      '<p class="pjw-prompt" style="margin-top:22px">Describe this step</p>' +
+      '<p class="pjw-prompt-note">What does “done” look like? Totally optional.</p>' +
+      '<textarea class="pjw-textarea" id="pjwPhaseDesc" rows="3" placeholder="A little context for future-you.">' + escapeHtml(ph.description || '') + '</textarea>' +
+      '<p class="pjw-prompt" style="margin-top:10px">One step, or a checklist?</p>' +
+      '<p class="pjw-prompt-note">Choose what matches how your brain works—you can edit later.</p>' +
+      '<div class="pjw-mode-row">' +
+      '<button type="button" class="pjw-mode-chip' + (mode === 'single' ? ' selected' : '') + '" onclick="projectWizardSelectPhaseMode(\'single\')">Just one step<span class="pjw-mode-chip-desc">One clear to-do in plain language</span></button>' +
+      '<button type="button" class="pjw-mode-chip' + (mode === 'checklist' ? ' selected' : '') + '" onclick="projectWizardSelectPhaseMode(\'checklist\')">A checklist<span class="pjw-mode-chip-desc">Several smaller items to tick off</span></button>' +
+      '</div>' +
+      (mode === 'single'
+        ? '<div class="pjw-field"><label class="pjw-label" for="pjwSingleStep">The one thing to do</label><input type="text" class="pjw-input" id="pjwSingleStep" placeholder="e.g. Call the plumber, file the form…" value="' + escapeHtml(singleVal) + '"></div>'
+        : '<div class="pjw-field"><span class="pjw-label">Checklist</span><div class="pjw-checklist-list" id="pjwChecklistList">' + checklistRows + '</div><button type="button" class="pjw-add-line" onclick="projectWizardAddChecklistRow()">+ Add another line</button></div>') +
+      '<div class="pjw-due-compact">' +
+      '<div class="pjw-due-compact-label">Due by (optional)</div>' +
+      '<button type="button" class="pjw-due-open" onclick="projectWizardOpenPhaseDue()">' + calSvg + '<span id="pjwPhaseDueDisplay">' + escapeHtml(projectWizardFormatDateDisplay(ph.completionDate || null)) + '</span></button>' +
+      '<div class="pjw-date-native-wrap"><input type="date" class="pjw-date-native" id="pjwPhaseDue" value="' + escapeHtml(ph.completionDate || '') + '" onchange="projectWizardOnPhaseDueChange()"></div>' +
+      '</div></div>'
+    );
+  }
+
   function projectWizardSelectCount(n) {
     projectWizardPhaseCount = n;
-    if (projectWizardStep === 1) projectWizardRender();
+    if (projectWizardStep === 3) projectWizardRender();
+  }
+
+  function projectWizardRenderDots() {
+    const dotsEl = document.getElementById('pjwDots');
+    if (!dotsEl) return;
+    if (projectWizardStep <= 2) {
+      dotsEl.hidden = false;
+      let html = '';
+      for (let i = 0; i < 3; i++) {
+        let cls = 'pjw-dot';
+        if (i < projectWizardStep) cls += ' done';
+        else if (i === projectWizardStep) cls += ' current';
+        html += '<span class="' + cls + '" role="presentation"></span>';
+      }
+      dotsEl.innerHTML = html;
+      return;
+    }
+    const N = projectWizardPhaseCount;
+    const total = 4 + N;
+    dotsEl.hidden = false;
+    let html2 = '';
+    for (let j = 0; j < total; j++) {
+      let cls2 = 'pjw-dot';
+      if (j < projectWizardStep) cls2 += ' done';
+      else if (j === projectWizardStep) cls2 += ' current';
+      html2 += '<span class="' + cls2 + '" role="presentation"></span>';
+    }
+    dotsEl.innerHTML = html2;
   }
 
   function projectWizardSyncCurrentPhaseFromDom() {
-    if (projectWizardStep < 2) return;
-    const pi = projectWizardStep - 2;
-    const el = document.querySelector('#pjwBody .project-phase-editor');
+    if (projectWizardStep < 4) return;
+    const pi = projectWizardStep - 4;
     const ph = projectsEditing && projectsEditing.phases[pi];
-    if (el && ph) syncProjectPhaseFromEditorDiv(el, ph);
+    if (!ph) return;
+    const titleEl = document.getElementById('pjwPhaseTitle');
+    const descEl = document.getElementById('pjwPhaseDesc');
+    if (titleEl) ph.title = titleEl.value.trim();
+    if (descEl) ph.description = descEl.value.trim();
+    const dueEl = document.getElementById('pjwPhaseDue');
+    if (dueEl) ph.completionDate = dueEl.value || null;
+    const mode = projectWizardGetPhaseMode(ph);
+    if (mode === 'single') {
+      const single = document.getElementById('pjwSingleStep');
+      const txt = single ? single.value.trim() : '';
+      const keepId = ph.checklist && ph.checklist[0] && ph.checklist[0].id ? ph.checklist[0].id : genId();
+      ph.checklist = txt ? [{ id: keepId, text: txt, done: false }] : null;
+      ph._wizardMode = 'single';
+    } else {
+      ph._wizardMode = 'checklist';
+      const rows = document.querySelectorAll('#pjwChecklistList .pjw-checklist-input');
+      const prev = ph.checklist || [];
+      const lines = [];
+      rows.forEach(function(inp, j) {
+        const v = inp.value.trim();
+        if (v) {
+          const p = prev[j];
+          lines.push(p ? { ...p, text: v } : { id: genId(), text: v, done: false });
+        }
+      });
+      ph.checklist = lines.length ? lines : null;
+    }
   }
 
   function projectWizardRender() {
@@ -8429,43 +8876,55 @@
     const bodyEl = document.getElementById('pjwBody');
     const nextBtn = document.getElementById('pjwNext');
     const backBtn = document.getElementById('pjwBack');
-    const dotsEl = document.getElementById('pjwDots');
     const N = projectWizardPhaseCount;
-    const total = 2 + N;
+    const total = 4 + N;
+    const calSvg = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.75"/><path d="M3 10h18M8 2v4M16 2v4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>';
+
+    projectWizardRenderDots();
 
     if (projectWizardStep === 0) {
-      if (progressEl) progressEl.textContent = 'Step 1 · The basics';
-      if (dotsEl) dotsEl.hidden = true;
-      if (headingEl) headingEl.textContent = 'First, the heart of it';
-      if (leadEl) leadEl.innerHTML = 'Name what you’re setting out to do. Everything else can wait.';
+      if (progressEl) progressEl.textContent = '1 of 3 · Name';
+      if (headingEl) headingEl.textContent = 'What should we call this?';
+      if (leadEl) leadEl.textContent = 'Give it a name you’ll like seeing on your map.';
       if (bodyEl) {
         bodyEl.innerHTML =
-          '<div class="pjw-field"><label class="pjw-label" for="pjwTitle">What should we call this?</label>' +
-          '<input type="text" class="pjw-input" id="pjwTitle" autocomplete="off" placeholder="Kitchen refresh, taxes, the guest room…" value="' + escapeHtml(projectsEditing.title || '') + '"></div>' +
-          '<div class="pjw-field"><label class="pjw-label" for="pjwDesc">Why it matters, if you like</label>' +
-          '<textarea class="pjw-textarea" id="pjwDesc" placeholder="A line so future-you remembers what pulled you in.">' + escapeHtml(projectsEditing.description || '') + '</textarea></div>' +
-          '<div class="pjw-field"><label class="pjw-label" for="pjwFinish">Hope to wrap up by</label>' +
-          '<input type="date" class="pjw-input" id="pjwFinish" value="' + escapeHtml(projectsEditing.finishDate || '') + '"></div>';
+          '<input type="text" class="pjw-input pjw-input-hero" id="pjwTitle" autocomplete="off" placeholder="Kitchen refresh, taxes, the guest room…" value="' + escapeHtml(projectsEditing.title || '') + '">';
       }
       if (backBtn) backBtn.textContent = 'Exit';
       if (nextBtn) nextBtn.textContent = 'Continue';
     } else if (projectWizardStep === 1) {
-      if (progressEl) progressEl.textContent = 'Step 2 · Shape of the voyage';
-      if (dotsEl) {
-        dotsEl.hidden = false;
-        let dotsHtml = '';
-        for (let i = 0; i < total; i++) {
-          let cls = 'pjw-dot';
-          if (i < projectWizardStep) cls += ' done';
-          else if (i === projectWizardStep) cls += ' current';
-          dotsHtml += '<span class="' + cls + '" role="presentation"></span>';
-        }
-        dotsEl.innerHTML = dotsHtml;
+      if (progressEl) progressEl.textContent = '2 of 3 · Heart';
+      if (headingEl) headingEl.textContent = 'Why it matters, if you like';
+      if (leadEl) leadEl.textContent = 'Soft and optional—a single line for future-you.';
+      if (bodyEl) {
+        bodyEl.innerHTML =
+          '<textarea class="pjw-textarea" id="pjwDesc" rows="5" placeholder="What pulled you into this project?">' + escapeHtml(projectsEditing.description || '') + '</textarea>';
       }
+      if (backBtn) backBtn.textContent = 'Back';
+      if (nextBtn) nextBtn.textContent = 'Continue';
+    } else if (projectWizardStep === 2) {
+      if (progressEl) progressEl.textContent = '3 of 3 · When';
+      if (headingEl) headingEl.textContent = 'Hope to wrap up by';
+      if (leadEl) leadEl.textContent = 'Optional. Pick a day on the calendar, or skip ahead.';
+      const fin = projectsEditing.finishDate || '';
+      if (bodyEl) {
+        bodyEl.innerHTML =
+          '<button type="button" class="pjw-date-card" onclick="projectWizardOpenFinishDate()">' +
+          '<div class="pjw-date-card-icon">' + calSvg + '</div>' +
+          '<div class="pjw-date-card-text">' +
+          '<div class="pjw-date-card-kicker">Target date</div>' +
+          '<div class="pjw-date-card-value" id="pjwFinishDisplay">' + escapeHtml(projectWizardFormatDateDisplay(fin || null)) + '</div>' +
+          '</div></button>' +
+          '<div class="pjw-date-native-wrap"><input type="date" class="pjw-date-native" id="pjwFinish" value="' + escapeHtml(fin) + '" onchange="projectWizardOnFinishInput()"></div>';
+      }
+      if (backBtn) backBtn.textContent = 'Back';
+      if (nextBtn) nextBtn.textContent = 'Continue';
+    } else if (projectWizardStep === 3) {
+      if (progressEl) progressEl.textContent = 'Your map · Phases';
       if (headingEl) headingEl.textContent = 'How many steps or phases feels right?';
       if (leadEl) {
         leadEl.innerHTML = 'Don’t worry—you can add or remove legs anytime.' +
-          '<span class="pjw-lead-note">Note: each phase can be a single task, or you can add a checklist of smaller steps on the next screens.</span>';
+          '<span class="pjw-lead-note">Note: each phase can be a single task, or a checklist of smaller steps on the next screens.</span>';
       }
       if (bodyEl) {
         let chips = '';
@@ -8477,27 +8936,16 @@
       if (backBtn) backBtn.textContent = 'Back';
       if (nextBtn) nextBtn.textContent = 'Continue';
     } else {
-      const pi = projectWizardStep - 2;
+      const pi = projectWizardStep - 4;
       if (progressEl) progressEl.textContent = 'Leg ' + (pi + 1) + ' of ' + N + ' · Step ' + (projectWizardStep + 1) + ' of ' + total;
-      if (dotsEl) {
-        dotsEl.hidden = false;
-        let dotsHtml = '';
-        for (let i = 0; i < total; i++) {
-          let cls = 'pjw-dot';
-          if (i < projectWizardStep) cls += ' done';
-          else if (i === projectWizardStep) cls += ' current';
-          dotsHtml += '<span class="' + cls + '" role="presentation"></span>';
-        }
-        dotsEl.innerHTML = dotsHtml;
-      }
-      if (headingEl) headingEl.textContent = 'Part ' + (pi + 1) + ' of ' + N;
+      if (headingEl) headingEl.textContent = 'Shape this leg';
       if (leadEl) {
         leadEl.textContent = pi === 0
-          ? 'Each leg can be one simple thing—or use a checklist below for smaller steps.'
-          : 'Optional fields stay optional. You can always edit later.';
+          ? 'Take your time—only the first question really wants an answer.'
+          : 'Same gentle pace. You can edit everything later.';
       }
       const ph = projectsEditing.phases[pi];
-      if (bodyEl) bodyEl.innerHTML = ph ? renderPhaseEditor(ph, pi, { wizard: true }) : '';
+      if (bodyEl) bodyEl.innerHTML = ph ? renderPhaseWizardHtml(pi) : '';
       if (backBtn) backBtn.textContent = 'Back';
       const isLast = pi >= N - 1;
       if (nextBtn) nextBtn.textContent = isLast ? 'Save' : 'Continue';
@@ -8516,15 +8964,21 @@
         return;
       }
       projectsEditing.title = t;
-      projectsEditing.description = (document.getElementById('pjwDesc') && document.getElementById('pjwDesc').value || '').trim();
-      projectsEditing.finishDate = (document.getElementById('pjwFinish') && document.getElementById('pjwFinish').value) || null;
       projectWizardStep = 1;
     } else if (projectWizardStep === 1) {
-      projectWizardApplyPhaseCount(projectWizardPhaseCount);
+      const dEl = document.getElementById('pjwDesc');
+      projectsEditing.description = dEl ? dEl.value.trim() : '';
       projectWizardStep = 2;
+    } else if (projectWizardStep === 2) {
+      const fEl = document.getElementById('pjwFinish');
+      projectsEditing.finishDate = fEl && fEl.value ? fEl.value : null;
+      projectWizardStep = 3;
+    } else if (projectWizardStep === 3) {
+      projectWizardApplyPhaseCount(projectWizardPhaseCount);
+      projectWizardStep = 4;
     } else {
       projectWizardSyncCurrentPhaseFromDom();
-      const pi = projectWizardStep - 2;
+      const pi = projectWizardStep - 4;
       if (pi >= projectWizardPhaseCount - 1) {
         saveProjectWizardFinal();
         return;
@@ -8539,12 +8993,52 @@
       closeProjectWizard();
       return;
     }
-    if (projectWizardStep >= 2) {
+    if (projectWizardStep >= 4) {
       projectWizardSyncCurrentPhaseFromDom();
+    } else if (projectWizardStep === 2) {
+      const fEl = document.getElementById('pjwFinish');
+      if (fEl) projectsEditing.finishDate = fEl.value || null;
+    } else if (projectWizardStep === 1) {
+      const dEl = document.getElementById('pjwDesc');
+      if (dEl) projectsEditing.description = dEl.value.trim();
     }
     projectWizardStep--;
     projectWizardRender();
   }
+
+  const projectWizardSwipe = { x0: 0, y0: 0, active: false };
+
+  function projectWizardTouchStart(ev) {
+    const o = document.getElementById('projectWizardOverlay');
+    if (!o || !o.classList.contains('open')) return;
+    const t = ev.target;
+    if (t.closest && t.closest('input, textarea, button, select, a, .pjw-date-card, .pjw-due-open, .pjw-checklist-input')) return;
+    if (ev.touches.length !== 1) return;
+    projectWizardSwipe.active = true;
+    projectWizardSwipe.x0 = ev.touches[0].clientX;
+    projectWizardSwipe.y0 = ev.touches[0].clientY;
+  }
+
+  function projectWizardTouchEnd(ev) {
+    if (!projectWizardSwipe.active) return;
+    projectWizardSwipe.active = false;
+    const o = document.getElementById('projectWizardOverlay');
+    if (!o || !o.classList.contains('open')) return;
+    if (ev.changedTouches.length !== 1) return;
+    const dx = ev.changedTouches[0].clientX - projectWizardSwipe.x0;
+    const dy = ev.changedTouches[0].clientY - projectWizardSwipe.y0;
+    if (Math.abs(dx) < 56 || Math.abs(dx) < Math.abs(dy) * 1.15) return;
+    if (dx < 0) projectWizardNext();
+    else projectWizardBack();
+  }
+
+  (function projectWizardInitSwipe() {
+    const el = document.getElementById('projectWizardOverlay');
+    if (!el || el.dataset.pjwSwipe === '1') return;
+    el.dataset.pjwSwipe = '1';
+    el.addEventListener('touchstart', projectWizardTouchStart, { passive: true });
+    el.addEventListener('touchend', projectWizardTouchEnd, { passive: true });
+  })();
 
   function saveProjectWizardFinal() {
     projectWizardSyncCurrentPhaseFromDom();
