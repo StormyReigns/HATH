@@ -5164,6 +5164,10 @@
       margin: -4px 0 12px;
       line-height: 1.45;
     }
+    .pjw-prompt-note.pjw-optional-note {
+      font-style: italic;
+      margin-top: -6px;
+    }
     .pjw-label {
       display: block;
       font-size: 11px;
@@ -5359,6 +5363,15 @@
       color: rgba(100,72,48,0.42);
       margin-bottom: 10px;
     }
+    .pjw-due-compact-label.pjw-due-prompt {
+      text-transform: none;
+      letter-spacing: 0.01em;
+      font-size: 15px;
+      font-weight: 500;
+      font-family: 'Playfair Display', serif;
+      color: rgba(55,42,32,0.72);
+      margin-bottom: 12px;
+    }
     .pjw-due-row-inner {
       display: flex;
       align-items: center;
@@ -5428,26 +5441,10 @@
       box-shadow: 0 0 0 1px rgba(192,122,74,0.08);
     }
     .pjw-checklist-list { display: flex; flex-direction: column; gap: 10px; }
-    .pjw-checklist-hint {
-      font-size: 12px;
-      line-height: 1.45;
-      color: rgba(80,60,45,0.48);
-      margin: -2px 0 10px;
-    }
-    .pjw-kbd {
-      font-size: 11px;
-      font-family: inherit;
-      font-weight: 600;
-      padding: 2px 7px;
-      border-radius: 6px;
-      border: 1px solid rgba(192,122,74,0.2);
-      background: rgba(255,255,255,0.65);
-      color: rgba(60,48,38,0.85);
-    }
     .pjw-checklist-row {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
     .pjw-checklist-num {
       width: 26px;
@@ -5480,18 +5477,30 @@
       background: rgba(255,255,255,0.94);
       box-shadow: 0 2px 12px rgba(0,0,0,0.05), 0 0 0 2px rgba(192,122,74,0.1);
     }
-    .pjw-add-line {
-      margin-top: 12px;
-      width: 100%;
-      padding: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      font-family: inherit;
-      color: var(--accent);
-      background: rgba(192,122,74,0.08);
-      border: 1px dashed rgba(192,122,74,0.35);
+    .pjw-checklist-add {
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      margin: 0;
+      border: 1px solid rgba(192,122,74,0.22);
       border-radius: 12px;
+      background: rgba(192,122,74,0.1);
+      color: var(--accent);
+      font-size: 22px;
+      font-weight: 500;
+      line-height: 1;
+      font-family: inherit;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s, border-color 0.15s, transform 0.12s;
+    }
+    .pjw-checklist-add:active {
+      transform: scale(0.96);
+      background: rgba(192,122,74,0.18);
     }
     .pjw-phase-block {
       background: rgba(255,255,253,0.82);
@@ -5625,11 +5634,13 @@
       border-color: rgba(224,152,104,0.32);
       box-shadow: 0 2px 12px rgba(0,0,0,0.28), 0 0 0 2px rgba(192,122,74,0.14);
     }
-    html.dark-mode .pjw-checklist-hint { color: rgba(220,200,180,0.42); }
-    html.dark-mode .pjw-kbd {
-      border-color: rgba(255,255,255,0.14);
-      background: rgba(255,255,255,0.08);
-      color: rgba(255,240,230,0.82);
+    html.dark-mode .pjw-due-compact-label.pjw-due-prompt {
+      color: rgba(255,235,220,0.78);
+    }
+    html.dark-mode .pjw-checklist-add {
+      border-color: rgba(224,152,104,0.35);
+      background: rgba(192,122,74,0.18);
+      color: rgba(255,220,190,0.95);
     }
     .gj-randomizer-card-wrap {
       width: 78vw; max-width: 320px; height: 58vw; max-height: 240px;
@@ -6689,7 +6700,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.19.4';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.19.5';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -8877,43 +8888,28 @@
     projectWizardRender();
   }
 
-  function projectWizardAddChecklistRow() {
-    if (projectWizardStep < 3) return;
-    projectWizardSyncCurrentPhaseFromDom();
-    const pi = projectWizardStep - 3;
-    const ph = projectsEditing.phases[pi];
-    if (!ph) return;
-    if (!ph.checklist) ph.checklist = [];
-    ph.checklist.push({ id: genId(), text: '', done: false });
-    projectWizardRender();
-  }
-
-  function projectWizardChecklistKeydown(ev) {
-    if (!ev || ev.key !== 'Enter') return;
-    const inp = ev.target;
-    if (!inp || !inp.classList || !inp.classList.contains('pjw-checklist-input')) return;
-    ev.preventDefault();
+  function projectWizardInsertChecklistRowAfter(afterIdx) {
     if (projectWizardStep < 3) return;
     const pi = projectWizardStep - 3;
     const ph = projectsEditing && projectsEditing.phases[pi];
     if (!ph || projectWizardGetPhaseMode(ph) !== 'checklist') return;
-    if (!inp.value.trim()) return;
     const rowInputs = Array.prototype.slice.call(document.querySelectorAll('#pjwChecklistList .pjw-checklist-input'));
-    const idx = rowInputs.indexOf(inp);
-    if (idx < 0) return;
     const prev = ph.checklist && ph.checklist.length ? ph.checklist : [];
     const next = [];
     rowInputs.forEach(function(el, j) {
       const old = prev[j];
       next.push(old && old.id ? { id: old.id, text: el.value, done: !!old.done } : { id: genId(), text: el.value, done: false });
     });
-    next.splice(idx + 1, 0, { id: genId(), text: '', done: false });
+    let i = Number(afterIdx);
+    if (!Number.isFinite(i)) i = 0;
+    i = Math.max(0, Math.min(i, Math.max(0, next.length - 1)));
+    next.splice(i + 1, 0, { id: genId(), text: '', done: false });
     ph.checklist = next;
     ph._wizardMode = 'checklist';
     projectWizardRender();
     requestAnimationFrame(function() {
-      const after = document.querySelectorAll('#pjwChecklistList .pjw-checklist-input');
-      const elFocus = after[idx + 1];
+      const inputs = document.querySelectorAll('#pjwChecklistList .pjw-checklist-input');
+      const elFocus = inputs[i + 1];
       if (elFocus) {
         elFocus.focus();
         elFocus.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -8926,13 +8922,13 @@
     const N = projectWizardPhaseCount;
     const mode = projectWizardGetPhaseMode(ph);
     let firstPrompt = "What's next to tackle?";
-    if (pi === 0) firstPrompt = "What's the first thing you need to accomplish?";
+    if (pi === 0) firstPrompt = "What's the first step";
     else if (pi === N - 1 && N > 1) firstPrompt = "What's the last piece of this voyage?";
     let checklistRows = '';
     if (mode === 'checklist') {
       const items = ph.checklist && ph.checklist.length ? ph.checklist : [{ id: genId(), text: '', done: false }];
       for (let r = 0; r < items.length; r++) {
-        checklistRows += '<div class="pjw-checklist-row"><span class="pjw-checklist-num">' + (r + 1) + '</span><input type="text" class="pjw-checklist-input" enterkeyhint="next" autocomplete="off" value="' + escapeHtml(items[r].text || '') + '" placeholder="Something to check off" onkeydown="projectWizardChecklistKeydown(event)"></div>';
+        checklistRows += '<div class="pjw-checklist-row"><span class="pjw-checklist-num">' + (r + 1) + '</span><input type="text" class="pjw-checklist-input" autocomplete="off" value="' + escapeHtml(items[r].text || '') + '" placeholder="Something to check off"><button type="button" class="pjw-checklist-add" aria-label="Add line below" onclick="projectWizardInsertChecklistRowAfter(' + r + ')">+</button></div>';
       }
     }
     let singleVal = '';
@@ -8943,8 +8939,8 @@
       '<div class="pjw-phase-block">' +
       '<p class="pjw-prompt">' + firstPrompt + '</p>' +
       '<input type="text" class="pjw-input" id="pjwPhaseTitle" autocomplete="off" placeholder="Short name for this stretch" value="' + escapeHtml(ph.title || '') + '">' +
-      '<p class="pjw-prompt" style="margin-top:22px">Describe this step</p>' +
-      '<p class="pjw-prompt-note">What does “done” look like? Totally optional.</p>' +
+      '<p class="pjw-prompt" style="margin-top:22px">Describe it</p>' +
+      '<p class="pjw-prompt-note pjw-optional-note">*Optional</p>' +
       '<textarea class="pjw-textarea" id="pjwPhaseDesc" rows="3" placeholder="A little context for future-you.">' + escapeHtml(ph.description || '') + '</textarea>' +
       '<p class="pjw-mode-question">' + modeQuestion + '</p>' +
       '<div class="pjw-mode-inline">' +
@@ -8954,9 +8950,9 @@
       '</div>' +
       (mode === 'single'
         ? '<div class="pjw-field"><label class="pjw-label" for="pjwSingleStep">The one thing to do</label><input type="text" class="pjw-input" id="pjwSingleStep" placeholder="e.g. Call the plumber, file the form…" value="' + escapeHtml(singleVal) + '"></div>'
-        : '<div class="pjw-field"><span class="pjw-label">Checklist</span><p class="pjw-checklist-hint">Press <kbd class="pjw-kbd">Return</kbd> after a line to add the next.</p><div class="pjw-checklist-list" id="pjwChecklistList">' + checklistRows + '</div><button type="button" class="pjw-add-line" onclick="projectWizardAddChecklistRow()">+ Add another line</button></div>') +
+        : '<div class="pjw-field"><span class="pjw-label">Checklist</span><div class="pjw-checklist-list" id="pjwChecklistList">' + checklistRows + '</div></div>') +
       '<div class="pjw-due-compact">' +
-      '<div class="pjw-due-compact-label">Due by (optional)</div>' +
+      '<div class="pjw-due-compact-label pjw-due-prompt">Does this have a due date?</div>' +
       '<div class="pjw-due-row-inner">' +
       '<label class="pjw-cal-hit" aria-label="Pick due date">' +
       '<span class="pjw-cal-hit-visual">' + calInner + '</span>' +
@@ -9124,8 +9120,8 @@
       if (nextBtn) nextBtn.textContent = 'Continue';
     } else if (projectWizardStep === 1) {
       if (progressEl) progressEl.textContent = '2 of 2 · Details';
-      if (headingEl) headingEl.textContent = 'Why it matters, if you like';
-      if (leadEl) leadEl.textContent = 'Soft and optional—then tap the calendar if you want a target date.';
+      if (headingEl) headingEl.textContent = 'Describe this adventure';
+      if (leadEl) leadEl.textContent = 'Optional, you can skip this';
       const fin = projectsEditing.finishDate || '';
       if (bodyEl) {
         bodyEl.innerHTML =
