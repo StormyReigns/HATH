@@ -6858,7 +6858,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.23.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.24.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -8859,44 +8859,170 @@
     }
   }
 
+  function normalizeCopilotChecklistStrings(arr) {
+    if (!Array.isArray(arr)) return [];
+    const out = [];
+    arr.forEach(function(item) {
+      const t = item != null ? String(item).trim() : '';
+      if (t) out.push(t);
+    });
+    return out;
+  }
+
+  function mergePhaseFromCopilotDraft(oldPh, draftPh, idx, fallbackTitle, fallbackDesc) {
+    const old = oldPh || null;
+    const pt = draftPh && draftPh.title != null ? String(draftPh.title).trim() : '';
+    const title = pt || (old && old.title) || fallbackTitle || ('Phase ' + (idx + 1));
+    const pdRaw = draftPh && draftPh.description != null ? String(draftPh.description).trim() : null;
+    const description = pdRaw !== null ? pdRaw : (old ? String(old.description || '').trim() : (fallbackDesc || ''));
+    let completionDate = null;
+    if (draftPh && draftPh.completionDate !== undefined && draftPh.completionDate !== null && String(draftPh.completionDate).trim()) {
+      completionDate = String(draftPh.completionDate).trim();
+    } else if (old && old.completionDate) {
+      completionDate = old.completionDate;
+    }
+
+    const phase = {
+      id: old ? old.id : genId(),
+      title: title,
+      description: description,
+      completionDate: completionDate,
+      quote: old ? old.quote : undefined,
+      notes: old ? old.notes : undefined,
+      checklist: null,
+      completed: false
+    };
+
+    if (draftPh && Object.prototype.hasOwnProperty.call(draftPh, 'checklist')) {
+      if (draftPh.checklist === null) {
+        phase.checklist = null;
+        phase.completed = old ? !!old.completed : false;
+      } else if (Array.isArray(draftPh.checklist)) {
+        const strings = normalizeCopilotChecklistStrings(draftPh.checklist);
+        const oldItems = (old && old.checklist) || [];
+        const lines = [];
+        strings.forEach(function(text) {
+          const match = oldItems.find(function(c) { return c.text === text; });
+          if (match) {
+            lines.push({ id: match.id, text: text, done: !!match.done });
+          } else {
+            lines.push({ id: genId(), text: text, done: false });
+          }
+        });
+        phase.checklist = lines.length ? lines : null;
+        if (phase.checklist) {
+          phase.completed = phase.checklist.length > 0 && phase.checklist.every(function(c) { return c.done; });
+        } else {
+          phase.completed = old ? !!old.completed : false;
+        }
+      }
+    } else if (old) {
+      if (old.checklist && old.checklist.length) {
+        phase.checklist = old.checklist.map(function(c) {
+          return { id: c.id, text: c.text, done: !!c.done };
+        });
+        phase.completed = phase.checklist.every(function(c) { return c.done; });
+      } else {
+        phase.checklist = null;
+        phase.completed = !!old.completed;
+      }
+    } else {
+      phase.checklist = null;
+      phase.completed = false;
+    }
+
+    return phase;
+  }
+
+  function buildPhasesFromCopilotDraftNew(draft) {
+    const title = (draft.title || '').trim();
+    const desc = (draft.description != null ? String(draft.description) : '').trim();
+    let rawPhases = draft.phases;
+    if (!Array.isArray(rawPhases) || rawPhases.length === 0) {
+      rawPhases = [{ title: title || 'Main', description: desc, checklist: null, completionDate: null }];
+    }
+    return rawPhases.map(function(p, i) {
+      return mergePhaseFromCopilotDraft(null, p, i, title || 'Main', desc);
+    });
+  }
+
+  function buildPhasesFromCopilotDraftUpdate(existing, draft) {
+    const oldPhases = existing.phases || [];
+    const dt = (draft.title != null && String(draft.title).trim()) ? String(draft.title).trim() : '';
+    const defaultTitle = dt || existing.title || 'Phase';
+    const dd = draft.description !== undefined ? String(draft.description || '').trim() : null;
+    const defaultDesc = dd !== null ? dd : String(existing.description || '').trim();
+
+    if (!draft.phases || !Array.isArray(draft.phases) || draft.phases.length === 0) {
+      return oldPhases.map(function(ph, i) {
+        return mergePhaseFromCopilotDraft(ph, {
+          title: ph.title,
+          description: ph.description,
+          completionDate: ph.completionDate,
+          checklist: ph.checklist ? ph.checklist.map(function(c) { return c.text; }) : null
+        }, i, defaultTitle, defaultDesc);
+      });
+    }
+
+    const out = [];
+    for (let i = 0; i < draft.phases.length; i++) {
+      out.push(mergePhaseFromCopilotDraft(oldPhases[i], draft.phases[i], i, defaultTitle, defaultDesc));
+    }
+    return out;
+  }
+
   function applyProjectCopilotDraft(draft) {
     if (!draft || typeof draft !== 'object') return;
     window.projectCopilotActive = false;
-    const title = (draft.title || '').trim();
-    const desc = (draft.description != null ? String(draft.description) : '').trim();
-    const finishDate = draft.finishDate && String(draft.finishDate).trim() ? String(draft.finishDate).trim() : null;
-    let rawPhases = draft.phases;
-    if (!Array.isArray(rawPhases) || rawPhases.length === 0) rawPhases = [{ title: title || 'Main', description: desc, checklist: null, completionDate: null }];
-    const phases = rawPhases.map(function(p, i) {
-      const pt = (p && p.title != null ? String(p.title) : '').trim() || ('Phase ' + (i + 1));
-      const pd = (p && p.description != null ? String(p.description) : '').trim();
-      const cd = p && p.completionDate && String(p.completionDate).trim() ? String(p.completionDate).trim() : null;
-      let checklist = null;
-      if (p && Array.isArray(p.checklist) && p.checklist.length > 0) {
-        const lines = [];
-        p.checklist.forEach(function(line) {
-          const t = line != null ? String(line).trim() : '';
-          if (t) lines.push({ id: genId(), text: t, done: false });
-        });
-        checklist = lines.length ? lines : null;
-      }
-      return {
-        id: genId(),
-        title: pt,
-        description: pd,
-        checklist: checklist,
-        completionDate: cd,
-        completed: false
-      };
-    });
+    const all = getProjects();
+    const targetId = draft.id != null && String(draft.id).trim() ? String(draft.id).trim() : '';
+    const existing = targetId ? all.find(function(p) { return p.id === targetId; }) : null;
+
+    const title = (draft.title != null && String(draft.title).trim())
+      ? String(draft.title).trim()
+      : (existing && existing.title) ? String(existing.title).trim() : '';
     if (!title) return;
-    const newId = genId();
-    projectsEditing = { id: newId, createdAt: Date.now(), modifiedAt: Date.now() };
-    persistProjectRecord(title, desc, finishDate, phases);
-    projectsEditing = null;
+
+    const desc = draft.description !== undefined
+      ? String(draft.description || '').trim()
+      : (existing ? String(existing.description || '').trim() : '');
+    const finishDate = draft.finishDate !== undefined
+      ? (draft.finishDate && String(draft.finishDate).trim() ? String(draft.finishDate).trim() : null)
+      : (existing ? existing.finishDate : null);
+
+    let phases;
+    if (existing) {
+      phases = buildPhasesFromCopilotDraftUpdate(existing, draft);
+    } else {
+      phases = buildPhasesFromCopilotDraftNew(draft);
+    }
+    if (!phases || phases.length === 0) {
+      phases = [{ id: genId(), title: title, description: desc, checklist: null, completionDate: null, completed: false }];
+    }
+
+    let selectId;
+    if (existing) {
+      const mergedComplete = isProjectCompleted({ phases: phases });
+      projectsEditing = {
+        id: existing.id,
+        createdAt: existing.createdAt || Date.now(),
+        completedAt: mergedComplete ? (existing.completedAt || Date.now()) : null,
+        completeQuote: mergedComplete ? existing.completeQuote : undefined
+      };
+      persistProjectRecord(title, desc, finishDate, phases);
+      projectsEditing = null;
+      selectId = existing.id;
+    } else {
+      const newId = genId();
+      projectsEditing = { id: newId, createdAt: Date.now(), modifiedAt: Date.now() };
+      persistProjectRecord(title, desc, finishDate, phases);
+      projectsEditing = null;
+      selectId = newId;
+    }
+
     closeBlatherBookPanel();
     showProjectsScreen();
-    projectsSelectProject(newId);
+    projectsSelectProject(selectId);
   }
 
   async function beginProjectCopilotFromChooser() {
@@ -12488,7 +12614,7 @@
       const done = isProjectCompleted(p);
       const pct = Math.round(getProjectProgress(p));
       const det = getProjectLandingDetails(p);
-      let line = '- ' + (p.title || 'Untitled');
+      let line = '- id ' + p.id + ' — ' + (p.title || 'Untitled');
       line += done ? ' (completed)' : ' (' + pct + '% complete)';
       if (!done && det.currentPhaseName) line += ', now: ' + det.currentPhaseName;
       const desc = (p.description || '').trim().replace(/\s+/g, ' ');
@@ -12561,8 +12687,9 @@
     const parts = [];
     try {
       parts.push('Current screen: ' + getBlathersVisibleScreenLabel() + '.');
-      if (projectsViewing && projectsViewing.title) {
-        parts.push('Open project detail: "' + String(projectsViewing.title).slice(0, 100) + '".');
+      if (projectsViewing && projectsViewing.id) {
+        const t = projectsViewing.title ? String(projectsViewing.title).slice(0, 100) : 'Untitled';
+        parts.push('Open project detail: id ' + projectsViewing.id + ' — "' + t + '".');
       }
       parts.push('Projects saved on this device:\n' + summarizeProjectsForBlathersBlock());
       const sched = summarizeScheduleForBlathers();
