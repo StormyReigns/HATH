@@ -4647,6 +4647,44 @@
       color: var(--text);
       margin-bottom: 16px;
     }
+    .project-create-choice-modal .project-create-choice-lead {
+      font-size: 14px;
+      color: var(--text2);
+      margin: -8px 0 18px;
+      line-height: 1.45;
+    }
+    .project-create-choice-primary,
+    .project-create-choice-secondary {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 16px;
+      font-family: inherit;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      border: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.12s, opacity 0.15s;
+    }
+    .project-create-choice-primary:active,
+    .project-create-choice-secondary:active { transform: scale(0.98); }
+    .project-create-choice-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(192,122,74,0.35);
+    }
+    .project-create-choice-secondary {
+      background: rgba(192,122,74,0.12);
+      color: var(--text);
+      border: 1.5px solid rgba(192,122,74,0.35);
+    }
+    .project-create-choice-dismiss { margin-top: 4px; }
+    html.dark-mode .project-create-choice-secondary {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.18);
+      color: var(--text);
+    }
     .paste-modal .paste-filename {
       width: 100%;
       padding: 10px 12px;
@@ -6581,6 +6619,17 @@
   </div>
 </div>
 
+<!-- New project: wizard vs Blathers -->
+<div class="paste-modal-overlay" id="projectCreateChoiceOverlay" onclick="closeProjectCreateChoice(event)">
+  <div class="paste-modal project-create-choice-modal" onclick="event.stopPropagation()">
+    <h3>Start a new project</h3>
+    <p class="project-create-choice-lead">How would you like to begin?</p>
+    <button type="button" class="project-create-choice-primary" onclick="projectCreateChoiceWizard()">Step-by-step map</button>
+    <button type="button" class="project-create-choice-secondary" onclick="projectCreateChoiceBlathers()">Talk it through with Blathers</button>
+    <button type="button" class="paste-cancel-btn project-create-choice-dismiss" onclick="closeProjectCreateChoice()">Cancel</button>
+  </div>
+</div>
+
 <!-- Create/Edit Project modal -->
 <div class="paste-modal-overlay" id="projectModalOverlay" onclick="closeProjectModal(event)">
   <div class="paste-modal projects-modal" id="projectModal" onclick="event.stopPropagation()">
@@ -6809,7 +6858,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.21.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.22.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -7606,6 +7655,7 @@
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
     document.querySelector('.drawer-item:first-child').classList.add('active');
     conversationHistory.length = 0;
+    window.projectCopilotActive = false;
     setBlathers('sleep');
     document.getElementById('greetingText').innerHTML = getRandomGreeting();
     renderHomeProjectsScroller();
@@ -7615,6 +7665,7 @@
   }
 
   function showSubScreen(screenId) {
+    window.projectCopilotActive = false;
     closeDrawer();
     setTimeout(closeDrawer, 50);
     document.getElementById('hintArea').style.display = 'none';
@@ -8745,9 +8796,174 @@
     }
   }
 
+  function openProjectCreateChoice() {
+    document.getElementById('projectCreateChoiceOverlay').classList.add('open');
+  }
+
+  function closeProjectCreateChoice(ev) {
+    if (ev && ev.target !== document.getElementById('projectCreateChoiceOverlay')) return;
+    document.getElementById('projectCreateChoiceOverlay').classList.remove('open');
+  }
+
+  function projectCreateChoiceWizard() {
+    document.getElementById('projectCreateChoiceOverlay').classList.remove('open');
+    openProjectWizard();
+  }
+
+  function navigateHomeForProjectCopilot() {
+    closeDrawer();
+    stopScheduleFloatingRotation();
+    stopDocsBgCarousel();
+    document.getElementById('documentsScreen').classList.remove('visible');
+    document.getElementById('projectsScreen').classList.remove('visible');
+    document.getElementById('scheduleScreen').classList.remove('visible');
+    document.getElementById('civicsScreen').classList.remove('visible');
+    document.getElementById('settingsScreen').classList.remove('visible');
+    document.getElementById('recipesScreen').classList.remove('visible');
+    document.getElementById('recipeDetail').classList.remove('open');
+    document.getElementById('projectsLanding').style.display = 'flex';
+    document.getElementById('projectsView').style.display = 'none';
+    document.querySelector('.app').classList.remove('in-project-view');
+    projectsViewing = null;
+    const topbar = document.querySelector('.topbar');
+    if (topbar) topbar.classList.remove('collapsed');
+    document.getElementById('hintArea').style.display = 'none';
+    document.getElementById('chatArea').style.display = 'flex';
+    document.getElementById('chatArea').style.flexDirection = 'column';
+    document.querySelector('.body').classList.add('chat-mode');
+    document.getElementById('inputZone').style.display = 'flex';
+    document.getElementById('updatedAt').style.display = getApiUser() ? '' : 'none';
+    const wb = document.getElementById('wellbeing');
+    if (wb) wb.style.display = getApiUser() ? '' : 'none';
+    updateScreenAddFabs();
+    updateBottomBarHome();
+    updateBlatherBookVisibility();
+  }
+
+  function stripAndParseProjectCopilotJson(raw) {
+    if (!raw || typeof raw !== 'string') return { display: String(raw || ''), draft: null };
+    const marker = '[[[PROJECT_JSON]]]';
+    const idx = raw.indexOf(marker);
+    if (idx === -1) return { display: raw.trim(), draft: null };
+    const display = raw.slice(0, idx).trim();
+    let jsonStr = raw.slice(idx + marker.length).trim();
+    try {
+      const draft = JSON.parse(jsonStr);
+      return { display, draft };
+    } catch (e1) {
+      try {
+        const m = jsonStr.match(/\{[\s\S]*\}/);
+        if (m) return { display, draft: JSON.parse(m[0]) };
+      } catch (e2) {}
+      return { display: raw.trim(), draft: null };
+    }
+  }
+
+  function applyProjectCopilotDraft(draft) {
+    if (!draft || typeof draft !== 'object') return;
+    window.projectCopilotActive = false;
+    const title = (draft.title || '').trim();
+    const desc = (draft.description != null ? String(draft.description) : '').trim();
+    const finishDate = draft.finishDate && String(draft.finishDate).trim() ? String(draft.finishDate).trim() : null;
+    let rawPhases = draft.phases;
+    if (!Array.isArray(rawPhases) || rawPhases.length === 0) rawPhases = [{ title: title || 'Main', description: desc, checklist: null, completionDate: null }];
+    const phases = rawPhases.map(function(p, i) {
+      const pt = (p && p.title != null ? String(p.title) : '').trim() || ('Phase ' + (i + 1));
+      const pd = (p && p.description != null ? String(p.description) : '').trim();
+      const cd = p && p.completionDate && String(p.completionDate).trim() ? String(p.completionDate).trim() : null;
+      let checklist = null;
+      if (p && Array.isArray(p.checklist) && p.checklist.length > 0) {
+        const lines = [];
+        p.checklist.forEach(function(line) {
+          const t = line != null ? String(line).trim() : '';
+          if (t) lines.push({ id: genId(), text: t, done: false });
+        });
+        checklist = lines.length ? lines : null;
+      }
+      return {
+        id: genId(),
+        title: pt,
+        description: pd,
+        checklist: checklist,
+        completionDate: cd,
+        completed: false
+      };
+    });
+    if (!title) return;
+    const newId = genId();
+    projectsEditing = { id: newId, createdAt: Date.now(), modifiedAt: Date.now() };
+    persistProjectRecord(title, desc, finishDate, phases);
+    projectsEditing = null;
+    showProjectsScreen();
+    projectsSelectProject(newId);
+  }
+
+  async function beginProjectCopilotFromChooser() {
+    if (isSending) return;
+    document.getElementById('projectCreateChoiceOverlay').classList.remove('open');
+    isSending = true;
+    activeController = new AbortController();
+    setSendButtonMode('stop');
+    navigateHomeForProjectCopilot();
+    conversationHistory.length = 0;
+    window.projectCopilotActive = true;
+    const chat = document.getElementById('chatArea');
+    chat.innerHTML = '';
+    setBlathers('startled');
+    setTimeout(function() { setBlathers('thinking'); }, 600);
+    const typing = document.createElement('div');
+    typing.className = 'typing';
+    typing.id = 'typingIndicator';
+    typing.innerHTML = '<span></span><span></span><span></span>';
+    chat.appendChild(typing);
+    requestAnimationFrame(function() { chat.scrollTop = chat.scrollHeight; });
+    try {
+      const user = localStorage.getItem('shasta_user');
+      const body = {
+        message: '__PROJECT_COPILOT_START__',
+        user: getApiUser(),
+        history: [],
+        nickname: getDisplayName(),
+        dumbMode: !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true'),
+        projectCopilot: true
+      };
+      const res = await fetch(AI_URL, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(body),
+        signal: activeController.signal
+      });
+      const text2 = await res.text();
+      let data;
+      try { data = JSON.parse(text2); } catch (_) {
+        throw new Error('Invalid response from server');
+      }
+      typing.remove();
+      const reply = data.reply || friendlyBlathersError(data.error);
+      const parsed = stripAndParseProjectCopilotJson(reply);
+      addBubble(parsed.display || reply, 'hath');
+      conversationHistory.push({ role: 'assistant', content: parsed.display || reply });
+      if (parsed.draft) applyProjectCopilotDraft(parsed.draft);
+    } catch (err) {
+      typing.remove();
+      if (err.name !== 'AbortError') {
+        addBubble(friendlyBlathersError(err), 'hath');
+        window.projectCopilotActive = false;
+      }
+    }
+    activeController = null;
+    isSending = false;
+    setSendButtonMode('send');
+  }
+
+  function projectCreateChoiceBlathers() {
+    beginProjectCopilotFromChooser();
+  }
+
   function openCreateProjectModal(editId) {
     if (!editId) {
-      openProjectWizard();
+      openProjectCreateChoice();
       return;
     }
     projectsEditing = getProjects().find(p => p.id === editId) || null;
@@ -12333,7 +12549,8 @@
         history: history,
         nickname: getDisplayName(),
         dumbMode: !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true'),
-        tabs: matchedTabs.length > 0 ? matchedTabs : undefined
+        tabs: matchedTabs.length > 0 ? matchedTabs : undefined,
+        projectCopilot: !!window.projectCopilotActive
       };
       const res = await fetch(AI_URL, {
         method: 'POST',
@@ -12350,9 +12567,17 @@
       typing.remove();
       setSendButtonMode('send');
 
-      const reply = data.reply || friendlyBlathersError(data.error);
-      addBubble(reply, 'hath');
-      conversationHistory.push({ role: 'assistant', content: reply });
+      let reply = data.reply || friendlyBlathersError(data.error);
+      let displayReply = reply;
+      let copilotDraft = null;
+      if (window.projectCopilotActive) {
+        const parsed = stripAndParseProjectCopilotJson(reply);
+        displayReply = parsed.display || reply;
+        copilotDraft = parsed.draft;
+      }
+      addBubble(displayReply, 'hath');
+      conversationHistory.push({ role: 'assistant', content: displayReply });
+      if (copilotDraft) applyProjectCopilotDraft(copilotDraft);
 
     } catch (err) {
       typing.remove();
