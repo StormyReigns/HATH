@@ -607,6 +607,160 @@
       padding-left: 20px; /* extra left pad to account for overlap */
     }
 
+    .blathers-turn {
+      align-self: flex-start;
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .blathers-turn--book {
+      max-width: 100%;
+    }
+    .blathers-chrome {
+      margin-left: 58px;
+      padding: 0 4px 4px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .blathers-chrome-hint {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.45;
+      font-style: italic;
+    }
+    .blathers-snippet {
+      background: rgba(192, 122, 74, 0.09);
+      border: 1px solid rgba(192, 122, 74, 0.22);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--text);
+    }
+    .blathers-snippet-kicker {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .blathers-snippet-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+    .blathers-snippet-body {
+      color: var(--text2);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .blathers-snippet-check {
+      margin-top: 8px;
+      padding-left: 0;
+      list-style: none;
+      font-size: 13px;
+      color: var(--text2);
+    }
+    .blathers-snippet-check li {
+      padding: 2px 0 2px 1.1em;
+      position: relative;
+    }
+    .blathers-snippet-check li::before {
+      content: '○';
+      position: absolute;
+      left: 0;
+      opacity: 0.55;
+    }
+    .blathers-snippet-check li.done::before {
+      content: '✓';
+      opacity: 0.85;
+      color: var(--accent);
+    }
+    .blathers-nav-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .blathers-nav-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      background: rgba(192, 122, 74, 0.14);
+      border: 1px solid rgba(192, 122, 74, 0.35);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .blathers-nav-chip:active {
+      transform: scale(0.97);
+      background: rgba(192, 122, 74, 0.22);
+    }
+    .blathers-result-card {
+      margin-left: 58px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(192, 122, 74, 0.11);
+      border: 1px solid rgba(192, 122, 74, 0.28);
+      max-width: calc(100% - 58px);
+    }
+    .blathers-result-kicker {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .blathers-result-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 10px;
+      word-break: break-word;
+    }
+    .blathers-result-btn {
+      display: inline-block;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .blathers-result-btn:active {
+      opacity: 0.92;
+    }
+    html.dark-mode .blathers-snippet {
+      background: rgba(192, 122, 74, 0.12);
+      border-color: rgba(220, 180, 140, 0.2);
+    }
+    html.dark-mode .blathers-nav-chip {
+      background: rgba(192, 122, 74, 0.18);
+      border-color: rgba(220, 180, 140, 0.25);
+    }
+    html.dark-mode .blathers-result-card {
+      background: rgba(192, 122, 74, 0.14);
+      border-color: rgba(220, 180, 140, 0.22);
+    }
+    .blathers-turn--book .blathers-chrome,
+    .blathers-turn--book .blathers-result-card {
+      margin-left: 0;
+      max-width: 100%;
+    }
+
     /* ── LOGIN BLAISIE ── */
     .login-blaisie {
       width: 140px; height: 140px;
@@ -6858,7 +7012,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.24.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.25.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -8840,23 +8994,328 @@
     updateBlatherBookVisibility();
   }
 
-  function stripAndParseProjectCopilotJson(raw) {
-    if (!raw || typeof raw !== 'string') return { display: String(raw || ''), draft: null };
-    const marker = '[[[PROJECT_JSON]]]';
-    const idx = raw.indexOf(marker);
-    if (idx === -1) return { display: raw.trim(), draft: null };
-    const display = raw.slice(0, idx).trim();
-    let jsonStr = raw.slice(idx + marker.length).trim();
+  function tryParseJsonObjectFragment(s) {
+    if (s == null) return null;
+    const str = String(s).trim();
     try {
-      const draft = JSON.parse(jsonStr);
-      return { display, draft };
-    } catch (e1) {
-      try {
-        const m = jsonStr.match(/\{[\s\S]*\}/);
-        if (m) return { display, draft: JSON.parse(m[0]) };
-      } catch (e2) {}
-      return { display: raw.trim(), draft: null };
+      return JSON.parse(str);
+    } catch (_) {
+      const m = str.match(/\{[\s\S]*\}/);
+      if (m) {
+        try {
+          return JSON.parse(m[0]);
+        } catch (_) {}
+      }
     }
+    return null;
+  }
+
+  /** Strips [[[PROJECT_JSON]]], [[[PROJECT_PATCH_JSON]]], [[[BLATHERS_UI]]] (last-first). */
+  function parseBlathersStructuredReply(raw) {
+    const out = { display: String(raw || '').trim(), projectDraft: null, projectPatch: null, uiPayload: null };
+    if (!raw || typeof raw !== 'string') return out;
+    const tags = [
+      ['[[[PROJECT_JSON]]]', 'draft'],
+      ['[[[PROJECT_PATCH_JSON]]]', 'patch'],
+      ['[[[BLATHERS_UI]]]', 'ui']
+    ];
+    let display = raw.trim();
+    for (let iter = 0; iter < 10; iter++) {
+      let bestI = -1;
+      let bestTag = null;
+      for (let t = 0; t < tags.length; t++) {
+        const i = display.lastIndexOf(tags[t][0]);
+        if (i > bestI) {
+          bestI = i;
+          bestTag = tags[t];
+        }
+      }
+      if (bestI < 0 || !bestTag) break;
+      const marker = bestTag[0];
+      const key = bestTag[1];
+      let jsonPart = display.slice(bestI + marker.length).trim();
+      display = display.slice(0, bestI).trim();
+      const nextMarker = jsonPart.search(/\[\[\[[A-Z_]+\]\]\]/);
+      if (nextMarker > 0) jsonPart = jsonPart.slice(0, nextMarker).trim();
+      const obj = tryParseJsonObjectFragment(jsonPart);
+      if (key === 'draft' && obj) out.projectDraft = obj;
+      else if (key === 'patch' && obj) out.projectPatch = obj;
+      else if (key === 'ui' && obj) out.uiPayload = obj;
+    }
+    out.display = display.trim();
+    return out;
+  }
+
+  function stripAndParseProjectCopilotJson(raw) {
+    const p = parseBlathersStructuredReply(raw);
+    return { display: p.display, draft: p.projectDraft };
+  }
+
+  function runBlathersNav(nav, projectId) {
+    const n = String(nav || '').toLowerCase().trim();
+    closeDrawer();
+    closeBlatherBookPanel();
+    try {
+      if (n === 'home') {
+        goHome();
+        return;
+      }
+      if (n === 'projects') {
+        showProjectsScreen();
+        if (projectId) projectsSelectProject(String(projectId));
+        return;
+      }
+      if (n === 'documents') {
+        showDocumentsScreen();
+        return;
+      }
+      if (n === 'recipes') {
+        showRecipesScreen();
+        return;
+      }
+      if (n === 'schedule') {
+        showScheduleScreen();
+        return;
+      }
+      if (n === 'civics') {
+        showCivicsScreen();
+        return;
+      }
+      if (n === 'settings') {
+        showSettingsScreen();
+        return;
+      }
+    } catch (e) {}
+  }
+
+  function buildBlathersSnippetEl(sn) {
+    if (!sn || typeof sn !== 'object') return null;
+    const kind = String(sn.kind || sn.type || '').toLowerCase();
+    const projectId = sn.projectId != null ? String(sn.projectId).trim() : '';
+    if (!projectId) return null;
+    const all = getProjects();
+    const p = all.find(function(x) { return x.id === projectId; });
+    if (!p) return null;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'blathers-snippet';
+
+    if (kind === 'project') {
+      const kick = document.createElement('div');
+      kick.className = 'blathers-snippet-kicker';
+      kick.textContent = 'Project';
+      wrap.appendChild(kick);
+      const ttl = document.createElement('div');
+      ttl.className = 'blathers-snippet-title';
+      ttl.textContent = p.title || 'Untitled';
+      wrap.appendChild(ttl);
+      const desc = (p.description || '').trim();
+      if (desc) {
+        const body = document.createElement('div');
+        body.className = 'blathers-snippet-body';
+        body.textContent = desc.length > 320 ? desc.slice(0, 317) + '\u2026' : desc;
+        wrap.appendChild(body);
+      }
+      const nPh = (p.phases && p.phases.length) ? p.phases.length : 0;
+      if (nPh > 0) {
+        const meta = document.createElement('div');
+        meta.className = 'blathers-snippet-body';
+        meta.style.marginTop = '6px';
+        meta.style.fontSize = '12px';
+        meta.textContent = nPh === 1 ? '1 phase' : nPh + ' phases';
+        wrap.appendChild(meta);
+      }
+      return wrap;
+    }
+
+    if (kind === 'phase') {
+      const idx = parseInt(sn.phaseIndex, 10);
+      if (isNaN(idx) || !p.phases || !p.phases[idx]) return null;
+      const ph = p.phases[idx];
+      const kick = document.createElement('div');
+      kick.className = 'blathers-snippet-kicker';
+      kick.textContent = 'Phase ' + (idx + 1) + (p.title ? ' · ' + p.title : '');
+      wrap.appendChild(kick);
+      const ttl = document.createElement('div');
+      ttl.className = 'blathers-snippet-title';
+      ttl.textContent = ph.title || ('Phase ' + (idx + 1));
+      wrap.appendChild(ttl);
+      const pd = (ph.description || '').trim();
+      if (pd) {
+        const body = document.createElement('div');
+        body.className = 'blathers-snippet-body';
+        body.textContent = pd.length > 400 ? pd.slice(0, 397) + '\u2026' : pd;
+        wrap.appendChild(body);
+      }
+      const notes = (ph.notes || '').trim();
+      if (notes) {
+        const nb = document.createElement('div');
+        nb.className = 'blathers-snippet-body';
+        nb.style.marginTop = '8px';
+        nb.style.fontSize = '13px';
+        nb.textContent = 'Notes: ' + (notes.length > 200 ? notes.slice(0, 197) + '\u2026' : notes);
+        wrap.appendChild(nb);
+      }
+      if (ph.checklist && ph.checklist.length > 0) {
+        const ul = document.createElement('ul');
+        ul.className = 'blathers-snippet-check';
+        ph.checklist.slice(0, 12).forEach(function(c) {
+          const li = document.createElement('li');
+          li.textContent = c.text || '';
+          if (c.done) li.classList.add('done');
+          ul.appendChild(li);
+        });
+        wrap.appendChild(ul);
+      }
+      return wrap;
+    }
+
+    return null;
+  }
+
+  function mountBlathersChrome(turnEl, uiPayload) {
+    if (!turnEl || !uiPayload || typeof uiPayload !== 'object') return;
+    const hint = uiPayload.hint != null ? String(uiPayload.hint).trim() : '';
+    const snippets = Array.isArray(uiPayload.snippets) ? uiPayload.snippets : [];
+    const navList = Array.isArray(uiPayload.nav) ? uiPayload.nav : [];
+
+    if (!hint && snippets.length === 0 && navList.length === 0) return;
+
+    const chrome = document.createElement('div');
+    chrome.className = 'blathers-chrome';
+
+    if (hint) {
+      const h = document.createElement('div');
+      h.className = 'blathers-chrome-hint';
+      h.textContent = hint.slice(0, 500);
+      chrome.appendChild(h);
+    }
+
+    snippets.forEach(function(sn) {
+      const el = buildBlathersSnippetEl(sn);
+      if (el) chrome.appendChild(el);
+    });
+
+    if (navList.length > 0) {
+      const row = document.createElement('div');
+      row.className = 'blathers-nav-row';
+      navList.forEach(function(item) {
+        if (!item || typeof item !== 'object') return;
+        const nav = String(item.nav || '').toLowerCase().trim();
+        if (!nav) return;
+        const label = (item.label != null && String(item.label).trim())
+          ? String(item.label).trim()
+          : nav.charAt(0).toUpperCase() + nav.slice(1);
+        const pid = item.projectId != null ? String(item.projectId).trim() : '';
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'blathers-nav-chip';
+        btn.textContent = label;
+        btn.onclick = function() {
+          runBlathersNav(nav, pid || null);
+        };
+        row.appendChild(btn);
+      });
+      if (row.childNodes.length) chrome.appendChild(row);
+    }
+
+    turnEl.appendChild(chrome);
+  }
+
+  function addBlathersResultCard(turnEl, result) {
+    if (!turnEl || !result || !result.projectId) return;
+    const card = document.createElement('div');
+    card.className = 'blathers-result-card';
+    const kick = document.createElement('div');
+    kick.className = 'blathers-result-kicker';
+    kick.textContent = result.kind === 'updated' ? 'Project updated' : 'Project saved';
+    const ttl = document.createElement('div');
+    ttl.className = 'blathers-result-title';
+    ttl.textContent = result.title || 'Project';
+    card.appendChild(kick);
+    card.appendChild(ttl);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'blathers-result-btn';
+    btn.textContent = 'Open in Projects';
+    const pid = String(result.projectId);
+    btn.onclick = function() {
+      closeDrawer();
+      closeBlatherBookPanel();
+      showProjectsScreen();
+      projectsSelectProject(pid);
+    };
+    card.appendChild(btn);
+    turnEl.appendChild(card);
+  }
+
+  function applyProjectPatchJson(patch) {
+    if (!patch || typeof patch !== 'object' || !patch.projectId) return null;
+    const projectId = String(patch.projectId).trim();
+    const all = getProjects();
+    const p = all.find(function(x) { return x.id === projectId; });
+    if (!p) return null;
+    const ops = Array.isArray(patch.ops) ? patch.ops : [];
+    for (let i = 0; i < ops.length; i++) {
+      const op = ops[i];
+      if (!op || typeof op !== 'object') continue;
+      const typ = String(op.op || '').toLowerCase().replace(/\s+/g, '');
+      if (typ === 'renameproject' || typ === 'settitle') {
+        if (op.title != null) p.title = String(op.title).trim().slice(0, 240) || p.title;
+      } else if (typ === 'setprojectdescription' || typ === 'setdescription') {
+        p.description = op.description != null ? String(op.description) : '';
+      } else if (typ === 'setfinishdate') {
+        const fd = op.finishDate != null ? String(op.finishDate).trim() : '';
+        p.finishDate = fd || null;
+      } else if (typ === 'setphasetitle') {
+        const idx = parseInt(op.phaseIndex, 10);
+        if (!isNaN(idx) && p.phases && p.phases[idx] && op.title != null) {
+          p.phases[idx].title = String(op.title).trim().slice(0, 200) || p.phases[idx].title;
+        }
+      } else if (typ === 'setphasedescription') {
+        const idx = parseInt(op.phaseIndex, 10);
+        if (!isNaN(idx) && p.phases && p.phases[idx]) {
+          p.phases[idx].description = op.description != null ? String(op.description) : '';
+        }
+      } else if (typ === 'setphasenotes') {
+        const idx = parseInt(op.phaseIndex, 10);
+        if (!isNaN(idx) && p.phases && p.phases[idx]) {
+          p.phases[idx].notes = op.notes != null ? String(op.notes) : '';
+        }
+      } else if (typ === 'addchecklistitems') {
+        const idx = parseInt(op.phaseIndex, 10);
+        if (isNaN(idx) || !p.phases || !p.phases[idx]) continue;
+        const ph = p.phases[idx];
+        const items = Array.isArray(op.items) ? op.items : [];
+        if (!ph.checklist) ph.checklist = [];
+        items.forEach(function(line) {
+          const t = line != null ? String(line).trim() : '';
+          if (t) ph.checklist.push({ id: genId(), text: t, done: false });
+        });
+      } else if (typ === 'setphasecompleted') {
+        const idx = parseInt(op.phaseIndex, 10);
+        if (isNaN(idx) || !p.phases || !p.phases[idx]) continue;
+        const ph = p.phases[idx];
+        const done = op.completed === true || op.completed === 'true';
+        ph.completed = done;
+        if (ph.checklist && ph.checklist.length) {
+          ph.checklist.forEach(function(c) { c.done = done; });
+        }
+      }
+    }
+    p.modifiedAt = Date.now();
+    if (isProjectCompleted(p)) p.completedAt = Date.now();
+    saveProjects(all);
+    try {
+      renderHomeProjectsScroller();
+    } catch (e1) {}
+    try {
+      if (projectsViewing && projectsViewing.id === p.id) {
+        projectsViewing = p;
+        renderProjectsView();
+      }
+    } catch (e2) {}
+    return { projectId: p.id, title: p.title, kind: 'updated' };
   }
 
   function normalizeCopilotChecklistStrings(arr) {
@@ -8971,8 +9430,9 @@
     return out;
   }
 
+  /** Saves or merges a project from [[[PROJECT_JSON]]]; does not navigate. Returns { projectId, title, kind } or null. */
   function applyProjectCopilotDraft(draft) {
-    if (!draft || typeof draft !== 'object') return;
+    if (!draft || typeof draft !== 'object') return null;
     window.projectCopilotActive = false;
     const all = getProjects();
     const targetId = draft.id != null && String(draft.id).trim() ? String(draft.id).trim() : '';
@@ -8981,7 +9441,7 @@
     const title = (draft.title != null && String(draft.title).trim())
       ? String(draft.title).trim()
       : (existing && existing.title) ? String(existing.title).trim() : '';
-    if (!title) return;
+    if (!title) return null;
 
     const desc = draft.description !== undefined
       ? String(draft.description || '').trim()
@@ -9020,9 +9480,19 @@
       selectId = newId;
     }
 
-    closeBlatherBookPanel();
-    showProjectsScreen();
-    projectsSelectProject(selectId);
+    try {
+      renderHomeProjectsScroller();
+    } catch (_) {}
+    try {
+      if (projectsViewing && projectsViewing.id === selectId) {
+        const refreshed = getProjects().find(function(p) { return p.id === selectId; });
+        if (refreshed) {
+          projectsViewing = refreshed;
+          renderProjectsView();
+        }
+      }
+    } catch (_) {}
+    return { projectId: selectId, title: title, kind: existing ? 'updated' : 'created' };
   }
 
   async function beginProjectCopilotFromChooser() {
@@ -9069,10 +9539,11 @@
       }
       typing.remove();
       const reply = data.reply || friendlyBlathersError(data.error);
-      const parsed = stripAndParseProjectCopilotJson(reply);
-      addBubble(parsed.display || reply, 'hath');
-      conversationHistory.push({ role: 'assistant', content: parsed.display || reply });
-      if (parsed.draft) applyProjectCopilotDraft(parsed.draft);
+      const structured = parseBlathersStructuredReply(reply);
+      const displayReply = structured.display || reply;
+      const turn = addBubble(displayReply, 'hath');
+      conversationHistory.push({ role: 'assistant', content: displayReply });
+      applyBlathersStructuredFollowUp(turn, structured);
     } catch (err) {
       typing.remove();
       if (err.name !== 'AbortError') {
@@ -12820,11 +13291,11 @@
       setSendButtonMode('send');
 
       const reply = data.reply || friendlyBlathersError(data.error);
-      const parsed = stripAndParseProjectCopilotJson(reply);
-      const displayReply = parsed.display || reply;
-      addBubble(displayReply, 'hath');
+      const structured = parseBlathersStructuredReply(reply);
+      const displayReply = structured.display || reply;
+      const turn = addBubble(displayReply, 'hath');
       conversationHistory.push({ role: 'assistant', content: displayReply });
-      if (parsed.draft) applyProjectCopilotDraft(parsed.draft);
+      applyBlathersStructuredFollowUp(turn, structured);
 
     } catch (err) {
       typing.remove();
@@ -12888,7 +13359,9 @@
         .replace(/`(.*?)`/g, '<code>$1</code>')
         .replace(/\n/g, '<br>');
 
-      // Wrap bubble + avatar in a row
+      const turn = document.createElement('div');
+      turn.className = 'blathers-turn';
+
       const row = document.createElement('div');
       row.className = 'bubble-row';
 
@@ -12903,16 +13376,38 @@
 
       row.appendChild(avatar);
       row.appendChild(b);
-      chat.appendChild(row);
+      turn.appendChild(row);
+      chat.appendChild(turn);
 
-    } else {
-      const b = document.createElement('div');
-      b.className = 'bubble user';
-      b.textContent = text;
-      chat.appendChild(b);
+      requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
+      return turn;
     }
 
+    const b = document.createElement('div');
+    b.className = 'bubble user';
+    b.textContent = text;
+    chat.appendChild(b);
     requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
+    return null;
+  }
+
+  function applyBlathersStructuredFollowUp(turnEl, structured) {
+    if (!turnEl || !structured) return;
+    mountBlathersChrome(turnEl, structured.uiPayload);
+    if (structured.projectDraft) {
+      const r = applyProjectCopilotDraft(structured.projectDraft);
+      if (r) addBlathersResultCard(turnEl, r);
+    }
+    if (structured.projectPatch) {
+      const r2 = applyProjectPatchJson(structured.projectPatch);
+      if (r2) addBlathersResultCard(turnEl, r2);
+    }
+    requestAnimationFrame(function() {
+      const chat = document.getElementById('chatArea');
+      const book = document.getElementById('blatherbookMessages');
+      if (chat) chat.scrollTop = chat.scrollHeight;
+      if (book) book.scrollTop = book.scrollHeight;
+    });
   }
 
   // ── BLATHERBOOK (floating quick-chat) ──────────────────────────
@@ -13011,10 +13506,12 @@
 
   function addBlatherBookBubble(text, who) {
     const container = document.getElementById('blatherbookMessages');
-    if (!container) return;
-    const b = document.createElement('div');
-    b.className = 'bubble ' + (who === 'hath' ? 'hath' : 'user');
+    if (!container) return null;
     if (who === 'hath') {
+      const turn = document.createElement('div');
+      turn.className = 'blathers-turn blathers-turn--book';
+      const b = document.createElement('div');
+      b.className = 'bubble hath';
       if (isCivicsResponse(text)) {
         b.innerHTML = renderCivicsResponse(text);
       } else {
@@ -13028,11 +13525,17 @@
           .replace(/\n/g, '<br>');
         b.innerHTML = html;
       }
-    } else {
-      b.textContent = text;
+      turn.appendChild(b);
+      container.appendChild(turn);
+      requestAnimationFrame(() => { container.scrollTop = container.scrollHeight; });
+      return turn;
     }
+    const b = document.createElement('div');
+    b.className = 'bubble user';
+    b.textContent = text;
     container.appendChild(b);
     requestAnimationFrame(() => { container.scrollTop = container.scrollHeight; });
+    return null;
   }
 
   function blatherbookHandleKey(e) {
@@ -13189,11 +13692,11 @@
       }
       typing.remove();
       const reply = data.reply || friendlyBlathersError(data.error);
-      const parsed = stripAndParseProjectCopilotJson(reply);
-      const displayReply = parsed.display || reply;
-      addBlatherBookBubble(displayReply, 'hath');
+      const structured = parseBlathersStructuredReply(reply);
+      const displayReply = structured.display || reply;
+      const turn = addBlatherBookBubble(displayReply, 'hath');
       blatherbookHistory.push({ role: 'assistant', content: displayReply });
-      if (parsed.draft) applyProjectCopilotDraft(parsed.draft);
+      applyBlathersStructuredFollowUp(turn, structured);
     } catch (err) {
       typing.remove();
       if (err.name !== 'AbortError') {
