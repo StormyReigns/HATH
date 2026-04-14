@@ -3573,7 +3573,7 @@
       display: flex;
       flex-direction: column;
       overflow-y: auto;
-      overflow-x: hidden;
+      overflow-x: visible;
       position: relative;
       padding-bottom: 16px;
     }
@@ -3590,6 +3590,9 @@
       gap: 12px;
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      overscroll-behavior-y: auto;
+      touch-action: pan-x pan-y;
       scrollbar-width: none;
       padding: 0 8%;
     }
@@ -3897,10 +3900,11 @@
       pointer-events: none;
     }
     .app.in-project-view .projects-ocean-strip-spacer {
-      height: calc(12px + 88px + env(safe-area-inset-bottom, 0px));
+      height: calc(12px + 88px + 52px + max(0px, env(safe-area-inset-bottom, 0px)));
     }
     .projects-korl-quote {
       position: relative;
+      z-index: 70;
       flex-shrink: 0;
       padding: 10px 18px 8px 30px;
       margin-top: 4px;
@@ -3954,7 +3958,7 @@
       transform: translateX(-50%);
       width: min(calc(100vw - 24px), 420px);
       margin: 0;
-      z-index: 65;
+      z-index: 60;
     }
     .projects-ocean-strip.complete {
       border-color: rgba(210,165,80,0.8);
@@ -6337,6 +6341,7 @@
           </div>
         </div>
         <div class="projects-korl-quote" id="projectsKorlQuote"></div>
+        <div class="projects-ocean-strip-spacer" aria-hidden="true"></div>
         <div class="projects-ocean-strip" id="projectsOceanStrip">
           <div class="ocean-strip-inner">
             <div class="ocean-crackle"></div>
@@ -6771,7 +6776,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.19.6';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.19.7';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
