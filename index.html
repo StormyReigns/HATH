@@ -3898,14 +3898,15 @@
       color: rgba(192,122,74,0.42);
       pointer-events: none;
     }
-    /* In-flow gap above fixed ocean (matches strip height + breathing room). */
+    /* In-flow gap: .app already reserves the bottom bar + safe area; ocean is fixed.
+ Only a modest band so the quote clears the strip — avoids double-counting 52px + 88px. */
     .projects-ocean-strip-spacer {
       flex-shrink: 0;
       width: 100%;
       pointer-events: none;
     }
     .app.in-project-view .projects-ocean-strip-spacer {
-      height: calc(6px + 88px + 52px + max(0px, env(safe-area-inset-bottom, 0px)));
+      height: calc(10px + max(12px, env(safe-area-inset-bottom, 0px)));
     }
     .projects-korl-quote {
       position: relative;
@@ -3923,7 +3924,7 @@
       opacity: 0.93;
     }
     .app.in-project-view .projects-korl-quote {
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
     /* worn gradient divider — thicker centre, fading to edges */
     .projects-korl-quote::before {
@@ -6784,7 +6785,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.19.10';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.19.11';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
