@@ -4864,6 +4864,7 @@
     }
     .gj-card-image img[src] { opacity: 1; }
     .gj-card-image.hf-card { background: linear-gradient(135deg, #d4edd9 0%, #7dc28a 100%); }
+    .gj-card-image.takeout-card { background: linear-gradient(135deg, #ffe8cc 0%, #e8a060 45%, #c07a4a 100%); }
     .gj-card-monogram {
       font-size: 72px; font-weight: 800;
       color: rgba(255,255,255,0.35);
@@ -4981,6 +4982,24 @@
     .gj-mode-select-panel, .gj-game-panel, .gj-randomizer-panel { display: none; flex-direction: column; align-items: center; }
     .gj-mode-select-panel.visible, .gj-game-panel.visible, .gj-randomizer-panel.visible { display: flex; }
     .gj-mode-select-gordon { width: 180px; object-fit: contain; margin-bottom: 24px; }
+    .gj-source-toggle-row {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 10px;
+      width: 100%; max-width: 280px; margin-bottom: 20px;
+    }
+    .gj-source-toggle-label {
+      width: 100%; text-align: center; font-size: 11px; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.45);
+    }
+    .gj-source-toggle {
+      flex: 1; min-width: 108px; padding: 12px 14px; border-radius: 12px; font-size: 15px; font-weight: 700;
+      border: 1.5px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.55); cursor: pointer; font-family: inherit;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .gj-source-toggle.active {
+      background: rgba(192,122,74,0.35); border-color: rgba(232,180,140,0.55); color: #fff;
+    }
+    .gj-winner-actions.gj-takeout-actions { flex-direction: column; align-items: stretch; max-width: 280px; }
     .gj-mode-select-btns { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 260px; }
     .gj-mode-btn {
       padding: 16px 24px; border-radius: 14px; font-size: 16px; font-weight: 700;
@@ -5736,6 +5755,7 @@
     .gj-randomizer-card { position: absolute; inset: 0; display: flex; flex-direction: column; }
     .gj-randomizer-card-image { flex: 1; position: relative; background: linear-gradient(135deg, #e8d5b0 0%, #c9a06a 100%); display: flex; align-items: center; justify-content: center; }
     .gj-randomizer-card-image.hf { background: linear-gradient(135deg, #d4edd9 0%, #7dc28a 100%); }
+    .gj-randomizer-card-image.takeout { background: linear-gradient(135deg, #ffe8cc 0%, #e8a060 45%, #c07a4a 100%); }
     .gj-randomizer-card-image img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.3s; }
     .gj-randomizer-card-image img.loaded { opacity: 1; }
     .gj-randomizer-card-monogram { font-size: 64px; font-weight: 800; color: rgba(255,255,255,0.35); }
@@ -5744,6 +5764,9 @@
     .gj-randomizer-card-name { font-size: 16px; font-weight: 700; color: var(--text); flex: 1; }
     .gj-randomizer-card-source { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: rgba(192,122,74,0.15); color: var(--accent); }
     .gj-randomizer-card-source.hf { background: rgba(0,169,91,0.13); color: #00a05a; }
+    .gj-card-source.takeout { background: rgba(192,122,74,0.2); color: #a85a28; }
+    html.dark-mode .gj-card-source.takeout { background: rgba(212,164,90,0.18); color: #d4a45a; }
+    .gj-randomizer-card-source.takeout { background: rgba(192,122,74,0.2); color: #a85a28; }
     .gj-randomizer-shuffle-placeholder { min-height: 80px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: rgba(255,255,255,0.5); }
     .gj-filters {
       display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
@@ -6786,7 +6809,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.20.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.21.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -13563,6 +13586,27 @@
 
   const gjState = { pool: [], index: 0, winner: null, maybe: [], rejectCount: 0 };
   const gjFilters = { source: 'all', favourites: false, cuisine: '' };
+  const gjSourceToggles = { recipes: true, takeout: true };
+
+  function gjRefreshSourceToggleButtons() {
+    var rBtn = document.getElementById('gjToggleRecipes');
+    var tBtn = document.getElementById('gjToggleTakeout');
+    if (rBtn) rBtn.classList.toggle('active', gjSourceToggles.recipes);
+    if (tBtn) tBtn.classList.toggle('active', gjSourceToggles.takeout);
+  }
+
+  function gjToggleSource(key) {
+    if (key !== 'recipes' && key !== 'takeout') return;
+    gjSourceToggles[key] = !gjSourceToggles[key];
+    if (!gjSourceToggles.recipes && !gjSourceToggles.takeout) {
+      gjSourceToggles[key] = true;
+      showDocsToast('Keep at least one source: Recipes or Takeout.', true);
+      gjRefreshSourceToggleButtons();
+      return;
+    }
+    gjRefreshSourceToggleButtons();
+  }
+
   function getGjFilteredRecipes() {
     var list = recipesState.all || [];
     if (gjFilters.favourites) {
@@ -13574,36 +13618,83 @@
     if (gjFilters.cuisine) list = list.filter(function(r) { return (r.cuisine || '') === gjFilters.cuisine; });
     return list;
   }
+
+  function getGjFilteredItems() {
+    var items = [];
+    if (gjSourceToggles.recipes) {
+      getGjFilteredRecipes().forEach(function(r) {
+        items.push(Object.assign({}, r, { gjKind: 'recipe' }));
+      });
+    }
+    if (gjSourceToggles.takeout && typeof getTakeoutSpots === 'function') {
+      var spots = getTakeoutSpots().filter(function(s) { return s.active !== false; });
+      if (gjFilters.cuisine) {
+        spots = spots.filter(function(s) { return (s.cuisine || '').trim() === gjFilters.cuisine; });
+      }
+      spots.forEach(function(s) {
+        items.push({
+          gjKind: 'takeout',
+          id: s.id,
+          name: s.name,
+          cuisine: s.cuisine,
+          source: 'takeout',
+          sourceLabel: 'Takeout',
+          imageId: null,
+          takeoutSpot: s
+        });
+      });
+    }
+    return items;
+  }
+
+  function gjCollectGjCuisines() {
+    var set = {};
+    if (gjSourceToggles.recipes && recipesState.all) {
+      (recipesState.all || []).forEach(function(r) {
+        var c = (r.cuisine || '').trim();
+        if (c) set[c] = true;
+      });
+    }
+    if (gjSourceToggles.takeout && typeof getTakeoutSpots === 'function') {
+      getTakeoutSpots().filter(function(s) { return s.active !== false; }).forEach(function(s) {
+        var c = (s.cuisine || '').trim();
+        if (c) set[c] = true;
+      });
+    }
+    return Object.keys(set).sort();
+  }
+
   function renderGjFilters(containerId, onFilterChange) {
     var el = document.getElementById(containerId);
     if (!el) return;
-    var sources = ['all', 'favourites'];
     var usedSources = recipesState.all ? [...new Set((recipesState.all || []).map(function(r) { return r.source; }))] : [];
-    var cuisines = recipesState.all ? [...new Set((recipesState.all || []).map(function(r) { return (r.cuisine || '').trim(); }).filter(Boolean))].sort() : [];
+    var cuisines = gjCollectGjCuisines();
     var labels = { all: 'All', favourites: '★ Favourites', hellofresh: 'HelloFresh', other: 'Other' };
     el.innerHTML = '';
-    ['all', 'favourites'].forEach(function(s) {
-      if (s === 'favourites' && !(recipesState.all || []).some(function(r) { return getRecipeFavourites().includes(r.id); })) return;
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'gj-filter-chip' + (s === 'favourites' && gjFilters.favourites ? ' active' : s === gjFilters.source && !gjFilters.favourites ? ' active' : '');
-      btn.textContent = labels[s] || s;
-      btn.onclick = function() {
-        if (s === 'favourites') gjFilters.favourites = !gjFilters.favourites, gjFilters.source = 'all';
-        else gjFilters.source = s, gjFilters.favourites = false;
-        if (onFilterChange) onFilterChange();
-      };
-      el.appendChild(btn);
-    });
-    usedSources.forEach(function(s) {
-      if (s === 'all' || s === 'favourites') return;
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'gj-filter-chip' + (s === gjFilters.source && !gjFilters.favourites ? ' active' : '');
-      btn.textContent = labels[s] || (s.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); }));
-      btn.onclick = function() { gjFilters.source = s; gjFilters.favourites = false; if (onFilterChange) onFilterChange(); };
-      el.appendChild(btn);
-    });
+    if (gjSourceToggles.recipes) {
+      ['all', 'favourites'].forEach(function(s) {
+        if (s === 'favourites' && !(recipesState.all || []).some(function(r) { return getRecipeFavourites().includes(r.id); })) return;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'gj-filter-chip' + (s === 'favourites' && gjFilters.favourites ? ' active' : s === gjFilters.source && !gjFilters.favourites ? ' active' : '');
+        btn.textContent = labels[s] || s;
+        btn.onclick = function() {
+          if (s === 'favourites') gjFilters.favourites = !gjFilters.favourites, gjFilters.source = 'all';
+          else gjFilters.source = s, gjFilters.favourites = false;
+          if (onFilterChange) onFilterChange();
+        };
+        el.appendChild(btn);
+      });
+      usedSources.forEach(function(s) {
+        if (s === 'all' || s === 'favourites') return;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'gj-filter-chip' + (s === gjFilters.source && !gjFilters.favourites ? ' active' : '');
+        btn.textContent = labels[s] || (s.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); }));
+        btn.onclick = function() { gjFilters.source = s; gjFilters.favourites = false; if (onFilterChange) onFilterChange(); };
+        el.appendChild(btn);
+      });
+    }
     cuisines.forEach(function(c) {
       var btn = document.createElement('button');
       btn.type = 'button';
@@ -13617,7 +13708,9 @@
   function updateHomeGjVisibility() {
     const el = document.getElementById('homeGjBtn');
     if (!el) return;
-    if (recipesState.all && recipesState.all.length > 0) {
+    var hasRecipes = recipesState.all && recipesState.all.length > 0;
+    var hasTakeout = typeof getTakeoutSpots === 'function' && getTakeoutSpots().some(function(s) { return s.active !== false; });
+    if (hasRecipes || hasTakeout) {
       el.classList.add('visible');
       el.style.display = '';
     } else {
@@ -13635,11 +13728,14 @@
     document.getElementById('gjModeSelectPanel').classList.add('visible');
     document.getElementById('gjGamePanel').classList.remove('visible');
     document.getElementById('gjRandomizerPanel').classList.remove('visible');
+    gjRefreshSourceToggleButtons();
 
-    if (!recipesState.loaded && !recipesState.loading) {
-      await loadRecipesData();
-    } else if (recipesState.loading) {
-      while (recipesState.loading) await new Promise(r => setTimeout(r, 100));
+    if (gjSourceToggles.recipes) {
+      if (!recipesState.loaded && !recipesState.loading) {
+        await loadRecipesData();
+      } else if (recipesState.loading) {
+        while (recipesState.loading) await new Promise(r => setTimeout(r, 100));
+      }
     }
   }
 
@@ -13657,7 +13753,7 @@
   }
 
   function gjApplyFiltersAndRestart() {
-    var filtered = getGjFilteredRecipes();
+    var filtered = getGjFilteredItems();
     var pool = filtered.length > 0 ? shuffleArray(filtered).slice(0, Math.min(20, filtered.length)) : [];
     gjState.pool = pool;
     gjState.index = 0;
@@ -13667,14 +13763,16 @@
     document.getElementById('gjGordonYell').classList.remove('visible');
     document.getElementById('gjGordonBanish').classList.remove('visible');
     document.getElementById('gjGordonWinner').classList.remove('visible');
-    document.getElementById('gjWinnerActions').style.display = 'none';
+    var winAct = document.getElementById('gjWinnerActions');
+    winAct.style.display = 'none';
+    winAct.className = 'gj-winner-actions';
     document.getElementById('gjTitle').textContent = "Gordon's Judgement";
     document.getElementById('gjSwipeRow').style.display = 'flex';
     document.getElementById('gjCardStack').parentElement.style.display = '';
     var counterEl = document.getElementById('gjCounter');
     document.getElementById('gjCardStack').parentElement.style.display = '';
     if (pool.length === 0) {
-      counterEl.textContent = 'No recipes match filters.';
+      counterEl.textContent = 'Nothing matches — try other sources or filters.';
       document.getElementById('gjCardStack').innerHTML = '';
     } else {
       startGordonsJudgement();
@@ -13689,7 +13787,9 @@
     document.getElementById('gjGordonYell').classList.remove('visible');
     document.getElementById('gjGordonBanish').classList.remove('visible');
     document.getElementById('gjGordonWinner').classList.remove('visible');
-    document.getElementById('gjWinnerActions').style.display = 'none';
+    var wAct = document.getElementById('gjWinnerActions');
+    wAct.style.display = 'none';
+    wAct.className = 'gj-winner-actions';
     document.getElementById('gjTitle').textContent = "Gordon's Judgement";
     document.getElementById('gjSwipeRow').style.display = 'flex';
     document.getElementById('gjSwipeHint').style.display = '';
@@ -13711,15 +13811,20 @@
     document.getElementById('gjGordonYell').classList.remove('visible');
     document.getElementById('gjGordonBanish').classList.remove('visible');
     document.getElementById('gjGordonWinner').classList.remove('visible');
-    document.getElementById('gjWinnerActions').style.display = 'none';
+    var wActClose = document.getElementById('gjWinnerActions');
+    wActClose.style.display = 'none';
+    wActClose.className = 'gj-winner-actions';
     document.getElementById('gjTitle').textContent = "Gordon's Judgement";
     document.getElementById('gjCardStack').innerHTML = '';
   }
 
   var randomizerWinner = null;
   function runRandomizer() {
-    var all = getGjFilteredRecipes();
-    if (all.length === 0) return;
+    var all = getGjFilteredItems();
+    if (all.length === 0) {
+      showDocsToast('Nothing to pick — include Recipes or Takeout, or loosen filters.', true);
+      return;
+    }
     var cardWrap = document.getElementById('gjRandomizerCardWrap');
     var cardEl = document.getElementById('gjRandomizerCard');
     var placeholder = document.getElementById('gjRandomizerPlaceholder');
@@ -13731,10 +13836,12 @@
     var steps = 12 + Math.floor(Math.random() * 8);
     var idx = 0;
     function showRecipe(r) {
-      var hf = r.source === 'hellofresh' ? ' hf' : '';
-      cardEl.innerHTML = '<div class="gj-randomizer-card-image' + hf + '"><div class="gj-randomizer-card-monogram">' + recipeMonogram(r.name) + '</div></div><div class="gj-randomizer-card-body"><div class="gj-randomizer-card-name">' + escapeHtml(r.name) + '</div><span class="gj-randomizer-card-source' + hf + '">' + escapeHtml(r.sourceLabel || r.source || 'Recipe') + '</span></div>';
+      var isTakeout = r.gjKind === 'takeout';
+      var hf = !isTakeout && r.source === 'hellofresh' ? ' hf' : '';
+      var to = isTakeout ? ' takeout' : '';
+      cardEl.innerHTML = '<div class="gj-randomizer-card-image' + hf + to + '"><div class="gj-randomizer-card-monogram">' + recipeMonogram(r.name) + '</div></div><div class="gj-randomizer-card-body"><div class="gj-randomizer-card-name">' + escapeHtml(r.name) + '</div><span class="gj-randomizer-card-source' + hf + to + '">' + escapeHtml(r.sourceLabel || r.source || 'Recipe') + '</span></div>';
       var imgDiv = cardEl.querySelector('.gj-randomizer-card-image');
-      if (r.imageId) {
+      if (!isTakeout && r.imageId) {
         fetchThumbnail(r.imageId).then(function(data) {
           if (!data || data.error || !imgDiv.isConnected) return;
           var img = document.createElement('img');
@@ -13755,11 +13862,30 @@
         randomizerWinner = r;
         btn.style.display = 'none';
         actions.style.display = 'flex';
-        document.getElementById('gjRandomizerCook').onclick = function() {
-          closeGordonsJudgement();
-          if (!document.getElementById('recipesScreen').classList.contains('visible')) showRecipesScreen();
-          openRecipeDetail(randomizerWinner);
-        };
+        var win = randomizerWinner;
+        var isTakeoutWin = win && win.gjKind === 'takeout' && win.takeoutSpot;
+        var actionsEl = document.getElementById('gjRandomizerActions');
+        if (isTakeoutWin) {
+          var s = win.takeoutSpot;
+          var ddUrl = takeoutDoordashUrl(s);
+          var ueUrl = takeoutUbereatsUrl(s);
+          actionsEl.className = 'gj-winner-actions gj-takeout-actions';
+          var h = '<button type="button" class="gj-winner-btn-primary" id="gjRandDd">DoorDash</button><button type="button" class="gj-winner-btn-secondary" id="gjRandUe">Uber Eats</button>';
+          if (s.website) h += '<button type="button" class="gj-winner-btn-secondary" id="gjRandWeb">Website</button>';
+          h += '<button type="button" class="gj-winner-btn-secondary" onclick="randomizerGoAgain()">Go Again</button>';
+          actionsEl.innerHTML = h;
+          document.getElementById('gjRandDd').onclick = function() { window.open(ddUrl, '_blank', 'noopener'); };
+          document.getElementById('gjRandUe').onclick = function() { window.open(ueUrl, '_blank', 'noopener'); };
+          if (s.website) document.getElementById('gjRandWeb').onclick = function() { window.open(s.website, '_blank', 'noopener'); };
+        } else {
+          actionsEl.className = 'gj-winner-actions';
+          actionsEl.innerHTML = '<button type="button" class="gj-winner-btn-primary" id="gjRandomizerCook">Let\'s Cook</button><button type="button" class="gj-winner-btn-secondary" onclick="randomizerGoAgain()">Go Again</button>';
+          document.getElementById('gjRandomizerCook').onclick = function() {
+            closeGordonsJudgement();
+            if (!document.getElementById('recipesScreen').classList.contains('visible')) showRecipesScreen();
+            openRecipeDetail(randomizerWinner);
+          };
+        }
         btn.disabled = false;
       }
     }
@@ -13767,6 +13893,8 @@
   }
   function randomizerGoAgain() {
     randomizerWinner = null;
+    var ra = document.getElementById('gjRandomizerActions');
+    if (ra) { ra.className = 'gj-winner-actions'; }
     renderGjFilters('gjRandomizerFilters', function() {});
     document.getElementById('gjRandomizerCardWrap').style.display = 'none';
     document.getElementById('gjRandomizerPlaceholder').style.display = 'flex';
@@ -13795,8 +13923,11 @@
       const recipe = pool[idx + i];
       const card = document.createElement('div');
       card.className = 'gj-card' + (i === 0 ? ' gj-top' : '');
-      const hfCardClass = recipe.source === 'hellofresh' ? ' hf-card' : '';
-      const hfSourceClass = recipe.source === 'hellofresh' ? ' hf' : '';
+      const isTakeout = recipe.gjKind === 'takeout';
+      const hfCardClass = !isTakeout && recipe.source === 'hellofresh' ? ' hf-card' : '';
+      const takeoutCardClass = isTakeout ? ' takeout-card' : '';
+      const hfSourceClass = !isTakeout && recipe.source === 'hellofresh' ? ' hf' : '';
+      const takeoutSourceClass = isTakeout ? ' takeout' : '';
       const scale = i === 0 ? 1 : i === 1 ? 0.94 : 0.88;
       const ty = i === 0 ? 0 : i === 1 ? 6 : 12;
       const opacity = i === 0 ? 1 : i === 1 ? 0.75 : 0.5;
@@ -13808,14 +13939,19 @@
         <div class="gj-verdict-yes">✓</div>
         <div class="gj-verdict-no">✕</div>
         <button type="button" class="gj-card-winner-btn" onclick="event.stopPropagation();gjPickCurrentWinner()">Winner!</button>
-        <div class="gj-card-image${hfCardClass}">
+        <div class="gj-card-image${hfCardClass}${takeoutCardClass}">
           <div class="gj-card-monogram">${recipeMonogram(recipe.name)}</div>
         </div>
         <div class="gj-card-body">
           <div class="gj-card-name">${escapeHtml(recipe.name)}</div>
-          <span class="gj-card-source${hfSourceClass}">${escapeHtml(recipe.sourceLabel || recipe.source || 'Recipe')}</span>
+          <span class="gj-card-source${hfSourceClass}${takeoutSourceClass}">${escapeHtml(recipe.sourceLabel || recipe.source || 'Recipe')}</span>
         </div>
       `;
+
+      if (!isTakeout && recipe.imageId) {
+        var imgDivEarly = card.querySelector('.gj-card-image');
+        if (imgDivEarly) loadThumbnailInto(recipe.imageId, imgDivEarly);
+      }
 
       if (i === 0) {
         let startX = 0;
@@ -13903,8 +14039,10 @@
           document.getElementById('gjCardStack').innerHTML = '';
           document.getElementById('gjSwipeRow').style.display = 'none';
           document.getElementById('gjCounter').textContent = 'None made the cut. Go Again?';
-          document.getElementById('gjWinnerActions').style.display = 'flex';
-          document.getElementById('gjWinnerActions').innerHTML = '<button type="button" class="gj-winner-btn-secondary" onclick="gjApplyFiltersAndRestart()">Go Again</button>';
+          var wa = document.getElementById('gjWinnerActions');
+          wa.className = 'gj-winner-actions';
+          wa.style.display = 'flex';
+          wa.innerHTML = '<button type="button" class="gj-winner-btn-secondary" onclick="gjApplyFiltersAndRestart()">Go Again</button>';
         }
       } else {
         gjRenderStack();
@@ -14008,13 +14146,16 @@
   }
 
   function gjBuildMaybeCard(recipe) {
-    var hfCardClass = recipe.source === 'hellofresh' ? ' hf-card' : '';
-    var hfSourceClass = recipe.source === 'hellofresh' ? ' hf' : '';
+    var isTakeout = recipe.gjKind === 'takeout';
+    var hfCardClass = !isTakeout && recipe.source === 'hellofresh' ? ' hf-card' : '';
+    var takeoutCardClass = isTakeout ? ' takeout-card' : '';
+    var hfSourceClass = !isTakeout && recipe.source === 'hellofresh' ? ' hf' : '';
+    var takeoutSourceClass = isTakeout ? ' takeout' : '';
     var card = document.createElement('div');
     card.className = 'gj-card gj-card-on-card';
-    card.innerHTML = '<button type="button" class="gj-card-remove-btn" onclick="event.stopPropagation();gjMaybeRemoveCurrent()" aria-label="Remove">×</button><button type="button" class="gj-card-winner-btn" onclick="event.stopPropagation();gjMaybePickWinner()">Winner!</button><div class="gj-card-image' + hfCardClass + '"><div class="gj-card-monogram">' + recipeMonogram(recipe.name) + '</div></div><div class="gj-card-body"><div class="gj-card-name">' + escapeHtml(recipe.name) + '</div><span class="gj-card-source' + hfSourceClass + '">' + escapeHtml(recipe.sourceLabel || recipe.source || 'Recipe') + '</span></div>';
+    card.innerHTML = '<button type="button" class="gj-card-remove-btn" onclick="event.stopPropagation();gjMaybeRemoveCurrent()" aria-label="Remove">×</button><button type="button" class="gj-card-winner-btn" onclick="event.stopPropagation();gjMaybePickWinner()">Winner!</button><div class="gj-card-image' + hfCardClass + takeoutCardClass + '"><div class="gj-card-monogram">' + recipeMonogram(recipe.name) + '</div></div><div class="gj-card-body"><div class="gj-card-name">' + escapeHtml(recipe.name) + '</div><span class="gj-card-source' + hfSourceClass + takeoutSourceClass + '">' + escapeHtml(recipe.sourceLabel || recipe.source || 'Recipe') + '</span></div>';
     var imgDiv = card.querySelector('.gj-card-image');
-    if (recipe.imageId) loadThumbnailInto(recipe.imageId, imgDiv);
+    if (!isTakeout && recipe.imageId) loadThumbnailInto(recipe.imageId, imgDiv);
     return card;
   }
 
@@ -14031,8 +14172,10 @@
       document.getElementById('gjTitle').textContent = "Gordon's Judgement";
       document.getElementById('gjCardStack').innerHTML = '';
       document.getElementById('gjCounter').textContent = 'None left. Go Again?';
-      document.getElementById('gjWinnerActions').style.display = 'flex';
-      document.getElementById('gjWinnerActions').innerHTML = '<button type="button" class="gj-winner-btn-secondary" onclick="gjApplyFiltersAndRestart()">Go Again</button>';
+      var wa2 = document.getElementById('gjWinnerActions');
+      wa2.className = 'gj-winner-actions';
+      wa2.style.display = 'flex';
+      wa2.innerHTML = '<button type="button" class="gj-winner-btn-secondary" onclick="gjApplyFiltersAndRestart()">Go Again</button>';
     } else {
       if (gjMaybeIndex >= gjState.maybe.length) gjMaybeIndex = gjState.maybe.length - 1;
       gjRenderMaybeReel();
@@ -14053,40 +14196,62 @@
     stack.innerHTML = '';
     stack.style.opacity = '';
 
+    var isTakeout = recipe.gjKind === 'takeout';
     var card = document.createElement('div');
     card.className = 'gj-card';
-    const hfCardClass = recipe.source === 'hellofresh' ? ' hf-card' : '';
-    const hfSourceClass = recipe.source === 'hellofresh' ? ' hf' : '';
+    var hfCardClass = !isTakeout && recipe.source === 'hellofresh' ? ' hf-card' : '';
+    var takeoutCardClass = isTakeout ? ' takeout-card' : '';
+    var hfSourceClass = !isTakeout && recipe.source === 'hellofresh' ? ' hf' : '';
+    var takeoutSourceClass = isTakeout ? ' takeout' : '';
     card.innerHTML = `
-      <div class="gj-card-image${hfCardClass}">
+      <div class="gj-card-image${hfCardClass}${takeoutCardClass}">
         <div class="gj-card-monogram">${recipeMonogram(recipe.name)}</div>
       </div>
       <div class="gj-card-body">
         <div class="gj-card-name">${escapeHtml(recipe.name)}</div>
-        <span class="gj-card-source${hfSourceClass}">${escapeHtml(recipe.sourceLabel || recipe.source || 'Recipe')}</span>
+        <span class="gj-card-source${hfSourceClass}${takeoutSourceClass}">${escapeHtml(recipe.sourceLabel || recipe.source || 'Recipe')}</span>
       </div>
     `;
     stack.appendChild(card);
+    if (!isTakeout && recipe.imageId) {
+      var imgDivW = card.querySelector('.gj-card-image');
+      if (imgDivW) loadThumbnailInto(recipe.imageId, imgDivW);
+    }
 
     document.getElementById('gjGordonYell').classList.remove('visible');
     document.getElementById('gjGordonBanish').classList.remove('visible');
     document.getElementById('gjGordonWinner').classList.add('visible');
-    document.getElementById('gjWinnerActions').innerHTML = '<button type="button" class="gj-winner-btn-primary" id="gjWinnerCook">Let\'s Cook</button><button type="button" class="gj-winner-btn-secondary" onclick="startGordonsJudgement()">Go Again</button>';
-    document.getElementById('gjWinnerActions').style.display = 'flex';
+    var actionsEl = document.getElementById('gjWinnerActions');
+    if (isTakeout && recipe.takeoutSpot) {
+      var s = recipe.takeoutSpot;
+      var ddUrl = takeoutDoordashUrl(s);
+      var ueUrl = takeoutUbereatsUrl(s);
+      actionsEl.className = 'gj-winner-actions gj-takeout-actions';
+      var html = '<button type="button" class="gj-winner-btn-primary" id="gjWinnerDd">DoorDash</button><button type="button" class="gj-winner-btn-secondary" id="gjWinnerUe">Uber Eats</button>';
+      if (s.website) html += '<button type="button" class="gj-winner-btn-secondary" id="gjWinnerWeb">Website</button>';
+      html += '<button type="button" class="gj-winner-btn-secondary" onclick="startGordonsJudgement()">Go Again</button>';
+      actionsEl.innerHTML = html;
+      document.getElementById('gjWinnerDd').onclick = function() { window.open(ddUrl, '_blank', 'noopener'); };
+      document.getElementById('gjWinnerUe').onclick = function() { window.open(ueUrl, '_blank', 'noopener'); };
+      if (s.website) document.getElementById('gjWinnerWeb').onclick = function() { window.open(s.website, '_blank', 'noopener'); };
+    } else {
+      actionsEl.className = 'gj-winner-actions';
+      actionsEl.innerHTML = '<button type="button" class="gj-winner-btn-primary" id="gjWinnerCook">Let\'s Cook</button><button type="button" class="gj-winner-btn-secondary" onclick="startGordonsJudgement()">Go Again</button>';
+      var cookBtn = document.getElementById('gjWinnerCook');
+      cookBtn.onclick = function() {
+        closeGordonsJudgement();
+        if (!document.getElementById('recipesScreen').classList.contains('visible')) {
+          showRecipesScreen();
+        }
+        openRecipeDetail(recipe);
+      };
+    }
+    actionsEl.style.display = 'flex';
 
     const counterEl = document.getElementById('gjCounter');
     counterEl.textContent = recipe.name;
     counterEl.style.fontSize = '18px';
     counterEl.style.color = 'rgba(255,255,255,0.9)';
-
-    const cookBtn = document.getElementById('gjWinnerCook');
-    cookBtn.onclick = function() {
-      closeGordonsJudgement();
-      if (!document.getElementById('recipesScreen').classList.contains('visible')) {
-        showRecipesScreen();
-      }
-      openRecipeDetail(recipe);
-    };
   }
 
   // ── Takeout spots ────────────────────────────────────────────────
@@ -14123,6 +14288,7 @@
 
   function saveTakeoutSpots(arr) {
     try { localStorage.setItem(TAKEOUT_STORAGE_KEY, JSON.stringify(arr)); } catch (_) {}
+    if (typeof updateHomeGjVisibility === 'function') updateHomeGjVisibility();
   }
 
   function takeoutDoordashUrl(spot) {
@@ -14139,6 +14305,7 @@
     if (localStorage.getItem(TAKEOUT_STORAGE_KEY) !== null) {
       renderTakeoutSpots();
       renderRecipeSourceChips();
+      if (typeof updateHomeGjVisibility === 'function') updateHomeGjVisibility();
       return;
     }
     var preload = TAKEOUT_PRELOAD.map(function(p) {
@@ -14430,6 +14597,11 @@
   <button class="gj-btn-close" onclick="closeGordonsJudgement()">✕</button>
   <div class="gj-mode-select-panel visible" id="gjModeSelectPanel">
     <img class="gj-mode-select-gordon" src="https://stormyreigns.github.io/HATH/HKGordon.png" alt="">
+    <div class="gj-source-toggle-row" id="gjSourceToggleRow">
+      <span class="gj-source-toggle-label">Include</span>
+      <button type="button" class="gj-source-toggle active" id="gjToggleRecipes" onclick="gjToggleSource('recipes')">Recipes</button>
+      <button type="button" class="gj-source-toggle active" id="gjToggleTakeout" onclick="gjToggleSource('takeout')">Takeout</button>
+    </div>
     <div class="gj-mode-select-btns">
       <button type="button" class="gj-mode-btn" onclick="chooseGjMode('judgement')">Gordon's Judgement</button>
       <button type="button" class="gj-mode-btn" onclick="chooseGjMode('randomizer')">Randomizer</button>
