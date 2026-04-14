@@ -6858,7 +6858,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.22.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.23.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -8894,6 +8894,7 @@
     projectsEditing = { id: newId, createdAt: Date.now(), modifiedAt: Date.now() };
     persistProjectRecord(title, desc, finishDate, phases);
     projectsEditing = null;
+    closeBlatherBookPanel();
     showProjectsScreen();
     projectsSelectProject(newId);
   }
@@ -8925,7 +8926,8 @@
         history: [],
         nickname: getDisplayName(),
         dumbMode: !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true'),
-        projectCopilot: true
+        projectCopilot: true,
+        clientContext: buildBlathersClientContext()
       };
       const res = await fetch(AI_URL, {
         method: 'POST',
@@ -12460,6 +12462,128 @@
     return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
   }
 
+  function getBlathersVisibleScreenLabel() {
+    const pairs = [
+      ['documentsScreen', 'Documents'],
+      ['projectsScreen', 'Projects'],
+      ['scheduleScreen', 'Schedule'],
+      ['civicsScreen', 'Civics'],
+      ['recipesScreen', 'Recipes'],
+      ['settingsScreen', 'Settings']
+    ];
+    for (let i = 0; i < pairs.length; i++) {
+      const el = document.getElementById(pairs[i][0]);
+      if (el && el.classList.contains('visible')) return pairs[i][1];
+    }
+    return 'Home';
+  }
+
+  function summarizeProjectsForBlathersBlock() {
+    const all = getProjects();
+    if (!all.length) return 'None yet.';
+    const lines = [];
+    const maxP = 15;
+    for (let i = 0; i < all.length && i < maxP; i++) {
+      const p = all[i];
+      const done = isProjectCompleted(p);
+      const pct = Math.round(getProjectProgress(p));
+      const det = getProjectLandingDetails(p);
+      let line = '- ' + (p.title || 'Untitled');
+      line += done ? ' (completed)' : ' (' + pct + '% complete)';
+      if (!done && det.currentPhaseName) line += ', now: ' + det.currentPhaseName;
+      const desc = (p.description || '').trim().replace(/\s+/g, ' ');
+      if (desc) line += ' — ' + (desc.length > 100 ? desc.slice(0, 97) + '\u2026' : desc);
+      lines.push(line);
+    }
+    if (all.length > maxP) lines.push('...plus ' + (all.length - maxP) + ' more.');
+    return lines.join('\n');
+  }
+
+  function summarizeScheduleForBlathers() {
+    if (typeof scheduleEvents === 'undefined' || !scheduleEvents.length) return '';
+    const lines = [];
+    const n = Math.min(14, scheduleEvents.length);
+    for (let i = 0; i < n; i++) {
+      const ev = scheduleEvents[i];
+      if (!ev) continue;
+      lines.push('- ' + (ev.title || 'Event') + ' (' + (ev.date || '') + ')');
+    }
+    return lines.join('\n');
+  }
+
+  function summarizeRecipeFavouritesForBlathers() {
+    const ids = getRecipeFavourites();
+    if (!ids.length) return '';
+    const pool = (typeof recipesState !== 'undefined' && recipesState.all && recipesState.all.length) ? recipesState.all : [];
+    const names = [];
+    for (let i = 0; i < ids.length && i < 30; i++) {
+      const id = ids[i];
+      const r = pool.find(function(x) { return x.id === id; });
+      names.push(r ? (r.name || r.title || id) : id);
+    }
+    return 'Starred recipes (' + ids.length + '): ' + names.join(', ');
+  }
+
+  function summarizeCivicsNotesForBlathers() {
+    try {
+      const raw = localStorage.getItem(CIVICS_NOTES_KEY);
+      const obj = raw ? JSON.parse(raw) : {};
+      const keys = Object.keys(obj).filter(function(k) {
+        return String(obj[k] || '').trim().length > 0;
+      });
+      if (!keys.length) return '';
+      const parts = [];
+      for (let i = 0; i < keys.length && i < 12; i++) {
+        const note = String(obj[keys[i]] || '').trim().replace(/\s+/g, ' ');
+        parts.push('- ' + keys[i] + ': ' + (note.length > 120 ? note.slice(0, 117) + '\u2026' : note));
+      }
+      if (keys.length > 12) parts.push('...plus notes for ' + (keys.length - 12) + ' more candidates.');
+      return parts.join('\n');
+    } catch (_) {
+      return '';
+    }
+  }
+
+  function summarizeRecentUploadsForBlathers() {
+    try {
+      const arr = getRecentUploadsFromCache();
+      if (!arr.length) return '';
+      return arr.slice(0, 8).map(function(f) {
+        return '- ' + (f.name || 'file');
+      }).join('\n');
+    } catch (_) {
+      return '';
+    }
+  }
+
+  /** Compact snapshot of on-device ShastApp state for Blathers (localStorage, not cookies). */
+  function buildBlathersClientContext() {
+    const parts = [];
+    try {
+      parts.push('Current screen: ' + getBlathersVisibleScreenLabel() + '.');
+      if (projectsViewing && projectsViewing.title) {
+        parts.push('Open project detail: "' + String(projectsViewing.title).slice(0, 100) + '".');
+      }
+      parts.push('Projects saved on this device:\n' + summarizeProjectsForBlathersBlock());
+      const sched = summarizeScheduleForBlathers();
+      if (sched) parts.push('Upcoming events (cached in app):\n' + sched);
+      const favs = summarizeRecipeFavouritesForBlathers();
+      if (favs) parts.push(favs);
+      const civ = summarizeCivicsNotesForBlathers();
+      if (civ) parts.push('Civics notes (saved in app):\n' + civ);
+      const recent = summarizeRecentUploadsForBlathers();
+      if (recent) parts.push('Recent uploads (app cache):\n' + recent);
+      const rec = window._recipeDetailCurrent;
+      if (rec && (rec.name || rec.title)) {
+        parts.push('Recipe detail open: ' + String(rec.name || rec.title).slice(0, 120) + '.');
+      }
+    } catch (_) {}
+    let out = parts.join('\n\n');
+    const max = 4500;
+    if (out.length > max) out = out.slice(0, max - 1) + '\u2026';
+    return out;
+  }
+
   // ── STATE ─────────────────────────────────────────────────────
   let isSending = false;
   let activeController = null;
@@ -12550,7 +12674,8 @@
         nickname: getDisplayName(),
         dumbMode: !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true'),
         tabs: matchedTabs.length > 0 ? matchedTabs : undefined,
-        projectCopilot: !!window.projectCopilotActive
+        projectCopilot: !!window.projectCopilotActive,
+        clientContext: buildBlathersClientContext()
       };
       const res = await fetch(AI_URL, {
         method: 'POST',
@@ -12567,17 +12692,12 @@
       typing.remove();
       setSendButtonMode('send');
 
-      let reply = data.reply || friendlyBlathersError(data.error);
-      let displayReply = reply;
-      let copilotDraft = null;
-      if (window.projectCopilotActive) {
-        const parsed = stripAndParseProjectCopilotJson(reply);
-        displayReply = parsed.display || reply;
-        copilotDraft = parsed.draft;
-      }
+      const reply = data.reply || friendlyBlathersError(data.error);
+      const parsed = stripAndParseProjectCopilotJson(reply);
+      const displayReply = parsed.display || reply;
       addBubble(displayReply, 'hath');
       conversationHistory.push({ role: 'assistant', content: displayReply });
-      if (copilotDraft) applyProjectCopilotDraft(copilotDraft);
+      if (parsed.draft) applyProjectCopilotDraft(parsed.draft);
 
     } catch (err) {
       typing.remove();
@@ -12771,7 +12891,10 @@
       if (isCivicsResponse(text)) {
         b.innerHTML = renderCivicsResponse(text);
       } else {
-        const html = String(text)
+        let t = String(text);
+        const tagMatch = t.match(/^\[(HAPPY|CLEVER|UNCERTAIN|ANNOUNCE|THINKING)\]\s*/i);
+        if (tagMatch) t = t.replace(tagMatch[0], '');
+        const html = t
           .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
           .replace(/\*(.*?)\*/g, '<em>$1</em>')
           .replace(/`(.*?)`/g, '<code>$1</code>')
@@ -12922,6 +13045,7 @@
         nickname: getDisplayName(),
         dumbMode: !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true'),
         tabs: matchedTabs.length > 0 ? matchedTabs : undefined,
+        clientContext: buildBlathersClientContext(),
         ...(onDocs && crumb && { currentFolderId: crumb.id, currentFolderName: crumb.name, currentFolderPath: docsBreadcrumb.map(b => b.name).join('/') })
       };
       const res = await fetch(AI_URL, {
@@ -12938,8 +13062,11 @@
       }
       typing.remove();
       const reply = data.reply || friendlyBlathersError(data.error);
-      addBlatherBookBubble(reply, 'hath');
-      blatherbookHistory.push({ role: 'assistant', content: reply });
+      const parsed = stripAndParseProjectCopilotJson(reply);
+      const displayReply = parsed.display || reply;
+      addBlatherBookBubble(displayReply, 'hath');
+      blatherbookHistory.push({ role: 'assistant', content: displayReply });
+      if (parsed.draft) applyProjectCopilotDraft(parsed.draft);
     } catch (err) {
       typing.remove();
       if (err.name !== 'AbortError') {
