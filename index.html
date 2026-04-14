@@ -7012,7 +7012,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.25.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.25.1';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -9046,6 +9046,45 @@
     return out;
   }
 
+  /** Remove JSON/code the model leaked into prose (fences, trailing objects, stray markers). */
+  function sanitizeBlathersUserVisibleText(text) {
+    if (text == null) return '';
+    let t = typeof text === 'string' ? text : String(text);
+    t = t.replace(/```+[\s\S]*?```+/g, '');
+    t = t.replace(/\u00a0/g, ' ');
+    t = t.replace(/\n*\[\[\[[A-Z_]+\]\]\][^\n]*/g, '');
+    var guard = 0;
+    while (guard++ < 6) {
+      var s = t.trimEnd();
+      var jsonStart = -1;
+      for (var i = s.length - 1; i >= 0; i--) {
+        if (s.charAt(i) === '{') {
+          jsonStart = i;
+          break;
+        }
+      }
+      if (jsonStart < 0) break;
+      var before = s.slice(0, jsonStart);
+      var candidate = s.slice(jsonStart);
+      try {
+        var o = JSON.parse(candidate);
+        if (o && typeof o === 'object' && (
+          Array.isArray(o.phases) ||
+          Array.isArray(o.snippets) ||
+          Array.isArray(o.ops) ||
+          (o.projectId != null && Array.isArray(o.ops)) ||
+          (o.hint != null && Array.isArray(o.snippets)) ||
+          (Array.isArray(o.nav) && o.nav.length > 0 && typeof o.nav[0] === 'object' && o.nav[0].nav != null)
+        )) {
+          t = before.replace(/\s+$/, '');
+          continue;
+        }
+      } catch (e) {}
+      break;
+    }
+    return t.replace(/\n{3,}/g, '\n\n').trim();
+  }
+
   function stripAndParseProjectCopilotJson(raw) {
     const p = parseBlathersStructuredReply(raw);
     return { display: p.display, draft: p.projectDraft };
@@ -9540,7 +9579,7 @@
       typing.remove();
       const reply = data.reply || friendlyBlathersError(data.error);
       const structured = parseBlathersStructuredReply(reply);
-      const displayReply = structured.display || reply;
+      const displayReply = sanitizeBlathersUserVisibleText(structured.display || reply);
       const turn = addBubble(displayReply, 'hath');
       conversationHistory.push({ role: 'assistant', content: displayReply });
       applyBlathersStructuredFollowUp(turn, structured);
@@ -13292,7 +13331,7 @@
 
       const reply = data.reply || friendlyBlathersError(data.error);
       const structured = parseBlathersStructuredReply(reply);
-      const displayReply = structured.display || reply;
+      const displayReply = sanitizeBlathersUserVisibleText(structured.display || reply);
       const turn = addBubble(displayReply, 'hath');
       conversationHistory.push({ role: 'assistant', content: displayReply });
       applyBlathersStructuredFollowUp(turn, structured);
@@ -13693,7 +13732,7 @@
       typing.remove();
       const reply = data.reply || friendlyBlathersError(data.error);
       const structured = parseBlathersStructuredReply(reply);
-      const displayReply = structured.display || reply;
+      const displayReply = sanitizeBlathersUserVisibleText(structured.display || reply);
       const turn = addBlatherBookBubble(displayReply, 'hath');
       blatherbookHistory.push({ role: 'assistant', content: displayReply });
       applyBlathersStructuredFollowUp(turn, structured);
