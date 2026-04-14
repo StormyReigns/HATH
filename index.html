@@ -1496,10 +1496,6 @@
     html.dark-mode .drawer-update-btn { color: var(--text2); }
     html.dark-mode .drawer-update-btn:hover { background: rgba(255,255,255,0.06); color: var(--text); }
 
-    /* updated-at timestamp */
-    .updated-at { font-size: 10px; color: var(--muted); text-align: center; margin-top: -8px; letter-spacing: 0.03em; opacity: 0; transition: opacity 0.4s; }
-    .updated-at.loaded { opacity: 1; }
-
     /* Offline screen — warm Blathers message */
     .offline-screen {
       position: fixed; inset: 0; z-index: 200;
@@ -6106,16 +6102,54 @@
     .gj-entry-btn span:not(.gj-entry-flame) {
       position: relative; z-index: 1;
     }
-    /* Same Gordon entry as Recipes; fades in when recipe list is ready */
-    #homeGjBtn.gj-entry-btn {
+    /* Compact GJ — bottom-right above Blathers input; fades in when recipes/takeout ready */
+    .home-gj-btn {
+      position: absolute;
+      right: max(14px, env(safe-area-inset-right));
+      bottom: calc(100% + 2px);
+      z-index: 61;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      width: 52px;
+      padding: 6px 8px 8px;
+      margin: 0;
+      border: 1px solid rgba(180,80,20,0.35);
+      border-radius: 12px;
+      background: linear-gradient(175deg, #2e1208 0%, #1a0a04 65%, #0e0602 100%);
+      box-shadow:
+        0 1px 0 rgba(255,160,60,0.08) inset,
+        0 2px 10px rgba(0,0,0,0.25);
+      cursor: pointer;
       opacity: 0;
-      transition: opacity 0.4s ease;
       pointer-events: none;
-      margin-top: 6px;
+      transition: opacity 0.35s ease, transform 0.12s;
     }
-    #homeGjBtn.gj-entry-btn.visible {
+    .home-gj-btn.visible {
       opacity: 1;
       pointer-events: auto;
+    }
+    .home-gj-btn:active { transform: scale(0.96); }
+    .home-gj-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      color: #d4a45a;
+      line-height: 1;
+    }
+    .home-gj-icon {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+      filter: brightness(0) saturate(100%) invert(72%) sepia(30%)
+              saturate(500%) hue-rotate(5deg) brightness(0.95);
+    }
+    body.drawer-open .home-gj-btn {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
     }
   </style>
 </head>
@@ -6185,12 +6219,6 @@
         <div class="upcoming-events-label">Upcoming</div>
         <div class="upcoming-events-list" id="upcomingEventsList"></div>
       </div>
-
-      <button type="button" class="gj-entry-btn" id="homeGjBtn" onclick="openGordonsJudgement()" aria-label="Gordon's Judgement">
-        <span class="gj-entry-flame"></span>
-        <img class="gj-entry-icon" src="https://stormyreigns.github.io/HATH/HKChefKnife.png" alt="">
-        <span>Gordon's Judgement</span>
-      </button>
 
       <div class="matt-note" id="mattNote"></div>
     </div>
@@ -6640,6 +6668,10 @@
 
     <!-- Blathers overlaps the input bar, associated with chat -->
     <div class="input-zone" id="inputZone">
+      <button type="button" class="home-gj-btn" id="homeGjBtn" onclick="openGordonsJudgement()" aria-label="Gordon's Judgement">
+        <span class="home-gj-label">GJ</span>
+        <img class="home-gj-icon" src="https://stormyreigns.github.io/HATH/HKChefKnife.png" alt="">
+      </button>
       <div class="blathers-wrap" id="blathersWrap">
         <img id="blathersIdle" class="blathers-idle"
              src="https://stormyreigns.github.io/HATH/IMG_7941.png"
@@ -6662,8 +6694,6 @@
         </button>
       </div>
     </div>
-
-    <div class="updated-at" id="updatedAt"></div>
   </div>
 </div><!-- end .app -->
 
@@ -7012,7 +7042,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.25.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.25.2';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -7061,14 +7091,10 @@
       if (up) { up.style.display = 'none'; up.classList.remove('loaded'); }
       var mn = document.getElementById('mattNote');
       if (mn) { mn.innerHTML = ''; mn.classList.remove('loaded'); }
-      var ua = document.getElementById('updatedAt');
-      if (ua) { ua.textContent = ''; ua.classList.remove('loaded'); ua.style.display = 'none'; }
       renderHomeProjectsScroller();
     } else {
       var wb2 = document.getElementById('wellbeing');
       if (wb2) wb2.style.display = '';
-      var ua2 = document.getElementById('updatedAt');
-      if (ua2) ua2.style.display = '';
       renderHomeProjectsScroller();
       renderRecentUploads();
       loadCalendar();
@@ -7510,13 +7536,6 @@
         noteEl.classList.add('loaded');
       }
 
-      // Last updated
-      if (data.meta?.updated) {
-        const el = document.getElementById('updatedAt');
-        el.textContent = `Last updated ${data.meta.updated}`;
-        el.classList.add('loaded');
-      }
-
     } catch (err) {
       console.warn('Could not load Shasta data:', err);
       setWellbeing('OK');
@@ -7803,8 +7822,6 @@
     const topbar = document.querySelector('.topbar');
     if (topbar) topbar.classList.remove('collapsed');
     document.getElementById('inputZone').style.display = 'flex';
-    var uaHome = document.getElementById('updatedAt');
-    if (uaHome) uaHome.style.display = getApiUser() ? '' : 'none';
     document.querySelector('.body').classList.remove('chat-mode');
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
     document.querySelector('.drawer-item:first-child').classList.add('active');
@@ -7847,7 +7864,6 @@
       document.querySelector('.app').classList.remove('in-project-view');
     }
     document.getElementById('inputZone').style.display = 'none';
-    document.getElementById('updatedAt').style.display = 'none';
     document.querySelector('.body').classList.add('chat-mode');
     updateBlatherBookVisibility();
     updateBottomBarHome();
@@ -8986,7 +9002,6 @@
     document.getElementById('chatArea').style.flexDirection = 'column';
     document.querySelector('.body').classList.add('chat-mode');
     document.getElementById('inputZone').style.display = 'flex';
-    document.getElementById('updatedAt').style.display = getApiUser() ? '' : 'none';
     const wb = document.getElementById('wellbeing');
     if (wb) wb.style.display = getApiUser() ? '' : 'none';
     updateScreenAddFabs();
@@ -13277,7 +13292,6 @@
     // Blathers wakes up startled, then settles into thinking
     setBlathers('startled');
     setTimeout(() => setBlathers('thinking'), 600);
-    document.getElementById('updatedAt').style.display = 'none';
     const chat = document.getElementById('chatArea');
     chat.style.display = 'flex';
     chat.style.flexDirection = 'column';
