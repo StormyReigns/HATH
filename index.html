@@ -3905,33 +3905,7 @@
       pointer-events: none;
     }
     .app.in-project-view .projects-ocean-strip-spacer {
-      height: calc(12px + 88px + 52px + max(0px, env(safe-area-inset-bottom, 0px)));
-    }
-    /* Reserves space for a long Korl line (~6–7 lines) so phase cards can use the rest of the viewport. */
-    .projects-korl-slot {
-      flex-shrink: 0;
-      width: 100%;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-    }
-    .app.in-project-view .projects-korl-slot {
-      min-height: clamp(168px, 26vmin, 232px);
-      max-height: min(42vh, 240px);
-      padding-top: 4px;
-      overflow: hidden;
-      z-index: 70;
-      position: relative;
-    }
-    .app.in-project-view .projects-korl-slot .projects-korl-quote {
-      flex: 1 1 auto;
-      min-height: 0;
-      max-height: 100%;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior-y: contain;
-      margin-top: 0;
+      height: calc(6px + 88px + 52px + max(0px, env(safe-area-inset-bottom, 0px)));
     }
     .projects-korl-quote {
       position: relative;
@@ -3947,6 +3921,9 @@
       letter-spacing: 0.028em;
       text-shadow: 0 1px 0 rgba(255,242,225,0.95), 0 -1px 0 rgba(80,40,10,0.14);
       opacity: 0.93;
+    }
+    .app.in-project-view .projects-korl-quote {
+      margin-bottom: 8px;
     }
     /* worn gradient divider — thicker centre, fading to edges */
     .projects-korl-quote::before {
@@ -6371,9 +6348,7 @@
             </div>
           </div>
         </div>
-        <div class="projects-korl-slot">
-          <div class="projects-korl-quote" id="projectsKorlQuote"></div>
-        </div>
+        <div class="projects-korl-quote" id="projectsKorlQuote"></div>
         <div class="projects-ocean-strip-spacer" aria-hidden="true"></div>
         <div class="projects-ocean-strip" id="projectsOceanStrip">
           <div class="ocean-strip-inner">
@@ -6809,7 +6784,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.19.9';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.19.10';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
