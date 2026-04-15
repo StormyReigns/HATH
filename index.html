@@ -6249,9 +6249,11 @@
       flex-direction: row;
       align-items: center;
       justify-content: center;
-      width: 62px;
-      padding: 4px 5px 5px;
+      width: 56px;
+      height: 56px;
+      padding: 0;
       margin: 0;
+      box-sizing: border-box;
       -webkit-appearance: none;
       appearance: none;
       font: inherit;
@@ -6266,8 +6268,6 @@
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.35s ease, transform 0.12s;
-      min-height: 0;
-      height: auto;
     }
     .home-gj-btn.visible {
       opacity: 1;
@@ -6278,10 +6278,10 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
+      justify-content: center;
       align-self: center;
       flex: 0 0 auto;
-      gap: 0;
+      gap: 2px;
       line-height: 0;
       font-size: 0;
     }
@@ -6293,19 +6293,31 @@
       color: #d4a45a;
       line-height: 1;
       margin: 0;
-      padding: 11px 0 0;
+      padding: 0;
     }
+    /*
+      PNG is a square with lots of transparent padding; the blade sits low in the bitmap.
+      Clip from the top and pin the asset to the bottom of the clip so only the blade shows
+      ~2px below “GJ” (stack gap) without the invisible box between.
+    */
     .home-gj-knife {
-      display: block;
-      line-height: 0;
+      position: relative;
+      width: 40px;
+      height: 22px;
+      overflow: hidden;
       flex-shrink: 0;
+      line-height: 0;
     }
     .home-gj-icon {
-      display: block;
-      width: 36px;
-      height: 36px;
-      margin: -2px 0 0;
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: 44px;
+      height: 44px;
+      margin: 0;
       object-fit: contain;
+      object-position: center bottom;
       filter: brightness(0) saturate(100%) invert(72%) sepia(30%)
               saturate(500%) hue-rotate(5deg) brightness(0.95);
     }
@@ -7202,7 +7214,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.26.5';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.26.6';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
