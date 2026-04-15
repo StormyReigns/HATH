@@ -6291,29 +6291,25 @@
       padding: 0;
     }
     /*
-      PNG is a square with lots of transparent padding; the blade sits low in the bitmap.
-      Clip from the top and pin the asset to the bottom of the clip so only the blade shows
-      ~2px below “GJ” (stack gap) without the invisible box between.
+      PNG has transparent padding above the blade. Fixed-height clip + flex-end pins the
+      bitmap to the bottom of a 20px strip so only the blade shows (tweak height ±2–3px).
     */
     .home-gj-knife {
-      position: relative;
-      width: 40px;
-      height: 22px;
+      height: 20px;
       overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
       flex-shrink: 0;
-      line-height: 0;
       margin: 0;
     }
     .home-gj-icon {
-      position: absolute;
-      left: 50%;
-      bottom: 0;
-      transform: translateX(-50%);
-      width: 44px;
-      height: 44px;
-      margin: 0;
+      display: block;
+      height: 20px;
+      width: auto;
       object-fit: contain;
       object-position: center bottom;
+      margin: 0;
       filter: brightness(0) saturate(100%) invert(72%) sepia(30%)
               saturate(500%) hue-rotate(5deg) brightness(0.95);
     }
@@ -7210,7 +7206,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.26.9';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.26.10';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
