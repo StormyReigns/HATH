@@ -6269,6 +6269,7 @@
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.35s ease, transform 0.12s;
+      overflow: hidden;
     }
     .home-gj-btn.visible {
       opacity: 1;
@@ -6291,11 +6292,14 @@
       padding: 0;
     }
     /*
-      PNG has transparent padding above the blade. Fixed-height clip + flex-end pins the
-      bitmap to the bottom of a 20px strip so only the blade shows (tweak height ±2–3px).
+      PNG is mostly transparent above the blade. The clip (.home-gj-knife) is shorter than
+      the img so flex-end crops from the top — only the bottom slice (blade) is visible.
+      Tweak clip height (e.g. 12–16px) and img height (e.g. 36–44px) together.
     */
     .home-gj-knife {
-      height: 20px;
+      height: 14px;
+      width: 44px;
+      max-width: 100%;
       overflow: hidden;
       display: flex;
       align-items: flex-end;
@@ -6305,7 +6309,7 @@
     }
     .home-gj-icon {
       display: block;
-      height: 20px;
+      height: 40px;
       width: auto;
       object-fit: contain;
       object-position: center bottom;
@@ -7206,7 +7210,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.26.10';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.26.11';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
