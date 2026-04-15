@@ -6251,7 +6251,7 @@
       justify-content: center;
       width: 56px;
       height: 56px;
-      padding: 0;
+      padding: 6px;
       margin: 0;
       box-sizing: border-box;
       -webkit-appearance: none;
@@ -6275,12 +6275,14 @@
     }
     .home-gj-btn:active { transform: scale(0.96); }
     .home-gj-stack {
-      display: flex;
+      display: inline-flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      align-self: center;
+      justify-content: flex-start;
       flex: 0 0 auto;
+      width: auto;
+      height: auto;
+      max-height: none;
       gap: 2px;
       line-height: 0;
       font-size: 0;
@@ -6292,7 +6294,7 @@
       letter-spacing: 0.08em;
       color: #d4a45a;
       line-height: 1;
-      margin: 0;
+      margin: 5px 0 0;
       padding: 0;
     }
     /*
@@ -6307,6 +6309,7 @@
       overflow: hidden;
       flex-shrink: 0;
       line-height: 0;
+      margin-top: -2px;
     }
     .home-gj-icon {
       position: absolute;
@@ -7214,7 +7217,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.26.6';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.26.7';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
