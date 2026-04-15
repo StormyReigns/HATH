@@ -6245,13 +6245,11 @@
       right: max(14px, env(safe-area-inset-right));
       bottom: calc(100% + 2px);
       z-index: 61;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
+      display: grid;
+      place-items: center;
       width: 56px;
       height: 56px;
-      padding: 6px;
+      padding: 0;
       margin: 0;
       box-sizing: border-box;
       -webkit-appearance: none;
@@ -6275,17 +6273,15 @@
     }
     .home-gj-btn:active { transform: scale(0.96); }
     .home-gj-stack {
-      display: inline-flex;
+      display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      flex: 0 0 auto;
-      width: auto;
-      height: auto;
-      max-height: none;
+      flex: none;
+      width: max-content;
+      height: fit-content;
+      min-height: 0;
       gap: 2px;
-      line-height: 0;
-      font-size: 0;
     }
     .home-gj-label {
       display: block;
@@ -6294,7 +6290,7 @@
       letter-spacing: 0.08em;
       color: #d4a45a;
       line-height: 1;
-      margin: 5px 0 0;
+      margin: 0;
       padding: 0;
     }
     /*
@@ -6309,7 +6305,7 @@
       overflow: hidden;
       flex-shrink: 0;
       line-height: 0;
-      margin-top: -2px;
+      margin: 0;
     }
     .home-gj-icon {
       position: absolute;
@@ -7217,7 +7213,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.26.7';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.26.8';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
