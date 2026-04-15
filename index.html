@@ -6245,8 +6245,11 @@
       right: max(14px, env(safe-area-inset-right));
       bottom: calc(100% + 2px);
       z-index: 61;
-      display: grid;
-      place-items: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
       width: 56px;
       height: 56px;
       padding: 0;
@@ -6272,16 +6275,10 @@
       pointer-events: auto;
     }
     .home-gj-btn:active { transform: scale(0.96); }
-    .home-gj-stack {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      flex: none;
-      width: max-content;
-      height: fit-content;
+    .home-gj-label,
+    .home-gj-knife {
+      flex: 0 0 auto;
       min-height: 0;
-      gap: 2px;
     }
     .home-gj-label {
       display: block;
@@ -6289,7 +6286,7 @@
       font-weight: 800;
       letter-spacing: 0.08em;
       color: #d4a45a;
-      line-height: 1;
+      line-height: 13px;
       margin: 0;
       padding: 0;
     }
@@ -6842,7 +6839,7 @@
 
     <!-- Blathers overlaps the input bar, associated with chat -->
     <div class="input-zone" id="inputZone">
-      <button type="button" class="home-gj-btn" id="homeGjBtn" onclick="openGordonsJudgement()" aria-label="Gordon's Judgement"><span class="home-gj-stack"><span class="home-gj-label">GJ</span><span class="home-gj-knife"><img class="home-gj-icon" src="https://stormyreigns.github.io/HATH/HKChefKnife.png" alt=""></span></span></button>
+      <button type="button" class="home-gj-btn" id="homeGjBtn" onclick="openGordonsJudgement()" aria-label="Gordon's Judgement"><span class="home-gj-label">GJ</span><span class="home-gj-knife"><img class="home-gj-icon" src="https://stormyreigns.github.io/HATH/HKChefKnife.png" alt=""></span></button>
       <div class="blathers-wrap" id="blathersWrap">
         <img id="blathersIdle" class="blathers-idle"
              src="https://stormyreigns.github.io/HATH/IMG_7941.png"
@@ -7213,7 +7210,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.26.8';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.26.9';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
