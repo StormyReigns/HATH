@@ -6291,36 +6291,15 @@
       margin: 0;
       padding: 0;
     }
-    /*
-      PNG is square with transparency above/below the knife. Fitting the full bitmap into the
-      clip (contain + fill box) leaves empty pixels above the knife inside the clip — reads as a
-      huge gap under “GJ”. Render the image larger (contain in a tall box), bottom-align, clip
-      overflow: only the bottom ~22px of that render shows, cropping off top transparency first.
-    */
+    /* Knife: runtime canvas (#gjKnifeCanvas) crops transparent padding via renderGjKnife() */
     .home-gj-knife {
-      position: relative;
-      height: 22px;
-      width: 46px;
-      max-width: 100%;
-      overflow: hidden;
       flex-shrink: 0;
       margin: 0;
       line-height: 0;
     }
-    .home-gj-icon {
-      position: absolute;
-      left: 50%;
-      bottom: 0;
-      transform: translateX(-50%);
-      width: 46px;
-      height: 46px;
-      display: block;
-      object-fit: contain;
-      object-position: center bottom;
-      margin: 0;
+    .home-gj-knife canvas {
       pointer-events: none;
-      filter: brightness(0) saturate(100%) invert(72%) sepia(30%)
-              saturate(500%) hue-rotate(5deg) brightness(0.95);
+      vertical-align: bottom;
     }
     body.drawer-open .home-gj-btn {
       opacity: 0;
@@ -6844,7 +6823,7 @@
 
     <!-- Blathers overlaps the input bar, associated with chat -->
     <div class="input-zone" id="inputZone">
-      <button type="button" class="home-gj-btn" id="homeGjBtn" onclick="openGordonsJudgement()" aria-label="Gordon's Judgement"><span class="home-gj-label">GJ</span><span class="home-gj-knife"><img class="home-gj-icon" src="https://stormyreigns.github.io/HATH/HKChefKnife.png" alt=""></span></button>
+      <button type="button" class="home-gj-btn" id="homeGjBtn" onclick="openGordonsJudgement()" aria-label="Gordon's Judgement"><span class="home-gj-label">GJ</span><span class="home-gj-knife"><canvas id="gjKnifeCanvas" style="width:40px;height:auto;display:block;filter:brightness(0) saturate(100%) invert(78%) sepia(40%) saturate(500%) hue-rotate(5deg) brightness(95%)"></canvas></span></button>
       <div class="blathers-wrap" id="blathersWrap">
         <img id="blathersIdle" class="blathers-idle"
              src="https://stormyreigns.github.io/HATH/IMG_7941.png"
@@ -7215,7 +7194,50 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.26.14';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.27.0';  // Bump this when you deploy changes.
+
+  function renderGjKnife() {
+    const canvas = document.getElementById('gjKnifeCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function() {
+      let top = img.naturalHeight;
+      let bottom = 0;
+      try {
+        const offscreen = document.createElement('canvas');
+        offscreen.width = img.naturalWidth;
+        offscreen.height = img.naturalHeight;
+        const octx = offscreen.getContext('2d');
+        octx.drawImage(img, 0, 0);
+        const data = octx.getImageData(0, 0, offscreen.width, offscreen.height).data;
+        for (let y = 0; y < offscreen.height; y++) {
+          for (let x = 0; x < offscreen.width; x++) {
+            const alpha = data[(y * offscreen.width + x) * 4 + 3];
+            if (alpha > 10) {
+              if (y < top) top = y;
+              if (y > bottom) bottom = y;
+            }
+          }
+        }
+      } catch (e) {
+        top = 0;
+        bottom = img.naturalHeight - 1;
+      }
+      if (top > bottom) {
+        top = 0;
+        bottom = img.naturalHeight - 1;
+      }
+      const contentH = bottom - top + 1;
+      canvas.width = img.naturalWidth;
+      canvas.height = contentH;
+      ctx.drawImage(img, 0, -top);
+    };
+    img.onerror = function() {};
+    img.src = 'https://stormyreigns.github.io/HATH/HKChefKnife.png';
+  }
+  document.addEventListener('DOMContentLoaded', renderGjKnife);
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
