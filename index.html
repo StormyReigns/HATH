@@ -2197,9 +2197,13 @@
     .civics-card-research { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.06); }
     html.dark-mode .civics-card-research { border-top-color: rgba(255,255,255,0.08); }
     .civics-funding-chart {
-      display: flex; align-items: center; gap: 16px;
+      display: flex; flex-direction: column; align-items: stretch; gap: 0;
       padding: 12px 0 8px; border-bottom: 1px solid rgba(192,122,74,0.1);
       margin-bottom: 12px;
+    }
+    .civics-funding-chart-inner {
+      display: flex; align-items: center; gap: 16px;
+      width: 100%;
     }
     .civics-funding-donut {
       width: 72px; height: 72px; border-radius: 50%; flex-shrink: 0;
@@ -2215,6 +2219,139 @@
     .civics-funding-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
     .civics-funding-legend-label { color: var(--text2); min-width: 56px; }
     .civics-funding-legend-val { color: var(--text); font-weight: 500; font-variant-numeric: tabular-nums; }
+    .civics-funding-chart--tappable { cursor: pointer; }
+    .civics-funding-chart--tappable:active { opacity: 0.85; }
+    .civics-funding-chart-hint {
+      width: 100%; text-align: center; font-size: 11px;
+      color: var(--muted); margin-top: 6px; letter-spacing: 0.03em;
+    }
+    .funding-deepdive-overlay {
+      position: fixed; inset: 0; z-index: 401;
+      background: rgba(6, 4, 0, 0.72);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.28s ease;
+      display: flex; align-items: flex-end; justify-content: center;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .funding-deepdive-overlay.open {
+      opacity: 1; pointer-events: all;
+    }
+    .funding-deepdive-card {
+      position: relative;
+      background: var(--edge-bg, #fdf8f5);
+      border-radius: 24px 24px 0 0;
+      width: 100%; max-width: 480px;
+      padding: 24px 20px 32px;
+      max-height: 90vh; overflow-y: auto;
+      transform: translateY(40px) scale(0.96);
+      transform-origin: center bottom;
+      transition: transform 0.32s cubic-bezier(0.34, 1.26, 0.64, 1), opacity 0.28s ease;
+      opacity: 0;
+    }
+    .funding-deepdive-overlay.open .funding-deepdive-card {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+    html.dark-mode .funding-deepdive-card { background: #1e1c1a; }
+
+    .funding-deepdive-close {
+      position: absolute; top: 16px; right: 16px;
+      width: 30px; height: 30px; border-radius: 50%;
+      background: rgba(0,0,0,0.08); border: none; cursor: pointer;
+      font-size: 14px; color: var(--text2); display: flex; align-items: center; justify-content: center;
+    }
+    html.dark-mode .funding-deepdive-close { background: rgba(255,255,255,0.1); }
+
+    .funding-deepdive-name {
+      font-size: 18px; font-weight: 700; color: var(--text);
+      margin-bottom: 20px; padding-right: 36px; line-height: 1.25;
+    }
+
+    .funding-deepdive-donut-wrap {
+      display: flex; justify-content: center; margin-bottom: 24px;
+    }
+    .funding-deepdive-donut {
+      width: 160px; height: 160px; border-radius: 50%;
+      position: relative; flex-shrink: 0;
+      transition: background 0.3s ease;
+    }
+    .funding-deepdive-donut-hole {
+      position: absolute; inset: 38px; border-radius: 50%;
+      background: var(--edge-bg, #fdf8f5);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 2px;
+    }
+    html.dark-mode .funding-deepdive-donut-hole { background: #1e1c1a; }
+    .funding-deepdive-donut-center-label {
+      font-size: 11px; font-weight: 600; color: var(--text2);
+      text-align: center; line-height: 1.3; padding: 0 6px;
+      transition: opacity 0.15s ease;
+      white-space: pre-line;
+    }
+
+    .funding-deepdive-rows {
+      display: flex; flex-direction: column; gap: 2px; margin-bottom: 20px;
+    }
+    .fdd-row {
+      border-radius: 12px; overflow: hidden;
+      border: 1px solid rgba(0,0,0,0.06);
+      background: rgba(0,0,0,0.02);
+      transition: background 0.15s ease;
+    }
+    html.dark-mode .fdd-row { border-color: rgba(255,255,255,0.07); background: rgba(255,255,255,0.03); }
+    .fdd-row.fdd-row--active { background: rgba(0,0,0,0.05); }
+    html.dark-mode .fdd-row.fdd-row--active { background: rgba(255,255,255,0.07); }
+
+    .fdd-row-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px; cursor: pointer; user-select: none;
+    }
+    .fdd-row-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .fdd-row-label { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
+    .fdd-row-val { font-size: 14px; font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; }
+    .fdd-row-pct { font-size: 12px; color: var(--muted); margin-left: 6px; }
+    .fdd-row-chevron {
+      font-size: 11px; color: var(--muted); transition: transform 0.2s ease; margin-left: 4px;
+    }
+    .fdd-row.fdd-row--open .fdd-row-chevron { transform: rotate(180deg); }
+
+    .fdd-row-body {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.25s ease, padding 0.2s ease;
+      padding: 0 14px;
+      font-size: 13px; color: var(--text2); line-height: 1.55;
+    }
+    .fdd-row.fdd-row--open .fdd-row-body {
+      max-height: 200px; padding: 0 14px 14px;
+    }
+
+    .funding-deepdive-summary {
+      background: rgba(192,122,74,0.07);
+      border-radius: 12px; padding: 14px 16px;
+      margin-bottom: 16px; border: 1px solid rgba(192,122,74,0.15);
+    }
+    .funding-deepdive-summary-text { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+    .funding-deepdive-interpret {
+      border-radius: 12px; border: 1px solid rgba(0,0,0,0.06);
+      background: rgba(0,0,0,0.02); padding: 14px 16px;
+    }
+    html.dark-mode .funding-deepdive-interpret { border-color: rgba(255,255,255,0.07); background: rgba(255,255,255,0.02); }
+    .funding-deepdive-interpret-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--muted); margin-bottom: 8px;
+    }
+    .funding-deepdive-interpret-body {
+      font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 12px;
+    }
+    .funding-deepdive-interpret-btn {
+      display: block; width: 100%; padding: 10px;
+      background: var(--accent); color: white; border: none; border-radius: 10px;
+      font-size: 13px; font-weight: 600; cursor: pointer; text-align: center;
+    }
+    .funding-deepdive-interpret-btn:disabled { opacity: 0.5; }
+
     .civics-card-notes { margin-top: 12px; }
     .civics-card-notes-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px; }
     .civics-card-notes textarea {
@@ -7053,7 +7190,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.25.5';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.26.0';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
@@ -7355,6 +7492,13 @@
     initGSIWhenReady();
 
     hideLoadScreen();
+
+    var fddOverlay = document.getElementById('fundingDeepDive');
+    if (fddOverlay) {
+      fddOverlay.addEventListener('click', function(e) {
+        if (e.target === fddOverlay) closeFundingDeepDive();
+      });
+    }
   });
 
   // ── CONFIG ────────────────────────────────────────────────────
@@ -12262,7 +12406,7 @@
     return '$' + Math.round(Number(n)).toLocaleString('en-US');
   }
 
-  function renderFundingChart(t) {
+  function renderFundingChart(t, candidateName) {
     if (!t) return '';
     var personal = Math.max(0, Number(t.individual) || 0);
     var pac = Math.max(0, Number(t.pac) || 0);
@@ -12296,14 +12440,30 @@
       return Math.round((n / total) * 100);
     };
 
-    return '<div class="civics-funding-chart" role="img" aria-label="Campaign funding breakdown">' +
+    var nameStr = (candidateName != null && String(candidateName).trim() !== '')
+      ? String(candidateName).trim()
+      : (t.candidateName || '');
+    var fecAttr = JSON.stringify({
+      individual: personal, pac: pac, selfFunding: selfAmt, other: otherAmt,
+      raised: t.raised || 0, spent: t.spent || 0, cashOnHand: t.cashOnHand || 0,
+      candidateName: nameStr
+    }).replace(/'/g, '&#39;');
+
+    return '<div class="civics-funding-chart civics-funding-chart--tappable" ' +
+      'role="button" tabindex="0" aria-label="Tap to expand funding breakdown" ' +
+      'onclick="openFundingDeepDive(this)" ' +
+      'onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();openFundingDeepDive(this);}" ' +
+      'data-fec=\'' + fecAttr + '\'>' +
+      '<div class="civics-funding-chart-inner">' +
       '<div class="civics-funding-donut" style="background:' + gradient + '"><div class="civics-funding-donut-hole"></div></div>' +
       '<div class="civics-funding-legend">' +
       (personal > 0 ? '<div class="civics-funding-legend-row"><span class="civics-funding-dot" style="background:#4a90d9"></span><span class="civics-funding-legend-label">Personal</span><span class="civics-funding-legend-val">' + fmt(personal) + ' (' + legPct(personal) + '%)</span></div>' : '') +
       (pac > 0 ? '<div class="civics-funding-legend-row"><span class="civics-funding-dot" style="background:#e07070"></span><span class="civics-funding-legend-label">PAC</span><span class="civics-funding-legend-val">' + fmt(pac) + ' (' + legPct(pac) + '%)</span></div>' : '') +
       (selfAmt > 0 ? '<div class="civics-funding-legend-row"><span class="civics-funding-dot" style="background:#c0a060"></span><span class="civics-funding-legend-label">Self</span><span class="civics-funding-legend-val">' + fmt(selfAmt) + ' (' + legPct(selfAmt) + '%)</span></div>' : '') +
       (otherAmt > 0 ? '<div class="civics-funding-legend-row"><span class="civics-funding-dot" style="background:#7a8a99"></span><span class="civics-funding-legend-label">Other</span><span class="civics-funding-legend-val">' + fmt(otherAmt) + ' (' + legPct(otherAmt) + '%)</span></div>' : '') +
-      '</div></div>';
+      '</div></div>' +
+      '<div class="civics-funding-chart-hint">Tap to learn more</div>' +
+      '</div>';
   }
 
   function normalizeCivicsFecTotalsFromData(data) {
@@ -12335,9 +12495,184 @@
     return null;
   }
 
-  function mergeCivicsResearchDisplay(fecTotals, proseHtml) {
-    var chart = fecTotals ? renderFundingChart(fecTotals) : '';
+  function mergeCivicsResearchDisplay(fecTotals, proseHtml, candidateName) {
+    var chart = fecTotals ? renderFundingChart(fecTotals, candidateName) : '';
     return chart + proseHtml;
+  }
+
+  var _fddCurrentData = null;
+
+  function openFundingDeepDive(chartEl) {
+    var raw = chartEl.getAttribute('data-fec');
+    if (!raw) return;
+    var t;
+    try { t = JSON.parse(raw.replace(/&#39;/g, "'")); } catch (_) { return; }
+    _fddCurrentData = t;
+
+    var personal = Math.max(0, Number(t.individual) || 0);
+    var pac = Math.max(0, Number(t.pac) || 0);
+    var self = Math.max(0, Number(t.selfFunding) || 0);
+    var other = Math.max(0, Number(t.other) || 0);
+    var total = personal + pac + self + other;
+
+    var fmt = function(n) {
+      if (!n) return '$0';
+      if (n >= 1000000) return '$' + (n / 1000000).toFixed(1) + 'M';
+      if (n >= 1000) return '$' + Math.round(n / 1000) + 'K';
+      return '$' + Math.round(n);
+    };
+    var pct = function(n) { return total > 0 ? Math.round((n / total) * 100) : 0; };
+
+    document.getElementById('fddCandidateName').textContent =
+      (t.candidateName || 'Campaign') + ' — Funding Breakdown';
+
+    var c1 = total > 0 ? personal / total * 100 : 0;
+    var c2 = total > 0 ? c1 + pac / total * 100 : 0;
+    var c3 = total > 0 ? c2 + self / total * 100 : 0;
+    var stops = [];
+    if (personal > 0) stops.push('#4a90d9 0% ' + c1 + '%');
+    if (pac > 0) stops.push('#e07070 ' + c1 + '% ' + c2 + '%');
+    if (self > 0) stops.push('#c0a060 ' + c2 + '% ' + c3 + '%');
+    if (other > 0) stops.push('#7a8a99 ' + c3 + '% 100%');
+    var donutEl = document.getElementById('fddDonut');
+    donutEl.style.background = stops.length ? 'conic-gradient(from 0deg, ' + stops.join(', ') + ')' : '#eee';
+
+    document.getElementById('fddCenterLabel').textContent = fmt(t.raised || total) + '\nraised';
+
+    var TOOLTIPS = {
+      personal: 'Money donated directly by individual people. A high percentage here suggests broad public support rather than reliance on special interests.',
+      pac: 'Contributions from Political Action Committees — organizations that pool money to influence elections on behalf of corporations, unions, or ideological groups.',
+      self: 'Money the candidate contributed from their own personal wealth. Heavy self-funding can signal independence from donors, but also raises questions about accountability to voters.',
+      other: 'Includes transfers from other committees, party funds, and miscellaneous receipts not categorized as individual, PAC, or self-funded contributions.'
+    };
+
+    var rowsData = [
+      { key: 'personal', color: '#4a90d9', label: 'Personal donations', amount: personal },
+      { key: 'pac', color: '#e07070', label: 'PAC money', amount: pac },
+      { key: 'self', color: '#c0a060', label: 'Self-funded', amount: self },
+      { key: 'other', color: '#7a8a99', label: 'Other', amount: other }
+    ].filter(function(r) { return r.amount > 0; });
+
+    var rowsEl = document.getElementById('fddRows');
+    rowsEl.innerHTML = rowsData.map(function(r, i) {
+      return '<div class="fdd-row" id="fddRow' + i + '">' +
+        '<div class="fdd-row-header" onclick="toggleFddRow(' + i + ', \'' + r.key + '\')">' +
+        '<span class="fdd-row-dot" style="background:' + r.color + '"></span>' +
+        '<span class="fdd-row-label">' + escapeHtml(r.label) + '</span>' +
+        '<span class="fdd-row-val">' + fmt(r.amount) + '</span>' +
+        '<span class="fdd-row-pct">(' + pct(r.amount) + '%)</span>' +
+        '<span class="fdd-row-chevron">▾</span>' +
+        '</div>' +
+        '<div class="fdd-row-body">' + escapeHtml(TOOLTIPS[r.key] || '') + '</div>' +
+        '</div>';
+    }).join('');
+
+    var summaryParts = [];
+    if (t.raised) summaryParts.push('Raised ' + fmt(t.raised));
+    if (t.spent) summaryParts.push('spent ' + fmt(t.spent));
+    if (t.cashOnHand) summaryParts.push(fmt(t.cashOnHand) + ' cash on hand');
+    document.getElementById('fddSummaryText').textContent = summaryParts.join(' · ');
+
+    document.getElementById('fddInterpretBody').textContent =
+      'Tap below to get a plain-English interpretation of this candidate\'s funding profile.';
+    var btn = document.getElementById('fddInterpretBtn');
+    btn.disabled = false;
+    btn.style.display = '';
+    btn.textContent = 'Analyze with Blathers 🦉';
+
+    document.getElementById('fundingDeepDive').classList.add('open');
+  }
+
+  function toggleFddRow(idx, key) {
+    var row = document.getElementById('fddRow' + idx);
+    if (!row) return;
+    var isOpen = row.classList.contains('fdd-row--open');
+    document.querySelectorAll('.fdd-row').forEach(function(r) {
+      r.classList.remove('fdd-row--open', 'fdd-row--active');
+    });
+    if (!isOpen) {
+      row.classList.add('fdd-row--open', 'fdd-row--active');
+      var centerEl = document.getElementById('fddCenterLabel');
+      if (centerEl && _fddCurrentData) {
+        var sliceLabels = { personal: 'Individual\ndonors', pac: 'PAC\nmoney', self: 'Self-\nfunded', other: 'Other' };
+        centerEl.textContent = sliceLabels[key] || '';
+      }
+    } else {
+      var fmt2 = function(n) {
+        if (!n) return '$0';
+        if (n >= 1000000) return '$' + (n / 1000000).toFixed(1) + 'M';
+        if (n >= 1000) return '$' + Math.round(n / 1000) + 'K';
+        return '$' + Math.round(n);
+      };
+      var t = _fddCurrentData;
+      var p = Math.max(0, Number(t && t.individual) || 0);
+      var pk = Math.max(0, Number(t && t.pac) || 0);
+      var sf = Math.max(0, Number(t && t.selfFunding) || 0);
+      var ot = Math.max(0, Number(t && t.other) || 0);
+      var tot = p + pk + sf + ot;
+      document.getElementById('fddCenterLabel').textContent =
+        fmt2((t && t.raised) || tot) + '\nraised';
+    }
+  }
+
+  function closeFundingDeepDive() {
+    document.getElementById('fundingDeepDive').classList.remove('open');
+    _fddCurrentData = null;
+  }
+
+  async function loadFundingInterpretation() {
+    if (!_fddCurrentData) return;
+    var btn = document.getElementById('fddInterpretBtn');
+    var body = document.getElementById('fddInterpretBody');
+    btn.disabled = true;
+    btn.textContent = 'Analyzing…';
+    body.textContent = '';
+
+    var t = _fddCurrentData;
+    var fmt = function(n) {
+      if (!n) return '$0';
+      if (n >= 1000000) return '$' + (n / 1000000).toFixed(1) + 'M';
+      if (n >= 1000) return '$' + Math.round(n / 1000) + 'K';
+      return '$' + Math.round(n);
+    };
+    var pct = function(a, b) { return b > 0 ? Math.round((a / b) * 100) : 0; };
+    var total = (Number(t.individual) || 0) + (Number(t.pac) || 0) + (Number(t.selfFunding) || 0) + (Number(t.other) || 0);
+
+    var prompt = 'In 2-3 plain-English sentences, interpret this campaign finance profile for a voter who may not follow politics closely. Be specific, use the actual numbers, and note anything unusual or worth knowing. Do not editorialize or recommend who to vote for.\n\n' +
+      'Candidate: ' + (t.candidateName || 'Unknown') + '\n' +
+      'Total raised: ' + fmt(t.raised || total) + '\n' +
+      'Total spent: ' + fmt(t.spent || 0) + '\n' +
+      'Cash on hand: ' + fmt(t.cashOnHand || 0) + '\n' +
+      'Individual donations: ' + fmt(t.individual || 0) + ' (' + pct(t.individual || 0, total) + '%)\n' +
+      'PAC contributions: ' + fmt(t.pac || 0) + ' (' + pct(t.pac || 0, total) + '%)\n' +
+      'Self-funded: ' + fmt(t.selfFunding || 0) + ' (' + pct(t.selfFunding || 0, total) + '%)\n' +
+      'Other: ' + fmt(t.other || 0);
+
+    try {
+      var res = await fetch(AI_URL, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          action: 'civics',
+          user: getApiUser(),
+          message: prompt,
+          civicsSources: [],
+          history: []
+        })
+      });
+      var text = await res.text();
+      var data;
+      try { data = JSON.parse(text); } catch (_) { throw new Error('Invalid response'); }
+      if (data.error) throw new Error(data.error);
+      var reply = (data.reply || '').trim();
+      body.textContent = reply || 'No interpretation available.';
+      btn.style.display = 'none';
+    } catch (_) {
+      body.textContent = 'Could not load interpretation. Try again.';
+      btn.disabled = false;
+      btn.textContent = 'Try again';
+    }
   }
 
   async function civicsAskBlathersAboutCandidate(btn) {
@@ -12358,7 +12693,7 @@
         if (cached) {
           const parsed = JSON.parse(cached);
           if (parsed && parsed.ts && parsed.html && (Date.now() - parsed.ts) < 7 * 24 * 60 * 60 * 1000) {
-            researchEl.innerHTML = mergeCivicsResearchDisplay(parsed.fecTotals || normalizeCivicsFecTotalsFromData(parsed), parsed.html);
+            researchEl.innerHTML = mergeCivicsResearchDisplay(parsed.fecTotals || normalizeCivicsFecTotalsFromData(parsed), parsed.html, name);
             researchEl.setAttribute('data-loaded', 'true');
             card.classList.add('expanded');
             var sum = card.querySelector('.civics-card-summary');
@@ -12403,7 +12738,7 @@
       const html = isCivicsResponse(replyNorm)
         ? renderCivicsResponse(replyNorm)
         : '<div class="civics-research-section-body">' + escapeHtml(String(reply || '')).replace(/\n/g, '<br>') + '</div>';
-      researchEl.innerHTML = mergeCivicsResearchDisplay(fecTotals, html);
+      researchEl.innerHTML = mergeCivicsResearchDisplay(fecTotals, html, name);
       researchEl.setAttribute('data-loaded', 'true');
       try {
         localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), html: html, fecTotals: fecTotals }));
@@ -15685,6 +16020,29 @@
     <div class="gj-winner-actions" id="gjRandomizerActions" style="display:none; margin-top:20px">
       <button type="button" class="gj-winner-btn-primary" id="gjRandomizerCook">Let's Cook</button>
       <button type="button" class="gj-winner-btn-secondary" onclick="randomizerGoAgain()">Go Again</button>
+    </div>
+  </div>
+</div>
+
+<div class="funding-deepdive-overlay" id="fundingDeepDive" aria-modal="true" role="dialog">
+  <div class="funding-deepdive-card" id="fundingDeepDiveCard">
+    <button type="button" class="funding-deepdive-close" onclick="closeFundingDeepDive()" aria-label="Close">✕</button>
+    <div class="funding-deepdive-name" id="fddCandidateName"></div>
+    <div class="funding-deepdive-donut-wrap">
+      <div class="funding-deepdive-donut" id="fddDonut">
+        <div class="funding-deepdive-donut-hole">
+          <div class="funding-deepdive-donut-center-label" id="fddCenterLabel"></div>
+        </div>
+      </div>
+    </div>
+    <div class="funding-deepdive-rows" id="fddRows"></div>
+    <div class="funding-deepdive-summary" id="fddSummary">
+      <div class="funding-deepdive-summary-text" id="fddSummaryText"></div>
+    </div>
+    <div class="funding-deepdive-interpret" id="fddInterpret">
+      <div class="funding-deepdive-interpret-label">What does this mean?</div>
+      <div class="funding-deepdive-interpret-body" id="fddInterpretBody">Tap to get a plain-English interpretation of this candidate's funding profile.</div>
+      <button type="button" class="funding-deepdive-interpret-btn" id="fddInterpretBtn" onclick="loadFundingInterpretation()">Analyze with Blathers 🦉</button>
     </div>
   </div>
 </div>
