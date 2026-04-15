@@ -6109,13 +6109,11 @@
       bottom: calc(100% + 2px);
       z-index: 61;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
       justify-content: center;
-      gap: 0;
-      row-gap: 0;
       width: 62px;
-      padding: 3px 4px 4px;
+      padding: 5px 4px;
       margin: 0;
       border: 1px solid rgba(180,80,20,0.35);
       border-radius: 14px;
@@ -6133,13 +6131,22 @@
       pointer-events: auto;
     }
     .home-gj-btn:active { transform: scale(0.96); }
+    .home-gj-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      gap: 0;
+      line-height: 0;
+    }
     .home-gj-label {
       display: block;
       font-size: 13px;
       font-weight: 800;
       letter-spacing: 0.08em;
       color: #d4a45a;
-      line-height: 0.82;
+      line-height: 1;
       margin: 0;
       padding: 0;
     }
@@ -6148,7 +6155,7 @@
       width: 36px;
       height: 36px;
       margin: 0;
-      margin-top: -1px;
+      margin-top: 1px;
       object-fit: contain;
       filter: brightness(0) saturate(100%) invert(72%) sepia(30%)
               saturate(500%) hue-rotate(5deg) brightness(0.95);
@@ -6675,7 +6682,7 @@
 
     <!-- Blathers overlaps the input bar, associated with chat -->
     <div class="input-zone" id="inputZone">
-      <button type="button" class="home-gj-btn" id="homeGjBtn" onclick="openGordonsJudgement()" aria-label="Gordon's Judgement"><span class="home-gj-label">GJ</span><img class="home-gj-icon" src="https://stormyreigns.github.io/HATH/HKChefKnife.png" alt=""></button>
+      <button type="button" class="home-gj-btn" id="homeGjBtn" onclick="openGordonsJudgement()" aria-label="Gordon's Judgement"><span class="home-gj-stack"><span class="home-gj-label">GJ</span><img class="home-gj-icon" src="https://stormyreigns.github.io/HATH/HKChefKnife.png" alt=""></span></button>
       <div class="blathers-wrap" id="blathersWrap">
         <img id="blathersIdle" class="blathers-idle"
              src="https://stormyreigns.github.io/HATH/IMG_7941.png"
@@ -7046,7 +7053,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.25.4';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.25.5';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
