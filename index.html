@@ -6292,28 +6292,33 @@
       padding: 0;
     }
     /*
-      PNG is mostly transparent above the blade. The clip (.home-gj-knife) is shorter than
-      the img so flex-end crops from the top — only the bottom slice (blade) is visible.
-      Tweak clip height (e.g. 12–16px) and img height (e.g. 36–44px) together.
+      PNG has transparent padding above the blade. Clip box is shorter than the drawn img;
+      img is position:absolute bottom so the top (transparency) is cropped. Do not use inner
+      flex + tall img — flex min-height can inflate this box in the button column and create
+      a huge gap under “GJ”. Tweak clip (e.g. 16–20px) vs img height (e.g. 32–40px) for shape.
     */
     .home-gj-knife {
-      height: 14px;
+      position: relative;
+      height: 18px;
       width: 44px;
       max-width: 100%;
       overflow: hidden;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
       flex-shrink: 0;
       margin: 0;
+      line-height: 0;
     }
     .home-gj-icon {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
       display: block;
-      height: 40px;
+      height: 36px;
       width: auto;
       object-fit: contain;
       object-position: center bottom;
       margin: 0;
+      pointer-events: none;
       filter: brightness(0) saturate(100%) invert(72%) sepia(30%)
               saturate(500%) hue-rotate(5deg) brightness(0.95);
     }
@@ -7210,7 +7215,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.26.11';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.26.12';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
