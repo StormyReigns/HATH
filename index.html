@@ -3309,6 +3309,41 @@
     .schedule-event.civic .schedule-event-dot { box-shadow: 0 0 5px rgba(42,91,168,0.6); }
     html.dark-mode .schedule-event.civic { background: rgba(42,91,168,0.28); box-shadow: inset 3px 0 0 #5a8fd8; }
     html.dark-mode .schedule-event.civic .schedule-event-title { color: #8ab4f8; }
+    .schedule-event.local {
+      background: rgba(255,255,255,0.82);
+      box-shadow: inset 3px 0 0 #6b9b7a;
+      padding-left: 10px;
+      border-radius: 0 10px 10px 0;
+    }
+    html.dark-mode .schedule-event.local {
+      background: rgba(255,255,255,0.14);
+      box-shadow: inset 3px 0 0 #8bc4a0;
+    }
+    .schedule-event.local .schedule-event-title { font-weight: 400; color: #3d6b4f; }
+    html.dark-mode .schedule-event.local .schedule-event-title { color: #a8d4b8; }
+    .schedule-event-dot.local { background: #6b9b7a; }
+    .schedule-event-badge.local-pill {
+      font-size: 10px; font-weight: 600;
+      background: rgba(107,155,122,0.2); color: #3d6b4f;
+      text-transform: none; letter-spacing: 0.02em;
+    }
+    html.dark-mode .schedule-event-badge.local-pill { background: rgba(139,196,160,0.2); color: #a8d4b8; }
+    .schedule-event.municipal-reminder {
+      cursor: default;
+      background: rgba(253, 245, 230, 0.95);
+      box-shadow: inset 3px 0 0 rgba(192,122,74,0.55);
+      font-style: italic;
+    }
+    html.dark-mode .schedule-event.municipal-reminder {
+      background: rgba(45, 40, 34, 0.85);
+      box-shadow: inset 3px 0 0 rgba(224,152,104,0.45);
+    }
+    .schedule-event.municipal-reminder .schedule-event-title {
+      font-weight: 400; color: var(--text2); line-height: 1.45;
+    }
+    .schedule-event.municipal-reminder .schedule-event-star,
+    .schedule-event.municipal-reminder .schedule-event-edit { display: none; }
+    .schedule-event-dot.municipal { background: rgba(192,122,74,0.85); }
     .schedule-event-dot {
       flex-shrink: 0; width: 10px; height: 10px; border-radius: 50%;
     }
@@ -6684,6 +6719,9 @@
             <button type="button" class="schedule-icon-btn" id="scheduleCalendarBtn" onclick="toggleScheduleMiniCalendar()" title="Calendar" aria-label="Toggle calendar">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </button>
+            <button type="button" class="schedule-icon-btn" onclick="openLocalEventQuickModal()" title="Add local event" aria-label="Add local event">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-8-4.5-8-11a8 8 0 0116 0c0 6.5-8 11-8 11z"/><circle cx="12" cy="10" r="3"/></svg>
+            </button>
           </div>
         </div>
       </div>
@@ -6776,6 +6814,23 @@
     <div class="schedule-mini-cal" id="scheduleMiniCal" onclick="event.stopPropagation()">
       <div class="schedule-mini-cal-title" id="scheduleMiniCalTitle"></div>
       <div class="schedule-mini-cal-grid" id="scheduleMiniCalGrid"></div>
+    </div>
+
+    <!-- Quick-add local community event -->
+    <div class="paste-modal-overlay" id="localEventQuickOverlay" onclick="closeLocalEventQuickModal(event)">
+      <div class="paste-modal" id="localEventQuickModal" onclick="event.stopPropagation()">
+        <h3>Add local event</h3>
+        <p class="local-event-quick-hint" style="font-size:13px;color:var(--muted);margin:0 0 10px;line-height:1.45;">Saved for both of you — appears as 📍 Local on the schedule through the end of this month.</p>
+        <input type="text" class="paste-filename" id="localEventQuickTitle" placeholder="Event name" maxlength="200">
+        <div class="event-modal-row" style="margin-top:10px">
+          <input type="date" id="localEventQuickDate" class="event-date-input" style="flex:1">
+        </div>
+        <input type="text" class="paste-filename" id="localEventQuickVenue" placeholder="Venue (optional)" maxlength="200" style="margin-top:10px">
+        <div class="paste-modal-actions" style="margin-top:14px">
+          <button type="button" class="paste-cancel-btn" onclick="closeLocalEventQuickModal()">Cancel</button>
+          <button type="button" class="paste-save-btn" onclick="saveLocalEventQuick()">Save</button>
+        </div>
+      </div>
     </div>
 
     <!-- Schedule calendars modal -->
@@ -7194,7 +7249,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.27.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.28.0';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -9227,13 +9282,14 @@
     return null;
   }
 
-  /** Strips [[[PROJECT_JSON]]], [[[PROJECT_PATCH_JSON]]], [[[BLATHERS_UI]]] (last-first). */
+  /** Strips [[[PROJECT_JSON]]], [[[PROJECT_PATCH_JSON]]], [[[LOCAL_EVENT_JSON]]], [[[BLATHERS_UI]]] (last-first). */
   function parseBlathersStructuredReply(raw) {
-    const out = { display: String(raw || '').trim(), projectDraft: null, projectPatch: null, uiPayload: null };
+    const out = { display: String(raw || '').trim(), projectDraft: null, projectPatch: null, uiPayload: null, localEventDraft: null };
     if (!raw || typeof raw !== 'string') return out;
     const tags = [
       ['[[[PROJECT_JSON]]]', 'draft'],
       ['[[[PROJECT_PATCH_JSON]]]', 'patch'],
+      ['[[[LOCAL_EVENT_JSON]]]', 'localEvent'],
       ['[[[BLATHERS_UI]]]', 'ui']
     ];
     let display = raw.trim();
@@ -9257,6 +9313,7 @@
       const obj = tryParseJsonObjectFragment(jsonPart);
       if (key === 'draft' && obj) out.projectDraft = obj;
       else if (key === 'patch' && obj) out.projectPatch = obj;
+      else if (key === 'localEvent' && obj) out.localEventDraft = obj;
       else if (key === 'ui' && obj) out.uiPayload = obj;
     }
     out.display = display.trim();
@@ -9269,7 +9326,7 @@
     let t = typeof text === 'string' ? text : String(text);
     t = t.replace(/```+[\s\S]*?```+/g, '');
     t = t.replace(/\u00a0/g, ' ');
-    t = t.replace(/\n*\[\[\[[A-Z_]+\]\]\][^\n]*/g, '');
+    t = t.replace(/\n*\[\[\[(PROJECT_JSON|PROJECT_PATCH_JSON|LOCAL_EVENT_JSON|BLATHERS_UI)\]\]\][^\n]*/g, '');
     var guard = 0;
     while (guard++ < 6) {
       var s = t.trimEnd();
@@ -9479,7 +9536,8 @@
   }
 
   function addBlathersResultCard(turnEl, result) {
-    if (!turnEl || !result || !result.projectId) return;
+    if (!turnEl || !result) return;
+    if (!result.projectId) return;
     const card = document.createElement('div');
     card.className = 'blathers-result-card';
     const kick = document.createElement('div');
@@ -12905,6 +12963,14 @@
   }
 
   function getEventId(ev) {
+    if (ev.calendar === 'local') {
+      const ds = (ev.date || (ev.start && String(ev.start).slice(0, 10)) || '').slice(0, 10);
+      return 'local:' + ds + '|' + (ev.title || '').trim();
+    }
+    if (ev.calendar === 'municipal' || ev.isMunicipalReminder) {
+      const ds = ev.start ? String(ev.start).slice(0, 10) : '';
+      return 'municipal:' + ds;
+    }
     return ev.id || (ev.start + '|' + (ev.title || '').trim() + '|' + (ev.calendar || 'shared'));
   }
 
@@ -12938,6 +13004,144 @@
     if (ids.includes(id)) ids = ids.filter(x => x !== id);
     else ids.push(id);
     setStarredEvents(ids);
+  }
+
+  function formatLocalYmd(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
+  }
+
+  function getLocalEventsApiRange() {
+    const now = new Date();
+    const from = formatLocalYmd(now);
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const until = formatLocalYmd(end);
+    return { from, until };
+  }
+
+  function scheduleFetchDaysThroughMonthEnd() {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const endMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const span = Math.round((endMonth - now) / 86400000) + 1;
+    return Math.max(30, span);
+  }
+
+  /** Normal/Bloomington IL municipal rhythm — edit yearly in one place. */
+  const MUNICIPAL_SERVICE_CONFIG = {
+    landscape_waste: { startMonth: 3, startDay: 6, endMonth: 10, endDay: 25 },
+    leaf_vacuum: { startMonth: 9, startDay: 27, endMonth: 0, endDay: 14 }
+  };
+
+  function dateOnly(dt) {
+    return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+  }
+
+  function inLandscapeWasteSeason(d) {
+    const y = d.getFullYear();
+    const t = dateOnly(d);
+    const a = new Date(y, MUNICIPAL_SERVICE_CONFIG.landscape_waste.startMonth, MUNICIPAL_SERVICE_CONFIG.landscape_waste.startDay);
+    const b = new Date(y, MUNICIPAL_SERVICE_CONFIG.landscape_waste.endMonth, MUNICIPAL_SERVICE_CONFIG.landscape_waste.endDay);
+    return t >= a && t <= b;
+  }
+
+  function inLeafVacuumSeason(d) {
+    const t = dateOnly(d);
+    const y = t.getFullYear();
+    const startThisOct = new Date(y, MUNICIPAL_SERVICE_CONFIG.leaf_vacuum.startMonth, MUNICIPAL_SERVICE_CONFIG.leaf_vacuum.startDay);
+    const endFollowingJan = new Date(y + 1, MUNICIPAL_SERVICE_CONFIG.leaf_vacuum.endMonth, MUNICIPAL_SERVICE_CONFIG.leaf_vacuum.endDay);
+    if (t >= startThisOct && t <= endFollowingJan) return true;
+    const startPrevOct = new Date(y - 1, MUNICIPAL_SERVICE_CONFIG.leaf_vacuum.startMonth, MUNICIPAL_SERVICE_CONFIG.leaf_vacuum.startDay);
+    const endThisJan = new Date(y, MUNICIPAL_SERVICE_CONFIG.leaf_vacuum.endMonth, MUNICIPAL_SERVICE_CONFIG.leaf_vacuum.endDay);
+    return t >= startPrevOct && t <= endThisJan;
+  }
+
+  function nthWeekdayOfMonth(year, monthIndex, weekdayDow, nth) {
+    let d = new Date(year, monthIndex, 1);
+    let count = 0;
+    while (d.getMonth() === monthIndex) {
+      if (d.getDay() === weekdayDow) {
+        count++;
+        if (count === nth) return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      }
+      d.setDate(d.getDate() + 1);
+    }
+    return null;
+  }
+
+  function lastWeekdayOfMonth(year, monthIndex, weekdayDow) {
+    let d = new Date(year, monthIndex + 1, 0);
+    while (d.getMonth() === monthIndex && d.getDay() !== weekdayDow) d.setDate(d.getDate() - 1);
+    return d.getMonth() === monthIndex ? new Date(d.getFullYear(), d.getMonth(), d.getDate()) : null;
+  }
+
+  function thanksgivingDate(year) {
+    let d = new Date(year, 10, 1);
+    let th = 0;
+    while (d.getMonth() === 10) {
+      if (d.getDay() === 4) {
+        th++;
+        if (th === 4) return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      }
+      d.setDate(d.getDate() + 1);
+    }
+    return null;
+  }
+
+  function sameCalendarDate(a, b) {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  }
+
+  function isTuesdayAfterMondayHoliday(tuesdayDate, mondayHoliday) {
+    if (!mondayHoliday) return false;
+    const next = new Date(mondayHoliday.getFullYear(), mondayHoliday.getMonth(), mondayHoliday.getDate() + 1);
+    return sameCalendarDate(tuesdayDate, next);
+  }
+
+  function isLandscapeBrushHolidaySkipTuesday(tuesdayDate) {
+    const t = dateOnly(tuesdayDate);
+    const y = t.getFullYear();
+    const m = t.getMonth();
+    const day = t.getDate();
+    if (m === 11 && day === 25) return false;
+    if (m === 0 && day === 1) return true;
+    if (m === 5 && day === 19) return true;
+    if (m === 6 && day === 4) return true;
+    if (m === 10 && day === 11) return true;
+    const mlk = nthWeekdayOfMonth(y, 0, 1, 3);
+    const mem = lastWeekdayOfMonth(y, 4, 1);
+    const lab = nthWeekdayOfMonth(y, 8, 1, 1);
+    if (isTuesdayAfterMondayHoliday(t, mlk)) return true;
+    if (isTuesdayAfterMondayHoliday(t, mem)) return true;
+    if (isTuesdayAfterMondayHoliday(t, lab)) return true;
+    const tg = thanksgivingDate(y);
+    if (tg) {
+      const tuesdayOfThatWeek = new Date(tg.getFullYear(), tg.getMonth(), tg.getDate() - 2);
+      if (sameCalendarDate(t, tuesdayOfThatWeek)) return true;
+    }
+    return false;
+  }
+
+  /** Passive Monday-evening nudge for Tuesday pickup (client-side only). */
+  function getMunicipalMondayReminderForDate(mondayDate) {
+    if (mondayDate.getDay() !== 1) return null;
+    const tomorrow = new Date(mondayDate.getFullYear(), mondayDate.getMonth(), mondayDate.getDate() + 1);
+    const tue = dateOnly(tomorrow);
+    if (tue.getMonth() === 11 && tue.getDate() === 25) {
+      return 'No pickup this week — collection shifts to Wednesday.';
+    }
+    if (isLandscapeBrushHolidaySkipTuesday(tue)) {
+      return 'Landscape and brush won\'t be collected this week, but trash still will.';
+    }
+    if (inLeafVacuumSeason(tue)) {
+      return 'Rake any leaves loose to the curb tonight — the vacuum crew is making rounds.';
+    }
+    if (inLandscapeWasteSeason(tue)) {
+      return 'Bins out tonight — don\'t forget your leaf bags if you have any.';
+    }
+    return 'Bins out tonight — trash and recycling pickup tomorrow.';
   }
 
   let scheduleEvents = [];
@@ -13031,28 +13235,15 @@
     return result.filter(ev => getEventCategory(ev) === scheduleFilter);
   }
 
+  function eventInScheduleTimeWindow(ev) {
+    return filterScheduleEventsByTime([ev]).length > 0;
+  }
+
   function renderScheduleList() {
     const list = document.getElementById('scheduleList');
     if (!list) return;
     const filtered = filterScheduleEvents(scheduleEvents);
 
-    // Event count line
-    const countEl = document.getElementById('scheduleEventCount');
-    if (countEl) {
-      if (filtered.length === 0) {
-        countEl.textContent = '';
-      } else {
-        const label = scheduleTimeFilter === 'week' ? 'this week'
-                    : scheduleTimeFilter === 'month' ? 'this month'
-                    : 'upcoming';
-        countEl.textContent = filtered.length + ' event' + (filtered.length === 1 ? '' : 's') + ' ' + label;
-      }
-    }
-
-    if (filtered.length === 0) {
-      list.innerHTML = '<div class="screen-loading">' + (scheduleFilter === 'all' && scheduleTimeFilter === 'all' ? 'No upcoming events.' : 'No events match this filter.') + '</div>';
-      return;
-    }
     const byDate = {};
     filtered.forEach(ev => {
       const d = new Date(ev.start || ev.date || ev.startTime);
@@ -13060,7 +13251,66 @@
       if (!byDate[key]) byDate[key] = [];
       byDate[key].push(ev);
     });
+
+    if (scheduleFilter === 'all') {
+      const today0 = new Date();
+      today0.setHours(0, 0, 0, 0);
+      let rangeEnd = new Date(today0.getTime());
+      filtered.forEach(ev => {
+        const d = new Date(ev.start || ev.date || ev.startTime);
+        const dd = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        if (dd > rangeEnd) rangeEnd = dd;
+      });
+      const monthEnd = new Date(today0.getFullYear(), today0.getMonth() + 1, 0);
+      if (monthEnd > rangeEnd) rangeEnd = monthEnd;
+      const cap = new Date(today0);
+      cap.setDate(cap.getDate() + 120);
+      if (rangeEnd > cap) rangeEnd = cap;
+      let scan = new Date(today0.getTime());
+      while (scan <= rangeEnd) {
+        if (scan.getDay() === 1) {
+          const key = scan.toDateString();
+          const muniLine = getMunicipalMondayReminderForDate(scan);
+          if (muniLine) {
+            const faux = { start: formatLocalYmd(scan) + 'T12:00:00', isAllDay: true, calendar: 'municipal' };
+            if (eventInScheduleTimeWindow(faux)) {
+              if (!byDate[key]) byDate[key] = [];
+              const hasM = byDate[key].some(x => x.isMunicipalReminder);
+              if (!hasM) {
+                byDate[key].unshift({
+                  calendar: 'municipal',
+                  title: muniLine,
+                  start: formatLocalYmd(scan) + 'T12:00:00',
+                  isAllDay: true,
+                  isMunicipalReminder: true
+                });
+              }
+            }
+          }
+        }
+        scan.setDate(scan.getDate() + 1);
+      }
+    }
+
     const keys = Object.keys(byDate).sort((a, b) => new Date(a) - new Date(b));
+
+    const countEl = document.getElementById('scheduleEventCount');
+    if (countEl) {
+      if (keys.length === 0) {
+        countEl.textContent = '';
+      } else {
+        const visibleCount = keys.reduce((acc, k) => acc + byDate[k].length, 0);
+        const label = scheduleTimeFilter === 'week' ? 'this week'
+                    : scheduleTimeFilter === 'month' ? 'this month'
+                    : 'upcoming';
+        countEl.textContent = visibleCount + ' event' + (visibleCount === 1 ? '' : 's') + ' ' + label;
+      }
+    }
+
+    if (keys.length === 0) {
+      list.innerHTML = '<div class="screen-loading">' + (scheduleFilter === 'all' && scheduleTimeFilter === 'all' ? 'No upcoming events.' : 'No events match this filter.') + '</div>';
+      return;
+    }
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
@@ -13068,7 +13318,12 @@
 
     list.innerHTML = '';
     keys.forEach(key => {
-      const events = byDate[key];
+      const events = byDate[key].slice();
+      events.sort((a, b) => {
+        if (a.isMunicipalReminder && !b.isMunicipalReminder) return -1;
+        if (!a.isMunicipalReminder && b.isMunicipalReminder) return 1;
+        return new Date(a.start || a.date || 0) - new Date(b.start || b.date || 0);
+      });
       const d = new Date(key);
       let label = key === today.toDateString() ? 'Today' : key === tomorrow.toDateString() ? 'Tomorrow' : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
       const header = document.createElement('div');
@@ -13079,18 +13334,38 @@
 
       events.forEach(ev => {
         const div = document.createElement('div');
-        div.className = 'schedule-event' + (isEventStarred(ev) ? ' starred' : '') + (ev.calendar === 'civic' ? ' civic' : '');
+        if (ev.isMunicipalReminder) {
+          div.className = 'schedule-event municipal-reminder';
+          div.dataset.dateKey = key;
+          div.innerHTML = `
+            <span class="schedule-event-dot municipal" aria-hidden="true"></span>
+            <div class="schedule-event-main">
+              <span class="schedule-event-title">${escapeHtml(ev.title || '')}</span>
+            </div>
+            <div class="schedule-event-right">
+              <span class="schedule-event-time"></span>
+            </div>
+          `;
+          div.onclick = null;
+          div._eventData = ev;
+          list.appendChild(div);
+          return;
+        }
+        div.className = 'schedule-event' + (isEventStarred(ev) ? ' starred' : '')
+          + (ev.calendar === 'civic' ? ' civic' : '')
+          + (ev.calendar === 'local' ? ' local' : '');
         div.dataset.dateKey = key;
         const cal = (ev.calendar || 'shared').toLowerCase();
         const time = (ev.start && !ev.isAllDay) ? formatEventTime(ev.start) : '';
         const title = (ev.title || ev.summary || 'Event').trim();
         const cat = getEventCategory(ev);
         const badge = cat ? `<span class="schedule-event-badge ${cat}">${cat}</span>` : '';
+        const localBadge = ev.calendar === 'local' ? '<span class="schedule-event-badge local-pill">📍 Local</span>' : '';
         const starClass = isEventStarred(ev) ? ' starred' : '';
         const starSvg = isEventStarred(ev)
           ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
           : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
-        const canEdit = ev.calendar && !['holidays', 'civic'].includes(ev.calendar.toLowerCase());
+        const canEdit = ev.calendar && !['holidays', 'civic', 'local', 'municipal'].includes(ev.calendar.toLowerCase());
         const editBtn = canEdit ? '<button type="button" class="schedule-event-edit" onclick="event.stopPropagation(); openEventModalForRow(this)" title="Edit">Edit</button>' : '';
         const bellBtn = ev.calendar === 'civic'
           ? `<div class="schedule-event-bell" onclick="event.stopPropagation(); addEventToCalendar(this.closest('.schedule-event')._eventData)" title="Add to Calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>`
@@ -13099,7 +13374,7 @@
           <span class="schedule-event-dot ${cal}"></span>
           <div class="schedule-event-main">
             <span class="schedule-event-title">${escapeHtml(title)}</span>
-            ${badge}
+            ${localBadge}${badge}
           </div>
           ${editBtn}
           <div class="schedule-event-right">
@@ -13369,6 +13644,91 @@
     }
   }
 
+  function openLocalEventQuickModal() {
+    if (!getApiUser()) {
+      alert('Sign in to add a local event.');
+      return;
+    }
+    const o = document.getElementById('localEventQuickOverlay');
+    const t = document.getElementById('localEventQuickTitle');
+    const dEl = document.getElementById('localEventQuickDate');
+    const v = document.getElementById('localEventQuickVenue');
+    if (t) t.value = '';
+    if (v) v.value = '';
+    if (dEl) dEl.value = formatLocalYmd(new Date());
+    if (o) o.classList.add('open');
+  }
+
+  function closeLocalEventQuickModal(ev) {
+    if (ev && ev.target !== document.getElementById('localEventQuickOverlay')) return;
+    const o = document.getElementById('localEventQuickOverlay');
+    if (o) o.classList.remove('open');
+  }
+
+  async function saveLocalEventQuick() {
+    const title = document.getElementById('localEventQuickTitle')?.value.trim();
+    const date = document.getElementById('localEventQuickDate')?.value;
+    const venue = document.getElementById('localEventQuickVenue')?.value.trim() || '';
+    if (!title || !date || !getApiUser()) return;
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'addLocalEvent', user: getApiUser(), title, date, venue, url: '', source: 'Quick add' })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      closeLocalEventQuickModal();
+      showScheduleScreen();
+    } catch (err) {
+      alert('Could not save: ' + (err.message || 'Unknown error'));
+    }
+  }
+
+  async function saveLocalEventFromBlathersDraft(draft) {
+    if (!draft || typeof draft !== 'object') throw new Error('Invalid data');
+    const title = String(draft.title || '').trim();
+    const date = String(draft.date || '').trim();
+    if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error('Need title and YYYY-MM-DD date');
+    const venue = draft.venue != null ? String(draft.venue).trim() : '';
+    const url = draft.url != null ? String(draft.url).trim() : '';
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      redirect: 'follow',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'addLocalEvent', user: getApiUser(), title, date, venue, url, source: 'Blathers chat' })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    return true;
+  }
+
+  function addBlathersLocalSavedCard(turnEl, draft) {
+    if (!turnEl || !draft) return;
+    const card = document.createElement('div');
+    card.className = 'blathers-result-card';
+    const kick = document.createElement('div');
+    kick.className = 'blathers-result-kicker';
+    kick.textContent = 'Local event saved';
+    const ttl = document.createElement('div');
+    ttl.className = 'blathers-result-title';
+    ttl.textContent = String(draft.title || '').trim() || 'Event';
+    card.appendChild(kick);
+    card.appendChild(ttl);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'blathers-result-btn';
+    btn.textContent = 'Open Schedule';
+    btn.onclick = function() {
+      closeDrawer();
+      closeBlatherBookPanel();
+      showScheduleScreen();
+    };
+    card.appendChild(btn);
+    turnEl.appendChild(card);
+  }
+
   function toggleScheduleMiniCalendar() {
     const overlay = document.getElementById('scheduleMiniCalOverlay');
     const panel = document.getElementById('scheduleMiniCal');
@@ -13476,23 +13836,35 @@
       return;
     }
     try {
-      let url = `${API_URL}?action=calendar&user=${encodeURIComponent(user)}&days=30`;
+      const daySpan = scheduleFetchDaysThroughMonthEnd();
+      let url = `${API_URL}?action=calendar&user=${encodeURIComponent(user)}&days=${daySpan}`;
       const calIds = getEnabledCalendars();
       if (calIds && calIds.length > 0) {
         url += '&calendars=' + encodeURIComponent(JSON.stringify(calIds));
       }
-      const res = await fetch(url, { redirect: 'follow' });
+      const range = getLocalEventsApiRange();
+      const localUrl = apiUrlWithUser(API_URL, '&action=getLocalEvents&from=' + encodeURIComponent(range.from) + '&until=' + encodeURIComponent(range.until));
+      const [res, locRes] = await Promise.all([
+        fetch(url, { redirect: 'follow' }),
+        fetch(localUrl, { redirect: 'follow' })
+      ]);
       const data = await res.json();
+      let localArr = [];
+      try {
+        const locData = await locRes.json();
+        if (!locData.error && Array.isArray(locData.events)) localArr = locData.events;
+      } catch (_) {}
+      const civic = getCivicEvents();
       if (data.error || !data.events || data.events.length === 0) {
-        scheduleEvents = getCivicEvents();
+        scheduleEvents = [...civic, ...localArr];
         if (scheduleEvents.length === 0) list.innerHTML = '<div class="screen-loading">No upcoming events.</div>';
         else renderScheduleList();
-        renderScheduleTimeChips();
-        renderScheduleChips();
-        return;
+      } else {
+        scheduleEvents = [...data.events, ...civic, ...localArr];
+        renderScheduleList();
       }
-      scheduleEvents = [...data.events, ...getCivicEvents()];
-      renderScheduleList();
+      renderScheduleTimeChips();
+      renderScheduleChips();
     } catch (err) {
       scheduleEvents = getCivicEvents();
       if (scheduleEvents.length === 0) list.innerHTML = '<div class="screen-loading">Could not load schedule.</div>';
@@ -13848,6 +14220,17 @@
     if (structured.projectPatch) {
       const r2 = applyProjectPatchJson(structured.projectPatch);
       if (r2) addBlathersResultCard(turnEl, r2);
+    }
+    if (structured.localEventDraft && getApiUser()) {
+      saveLocalEventFromBlathersDraft(structured.localEventDraft)
+        .then(function() {
+          addBlathersLocalSavedCard(turnEl, structured.localEventDraft);
+          const sc = document.getElementById('scheduleScreen');
+          if (sc && sc.classList.contains('visible')) showScheduleScreen();
+        })
+        .catch(function(err) {
+          console.warn('Local event save failed', err);
+        });
     }
     requestAnimationFrame(function() {
       const chat = document.getElementById('chatArea');
