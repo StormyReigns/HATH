@@ -6291,29 +6291,26 @@
       font-weight: 800;
       letter-spacing: 0.08em;
       color: #d4a45a;
-      line-height: 1;
+      line-height: 13px;
       margin: 0;
       padding: 0;
     }
-    /* Clip PNG padding above knife; align art to top of clip so it sits under “GJ” */
+    /*
+      Background (not <img>): PNG has large transparent top; object-fit keeps that as empty layout.
+      Short box + background-position bottom clips the dead space so the blade sits under “GJ”.
+    */
     .home-gj-knife {
       display: block;
-      width: 38px;
-      height: 30px;
-      margin: 0;
+      width: 40px;
+      height: 28px;
+      margin: 2px 0 0;
       padding: 0;
-      overflow: hidden;
-      line-height: 0;
       flex-shrink: 0;
-    }
-    .home-gj-icon {
-      display: block;
-      width: 38px;
-      height: 38px;
-      margin: 0;
-      margin-top: -16px;
-      object-fit: contain;
-      object-position: center bottom;
+      line-height: 0;
+      background-image: url('https://stormyreigns.github.io/HATH/HKChefKnife.png');
+      background-repeat: no-repeat;
+      background-position: center bottom;
+      background-size: 42px auto;
       filter: brightness(0) saturate(100%) invert(72%) sepia(30%)
               saturate(500%) hue-rotate(5deg) brightness(0.95);
     }
@@ -6839,7 +6836,7 @@
 
     <!-- Blathers overlaps the input bar, associated with chat -->
     <div class="input-zone" id="inputZone">
-      <button type="button" class="home-gj-btn" id="homeGjBtn" onclick="openGordonsJudgement()" aria-label="Gordon's Judgement"><span class="home-gj-stack"><span class="home-gj-label">GJ</span><span class="home-gj-knife"><img class="home-gj-icon" src="https://stormyreigns.github.io/HATH/HKChefKnife.png" alt=""></span></span></button>
+      <button type="button" class="home-gj-btn" id="homeGjBtn" onclick="openGordonsJudgement()" aria-label="Gordon's Judgement"><span class="home-gj-stack"><span class="home-gj-label">GJ</span><span class="home-gj-knife" aria-hidden="true"></span></span></button>
       <div class="blathers-wrap" id="blathersWrap">
         <img id="blathersIdle" class="blathers-idle"
              src="https://stormyreigns.github.io/HATH/IMG_7941.png"
@@ -7210,7 +7207,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.26.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.26.3';  // Bump this when you deploy changes.
 
   // ── AUTH ──────────────────────────────────────────────────────
   const CLIENT_ID     = '367279719730-dthue27mefq61h2qct1j1ahrbr2fuuqm.apps.googleusercontent.com';
