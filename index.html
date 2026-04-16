@@ -3053,7 +3053,10 @@
     }
 
     /* Schedule screen */
-    #scheduleScreen { flex-direction: column; padding: 4px 0 6px; position: relative; }
+    #scheduleScreen {
+      flex-direction: column; padding: 4px 0 6px; position: relative;
+      flex: 1; min-height: 0; display: flex;
+    }
     .schedule-bg-icon {
       position: absolute; inset: 0;
       width: 100%; height: 100%;
@@ -3067,6 +3070,8 @@
     #scheduleScreen .schedule-chips-wrap,
     #scheduleScreen .schedule-event-count,
     #scheduleScreen .screen-list,
+    #scheduleScreen .schedule-horizon-root,
+    #scheduleScreen .schedule-list-root,
     #scheduleScreen .screen-footer { position: relative; z-index: 1; }
     .schedule-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -3120,6 +3125,398 @@
       padding: 0; transition: opacity 0.15s;
     }
     .schedule-add-btn:active { opacity: 0.9; }
+
+    .schedule-view-toolbar {
+      display: flex; align-items: center; gap: 8px;
+      margin-right: 4px;
+    }
+    .schedule-view-toggle-pill {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px; font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(192,122,74,0.45);
+      background: rgba(192,122,74,0.12);
+      color: var(--accent);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .schedule-view-toggle-pill:hover, .schedule-view-toggle-pill:active {
+      background: rgba(192,122,74,0.22);
+    }
+    .schedule-view-toggle-pill.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    html.dark-mode .schedule-view-toggle-pill {
+      border-color: rgba(224,152,104,0.45);
+      background: rgba(224,152,104,0.12);
+      color: #e8b896;
+    }
+    html.dark-mode .schedule-view-toggle-pill.active {
+      background: rgba(224,152,104,0.85);
+      color: #1a1816;
+      border-color: rgba(224,152,104,0.9);
+    }
+    .schedule-add-compact {
+      min-width: 36px; min-height: 36px;
+      width: 36px; height: 36px;
+      border-radius: 999px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-size: 22px;
+      font-weight: 300;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 0 2px 0;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .schedule-add-compact:active { opacity: 0.88; transform: scale(0.96); }
+
+    .schedule-horizon-root {
+      display: flex;
+      flex-direction: row;
+      flex: 1;
+      min-height: 0;
+      gap: 10px;
+      padding: 0 10px 6px;
+      align-items: stretch;
+    }
+    .schedule-horizon-main {
+      flex: 1;
+      min-width: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+    }
+    .schedule-horizon-month-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+      padding: 0 2px;
+    }
+    .schedule-horizon-month-label {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .schedule-horizon-month-btn {
+      border: none;
+      background: rgba(192,122,74,0.12);
+      color: var(--accent);
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      padding: 0;
+    }
+    .schedule-horizon-month-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+    html.dark-mode .schedule-horizon-month-btn {
+      background: rgba(224,152,104,0.12);
+      color: #e8b896;
+    }
+
+    .schedule-horizon-aside {
+      width: 56px;
+      flex-shrink: 0;
+      border-left: 1px solid rgba(192,122,74,0.22);
+      padding: 4px 0 8px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    html.dark-mode .schedule-horizon-aside {
+      border-left-color: rgba(224,152,104,0.2);
+    }
+    .schedule-aside-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(192,122,74,0.15);
+    }
+    html.dark-mode .schedule-aside-block {
+      border-bottom-color: rgba(255,255,255,0.08);
+    }
+    .schedule-aside-block:last-child { border-bottom: none; padding-bottom: 0; }
+    .schedule-aside-rot {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-family: 'Inter', sans-serif;
+      font-size: 8px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      line-height: 1.1;
+      max-height: 140px;
+      text-align: center;
+    }
+    .schedule-aside-icon {
+      font-size: 14px;
+      line-height: 1;
+      opacity: 0.55;
+    }
+    .schedule-aside-hint {
+      font-family: 'Inter', sans-serif;
+      font-size: 9px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.25;
+      max-width: 52px;
+      opacity: 0.85;
+    }
+
+    .hz-standalone-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .hz-standalone-date {
+      width: 44px;
+      flex-shrink: 0;
+      text-align: left;
+      padding-top: 4px;
+    }
+    .hz-standalone-dow {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      line-height: 1.1;
+    }
+    .hz-standalone-daynum {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1;
+    }
+    .hz-standalone-card {
+      flex: 1;
+      min-width: 0;
+      background: rgba(255,255,255,0.92);
+      border: 1px solid rgba(192,122,74,0.12);
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    html.dark-mode .hz-standalone-card {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.1);
+    }
+    .hz-standalone-card.hz-row--quiet {
+      cursor: default;
+      background: rgba(253, 245, 230, 0.75);
+      border-style: dashed;
+      opacity: 0.95;
+    }
+    html.dark-mode .hz-standalone-card.hz-row--quiet {
+      background: rgba(45, 40, 34, 0.65);
+    }
+    .hz-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+    .hz-dot--shared { background: var(--accent); }
+    .hz-dot--personal { background: #7c6ba8; }
+    .hz-dot--civic { background: #2a5ba8; }
+    .hz-dot--local { background: #5a9070; }
+    .hz-dot--municipal { background: rgba(192,122,74,0.55); }
+    .hz-dot--holidays { background: #c9a227; }
+    .hz-card-body { flex: 1; min-width: 0; }
+    .hz-card-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.35;
+    }
+    .hz-card-sub {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+      line-height: 1.35;
+    }
+
+    .hz-group {
+      display: grid;
+      grid-template-columns: 14px 1fr;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      border: 1px solid rgba(192,122,74,0.18);
+      border-left: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    html.dark-mode .hz-group {
+      border-color: rgba(255,255,255,0.1);
+    }
+    .hz-group-spine {
+      grid-row: 1 / span 999;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hz-group--green .hz-group-spine { background: #5a9070; }
+    .hz-group--accent .hz-group-spine { background: var(--accent); }
+    .hz-group--civic .hz-group-spine { background: #2a5ba8; }
+    .hz-group-body {
+      background: rgba(192,122,74,0.06);
+      border-left: 1px solid rgba(192,122,74,0.15);
+      padding: 10px 10px 12px;
+    }
+    html.dark-mode .hz-group-body {
+      background: rgba(255,255,255,0.04);
+      border-left-color: rgba(255,255,255,0.08);
+    }
+    .hz-group--green .hz-group-body {
+      background: rgba(90,144,112,0.08);
+      border-left-color: rgba(90,144,112,0.25);
+    }
+    html.dark-mode .hz-group--green .hz-group-body {
+      background: rgba(90,144,112,0.12);
+    }
+    .hz-group--civic .hz-group-body {
+      background: rgba(42,91,168,0.08);
+      border-left-color: rgba(42,91,168,0.22);
+    }
+    html.dark-mode .hz-group--civic .hz-group-body {
+      background: rgba(42,91,168,0.14);
+    }
+    .hz-group-spine-label {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-family: 'Inter', sans-serif;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.95);
+      line-height: 1;
+      max-height: 160px;
+      text-align: center;
+    }
+    .hz-group-header {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .hz-nested {
+      display: grid;
+      grid-template-columns: 10px 1fr;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 8px;
+      margin-left: 4px;
+      border: 1px solid rgba(192,122,74,0.14);
+      border-left: none;
+    }
+    .hz-nested .hz-group-spine { min-height: 40px; }
+    .hz-nested .hz-group-body { padding: 8px; }
+
+    .hz-group-event-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 8px 0;
+      border-top: 1px solid rgba(0,0,0,0.05);
+      cursor: pointer;
+    }
+    .hz-group-event-row:first-of-type { border-top: none; padding-top: 0; }
+    html.dark-mode .hz-group-event-row { border-top-color: rgba(255,255,255,0.06); }
+
+    .schedule-list-root {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .schedule-list-root .screen-list {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .local-event-drawer-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 260;
+      background: rgba(0,0,0,0.35);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .local-event-drawer-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .local-event-drawer {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      max-height: 55vh;
+      background: var(--bg, #fdf8f1);
+      border-radius: 18px 18px 0 0;
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.18);
+      padding: 16px 18px max(20px, env(safe-area-inset-bottom));
+      transform: translateY(100%);
+      transition: transform 0.28s ease;
+    }
+    html.dark-mode .local-event-drawer {
+      background: #1a1816;
+    }
+    .local-event-drawer-overlay.open .local-event-drawer {
+      transform: translateY(0);
+    }
+    .local-event-drawer h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 500;
+      margin: 0 0 10px;
+      color: var(--text);
+    }
+    .local-event-drawer-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
 
     /* BlatherBook floating chat */
     .blatherbook-fab {
@@ -6712,6 +7109,10 @@
         </div>
         <div class="schedule-header-right">
           <div class="schedule-guest-signin-hint" id="scheduleGuestSigninHint" style="display:none" aria-live="polite">You're not signed in</div>
+          <div class="schedule-view-toolbar">
+            <button type="button" class="schedule-view-toggle-pill" id="scheduleViewListBtn" onclick="toggleScheduleViewMode()" aria-pressed="false">List</button>
+            <button type="button" class="schedule-add-compact" onclick="openLocalEventDrawer()" title="Add local event" aria-label="Add local event">+</button>
+          </div>
           <div class="schedule-header-actions">
             <button type="button" class="schedule-icon-btn" onclick="openScheduleCalendarsModal()" title="Calendars" aria-label="Manage calendars">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
@@ -6719,27 +7120,30 @@
             <button type="button" class="schedule-icon-btn" id="scheduleCalendarBtn" onclick="toggleScheduleMiniCalendar()" title="Calendar" aria-label="Toggle calendar">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </button>
-            <button type="button" class="schedule-icon-btn" onclick="openLocalEventQuickModal()" title="Add local event" aria-label="Add local event">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-8-4.5-8-11a8 8 0 0116 0c0 6.5-8 11-8 11z"/><circle cx="12" cy="10" r="3"/></svg>
-            </button>
           </div>
         </div>
       </div>
-      <div class="schedule-filters-wrap">
-        <div class="schedule-time-row">
-          <select id="scheduleTimeSelect" class="schedule-time-select" aria-label="Time range">
-            <option value="all">All time</option>
-            <option value="week">This week</option>
-            <option value="month">This month</option>
-          </select>
-        </div>
-        <div class="schedule-chips-wrap h-scroll-faded">
-          <div class="schedule-chips" id="scheduleChips"></div>
-        </div>
-      </div>
-      <div class="schedule-event-count" id="scheduleEventCount"></div>
       <div class="schedule-guest-banner" id="scheduleGuestBanner" style="display:none">Sign in to see your personal calendar</div>
-      <div class="screen-list" id="scheduleList"></div>
+      <div class="schedule-horizon-root" id="scheduleHorizonRoot">
+        <div class="schedule-horizon-main" id="scheduleHorizonMain"></div>
+        <aside class="schedule-horizon-aside" id="scheduleHorizonAside" aria-label="Pickup rhythm"></aside>
+      </div>
+      <div class="schedule-list-root" id="scheduleListRoot" style="display:none">
+        <div class="schedule-filters-wrap">
+          <div class="schedule-time-row">
+            <select id="scheduleTimeSelect" class="schedule-time-select" aria-label="Time range">
+              <option value="all">All time</option>
+              <option value="week">This week</option>
+              <option value="month">This month</option>
+            </select>
+          </div>
+          <div class="schedule-chips-wrap h-scroll-faded">
+            <div class="schedule-chips" id="scheduleChips"></div>
+          </div>
+        </div>
+        <div class="schedule-event-count" id="scheduleEventCount"></div>
+        <div class="screen-list" id="scheduleList"></div>
+      </div>
       <div class="screen-footer">
         <a href="https://calendar.google.com" target="_blank" rel="noopener">Open in Google Calendar</a>
       </div>
@@ -6816,18 +7220,18 @@
       <div class="schedule-mini-cal-grid" id="scheduleMiniCalGrid"></div>
     </div>
 
-    <!-- Quick-add local community event -->
-    <div class="paste-modal-overlay" id="localEventQuickOverlay" onclick="closeLocalEventQuickModal(event)">
-      <div class="paste-modal" id="localEventQuickModal" onclick="event.stopPropagation()">
+    <!-- Local event bottom drawer (Schedule +) -->
+    <div class="local-event-drawer-overlay" id="localEventDrawerOverlay" onclick="closeLocalEventDrawer(event)">
+      <div class="local-event-drawer" onclick="event.stopPropagation()">
         <h3>Add local event</h3>
-        <p class="local-event-quick-hint" style="font-size:13px;color:var(--muted);margin:0 0 10px;line-height:1.45;">Saved for both of you — appears as 📍 Local on the schedule through the end of this month.</p>
+        <p style="font-size:13px;color:var(--muted);margin:0 0 12px;line-height:1.45;">Saved for both of you — appears under Around town on the horizon.</p>
         <input type="text" class="paste-filename" id="localEventQuickTitle" placeholder="Event name" maxlength="200">
         <div class="event-modal-row" style="margin-top:10px">
-          <input type="date" id="localEventQuickDate" class="event-date-input" style="flex:1">
+          <input type="date" id="localEventQuickDate" class="event-date-input" style="flex:1;width:100%">
         </div>
         <input type="text" class="paste-filename" id="localEventQuickVenue" placeholder="Venue (optional)" maxlength="200" style="margin-top:10px">
-        <div class="paste-modal-actions" style="margin-top:14px">
-          <button type="button" class="paste-cancel-btn" onclick="closeLocalEventQuickModal()">Cancel</button>
+        <div class="local-event-drawer-actions">
+          <button type="button" class="paste-cancel-btn" onclick="closeLocalEventDrawer()">Cancel</button>
           <button type="button" class="paste-save-btn" onclick="saveLocalEventQuick()">Save</button>
         </div>
       </div>
@@ -7249,7 +7653,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.28.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.29.2';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -13013,14 +13417,6 @@
     return y + '-' + m + '-' + day;
   }
 
-  function getLocalEventsApiRange() {
-    const now = new Date();
-    const from = formatLocalYmd(now);
-    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    const until = formatLocalYmd(end);
-    return { from, until };
-  }
-
   function scheduleFetchDaysThroughMonthEnd() {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
@@ -13031,9 +13427,446 @@
 
   /** Normal/Bloomington IL municipal rhythm — edit yearly in one place. */
   const MUNICIPAL_SERVICE_CONFIG = {
+    pickup_day_dow: 2,
     landscape_waste: { startMonth: 3, startDay: 6, endMonth: 10, endDay: 25 },
     leaf_vacuum: { startMonth: 9, startDay: 27, endMonth: 0, endDay: 14 }
   };
+
+  /**
+   * Optional nested horizon groups (annual MM-DD, current horizon year).
+   * Example: { id: 'pride', label: 'Pride month', spine: 'accent', startMMDD: '06-01', endMMDD: '06-30',
+   *   nested: [{ id: 'ew', label: 'Election week', spine: 'civic', startMMDD: '06-01', endMMDD: '06-07' }] }
+   */
+  const SCHEDULE_HORIZON_PERIOD_GROUPS = [];
+
+  const SCHEDULE_VIEW_MODE_KEY = 'schedule_view_mode';
+  const LOCAL_EVENTS_CACHE_KEY = 'shasta_local_events_v1';
+  const LOCAL_EVENTS_CACHE_TTL_MS = 3600000;
+
+  let scheduleHorizonYear = null;
+  let scheduleHorizonMonth0 = null;
+
+  function getScheduleViewMode() {
+    try {
+      const v = sessionStorage.getItem(SCHEDULE_VIEW_MODE_KEY);
+      if (v === 'list' || v === 'horizon') return v;
+    } catch (_) {}
+    return 'horizon';
+  }
+
+  function setScheduleViewMode(mode) {
+    try {
+      sessionStorage.setItem(SCHEDULE_VIEW_MODE_KEY, mode === 'list' ? 'list' : 'horizon');
+    } catch (_) {}
+  }
+
+  function syncScheduleViewChrome() {
+    const listOn = getScheduleViewMode() === 'list';
+    const hr = document.getElementById('scheduleHorizonRoot');
+    const lr = document.getElementById('scheduleListRoot');
+    const btn = document.getElementById('scheduleViewListBtn');
+    if (hr) hr.style.display = listOn ? 'none' : 'flex';
+    if (lr) lr.style.display = listOn ? 'flex' : 'none';
+    if (btn) {
+      btn.classList.toggle('active', listOn);
+      btn.setAttribute('aria-pressed', listOn ? 'true' : 'false');
+    }
+  }
+
+  function toggleScheduleViewMode() {
+    setScheduleViewMode(getScheduleViewMode() === 'list' ? 'horizon' : 'list');
+    syncScheduleViewChrome();
+    refreshScheduleMainView();
+  }
+
+  function refreshScheduleMainView() {
+    if (getScheduleViewMode() === 'list') renderScheduleList();
+    else renderScheduleHorizon();
+  }
+
+  function ensureHorizonMonthCursor() {
+    const n = new Date();
+    if (scheduleHorizonYear == null || scheduleHorizonMonth0 == null) {
+      scheduleHorizonYear = n.getFullYear();
+      scheduleHorizonMonth0 = n.getMonth();
+    }
+  }
+
+  function horizonMonthRange() {
+    ensureHorizonMonthCursor();
+    const ys = scheduleHorizonYear;
+    const ms = scheduleHorizonMonth0;
+    const start = new Date(ys, ms, 1);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(ys, ms + 1, 0);
+    end.setHours(23, 59, 59, 999);
+    return { start, end };
+  }
+
+  function horizonDateCutoff() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const { start, end } = horizonMonthRange();
+    if (today >= start && today <= end) return today;
+    return start;
+  }
+
+  function shiftHorizonMonth(delta) {
+    ensureHorizonMonthCursor();
+    const d = new Date(scheduleHorizonYear, scheduleHorizonMonth0 + delta, 1);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const minYm = new Date(today.getFullYear(), today.getMonth(), 1);
+    if (d < minYm) return;
+    scheduleHorizonYear = d.getFullYear();
+    scheduleHorizonMonth0 = d.getMonth();
+    renderScheduleHorizon();
+    const u = localStorage.getItem('shasta_user');
+    if (u) {
+      fetchLocalEventsForScheduleCached().then(function(fresh) {
+        const base = (typeof scheduleEvents !== 'undefined' && scheduleEvents && scheduleEvents.length)
+          ? scheduleEvents.filter(function(e) { return e.calendar !== 'local'; })
+          : [];
+        scheduleEvents = base.concat(fresh || []);
+        renderScheduleHorizon();
+      });
+    }
+  }
+
+  function resolveMMDDInHorizonYear_(mmdd) {
+    const parts = String(mmdd || '').split('-');
+    if (parts.length !== 2) return null;
+    const mm = parseInt(parts[0], 10) - 1;
+    const dd = parseInt(parts[1], 10);
+    if (isNaN(mm) || isNaN(dd)) return null;
+    ensureHorizonMonthCursor();
+    return new Date(scheduleHorizonYear, mm, dd);
+  }
+
+  function localEventsCacheKeyForHorizon() {
+    ensureHorizonMonthCursor();
+    const ym = scheduleHorizonYear + '-' + String(scheduleHorizonMonth0 + 1).padStart(2, '0');
+    return LOCAL_EVENTS_CACHE_KEY + '_' + ym;
+  }
+
+  async function fetchLocalEventsForScheduleCached() {
+    const cacheKey = localEventsCacheKeyForHorizon();
+    try {
+      const raw = sessionStorage.getItem(cacheKey);
+      if (raw) {
+        const o = JSON.parse(raw);
+        if (o && o.t && Date.now() - o.t < LOCAL_EVENTS_CACHE_TTL_MS && Array.isArray(o.events)) return o.events;
+      }
+    } catch (_) {}
+    const user = localStorage.getItem('shasta_user');
+    if (!user) return [];
+    const ym = scheduleHorizonYear + '-' + String(scheduleHorizonMonth0 + 1).padStart(2, '0');
+    try {
+      const res = await fetch(apiUrlWithUser(API_URL, '&action=getLocalEvents&month=' + encodeURIComponent(ym)), { redirect: 'follow' });
+      const data = await res.json();
+      const events = (!data.error && Array.isArray(data.events)) ? data.events : [];
+      try {
+        sessionStorage.setItem(cacheKey, JSON.stringify({ t: Date.now(), events: events }));
+      } catch (_) {}
+      return events;
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function invalidateLocalEventsCache() {
+    try {
+      for (let i = sessionStorage.length - 1; i >= 0; i--) {
+        const k = sessionStorage.key(i);
+        if (k && k.indexOf(LOCAL_EVENTS_CACHE_KEY) === 0) sessionStorage.removeItem(k);
+      }
+    } catch (_) {}
+  }
+
+  async function mergeFreshLocalEventsIntoSchedule() {
+    invalidateLocalEventsCache();
+    const user = localStorage.getItem('shasta_user');
+    if (!user) return;
+    const fresh = await fetchLocalEventsForScheduleCached();
+    const base = (typeof scheduleEvents !== 'undefined' && scheduleEvents && scheduleEvents.length)
+      ? scheduleEvents.filter(function(e) { return e.calendar !== 'local'; })
+      : [];
+    scheduleEvents = base.concat(fresh);
+  }
+
+  function renderMunicipalAside() {
+    const aside = document.getElementById('scheduleHorizonAside');
+    if (!aside) return;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tuesday = new Date(today);
+    while (tuesday.getDay() !== MUNICIPAL_SERVICE_CONFIG.pickup_day_dow) tuesday.setDate(tuesday.getDate() + 1);
+    const nextTue = dateOnly(tuesday);
+
+    const blocks = [];
+    blocks.push(
+      '<div class="schedule-aside-block">' +
+        '<span class="schedule-aside-icon" aria-hidden="true">♻</span>' +
+        '<span class="schedule-aside-rot">Trash &amp; recycling</span>' +
+        '<span class="schedule-aside-hint">Tues year-round · skips Christmas → Wed</span>' +
+      '</div>'
+    );
+    blocks.push(
+      '<div class="schedule-aside-block">' +
+        '<span class="schedule-aside-icon" aria-hidden="true">🌿</span>' +
+        '<span class="schedule-aside-rot">Brush</span>' +
+        '<span class="schedule-aside-hint">Same Tue · skips holidays</span>' +
+      '</div>'
+    );
+    if (inLandscapeWasteSeason(nextTue) && !inLeafVacuumSeason(nextTue)) {
+      blocks.push(
+        '<div class="schedule-aside-block">' +
+          '<span class="schedule-aside-icon" aria-hidden="true">🍂</span>' +
+          '<span class="schedule-aside-rot">Landscape bags</span>' +
+          '<span class="schedule-aside-hint">Apr 6 – Nov 25 · holiday skips</span>' +
+        '</div>'
+      );
+    }
+    if (inLeafVacuumSeason(nextTue)) {
+      blocks.push(
+        '<div class="schedule-aside-block">' +
+          '<span class="schedule-aside-icon" aria-hidden="true">🍃</span>' +
+          '<span class="schedule-aside-rot">Leaf vacuum</span>' +
+          '<span class="schedule-aside-hint">Oct 27 – Jan 14 · rake loose to curb</span>' +
+        '</div>'
+      );
+    }
+    aside.innerHTML = blocks.join('');
+  }
+
+  /** Monday-only quiet row in Horizon main column when Tue pickup is exceptional. */
+  function getMunicipalMondayExceptionLine(mondayDate) {
+    if (mondayDate.getDay() !== 1) return null;
+    const tomorrow = new Date(mondayDate.getFullYear(), mondayDate.getMonth(), mondayDate.getDate() + 1);
+    const tue = dateOnly(tomorrow);
+    if (tue.getMonth() === 11 && tue.getDate() === 25) {
+      return 'No pickup this week — collection shifts to Wednesday.';
+    }
+    if (isLandscapeBrushHolidaySkipTuesday(tue)) {
+      return 'Landscape and brush won\'t be collected this week, but trash still will.';
+    }
+    if (inLeafVacuumSeason(tue)) {
+      return 'Rake any leaves loose to the curb tonight — the vacuum crew is making rounds.';
+    }
+    return null;
+  }
+
+  function hzDotClassForEvent(ev) {
+    const cal = String(ev.calendar || 'shared').toLowerCase();
+    if (cal === 'civic') return 'hz-dot--civic';
+    if (cal === 'local') return 'hz-dot--local';
+    if (cal === 'municipal') return 'hz-dot--municipal';
+    if (cal === 'holidays') return 'hz-dot--holidays';
+    if (cal === 'matt' || cal === 'jessica') return 'hz-dot--personal';
+    return 'hz-dot--shared';
+  }
+
+  function hzFormatDateCol(d) {
+    const dow = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()];
+    return { dow: dow, num: String(d.getDate()) };
+  }
+
+  function hzStandaloneRowHtml(ev, opts) {
+    const quiet = opts && opts.quiet;
+    const d = new Date(ev.start || ev.date || ev.startTime);
+    const col = hzFormatDateCol(d);
+    const title = (ev.title || ev.summary || 'Event').trim();
+    const subParts = [];
+    if (ev.calendar === 'local') subParts.push('Around town');
+    else if (ev.calendar === 'civic') subParts.push('Civic');
+    if (ev.venue) subParts.push(ev.venue);
+    const timeStr = (ev.start && !ev.isAllDay) ? formatEventTime(ev.start) : '';
+    if (timeStr) subParts.push(timeStr);
+    const sub = subParts.filter(Boolean).join(' · ');
+    const dot = hzDotClassForEvent(ev);
+    const click = ev.url && !quiet ? `onclick="window.open('${String(ev.url).replace(/'/g, '%27')}', '_blank')"` : '';
+    return (
+      '<div class="hz-standalone-row">' +
+        '<div class="hz-standalone-date">' +
+          '<div class="hz-standalone-dow">' + escapeHtml(col.dow) + '</div>' +
+          '<div class="hz-standalone-daynum">' + escapeHtml(col.num) + '</div>' +
+        '</div>' +
+        '<div class="hz-standalone-card' + (quiet ? ' hz-row--quiet' : '') + '" ' + click + '>' +
+          '<span class="hz-dot ' + dot + '"></span>' +
+          '<div class="hz-card-body">' +
+            '<div class="hz-card-title">' + escapeHtml(title) + '</div>' +
+            (sub ? '<div class="hz-card-sub">' + escapeHtml(sub) + '</div>' : '') +
+          '</div>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function hzGroupEventRowHtml(ev) {
+    const d = new Date(ev.start || ev.date || ev.startTime);
+    const col = hzFormatDateCol(d);
+    const title = (ev.title || ev.summary || 'Event').trim();
+    const sub = (ev.venue ? ev.venue + ' · ' : '') + ((ev.start && !ev.isAllDay) ? formatEventTime(ev.start) : '');
+    const dot = hzDotClassForEvent(ev);
+    const click = ev.url ? `onclick="window.open('${String(ev.url).replace(/'/g, '%27')}', '_blank')"` : '';
+    return (
+      '<div class="hz-group-event-row" ' + click + '>' +
+        '<div class="hz-standalone-date" style="width:40px;padding-top:0">' +
+          '<div class="hz-standalone-dow">' + escapeHtml(col.dow) + '</div>' +
+          '<div class="hz-standalone-daynum" style="font-size:18px">' + escapeHtml(col.num) + '</div>' +
+        '</div>' +
+        '<span class="hz-dot ' + dot + '" style="margin-top:6px"></span>' +
+        '<div class="hz-card-body">' +
+          '<div class="hz-card-title">' + escapeHtml(title) + '</div>' +
+          (sub ? '<div class="hz-card-sub">' + escapeHtml(sub.trim().replace(/\s*·\s*$/, '')) + '</div>' : '') +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function renderScheduleHorizon() {
+    const main = document.getElementById('scheduleHorizonMain');
+    if (!main) return;
+    renderMunicipalAside();
+    ensureHorizonMonthCursor();
+    const { start: monthStart, end: monthEnd } = horizonMonthRange();
+    const cutoff = horizonDateCutoff();
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const minYm = new Date(today.getFullYear(), today.getMonth(), 1);
+    const canPrev = new Date(scheduleHorizonYear, scheduleHorizonMonth0, 1) > minYm;
+
+    const label = new Date(scheduleHorizonYear, scheduleHorizonMonth0, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+    const all = (typeof scheduleEvents !== 'undefined' && scheduleEvents.length) ? scheduleEvents.slice() : [];
+    const inMonth = all.filter(ev => {
+      if (ev.calendar === 'local') return false;
+      const d = dateOnly(new Date(ev.start || ev.date || ev.startTime));
+      return d >= monthStart && d <= monthEnd && d >= cutoff;
+    });
+    const locals = all.filter(ev => ev.calendar === 'local').filter(ev => {
+      const d = dateOnly(new Date(ev.start || ev.date || ev.startTime));
+      return d >= monthStart && d <= monthEnd && d >= cutoff;
+    });
+
+    inMonth.sort((a, b) => new Date(a.start || a.date) - new Date(b.start || b.date));
+    locals.sort((a, b) => new Date(a.start || a.date) - new Date(b.start || b.date));
+
+    const mondayExtras = [];
+    let scan = new Date(monthStart.getTime());
+    while (scan <= monthEnd) {
+      if (scan.getDay() === 1 && scan >= cutoff) {
+        const line = getMunicipalMondayExceptionLine(scan);
+        if (line) {
+          mondayExtras.push({
+            start: formatLocalYmd(scan) + 'T12:00:00',
+            title: line,
+            calendar: 'municipal',
+            isAllDay: true,
+            url: ''
+          });
+        }
+      }
+      scan.setDate(scan.getDate() + 1);
+    }
+    mondayExtras.sort((a, b) => new Date(a.start) - new Date(b.start));
+
+    const parts = [];
+    parts.push('<div class="schedule-horizon-month-nav">');
+    parts.push('<button type="button" class="schedule-horizon-month-btn" ' + (!canPrev ? 'disabled' : '') + ' onclick="shiftHorizonMonth(-1)" aria-label="Previous month">←</button>');
+    parts.push('<div class="schedule-horizon-month-label">' + escapeHtml(label) + '</div>');
+    parts.push('<button type="button" class="schedule-horizon-month-btn" onclick="shiftHorizonMonth(1)" aria-label="Next month">→</button>');
+    parts.push('</div>');
+
+    const usedIds = new Set();
+    let hasAny = false;
+
+    function renderNestedGroups(parentDef, depth) {
+      if (depth > 1 || !parentDef.nested || !parentDef.nested.length) return '';
+      let html = '';
+      parentDef.nested.forEach(function(sub) {
+        const sd = resolveMMDDInHorizonYear_(sub.startMMDD);
+        const ed = resolveMMDDInHorizonYear_(sub.endMMDD);
+        if (!sd || !ed) return;
+        const sd0 = dateOnly(sd);
+        const ed0 = dateOnly(ed);
+        const evs = inMonth.filter(function(ev) {
+          const id = getEventId(ev);
+          if (usedIds.has(id)) return false;
+          const d = dateOnly(new Date(ev.start || ev.date || ev.startTime));
+          return d >= sd0 && d <= ed0;
+        });
+        evs.forEach(function(ev) { usedIds.add(getEventId(ev)); });
+        const spine = sub.spine === 'civic' ? 'civic' : (sub.spine === 'green' ? 'green' : 'accent');
+        html += '<div class="hz-nested hz-group hz-group--' + spine + '">';
+        html += '<div class="hz-group-spine"><span class="hz-group-spine-label">' + escapeHtml(sub.label) + '</span></div>';
+        html += '<div class="hz-group-body">';
+        evs.forEach(function(ev) { html += hzGroupEventRowHtml(ev); });
+        html += '</div></div>';
+      });
+      return html;
+    }
+
+    if (SCHEDULE_HORIZON_PERIOD_GROUPS.length) {
+      SCHEDULE_HORIZON_PERIOD_GROUPS.forEach(function(grp) {
+        const sd = resolveMMDDInHorizonYear_(grp.startMMDD);
+        const ed = resolveMMDDInHorizonYear_(grp.endMMDD);
+        if (!sd || !ed) return;
+        const sd0 = dateOnly(sd);
+        const ed0 = dateOnly(ed);
+        const evs = inMonth.filter(function(ev) {
+          const id = getEventId(ev);
+          if (usedIds.has(id)) return false;
+          const d = dateOnly(new Date(ev.start || ev.date || ev.startTime));
+          return d >= sd0 && d <= ed0;
+        });
+        evs.forEach(function(ev) { usedIds.add(getEventId(ev)); });
+        const nestedH = renderNestedGroups(grp, 0);
+        if (evs.length || (nestedH && nestedH.length)) hasAny = true;
+        const spine = grp.spine === 'civic' ? 'civic' : (grp.spine === 'green' ? 'green' : 'accent');
+        parts.push('<div class="hz-group hz-group--' + spine + '">');
+        parts.push('<div class="hz-group-spine"><span class="hz-group-spine-label">' + escapeHtml(grp.label) + '</span></div>');
+        parts.push('<div class="hz-group-body">');
+        parts.push('<div class="hz-group-header">' + escapeHtml(grp.label) + '</div>');
+        parts.push(nestedH);
+        evs.forEach(function(ev) { parts.push(hzGroupEventRowHtml(ev)); });
+        parts.push('</div></div>');
+      });
+    }
+
+    const remaining = inMonth.filter(ev => !usedIds.has(getEventId(ev)));
+    const stream = [];
+    mondayExtras.forEach(function(ex) {
+      stream.push({ t: new Date(ex.start).getTime(), ev: ex, quiet: true });
+    });
+    remaining.forEach(function(ev) {
+      stream.push({ t: new Date(ev.start || ev.date || ev.startTime).getTime(), ev: ev, quiet: false });
+    });
+    stream.sort(function(a, b) { return a.t - b.t; });
+    stream.forEach(function(x) {
+      hasAny = true;
+      parts.push(hzStandaloneRowHtml(x.ev, { quiet: x.quiet }));
+    });
+
+    if (locals.length) {
+      hasAny = true;
+      parts.push('<div class="hz-group hz-group--green">');
+      parts.push('<div class="hz-group-spine"><span class="hz-group-spine-label">Around town</span></div>');
+      parts.push('<div class="hz-group-body">');
+      parts.push('<div class="hz-group-header">Around town</div>');
+      locals.forEach(function(ev) {
+        parts.push(hzGroupEventRowHtml(ev));
+      });
+      parts.push('</div></div>');
+    }
+
+    if (!hasAny) {
+      parts.push('<div class="screen-loading" style="background:transparent;margin:20px 0">Nothing scheduled ahead this month.</div>');
+    }
+
+    main.innerHTML = parts.join('');
+  }
 
   function dateOnly(dt) {
     return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
@@ -13124,26 +13957,6 @@
     return false;
   }
 
-  /** Passive Monday-evening nudge for Tuesday pickup (client-side only). */
-  function getMunicipalMondayReminderForDate(mondayDate) {
-    if (mondayDate.getDay() !== 1) return null;
-    const tomorrow = new Date(mondayDate.getFullYear(), mondayDate.getMonth(), mondayDate.getDate() + 1);
-    const tue = dateOnly(tomorrow);
-    if (tue.getMonth() === 11 && tue.getDate() === 25) {
-      return 'No pickup this week — collection shifts to Wednesday.';
-    }
-    if (isLandscapeBrushHolidaySkipTuesday(tue)) {
-      return 'Landscape and brush won\'t be collected this week, but trash still will.';
-    }
-    if (inLeafVacuumSeason(tue)) {
-      return 'Rake any leaves loose to the curb tonight — the vacuum crew is making rounds.';
-    }
-    if (inLandscapeWasteSeason(tue)) {
-      return 'Bins out tonight — don\'t forget your leaf bags if you have any.';
-    }
-    return 'Bins out tonight — trash and recycling pickup tomorrow.';
-  }
-
   let scheduleEvents = [];
   let scheduleFilter = 'all';
   let scheduleTimeFilter = 'all'; // 'all' | 'week' | 'month'
@@ -13174,7 +13987,7 @@
     sel.value = scheduleTimeFilter;
     sel.onchange = () => {
       scheduleTimeFilter = sel.value;
-      renderScheduleList();
+      refreshScheduleMainView();
     };
   }
 
@@ -13198,7 +14011,7 @@
       btn.onclick = () => {
         scheduleFilter = btn.dataset.filter;
         renderScheduleChips();
-        renderScheduleList();
+        refreshScheduleMainView();
       };
     });
   }
@@ -13270,7 +14083,7 @@
       while (scan <= rangeEnd) {
         if (scan.getDay() === 1) {
           const key = scan.toDateString();
-          const muniLine = getMunicipalMondayReminderForDate(scan);
+          const muniLine = getMunicipalMondayExceptionLine(scan);
           if (muniLine) {
             const faux = { start: formatLocalYmd(scan) + 'T12:00:00', isAllDay: true, calendar: 'municipal' };
             if (eventInScheduleTimeWindow(faux)) {
@@ -13449,7 +14262,7 @@
     const eventRow = starEl ? starEl.closest('.schedule-event') : null;
     if (!eventRow || !eventRow._eventData) return;
     toggleEventStarred(eventRow._eventData);
-    renderScheduleList();
+    refreshScheduleMainView();
   }
 
   let scheduleCalendarsList = [];
@@ -13644,12 +14457,12 @@
     }
   }
 
-  function openLocalEventQuickModal() {
+  function openLocalEventDrawer() {
     if (!getApiUser()) {
       alert('Sign in to add a local event.');
       return;
     }
-    const o = document.getElementById('localEventQuickOverlay');
+    const o = document.getElementById('localEventDrawerOverlay');
     const t = document.getElementById('localEventQuickTitle');
     const dEl = document.getElementById('localEventQuickDate');
     const v = document.getElementById('localEventQuickVenue');
@@ -13659,9 +14472,9 @@
     if (o) o.classList.add('open');
   }
 
-  function closeLocalEventQuickModal(ev) {
-    if (ev && ev.target !== document.getElementById('localEventQuickOverlay')) return;
-    const o = document.getElementById('localEventQuickOverlay');
+  function closeLocalEventDrawer(ev) {
+    const o = document.getElementById('localEventDrawerOverlay');
+    if (ev && ev.target !== o) return;
     if (o) o.classList.remove('open');
   }
 
@@ -13675,12 +14488,13 @@
         method: 'POST',
         redirect: 'follow',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'addLocalEvent', user: getApiUser(), title, date, venue, url: '', source: 'Quick add' })
+        body: JSON.stringify({ action: 'addLocalEvent', user: getApiUser(), title, date, venue, url: '', source: 'Quick add', added_by: 'manual' })
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
-      closeLocalEventQuickModal();
-      showScheduleScreen();
+      closeLocalEventDrawer();
+      await mergeFreshLocalEventsIntoSchedule();
+      refreshScheduleMainView();
     } catch (err) {
       alert('Could not save: ' + (err.message || 'Unknown error'));
     }
@@ -13697,7 +14511,7 @@
       method: 'POST',
       redirect: 'follow',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'addLocalEvent', user: getApiUser(), title, date, venue, url, source: 'Blathers chat' })
+      body: JSON.stringify({ action: 'addLocalEvent', user: getApiUser(), title, date, venue, url, source: 'Blathers chat', added_by: 'blathers' })
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
@@ -13819,18 +14633,18 @@
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
     const scheduleBtn = document.querySelector('.drawer-item[data-screen="schedule"]');
     if (scheduleBtn) scheduleBtn.classList.add('active');
+    syncScheduleViewChrome();
     const list = document.getElementById('scheduleList');
-    list.innerHTML = '<div class="screen-loading">Loading…</div>';
+    const hzMain = document.getElementById('scheduleHorizonMain');
+    if (list) list.innerHTML = '<div class="screen-loading">Loading…</div>';
+    if (hzMain) hzMain.innerHTML = '<div class="screen-loading">Loading…</div>';
+    renderMunicipalAside();
     renderScheduleTimeChips();
     renderScheduleChips();
     const user = localStorage.getItem('shasta_user');
     if (!user) {
       scheduleEvents = getCivicEvents();
-      if (scheduleEvents.length === 0) {
-        list.innerHTML = '<div class="screen-loading">No upcoming civic dates.</div>';
-      } else {
-        renderScheduleList();
-      }
+      refreshScheduleMainView();
       renderScheduleTimeChips();
       renderScheduleChips();
       return;
@@ -13842,33 +14656,23 @@
       if (calIds && calIds.length > 0) {
         url += '&calendars=' + encodeURIComponent(JSON.stringify(calIds));
       }
-      const range = getLocalEventsApiRange();
-      const localUrl = apiUrlWithUser(API_URL, '&action=getLocalEvents&from=' + encodeURIComponent(range.from) + '&until=' + encodeURIComponent(range.until));
-      const [res, locRes] = await Promise.all([
+      const [res, localArr] = await Promise.all([
         fetch(url, { redirect: 'follow' }),
-        fetch(localUrl, { redirect: 'follow' })
+        fetchLocalEventsForScheduleCached()
       ]);
       const data = await res.json();
-      let localArr = [];
-      try {
-        const locData = await locRes.json();
-        if (!locData.error && Array.isArray(locData.events)) localArr = locData.events;
-      } catch (_) {}
       const civic = getCivicEvents();
       if (data.error || !data.events || data.events.length === 0) {
-        scheduleEvents = [...civic, ...localArr];
-        if (scheduleEvents.length === 0) list.innerHTML = '<div class="screen-loading">No upcoming events.</div>';
-        else renderScheduleList();
+        scheduleEvents = civic.concat(localArr);
       } else {
-        scheduleEvents = [...data.events, ...civic, ...localArr];
-        renderScheduleList();
+        scheduleEvents = data.events.concat(civic).concat(localArr);
       }
+      refreshScheduleMainView();
       renderScheduleTimeChips();
       renderScheduleChips();
     } catch (err) {
       scheduleEvents = getCivicEvents();
-      if (scheduleEvents.length === 0) list.innerHTML = '<div class="screen-loading">Could not load schedule.</div>';
-      else renderScheduleList();
+      refreshScheduleMainView();
       renderScheduleTimeChips();
       renderScheduleChips();
     }
@@ -14226,7 +15030,9 @@
         .then(function() {
           addBlathersLocalSavedCard(turnEl, structured.localEventDraft);
           const sc = document.getElementById('scheduleScreen');
-          if (sc && sc.classList.contains('visible')) showScheduleScreen();
+          if (sc && sc.classList.contains('visible')) {
+            return mergeFreshLocalEventsIntoSchedule().then(function() { refreshScheduleMainView(); });
+          }
         })
         .catch(function(err) {
           console.warn('Local event save failed', err);
