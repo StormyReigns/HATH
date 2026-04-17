@@ -3485,6 +3485,18 @@
       max-height: 160px;
       text-align: center;
     }
+    .hz-group-range-cap {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      color: var(--muted);
+      line-height: 1.25;
+    }
+    .hz-group-range-cap--top { margin-bottom: 6px; }
+    .hz-group-range-cap--bottom { margin-top: 10px; }
+    html.dark-mode .hz-group-range-cap { color: var(--muted); opacity: 0.95; }
+
     .hz-group-header {
       font-family: 'Playfair Display', serif;
       font-size: 15px;
@@ -3505,19 +3517,51 @@
     .hz-nested .hz-group-spine { min-height: 40px; }
     .hz-nested .hz-group-body { padding: 8px; }
 
-    .hz-group-event-row {
+    .hz-group-event-wrap {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 2px;
+    }
+    .hz-standalone-date--in-group {
+      width: 44px;
+      flex-shrink: 0;
+      text-align: left;
+      padding-top: 4px;
+    }
+    .hz-standalone-daynum--in-group {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1;
+    }
+    .hz-group-event-main {
+      flex: 1;
+      min-width: 0;
       display: flex;
       align-items: flex-start;
       gap: 8px;
-      padding: 8px 0;
-      border-top: 1px solid rgba(0,0,0,0.05);
-      cursor: pointer;
+      padding: 8px 10px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(192, 122, 74, 0.14);
+      border-radius: 10px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
     }
-    .hz-group-event-row:first-of-type { border-top: none; padding-top: 0; }
-    html.dark-mode .hz-group-event-row { border-top-color: rgba(255,255,255,0.06); }
+    html.dark-mode .hz-group-event-main {
+      background: rgba(40, 36, 32, 0.65);
+      border-color: rgba(224, 152, 104, 0.18);
+    }
+    .hz-group-event-wrap + .hz-group-event-wrap {
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+    }
+    .hz-group-event-wrap:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+    html.dark-mode .hz-group-event-wrap + .hz-group-event-wrap { border-top-color: rgba(255, 255, 255, 0.07); }
 
     .hz-standalone-card--hit,
-    .hz-group-event-row--hit { cursor: pointer; }
+    .hz-group-event-main--hit { cursor: pointer; }
     .hz-card-actions-row {
       display: flex;
       flex-wrap: wrap;
@@ -7724,7 +7768,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.31.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.31.1';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -13835,20 +13879,22 @@
     const dot = hzDotClassForEvent(ev);
     const ymdAttr = ' data-hz-day-ymd="' + formatLocalYmd(d) + '"';
     const regAttr = regId ? ' data-hz-reg="' + escapeHtml(regId) + '"' : '';
-    const hitClass = regId ? ' hz-group-event-row--hit' : '';
+    const mainHit = regId ? ' hz-group-event-main--hit' : '';
     const legacyClick = ev.url && !regId ? ' onclick="window.open(\'' + String(ev.url).replace(/'/g, '%27') + '\', \'_blank\')"' : '';
     const actions = regId ? hzCardActionsInnerHtml(ev) : '';
     return (
-      '<div class="hz-group-event-row' + hitClass + '"' + ymdAttr + regAttr + legacyClick + '>' +
-        '<div class="hz-standalone-date" style="width:40px;padding-top:0">' +
+      '<div class="hz-group-event-wrap"' + ymdAttr + regAttr + '>' +
+        '<div class="hz-standalone-date hz-standalone-date--in-group">' +
           '<div class="hz-standalone-dow">' + escapeHtml(col.dow) + '</div>' +
-          '<div class="hz-standalone-daynum" style="font-size:18px">' + escapeHtml(col.num) + '</div>' +
+          '<div class="hz-standalone-daynum hz-standalone-daynum--in-group">' + escapeHtml(col.num) + '</div>' +
         '</div>' +
-        '<span class="hz-dot ' + dot + '" style="margin-top:6px"></span>' +
-        '<div class="hz-card-body">' +
-          '<div class="hz-card-title">' + escapeHtml(title) + '</div>' +
-          (sub ? '<div class="hz-card-sub">' + escapeHtml(sub.trim().replace(/\s*·\s*$/, '')) + '</div>' : '') +
-          actions +
+        '<div class="hz-group-event-main' + mainHit + '"' + legacyClick + '">' +
+          '<span class="hz-dot ' + dot + '" style="margin-top:6px;flex-shrink:0"></span>' +
+          '<div class="hz-card-body">' +
+            '<div class="hz-card-title">' + escapeHtml(title) + '</div>' +
+            (sub ? '<div class="hz-card-sub">' + escapeHtml(sub.trim().replace(/\s*·\s*$/, '')) + '</div>' : '') +
+            actions +
+          '</div>' +
         '</div>' +
       '</div>'
     );
@@ -13868,10 +13914,11 @@
         if (d && d.url) window.open(d.url, '_blank');
       });
     });
-    main.querySelectorAll('.hz-group-event-row--hit').forEach(function(rowEl) {
-      rowEl.addEventListener('click', function(ev) {
+    main.querySelectorAll('.hz-group-event-main--hit').forEach(function(mainEl) {
+      mainEl.addEventListener('click', function(ev) {
         if (ev.target.closest('.hz-card-actions-row') || ev.target.closest('button')) return;
-        const d = rowEl._eventData;
+        const row = mainEl.closest('[data-hz-reg]');
+        const d = row && row._eventData;
         if (d && d.url) window.open(d.url, '_blank');
       });
     });
@@ -13885,6 +13932,17 @@
     ensureHorizonMonthCursor();
     const { start: monthStart, end: monthEnd } = horizonMonthRange();
     const cutoff = horizonDateCutoff();
+
+    /** Range caps for the visible month slice (period may extend beyond the month). */
+    function hzCapsForMonthView(rangeStart, rangeEnd) {
+      const s = dateOnly(rangeStart);
+      const e = dateOnly(rangeEnd);
+      const ms = dateOnly(monthStart);
+      const me = dateOnly(monthEnd);
+      const ds = s < ms ? ms : s;
+      const de = e > me ? me : e;
+      return hzPeriodRangeCapsPairHtml(ds, de);
+    }
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -13993,7 +14051,10 @@
         html += '<div class="hz-nested hz-group hz-group--' + spine + '">';
         html += '<div class="hz-group-spine"><span class="hz-group-spine-label">' + escapeHtml(sub.label) + '</span></div>';
         html += '<div class="hz-group-body">';
+        const capsSub = hzCapsForMonthView(sd0, ed0);
+        html += capsSub.top;
         evs.forEach(function(ev) { html += hzGroupEventRowHtml(ev, alloc(ev)); });
+        html += capsSub.bottom;
         html += '</div></div>';
       });
       return html;
@@ -14017,7 +14078,10 @@
           nestedHtml += '<div class="hz-nested hz-group hz-group--' + sp + '">';
           nestedHtml += '<div class="hz-group-spine"><span class="hz-group-spine-label">' + escapeHtml(sub.spineLabel) + '</span></div>';
           nestedHtml += '<div class="hz-group-body">';
+          const capsN = hzPeriodRangeCapsPairHtml(ns0, ne0);
+          nestedHtml += capsN.top;
           nev.forEach(function(ev) { nestedHtml += hzGroupEventRowHtml(ev, alloc(ev)); });
+          nestedHtml += capsN.bottom;
           nestedHtml += '</div></div>';
         });
       }
@@ -14035,9 +14099,12 @@
       parts.push('<div class="hz-group hz-group--' + spine + '">');
       parts.push('<div class="hz-group-spine"><span class="hz-group-spine-label">' + escapeHtml(grp.spineLabel) + '</span></div>');
       parts.push('<div class="hz-group-body">');
+      const capP = hzPeriodRangeCapsPairHtml(ps0, pe0);
+      parts.push(capP.top);
       parts.push('<div class="hz-group-header">' + escapeHtml(grp.label) + '</div>');
       parts.push(nestedHtml);
       pev.forEach(function(ev) { parts.push(hzGroupEventRowHtml(ev, alloc(ev))); });
+      parts.push(capP.bottom);
       parts.push('</div></div>');
       hasAny = true;
     }
@@ -14062,9 +14129,12 @@
         parts.push('<div class="hz-group hz-group--' + spine + '">');
         parts.push('<div class="hz-group-spine"><span class="hz-group-spine-label">' + escapeHtml(grp.label) + '</span></div>');
         parts.push('<div class="hz-group-body">');
+        const capG = hzCapsForMonthView(sd0, ed0);
+        parts.push(capG.top);
         parts.push('<div class="hz-group-header">' + escapeHtml(grp.label) + '</div>');
         parts.push(nestedH);
         evs.forEach(function(ev) { parts.push(hzGroupEventRowHtml(ev, alloc(ev))); });
+        parts.push(capG.bottom);
         parts.push('</div></div>');
       });
     }
@@ -14110,6 +14180,23 @@
 
   function dateOnly(dt) {
     return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+  }
+
+  /** Tiny start/end lines for period groupings (top = range start, bottom = range end). */
+  function hzPeriodRangeCapsPairHtml(rangeStart, rangeEnd) {
+    const a = dateOnly(rangeStart);
+    const b = dateOnly(rangeEnd);
+    const same = a.getTime() === b.getTime();
+    const top = same
+      ? a.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
+      : a.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const bot = same
+      ? a.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
+      : b.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return {
+      top: '<div class="hz-group-range-cap hz-group-range-cap--top">' + escapeHtml(top) + '</div>',
+      bottom: '<div class="hz-group-range-cap hz-group-range-cap--bottom">' + escapeHtml(bot) + '</div>'
+    };
   }
 
   function inLandscapeWasteSeason(d) {
@@ -14206,6 +14293,11 @@
     return { start: a, end: b };
   }
 
+  /** Last calendar day of month (monthIndex 0 = January). */
+  function lastDayOfMonthSchedule_(y, monthIndex0) {
+    return dateOnly(new Date(y, monthIndex0 + 1, 0));
+  }
+
   function getCulturalPeriodWindowsForMonth_(y, monthStart, monthEnd) {
     const febLast = isLeapYearSchedule_(y) ? 29 : 28;
     const mlk = weekMonSunContainingSchedule_(y, 0, 15);
@@ -14239,7 +14331,7 @@
       label: "Women's History Month",
       spine: 'accent',
       start: dateOnly(new Date(y, 2, 1)),
-      end: dateOnly(new Date(y, 3, 0)),
+      end: lastDayOfMonthSchedule_(y, 2),
       nested: []
     });
     raw.push({
@@ -14247,7 +14339,7 @@
       label: 'Earth Month',
       spine: 'green',
       start: dateOnly(new Date(y, 3, 1)),
-      end: dateOnly(new Date(y, 5, 0)),
+      end: lastDayOfMonthSchedule_(y, 3),
       nested: [
         { spineLabel: 'Earth Week', label: 'Earth Week (lead-up to Earth Day, Apr 22)', spine: 'accent', start: earthWeek.start, end: earthWeek.end }
       ]
@@ -14257,7 +14349,7 @@
       label: 'Asian Pacific American Heritage & Mental Health Awareness Month',
       spine: 'accent',
       start: dateOnly(new Date(y, 4, 1)),
-      end: dateOnly(new Date(y, 6, 0)),
+      end: lastDayOfMonthSchedule_(y, 4),
       nested: [
         { spineLabel: 'Teachers', label: 'Teacher Appreciation Week (first full week of May)', spine: 'green', start: teacherWeek.start, end: teacherWeek.end },
         { spineLabel: 'MH Week', label: 'Mental Health Awareness Week (mid-May)', spine: 'green', start: mentalHealthWeek.start, end: mentalHealthWeek.end }
@@ -14268,7 +14360,7 @@
       label: 'Pride Month',
       spine: 'accent',
       start: dateOnly(new Date(y, 5, 1)),
-      end: dateOnly(new Date(y, 7, 0)),
+      end: lastDayOfMonthSchedule_(y, 5),
       nested: [
         { spineLabel: 'Juneteenth', label: 'Juneteenth (June 19)', spine: 'civic', start: dateOnly(new Date(y, 5, 19)), end: dateOnly(new Date(y, 5, 19)) }
       ]
@@ -14286,7 +14378,7 @@
       label: 'Breast Cancer Awareness & Indigenous Peoples\' Month (after Hispanic Heritage through Oct 15)',
       spine: 'accent',
       start: dateOnly(new Date(y, 9, 16)),
-      end: dateOnly(new Date(y, 11, 0)),
+      end: lastDayOfMonthSchedule_(y, 9),
       nested: []
     });
     raw.push({
@@ -14294,7 +14386,7 @@
       label: 'Native American Heritage Month',
       spine: 'civic',
       start: dateOnly(new Date(y, 10, 1)),
-      end: dateOnly(new Date(y, 12, 0)),
+      end: lastDayOfMonthSchedule_(y, 10),
       nested: thanksWeek
         ? [{ spineLabel: 'Thanks Week', label: 'Thanksgiving & Native American Heritage Week', spine: 'green', start: thanksWeek.start, end: thanksWeek.end }]
         : []
