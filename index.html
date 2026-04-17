@@ -2466,6 +2466,7 @@
       overflow-x: auto; overflow-y: visible;
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
+      touch-action: pan-x pan-y;
       scrollbar-width: none; height: 100%; align-items: center;
       box-sizing: border-box; flex-shrink: 0;
     }
@@ -7653,7 +7654,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.29.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.29.3';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -7891,14 +7892,14 @@
 
   async function preloadApp() {
     const LOAD_MIN_MS = 1200;
-    const LOAD_MAX_MS = 4000;
+    const LOAD_MAX_MS = 14000;
     const start = Date.now();
 
     const fetchDocsFolder = async (folderId) => {
       try {
         const url = apiUrlWithUser(API_URL, '&action=listFolder&folder=' + encodeURIComponent(folderId));
         const res = await fetch(url, { redirect: 'follow' });
-        if (!res.ok) return;
+        if (!res.ok) return [];
         const data = await res.json();
         if (!data.error && (data.folders || data.files)) {
           docsFolderCache[folderId] = data;
@@ -7925,23 +7926,38 @@
         .then(d => (d && d.files) ? d.files : [])
         .catch(() => []);
 
-    const pingPromise = fetch(API_URL + '?action=ping', { redirect: 'follow' }).catch(() => null);
-    const rootPromise = fetchDocsFolder(DOCS_FOLDER_ID);
-    const balancePromise = fetchBalance();
-    const tabListPromise = fetchTabList();
-    const docIndexPromise = fetchDocIndex();
+    const runCore = async () => {
+      const pingPromise = fetch(API_URL + '?action=ping', { redirect: 'follow' }).catch(() => null);
+      const rootPromise = fetchDocsFolder(DOCS_FOLDER_ID);
+      const balancePromise = fetchBalance();
+      const tabListPromise = fetchTabList();
+      const docIndexPromise = fetchDocIndex();
 
-    const [rootFolders, balance, tabs, docIndex] = await Promise.all([
-      rootPromise, balancePromise, tabListPromise, docIndexPromise, pingPromise
-    ]);
-    window.shastaTabs = tabs || [];
-    window.shastaDocIndex = docIndex || [];
-    if (tabs && tabs.length > 0) {
-      try { sessionStorage.setItem('shasta_tabList', JSON.stringify(tabs)); } catch (_) {}
-    }
+      const [rootFolders, balance, tabs, docIndex] = await Promise.all([
+        rootPromise, balancePromise, tabListPromise, docIndexPromise, pingPromise
+      ]);
+      window.shastaTabs = tabs || [];
+      window.shastaDocIndex = docIndex || [];
+      if (tabs && tabs.length > 0) {
+        try { sessionStorage.setItem('shasta_tabList', JSON.stringify(tabs)); } catch (_) {}
+      }
 
-    if (rootFolders && rootFolders.length > 0) {
-      rootFolders.forEach(f => fetchDocsFolder(f.id));
+      if (rootFolders && rootFolders.length > 0) {
+        rootFolders.forEach(f => fetchDocsFolder(f.id));
+      }
+      return balance;
+    };
+
+    let balance = null;
+    try {
+      balance = await Promise.race([
+        runCore(),
+        new Promise(function(_, rej) {
+          setTimeout(function() { rej(new Error('preload_timeout')); }, LOAD_MAX_MS);
+        })
+      ]);
+    } catch (_) {
+      balance = null;
     }
 
     const elapsed = Date.now() - start;
@@ -7991,13 +8007,20 @@
     const savedExp  = localStorage.getItem('shasta_auth_exp');
     const sessionEmail = (savedUser && savedExp && Date.now() < parseInt(savedExp)) ? savedUser : null;
 
-    const preloadResult = await preloadApp();
-    _lastPreloadBalance = preloadResult;
-
-    launchApp(sessionEmail, preloadResult);
-    initGSIWhenReady();
-
-    hideLoadScreen();
+    let preloadResult = null;
+    try {
+      preloadResult = await preloadApp();
+      _lastPreloadBalance = preloadResult;
+      launchApp(sessionEmail, preloadResult);
+    } catch (_) {
+      _lastPreloadBalance = null;
+      try {
+        launchApp(sessionEmail, null);
+      } catch (_) {}
+    } finally {
+      initGSIWhenReady();
+      hideLoadScreen();
+    }
 
     var fddOverlay = document.getElementById('fundingDeepDive');
     if (fddOverlay) {
@@ -12608,12 +12631,12 @@
   }
 
   function setupCivicsCarouselSwipe() {
-    const screen = document.getElementById('civicsScreen');
     const carousel = document.getElementById('civicsCarousel');
     const track = document.getElementById('civicsCarouselTrack');
-    if (!screen || !carousel || !track || !carousel._civicsGroups) return;
-    if (screen._civicsPageSwipeBound) return;
-    screen._civicsPageSwipeBound = true;
+    const swipeHost = carousel && carousel.closest('.civics-carousel-wrap');
+    if (!swipeHost || !carousel || !track || !carousel._civicsGroups) return;
+    if (swipeHost._civicsPageSwipeBound) return;
+    swipeHost._civicsPageSwipeBound = true;
 
     var startX = 0;
     var startY = 0;
@@ -12640,7 +12663,7 @@
       updateCivicsCarouselEdges();
     }
 
-    screen.addEventListener('touchstart', function(e) {
+    swipeHost.addEventListener('touchstart', function(e) {
       if (e.touches.length !== 1) return;
       if (civicsSwipeInteractive(e.target)) {
         swipeAxis = 'skip';
@@ -12651,7 +12674,7 @@
       startY = e.touches[0].clientY;
     }, { passive: true });
 
-    screen.addEventListener('touchmove', function(e) {
+    swipeHost.addEventListener('touchmove', function(e) {
       if (swipeAxis === 'skip' || e.touches.length !== 1) return;
       var x = e.touches[0].clientX;
       var y = e.touches[0].clientY;
@@ -12668,7 +12691,7 @@
       if (swipeAxis === 'h') e.preventDefault();
     }, { passive: false });
 
-    screen.addEventListener('touchend', function(e) {
+    swipeHost.addEventListener('touchend', function(e) {
       if (swipeAxis === 'skip') {
         swipeAxis = null;
         return;
@@ -12686,7 +12709,7 @@
       applySlideDelta(dx);
     }, { passive: true });
 
-    screen.addEventListener('touchcancel', function() {
+    swipeHost.addEventListener('touchcancel', function() {
       swipeAxis = null;
     }, { passive: true });
 
