@@ -3070,9 +3070,8 @@
     #scheduleScreen .schedule-header,
     #scheduleScreen .schedule-chips-wrap,
     #scheduleScreen .schedule-event-count,
-    #scheduleScreen .screen-list,
     #scheduleScreen .schedule-horizon-root,
-    #scheduleScreen .schedule-list-root,
+    #scheduleScreen .schedule-life-chrome,
     #scheduleScreen .screen-footer { position: relative; z-index: 1; }
     .schedule-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -3190,9 +3189,37 @@
       padding: 0 10px 6px;
       align-items: stretch;
     }
+    .schedule-horizon-main-col {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+    }
+    .schedule-life-chrome {
+      flex-shrink: 0;
+      padding-bottom: 2px;
+    }
+    .schedule-life-chrome .schedule-filters-wrap {
+      margin-top: 0;
+      padding-left: 2px;
+      padding-right: 2px;
+    }
+    .schedule-life-chrome .schedule-event-count {
+      padding-left: 2px;
+      padding-right: 2px;
+    }
+    .schedule-life-swipe-host {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      touch-action: pan-y;
+    }
     .schedule-horizon-main {
       flex: 1;
       min-width: 0;
+      min-height: 0;
       overflow-x: hidden;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
@@ -3205,12 +3232,39 @@
       gap: 8px;
       margin-bottom: 10px;
       padding: 0 2px;
+      flex-wrap: wrap;
+    }
+    .schedule-horizon-month-nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+    }
+    .schedule-horizon-month-label-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      flex: 1;
+      min-width: 0;
     }
     .schedule-horizon-month-label {
       font-family: 'Playfair Display', serif;
       font-size: 17px;
       font-weight: 500;
       color: var(--text);
+      text-align: center;
+    }
+    .schedule-horizon-swipe-hint {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      opacity: 0.85;
     }
     .schedule-horizon-month-btn {
       border: none;
@@ -3460,18 +3514,68 @@
     .hz-group-event-row:first-of-type { border-top: none; padding-top: 0; }
     html.dark-mode .hz-group-event-row { border-top-color: rgba(255,255,255,0.06); }
 
-    .schedule-list-root {
-      flex: 1;
-      min-height: 0;
+    .hz-standalone-card--hit,
+    .hz-group-event-row--hit { cursor: pointer; }
+    .hz-card-actions-row {
       display: flex;
-      flex-direction: column;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 8px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      justify-content: flex-end;
     }
-    .schedule-list-root .screen-list {
-      flex: 1;
-      min-height: 0;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
+    html.dark-mode .hz-card-actions-row { border-top-color: rgba(255,255,255,0.08); }
+    .hz-mini-badge {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(192,122,74,0.12);
+      color: var(--accent);
     }
+    .hz-mini-badge.local-pill { background: rgba(90,144,112,0.18); color: #3d6b4f; }
+    html.dark-mode .hz-mini-badge.local-pill { color: #9bc9a8; }
+    .hz-card-time {
+      font-size: 12px;
+      color: var(--muted);
+      margin-right: auto;
+    }
+    .hz-sq-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(192,122,74,0.35);
+      background: rgba(192,122,74,0.08);
+      color: var(--accent);
+      cursor: pointer;
+    }
+    html.dark-mode .hz-sq-btn {
+      border-color: rgba(224,152,104,0.35);
+      background: rgba(224,152,104,0.1);
+      color: #e8b896;
+    }
+    .hz-standalone-card .schedule-event-star,
+    .hz-card-actions-row .schedule-event-star {
+      width: 32px; height: 32px;
+      min-width: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 0;
+      border-radius: 8px;
+    }
+    .hz-standalone-card .schedule-event-star.starred,
+    .hz-card-actions-row .schedule-event-star.starred { color: #c9a227; }
 
     .local-event-drawer-overlay {
       position: fixed;
@@ -7111,7 +7215,6 @@
         <div class="schedule-header-right">
           <div class="schedule-guest-signin-hint" id="scheduleGuestSigninHint" style="display:none" aria-live="polite">You're not signed in</div>
           <div class="schedule-view-toolbar">
-            <button type="button" class="schedule-view-toggle-pill" id="scheduleViewListBtn" onclick="toggleScheduleViewMode()" aria-pressed="false">List</button>
             <button type="button" class="schedule-add-compact" onclick="openLocalEventDrawer()" title="Add local event" aria-label="Add local event">+</button>
           </div>
           <div class="schedule-header-actions">
@@ -7126,24 +7229,27 @@
       </div>
       <div class="schedule-guest-banner" id="scheduleGuestBanner" style="display:none">Sign in to see your personal calendar</div>
       <div class="schedule-horizon-root" id="scheduleHorizonRoot">
-        <div class="schedule-horizon-main" id="scheduleHorizonMain"></div>
-        <aside class="schedule-horizon-aside" id="scheduleHorizonAside" aria-label="Pickup rhythm"></aside>
-      </div>
-      <div class="schedule-list-root" id="scheduleListRoot" style="display:none">
-        <div class="schedule-filters-wrap">
-          <div class="schedule-time-row">
-            <select id="scheduleTimeSelect" class="schedule-time-select" aria-label="Time range">
-              <option value="all">All time</option>
-              <option value="week">This week</option>
-              <option value="month">This month</option>
-            </select>
+        <div class="schedule-horizon-main-col">
+          <div class="schedule-life-chrome">
+            <div class="schedule-filters-wrap">
+              <div class="schedule-time-row">
+                <select id="scheduleTimeSelect" class="schedule-time-select" aria-label="Time range">
+                  <option value="all">All time</option>
+                  <option value="week">This week</option>
+                  <option value="month">This month</option>
+                </select>
+              </div>
+              <div class="schedule-chips-wrap h-scroll-faded">
+                <div class="schedule-chips" id="scheduleChips"></div>
+              </div>
+            </div>
+            <div class="schedule-event-count" id="scheduleEventCount"></div>
           </div>
-          <div class="schedule-chips-wrap h-scroll-faded">
-            <div class="schedule-chips" id="scheduleChips"></div>
+          <div class="schedule-life-swipe-host" id="scheduleLifeSwipeHost">
+            <div class="schedule-horizon-main" id="scheduleHorizonMain"></div>
           </div>
         </div>
-        <div class="schedule-event-count" id="scheduleEventCount"></div>
-        <div class="screen-list" id="scheduleList"></div>
+        <aside class="schedule-horizon-aside" id="scheduleHorizonAside" aria-label="Pickup rhythm"></aside>
       </div>
       <div class="screen-footer">
         <a href="https://calendar.google.com" target="_blank" rel="noopener">Open in Google Calendar</a>
@@ -7654,7 +7760,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.29.3';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.30.0';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -7850,7 +7956,7 @@
     const SCROLL_CONTAINERS = [
       '.civics-content',
       '#docsList',
-      '#scheduleList',
+      '#scheduleHorizonMain',
       '.recipes-list-wrap',
       '#projectsInProgressList',
       '.blatherbook-messages'
@@ -13462,49 +13568,41 @@
    */
   const SCHEDULE_HORIZON_PERIOD_GROUPS = [];
 
-  const SCHEDULE_VIEW_MODE_KEY = 'schedule_view_mode';
   const LOCAL_EVENTS_CACHE_KEY = 'shasta_local_events_v1';
   const LOCAL_EVENTS_CACHE_TTL_MS = 3600000;
 
   let scheduleHorizonYear = null;
   let scheduleHorizonMonth0 = null;
 
-  function getScheduleViewMode() {
-    try {
-      const v = sessionStorage.getItem(SCHEDULE_VIEW_MODE_KEY);
-      if (v === 'list' || v === 'horizon') return v;
-    } catch (_) {}
-    return 'horizon';
-  }
-
-  function setScheduleViewMode(mode) {
-    try {
-      sessionStorage.setItem(SCHEDULE_VIEW_MODE_KEY, mode === 'list' ? 'list' : 'horizon');
-    } catch (_) {}
-  }
-
-  function syncScheduleViewChrome() {
-    const listOn = getScheduleViewMode() === 'list';
-    const hr = document.getElementById('scheduleHorizonRoot');
-    const lr = document.getElementById('scheduleListRoot');
-    const btn = document.getElementById('scheduleViewListBtn');
-    if (hr) hr.style.display = listOn ? 'none' : 'flex';
-    if (lr) lr.style.display = listOn ? 'flex' : 'none';
-    if (btn) {
-      btn.classList.toggle('active', listOn);
-      btn.setAttribute('aria-pressed', listOn ? 'true' : 'false');
-    }
-  }
-
-  function toggleScheduleViewMode() {
-    setScheduleViewMode(getScheduleViewMode() === 'list' ? 'horizon' : 'list');
-    syncScheduleViewChrome();
-    refreshScheduleMainView();
-  }
-
   function refreshScheduleMainView() {
-    if (getScheduleViewMode() === 'list') renderScheduleList();
-    else renderScheduleHorizon();
+    renderScheduleHorizon();
+  }
+
+  let scheduleLifeSwipeBound = false;
+  function initScheduleLifeSwipe() {
+    if (scheduleLifeSwipeBound) return;
+    const host = document.getElementById('scheduleLifeSwipeHost');
+    if (!host) return;
+    scheduleLifeSwipeBound = true;
+    let x0 = null;
+    let y0 = null;
+    host.addEventListener('touchstart', function(e) {
+      if (e.touches.length !== 1) return;
+      x0 = e.touches[0].clientX;
+      y0 = e.touches[0].clientY;
+    }, { passive: true });
+    host.addEventListener('touchend', function(e) {
+      if (x0 == null || y0 == null) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - x0;
+      const dy = t.clientY - y0;
+      x0 = null;
+      y0 = null;
+      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 28) return;
+      const th = 52;
+      if (dx < -th) shiftHorizonMonth(1);
+      else if (dx > th) shiftHorizonMonth(-1);
+    }, { passive: true });
   }
 
   function ensureHorizonMonthCursor() {
@@ -13694,7 +13792,28 @@
     return { dow: dow, num: String(d.getDate()) };
   }
 
-  function hzStandaloneRowHtml(ev, opts) {
+  function hzCardActionsInnerHtml(ev) {
+    const cal = String(ev.calendar || 'shared').toLowerCase();
+    const time = (ev.start && !ev.isAllDay) ? formatEventTime(ev.start) : '';
+    const cat = getEventCategory(ev);
+    const badge = cat ? '<span class="hz-mini-badge ' + escapeHtml(cat) + '">' + escapeHtml(cat) + '</span>' : '';
+    const localBadge = ev.calendar === 'local' ? '<span class="hz-mini-badge local-pill">Local</span>' : '';
+    const canEdit = ev.calendar && ['holidays', 'civic', 'local', 'municipal'].indexOf(cal) < 0;
+    const editBtn = canEdit ? '<button type="button" class="hz-sq-btn hz-edit-btn" onclick="event.stopPropagation();openEventModalForRow(this)" title="Edit">Edit</button>' : '';
+    const bellBtn = cal === 'civic' ? '<button type="button" class="hz-sq-btn" onclick="event.stopPropagation();addEventToCalendarFromHzBtn(this)" title="Download .ics" aria-label="Add to calendar"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></button>' : '';
+    const starClass = isEventStarred(ev) ? ' starred' : '';
+    const starFill = isEventStarred(ev)
+      ? '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
+      : '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+    return (
+      '<div class="hz-card-actions-row">' + localBadge + badge +
+      '<span class="hz-card-time">' + escapeHtml(time) + '</span>' +
+      '<button type="button" class="schedule-event-star' + starClass + '" onclick="event.stopPropagation();scheduleToggleStar(event)">' + starFill + '</button>' +
+      bellBtn + editBtn + '</div>'
+    );
+  }
+
+  function hzStandaloneRowHtml(ev, opts, regId) {
     const quiet = opts && opts.quiet;
     const d = new Date(ev.start || ev.date || ev.startTime);
     const col = hzFormatDateCol(d);
@@ -13707,33 +13826,42 @@
     if (timeStr) subParts.push(timeStr);
     const sub = subParts.filter(Boolean).join(' · ');
     const dot = hzDotClassForEvent(ev);
-    const click = ev.url && !quiet ? `onclick="window.open('${String(ev.url).replace(/'/g, '%27')}', '_blank')"` : '';
+    const ymdAttr = ' data-hz-day-ymd="' + formatLocalYmd(d) + '"';
+    const regAttr = regId ? ' data-hz-reg="' + escapeHtml(regId) + '"' : '';
+    const hitClass = (!quiet && regId) ? ' hz-standalone-card--hit' : '';
+    const actions = (!quiet && regId) ? hzCardActionsInnerHtml(ev) : '';
+    const legacyClick = ev.url && !quiet && !regId ? ' onclick="window.open(\'' + String(ev.url).replace(/'/g, '%27') + '\', \'_blank\')"' : '';
     return (
-      '<div class="hz-standalone-row">' +
+      '<div class="hz-standalone-row"' + ymdAttr + regAttr + '>' +
         '<div class="hz-standalone-date">' +
           '<div class="hz-standalone-dow">' + escapeHtml(col.dow) + '</div>' +
           '<div class="hz-standalone-daynum">' + escapeHtml(col.num) + '</div>' +
         '</div>' +
-        '<div class="hz-standalone-card' + (quiet ? ' hz-row--quiet' : '') + '" ' + click + '>' +
+        '<div class="hz-standalone-card' + (quiet ? ' hz-row--quiet' : '') + hitClass + '"' + legacyClick + '>' +
           '<span class="hz-dot ' + dot + '"></span>' +
           '<div class="hz-card-body">' +
             '<div class="hz-card-title">' + escapeHtml(title) + '</div>' +
             (sub ? '<div class="hz-card-sub">' + escapeHtml(sub) + '</div>' : '') +
+            actions +
           '</div>' +
         '</div>' +
       '</div>'
     );
   }
 
-  function hzGroupEventRowHtml(ev) {
+  function hzGroupEventRowHtml(ev, regId) {
     const d = new Date(ev.start || ev.date || ev.startTime);
     const col = hzFormatDateCol(d);
     const title = (ev.title || ev.summary || 'Event').trim();
     const sub = (ev.venue ? ev.venue + ' · ' : '') + ((ev.start && !ev.isAllDay) ? formatEventTime(ev.start) : '');
     const dot = hzDotClassForEvent(ev);
-    const click = ev.url ? `onclick="window.open('${String(ev.url).replace(/'/g, '%27')}', '_blank')"` : '';
+    const ymdAttr = ' data-hz-day-ymd="' + formatLocalYmd(d) + '"';
+    const regAttr = regId ? ' data-hz-reg="' + escapeHtml(regId) + '"' : '';
+    const hitClass = regId ? ' hz-group-event-row--hit' : '';
+    const legacyClick = ev.url && !regId ? ' onclick="window.open(\'' + String(ev.url).replace(/'/g, '%27') + '\', \'_blank\')"' : '';
+    const actions = regId ? hzCardActionsInnerHtml(ev) : '';
     return (
-      '<div class="hz-group-event-row" ' + click + '>' +
+      '<div class="hz-group-event-row' + hitClass + '"' + ymdAttr + regAttr + legacyClick + '>' +
         '<div class="hz-standalone-date" style="width:40px;padding-top:0">' +
           '<div class="hz-standalone-dow">' + escapeHtml(col.dow) + '</div>' +
           '<div class="hz-standalone-daynum" style="font-size:18px">' + escapeHtml(col.num) + '</div>' +
@@ -13742,14 +13870,39 @@
         '<div class="hz-card-body">' +
           '<div class="hz-card-title">' + escapeHtml(title) + '</div>' +
           (sub ? '<div class="hz-card-sub">' + escapeHtml(sub.trim().replace(/\s*·\s*$/, '')) + '</div>' : '') +
+          actions +
         '</div>' +
       '</div>'
     );
   }
 
+  function attachHorizonScheduleBindings(main) {
+    if (!main || !main.hzEvRegistry) return;
+    const reg = main.hzEvRegistry;
+    main.querySelectorAll('[data-hz-reg]').forEach(function(el) {
+      el._eventData = reg[el.dataset.hzReg];
+    });
+    main.querySelectorAll('.hz-standalone-card--hit').forEach(function(card) {
+      card.addEventListener('click', function(ev) {
+        if (ev.target.closest('.hz-card-actions-row') || ev.target.closest('button')) return;
+        const row = card.closest('[data-hz-reg]');
+        const d = row && row._eventData;
+        if (d && d.url) window.open(d.url, '_blank');
+      });
+    });
+    main.querySelectorAll('.hz-group-event-row--hit').forEach(function(rowEl) {
+      rowEl.addEventListener('click', function(ev) {
+        if (ev.target.closest('.hz-card-actions-row') || ev.target.closest('button')) return;
+        const d = rowEl._eventData;
+        if (d && d.url) window.open(d.url, '_blank');
+      });
+    });
+  }
+
   function renderScheduleHorizon() {
     const main = document.getElementById('scheduleHorizonMain');
     if (!main) return;
+    initScheduleLifeSwipe();
     renderMunicipalAside();
     ensureHorizonMonthCursor();
     const { start: monthStart, end: monthEnd } = horizonMonthRange();
@@ -13762,7 +13915,7 @@
 
     const label = new Date(scheduleHorizonYear, scheduleHorizonMonth0, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
-    const all = (typeof scheduleEvents !== 'undefined' && scheduleEvents.length) ? scheduleEvents.slice() : [];
+    const all = filterScheduleEvents((typeof scheduleEvents !== 'undefined' && scheduleEvents.length) ? scheduleEvents.slice() : []);
     const inMonth = all.filter(ev => {
       if (ev.calendar === 'local') return false;
       const d = dateOnly(new Date(ev.start || ev.date || ev.startTime));
@@ -13777,30 +13930,68 @@
     locals.sort((a, b) => new Date(a.start || a.date) - new Date(b.start || b.date));
 
     const mondayExtras = [];
-    let scan = new Date(monthStart.getTime());
-    while (scan <= monthEnd) {
-      if (scan.getDay() === 1 && scan >= cutoff) {
-        const line = getMunicipalMondayExceptionLine(scan);
-        if (line) {
-          mondayExtras.push({
-            start: formatLocalYmd(scan) + 'T12:00:00',
-            title: line,
-            calendar: 'municipal',
-            isAllDay: true,
-            url: ''
-          });
+    if (scheduleFilter === 'all') {
+      let scan = new Date(monthStart.getTime());
+      while (scan <= monthEnd) {
+        if (scan.getDay() === 1 && scan >= cutoff) {
+          const faux = { start: formatLocalYmd(scan) + 'T12:00:00', isAllDay: true, calendar: 'municipal' };
+          if (eventInScheduleTimeWindow(faux)) {
+            const line = getMunicipalMondayExceptionLine(scan);
+            if (line) {
+              mondayExtras.push({
+                start: formatLocalYmd(scan) + 'T12:00:00',
+                title: line,
+                calendar: 'municipal',
+                isAllDay: true,
+                url: ''
+              });
+            }
+          }
         }
+        scan.setDate(scan.getDate() + 1);
       }
-      scan.setDate(scan.getDate() + 1);
     }
     mondayExtras.sort((a, b) => new Date(a.start) - new Date(b.start));
 
+    const countEl = document.getElementById('scheduleEventCount');
+    if (countEl) {
+      let winN = 0;
+      all.forEach(function(ev) {
+        const d = dateOnly(new Date(ev.start || ev.date || ev.startTime));
+        if (d >= monthStart && d <= monthEnd && d >= cutoff) winN++;
+      });
+      if (scheduleFilter === 'all') {
+        let s2 = new Date(monthStart.getTime());
+        while (s2 <= monthEnd) {
+          if (s2.getDay() === 1 && s2 >= cutoff) {
+            const faux = { start: formatLocalYmd(s2) + 'T12:00:00', isAllDay: true, calendar: 'municipal' };
+            if (getMunicipalMondayExceptionLine(s2) && eventInScheduleTimeWindow(faux)) winN++;
+          }
+          s2.setDate(s2.getDate() + 1);
+        }
+      }
+      const shortLabel = new Date(scheduleHorizonYear, scheduleHorizonMonth0, 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      countEl.textContent = winN ? (winN + ' event' + (winN === 1 ? '' : 's') + ' · ' + shortLabel) : '';
+    }
+
     const parts = [];
+    const reg = {};
+    let regN = 0;
+    function alloc(ev) {
+      const id = String(++regN);
+      reg[id] = ev;
+      return id;
+    }
+
     parts.push('<div class="schedule-horizon-month-nav">');
+    parts.push('<div class="schedule-horizon-month-nav-inner">');
     parts.push('<button type="button" class="schedule-horizon-month-btn" ' + (!canPrev ? 'disabled' : '') + ' onclick="shiftHorizonMonth(-1)" aria-label="Previous month">←</button>');
+    parts.push('<div class="schedule-horizon-month-label-wrap">');
     parts.push('<div class="schedule-horizon-month-label">' + escapeHtml(label) + '</div>');
-    parts.push('<button type="button" class="schedule-horizon-month-btn" onclick="shiftHorizonMonth(1)" aria-label="Next month">→</button>');
+    parts.push('<span class="schedule-horizon-swipe-hint">Swipe for month</span>');
     parts.push('</div>');
+    parts.push('<button type="button" class="schedule-horizon-month-btn" onclick="shiftHorizonMonth(1)" aria-label="Next month">→</button>');
+    parts.push('</div></div>');
 
     const usedIds = new Set();
     let hasAny = false;
@@ -13825,7 +14016,7 @@
         html += '<div class="hz-nested hz-group hz-group--' + spine + '">';
         html += '<div class="hz-group-spine"><span class="hz-group-spine-label">' + escapeHtml(sub.label) + '</span></div>';
         html += '<div class="hz-group-body">';
-        evs.forEach(function(ev) { html += hzGroupEventRowHtml(ev); });
+        evs.forEach(function(ev) { html += hzGroupEventRowHtml(ev, alloc(ev)); });
         html += '</div></div>';
       });
       return html;
@@ -13853,7 +14044,7 @@
         parts.push('<div class="hz-group-body">');
         parts.push('<div class="hz-group-header">' + escapeHtml(grp.label) + '</div>');
         parts.push(nestedH);
-        evs.forEach(function(ev) { parts.push(hzGroupEventRowHtml(ev)); });
+        evs.forEach(function(ev) { parts.push(hzGroupEventRowHtml(ev, alloc(ev))); });
         parts.push('</div></div>');
       });
     }
@@ -13869,7 +14060,7 @@
     stream.sort(function(a, b) { return a.t - b.t; });
     stream.forEach(function(x) {
       hasAny = true;
-      parts.push(hzStandaloneRowHtml(x.ev, { quiet: x.quiet }));
+      parts.push(x.quiet ? hzStandaloneRowHtml(x.ev, { quiet: true }) : hzStandaloneRowHtml(x.ev, { quiet: false }, alloc(x.ev)));
     });
 
     if (locals.length) {
@@ -13879,16 +14070,20 @@
       parts.push('<div class="hz-group-body">');
       parts.push('<div class="hz-group-header">Around town</div>');
       locals.forEach(function(ev) {
-        parts.push(hzGroupEventRowHtml(ev));
+        parts.push(hzGroupEventRowHtml(ev, alloc(ev)));
       });
       parts.push('</div></div>');
     }
 
     if (!hasAny) {
-      parts.push('<div class="screen-loading" style="background:transparent;margin:20px 0">Nothing scheduled ahead this month.</div>');
+      parts.push('<div class="screen-loading" style="background:transparent;margin:20px 0">' +
+        (scheduleFilter === 'all' && scheduleTimeFilter === 'all' ? 'Nothing scheduled ahead this month.' : 'No events match this filter in this month.') +
+        '</div>');
     }
 
     main.innerHTML = parts.join('');
+    main.hzEvRegistry = reg;
+    attachHorizonScheduleBindings(main);
   }
 
   function dateOnly(dt) {
@@ -14075,155 +14270,9 @@
     return filterScheduleEventsByTime([ev]).length > 0;
   }
 
-  function renderScheduleList() {
-    const list = document.getElementById('scheduleList');
-    if (!list) return;
-    const filtered = filterScheduleEvents(scheduleEvents);
-
-    const byDate = {};
-    filtered.forEach(ev => {
-      const d = new Date(ev.start || ev.date || ev.startTime);
-      const key = d.toDateString();
-      if (!byDate[key]) byDate[key] = [];
-      byDate[key].push(ev);
-    });
-
-    if (scheduleFilter === 'all') {
-      const today0 = new Date();
-      today0.setHours(0, 0, 0, 0);
-      let rangeEnd = new Date(today0.getTime());
-      filtered.forEach(ev => {
-        const d = new Date(ev.start || ev.date || ev.startTime);
-        const dd = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-        if (dd > rangeEnd) rangeEnd = dd;
-      });
-      const monthEnd = new Date(today0.getFullYear(), today0.getMonth() + 1, 0);
-      if (monthEnd > rangeEnd) rangeEnd = monthEnd;
-      const cap = new Date(today0);
-      cap.setDate(cap.getDate() + 120);
-      if (rangeEnd > cap) rangeEnd = cap;
-      let scan = new Date(today0.getTime());
-      while (scan <= rangeEnd) {
-        if (scan.getDay() === 1) {
-          const key = scan.toDateString();
-          const muniLine = getMunicipalMondayExceptionLine(scan);
-          if (muniLine) {
-            const faux = { start: formatLocalYmd(scan) + 'T12:00:00', isAllDay: true, calendar: 'municipal' };
-            if (eventInScheduleTimeWindow(faux)) {
-              if (!byDate[key]) byDate[key] = [];
-              const hasM = byDate[key].some(x => x.isMunicipalReminder);
-              if (!hasM) {
-                byDate[key].unshift({
-                  calendar: 'municipal',
-                  title: muniLine,
-                  start: formatLocalYmd(scan) + 'T12:00:00',
-                  isAllDay: true,
-                  isMunicipalReminder: true
-                });
-              }
-            }
-          }
-        }
-        scan.setDate(scan.getDate() + 1);
-      }
-    }
-
-    const keys = Object.keys(byDate).sort((a, b) => new Date(a) - new Date(b));
-
-    const countEl = document.getElementById('scheduleEventCount');
-    if (countEl) {
-      if (keys.length === 0) {
-        countEl.textContent = '';
-      } else {
-        const visibleCount = keys.reduce((acc, k) => acc + byDate[k].length, 0);
-        const label = scheduleTimeFilter === 'week' ? 'this week'
-                    : scheduleTimeFilter === 'month' ? 'this month'
-                    : 'upcoming';
-        countEl.textContent = visibleCount + ' event' + (visibleCount === 1 ? '' : 's') + ' ' + label;
-      }
-    }
-
-    if (keys.length === 0) {
-      list.innerHTML = '<div class="screen-loading">' + (scheduleFilter === 'all' && scheduleTimeFilter === 'all' ? 'No upcoming events.' : 'No events match this filter.') + '</div>';
-      return;
-    }
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    list.innerHTML = '';
-    keys.forEach(key => {
-      const events = byDate[key].slice();
-      events.sort((a, b) => {
-        if (a.isMunicipalReminder && !b.isMunicipalReminder) return -1;
-        if (!a.isMunicipalReminder && b.isMunicipalReminder) return 1;
-        return new Date(a.start || a.date || 0) - new Date(b.start || b.date || 0);
-      });
-      const d = new Date(key);
-      let label = key === today.toDateString() ? 'Today' : key === tomorrow.toDateString() ? 'Tomorrow' : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-      const header = document.createElement('div');
-      header.className = 'schedule-date-header';
-      header.textContent = label;
-      header.dataset.dateKey = key;
-      list.appendChild(header);
-
-      events.forEach(ev => {
-        const div = document.createElement('div');
-        if (ev.isMunicipalReminder) {
-          div.className = 'schedule-event municipal-reminder';
-          div.dataset.dateKey = key;
-          div.innerHTML = `
-            <span class="schedule-event-dot municipal" aria-hidden="true"></span>
-            <div class="schedule-event-main">
-              <span class="schedule-event-title">${escapeHtml(ev.title || '')}</span>
-            </div>
-            <div class="schedule-event-right">
-              <span class="schedule-event-time"></span>
-            </div>
-          `;
-          div.onclick = null;
-          div._eventData = ev;
-          list.appendChild(div);
-          return;
-        }
-        div.className = 'schedule-event' + (isEventStarred(ev) ? ' starred' : '')
-          + (ev.calendar === 'civic' ? ' civic' : '')
-          + (ev.calendar === 'local' ? ' local' : '');
-        div.dataset.dateKey = key;
-        const cal = (ev.calendar || 'shared').toLowerCase();
-        const time = (ev.start && !ev.isAllDay) ? formatEventTime(ev.start) : '';
-        const title = (ev.title || ev.summary || 'Event').trim();
-        const cat = getEventCategory(ev);
-        const badge = cat ? `<span class="schedule-event-badge ${cat}">${cat}</span>` : '';
-        const localBadge = ev.calendar === 'local' ? '<span class="schedule-event-badge local-pill">📍 Local</span>' : '';
-        const starClass = isEventStarred(ev) ? ' starred' : '';
-        const starSvg = isEventStarred(ev)
-          ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
-          : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
-        const canEdit = ev.calendar && !['holidays', 'civic', 'local', 'municipal'].includes(ev.calendar.toLowerCase());
-        const editBtn = canEdit ? '<button type="button" class="schedule-event-edit" onclick="event.stopPropagation(); openEventModalForRow(this)" title="Edit">Edit</button>' : '';
-        const bellBtn = ev.calendar === 'civic'
-          ? `<div class="schedule-event-bell" onclick="event.stopPropagation(); addEventToCalendar(this.closest('.schedule-event')._eventData)" title="Add to Calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>`
-          : '';
-        div.innerHTML = `
-          <span class="schedule-event-dot ${cal}"></span>
-          <div class="schedule-event-main">
-            <span class="schedule-event-title">${escapeHtml(title)}</span>
-            ${localBadge}${badge}
-          </div>
-          ${editBtn}
-          <div class="schedule-event-right">
-            ${bellBtn}
-            <div class="schedule-event-star${starClass}" onclick="event.stopPropagation(); scheduleToggleStar(event)">${starSvg}</div>
-            <span class="schedule-event-time">${escapeHtml(time)}</span>
-          </div>
-        `;
-        div.onclick = () => { if (ev.url) window.open(ev.url, '_blank'); };
-        div._eventData = ev;
-        list.appendChild(div);
-      });
-    });
+  function addEventToCalendarFromHzBtn(btn) {
+    const row = btn && btn.closest ? btn.closest('[data-hz-reg]') : null;
+    if (row && row._eventData) addEventToCalendar(row._eventData);
   }
 
   function generateIcs(ev) {
@@ -14282,7 +14331,7 @@
 
   function scheduleToggleStar(e) {
     const starEl = e.target.closest('.schedule-event-star');
-    const eventRow = starEl ? starEl.closest('.schedule-event') : null;
+    const eventRow = starEl ? starEl.closest('.schedule-event, [data-hz-reg]') : null;
     if (!eventRow || !eventRow._eventData) return;
     toggleEventStarred(eventRow._eventData);
     refreshScheduleMainView();
@@ -14424,7 +14473,7 @@
   }
 
   function openEventModalForRow(btn) {
-    const row = btn.closest('.schedule-event');
+    const row = btn.closest('.schedule-event, [data-hz-reg]');
     if (row && row._eventData) openEventModal(row._eventData);
   }
 
@@ -14645,9 +14694,41 @@
   }
 
   function scrollScheduleToDate(dateStr) {
-    const list = document.getElementById('scheduleList');
-    const header = list ? list.querySelector(`[data-date-key="${dateStr}"]`) : null;
-    if (header) header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const parsed = new Date(dateStr);
+    if (isNaN(parsed.getTime())) return;
+    const y = parsed.getFullYear();
+    const m0 = parsed.getMonth();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const minYm = new Date(today.getFullYear(), today.getMonth(), 1);
+    const targetYm = new Date(y, m0, 1);
+    const ymd = formatLocalYmd(parsed);
+    function scrollToYmd() {
+      const main = document.getElementById('scheduleHorizonMain');
+      const row = main && main.querySelector('[data-hz-day-ymd="' + ymd + '"]');
+      if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    const needSwitch = scheduleHorizonYear !== y || scheduleHorizonMonth0 !== m0;
+    if (targetYm >= minYm && needSwitch) {
+      scheduleHorizonYear = y;
+      scheduleHorizonMonth0 = m0;
+      const u = localStorage.getItem('shasta_user');
+      if (u) {
+        fetchLocalEventsForScheduleCached().then(function(fresh) {
+          const base = (typeof scheduleEvents !== 'undefined' && scheduleEvents && scheduleEvents.length)
+            ? scheduleEvents.filter(function(e) { return e.calendar !== 'local'; })
+            : [];
+          scheduleEvents = base.concat(fresh || []);
+          renderScheduleHorizon();
+          requestAnimationFrame(scrollToYmd);
+        });
+      } else {
+        renderScheduleHorizon();
+        requestAnimationFrame(scrollToYmd);
+      }
+      return;
+    }
+    scrollToYmd();
   }
 
   async function showScheduleScreen() {
@@ -14656,10 +14737,7 @@
     document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
     const scheduleBtn = document.querySelector('.drawer-item[data-screen="schedule"]');
     if (scheduleBtn) scheduleBtn.classList.add('active');
-    syncScheduleViewChrome();
-    const list = document.getElementById('scheduleList');
     const hzMain = document.getElementById('scheduleHorizonMain');
-    if (list) list.innerHTML = '<div class="screen-loading">Loading…</div>';
     if (hzMain) hzMain.innerHTML = '<div class="screen-loading">Loading…</div>';
     renderMunicipalAside();
     renderScheduleTimeChips();
