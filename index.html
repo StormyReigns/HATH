@@ -3068,10 +3068,10 @@
       opacity: 0.2;
     }
     #scheduleScreen .schedule-header,
-    #scheduleScreen .schedule-chips-wrap,
+    #scheduleScreen .schedule-chips-under-month,
     #scheduleScreen .schedule-event-count,
     #scheduleScreen .schedule-horizon-root,
-    #scheduleScreen .schedule-life-chrome,
+    #scheduleScreen .schedule-horizon-schedule-head,
     #scheduleScreen .screen-footer { position: relative; z-index: 1; }
     .schedule-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -3196,18 +3196,20 @@
       min-width: 0;
       min-height: 0;
     }
-    .schedule-life-chrome {
+    .schedule-horizon-schedule-head {
       flex-shrink: 0;
-      padding-bottom: 2px;
+      padding-bottom: 4px;
     }
-    .schedule-life-chrome .schedule-filters-wrap {
-      margin-top: 0;
+    .schedule-horizon-schedule-head .schedule-chips-under-month {
+      margin-top: 2px;
       padding-left: 2px;
       padding-right: 2px;
+      margin-bottom: 2px;
     }
-    .schedule-life-chrome .schedule-event-count {
+    .schedule-horizon-schedule-head .schedule-event-count {
       padding-left: 2px;
       padding-right: 2px;
+      padding-top: 0;
     }
     .schedule-life-swipe-host {
       flex: 1;
@@ -3230,7 +3232,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
       padding: 0 2px;
       flex-wrap: wrap;
     }
@@ -3722,39 +3724,6 @@
       border: 1px solid rgba(0,0,0,0.12); background: #fff;
     }
     .event-modal-actions { display: flex; align-items: center; flex-wrap: wrap; }
-    .schedule-filters-wrap {
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 4px;
-      padding: 0 16px;
-      padding-right: max(16px, env(safe-area-inset-right, 0));
-    }
-    .schedule-time-row {
-      display: flex;
-      align-items: center;
-    }
-    .schedule-time-select {
-      padding: 8px 12px;
-      font-size: 13px; font-weight: 400;
-      color: var(--text2);
-      background: #fdf8f5;
-      border: 1px solid rgba(0,0,0,0.08);
-      border-radius: 20px;
-      font-family: 'Inter', sans-serif;
-      cursor: pointer;
-      -webkit-appearance: none; appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 10px center;
-      padding-right: 28px; min-width: 0;
-    }
-    .schedule-time-select:focus { outline: none; border-color: var(--accent); }
-    html.dark-mode .schedule-time-select {
-      background-color: #1a1816;
-      border-color: rgba(255,255,255,0.12);
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-    }
     .schedule-chips-wrap {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -5880,8 +5849,9 @@
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       opacity: 0;
+      visibility: hidden;
       pointer-events: none;
-      transition: opacity 0.32s ease;
+      transition: opacity 0.32s ease, visibility 0s linear 0.32s;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -5891,7 +5861,9 @@
     }
     .project-wizard-overlay.open {
       opacity: 1;
+      visibility: visible;
       pointer-events: all;
+      transition: opacity 0.32s ease, visibility 0s linear 0s;
     }
     .pjw-close {
       position: absolute;
@@ -7230,22 +7202,14 @@
       <div class="schedule-guest-banner" id="scheduleGuestBanner" style="display:none">Sign in to see your personal calendar</div>
       <div class="schedule-horizon-root" id="scheduleHorizonRoot">
         <div class="schedule-horizon-main-col">
-          <div class="schedule-life-chrome">
-            <div class="schedule-filters-wrap">
-              <div class="schedule-time-row">
-                <select id="scheduleTimeSelect" class="schedule-time-select" aria-label="Time range">
-                  <option value="all">All time</option>
-                  <option value="week">This week</option>
-                  <option value="month">This month</option>
-                </select>
-              </div>
-              <div class="schedule-chips-wrap h-scroll-faded">
+          <div class="schedule-life-swipe-host" id="scheduleLifeSwipeHost">
+            <div class="schedule-horizon-schedule-head" id="scheduleHorizonScheduleHead">
+              <div id="scheduleHorizonMonthNavMount"></div>
+              <div class="schedule-chips-wrap h-scroll-faded schedule-chips-under-month">
                 <div class="schedule-chips" id="scheduleChips"></div>
               </div>
+              <div class="schedule-event-count" id="scheduleEventCount"></div>
             </div>
-            <div class="schedule-event-count" id="scheduleEventCount"></div>
-          </div>
-          <div class="schedule-life-swipe-host" id="scheduleLifeSwipeHost">
             <div class="schedule-horizon-main" id="scheduleHorizonMain"></div>
           </div>
         </div>
@@ -7760,7 +7724,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.30.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.31.0';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -10558,6 +10522,7 @@
   }
 
   function openProjectWizard() {
+    projectWizardAbortGesture();
     projectsEditing = {
       id: genId(),
       title: '',
@@ -10577,7 +10542,14 @@
     projectWizardRender();
   }
 
+  function projectWizardAbortGesture() {
+    projectWizardSwipe.active = false;
+    projectWizardSwipe.horizontal = false;
+    projectWizardResetSwipeSurface();
+  }
+
   function closeProjectWizard() {
+    projectWizardAbortGesture();
     const o = document.getElementById('projectWizardOverlay');
     if (o) {
       o.classList.remove('open');
@@ -10989,6 +10961,8 @@
     if (!o || !o.classList.contains('open')) return;
     const t = ev.target;
     if (t.closest && t.closest('input, textarea, button, select, a, .pjw-cal-hit, .pjw-checklist-input, .pjw-date-card')) return;
+    const bodyEl = t.closest && t.closest('.pjw-body');
+    if (bodyEl && bodyEl.scrollHeight > bodyEl.clientHeight + 8) return;
     if (ev.touches.length !== 1) return;
     projectWizardSwipe.active = true;
     projectWizardSwipe.horizontal = false;
@@ -11027,7 +11001,10 @@
     if (!wasActive && !wasH) return;
     if (!wasH) return;
     const o = document.getElementById('projectWizardOverlay');
-    if (!o || !o.classList.contains('open')) return;
+    if (!o || !o.classList.contains('open')) {
+      projectWizardResetSwipeSurface();
+      return;
+    }
     if (ev.changedTouches.length !== 1) return;
     const dx = ev.changedTouches[0].clientX - projectWizardSwipe.x0;
     const surf = document.getElementById('pjwSwipeSurface');
@@ -11082,12 +11059,13 @@
   }
 
   (function projectWizardInitSwipe() {
-    const el = document.getElementById('projectWizardOverlay');
-    if (!el || el.dataset.pjwSwipe === '1') return;
-    el.dataset.pjwSwipe = '1';
-    el.addEventListener('touchstart', projectWizardTouchStart, { passive: true });
-    el.addEventListener('touchmove', projectWizardTouchMove, { passive: true });
-    el.addEventListener('touchend', projectWizardTouchEnd, { passive: true });
+    const surf = document.getElementById('pjwSwipeSurface');
+    if (!surf || surf.dataset.pjwSwipe === '1') return;
+    surf.dataset.pjwSwipe = '1';
+    surf.addEventListener('touchstart', projectWizardTouchStart, { passive: true });
+    surf.addEventListener('touchmove', projectWizardTouchMove, { passive: true });
+    surf.addEventListener('touchend', projectWizardTouchEnd, { passive: true });
+    surf.addEventListener('touchcancel', projectWizardAbortGesture, { passive: true });
   })();
 
   function saveProjectWizardFinal() {
@@ -13934,18 +13912,15 @@
       let scan = new Date(monthStart.getTime());
       while (scan <= monthEnd) {
         if (scan.getDay() === 1 && scan >= cutoff) {
-          const faux = { start: formatLocalYmd(scan) + 'T12:00:00', isAllDay: true, calendar: 'municipal' };
-          if (eventInScheduleTimeWindow(faux)) {
-            const line = getMunicipalMondayExceptionLine(scan);
-            if (line) {
-              mondayExtras.push({
-                start: formatLocalYmd(scan) + 'T12:00:00',
-                title: line,
-                calendar: 'municipal',
-                isAllDay: true,
-                url: ''
-              });
-            }
+          const line = getMunicipalMondayExceptionLine(scan);
+          if (line) {
+            mondayExtras.push({
+              start: formatLocalYmd(scan) + 'T12:00:00',
+              title: line,
+              calendar: 'municipal',
+              isAllDay: true,
+              url: ''
+            });
           }
         }
         scan.setDate(scan.getDate() + 1);
@@ -13963,16 +13938,28 @@
       if (scheduleFilter === 'all') {
         let s2 = new Date(monthStart.getTime());
         while (s2 <= monthEnd) {
-          if (s2.getDay() === 1 && s2 >= cutoff) {
-            const faux = { start: formatLocalYmd(s2) + 'T12:00:00', isAllDay: true, calendar: 'municipal' };
-            if (getMunicipalMondayExceptionLine(s2) && eventInScheduleTimeWindow(faux)) winN++;
-          }
+          if (s2.getDay() === 1 && s2 >= cutoff && getMunicipalMondayExceptionLine(s2)) winN++;
           s2.setDate(s2.getDate() + 1);
         }
       }
       const shortLabel = new Date(scheduleHorizonYear, scheduleHorizonMonth0, 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
       countEl.textContent = winN ? (winN + ' event' + (winN === 1 ? '' : 's') + ' · ' + shortLabel) : '';
     }
+
+    const navMount = document.getElementById('scheduleHorizonMonthNavMount');
+    if (navMount) {
+      navMount.innerHTML =
+        '<div class="schedule-horizon-month-nav">' +
+        '<div class="schedule-horizon-month-nav-inner">' +
+        '<button type="button" class="schedule-horizon-month-btn" ' + (!canPrev ? 'disabled' : '') + ' onclick="shiftHorizonMonth(-1)" aria-label="Previous month">←</button>' +
+        '<div class="schedule-horizon-month-label-wrap">' +
+        '<div class="schedule-horizon-month-label">' + escapeHtml(label) + '</div>' +
+        '<span class="schedule-horizon-swipe-hint">Swipe for month</span>' +
+        '</div>' +
+        '<button type="button" class="schedule-horizon-month-btn" onclick="shiftHorizonMonth(1)" aria-label="Next month">→</button>' +
+        '</div></div>';
+    }
+    renderScheduleChips();
 
     const parts = [];
     const reg = {};
@@ -13982,16 +13969,6 @@
       reg[id] = ev;
       return id;
     }
-
-    parts.push('<div class="schedule-horizon-month-nav">');
-    parts.push('<div class="schedule-horizon-month-nav-inner">');
-    parts.push('<button type="button" class="schedule-horizon-month-btn" ' + (!canPrev ? 'disabled' : '') + ' onclick="shiftHorizonMonth(-1)" aria-label="Previous month">←</button>');
-    parts.push('<div class="schedule-horizon-month-label-wrap">');
-    parts.push('<div class="schedule-horizon-month-label">' + escapeHtml(label) + '</div>');
-    parts.push('<span class="schedule-horizon-swipe-hint">Swipe for month</span>');
-    parts.push('</div>');
-    parts.push('<button type="button" class="schedule-horizon-month-btn" onclick="shiftHorizonMonth(1)" aria-label="Next month">→</button>');
-    parts.push('</div></div>');
 
     const usedIds = new Set();
     let hasAny = false;
@@ -14022,6 +13999,49 @@
       return html;
     }
 
+    function renderCulturalPeriodBlock_(grp) {
+      let nestedHtml = '';
+      if (grp.nested && grp.nested.length) {
+        grp.nested.forEach(function(sub) {
+          const ns0 = dateOnly(sub.start);
+          const ne0 = dateOnly(sub.end);
+          const nev = inMonth.filter(function(ev) {
+            const id = getEventId(ev);
+            if (usedIds.has(id)) return false;
+            const d = dateOnly(new Date(ev.start || ev.date || ev.startTime));
+            return d >= ns0 && d <= ne0;
+          });
+          nev.forEach(function(ev) { usedIds.add(getEventId(ev)); });
+          if (!nev.length) return;
+          const sp = sub.spine === 'civic' ? 'civic' : (sub.spine === 'green' ? 'green' : 'accent');
+          nestedHtml += '<div class="hz-nested hz-group hz-group--' + sp + '">';
+          nestedHtml += '<div class="hz-group-spine"><span class="hz-group-spine-label">' + escapeHtml(sub.spineLabel) + '</span></div>';
+          nestedHtml += '<div class="hz-group-body">';
+          nev.forEach(function(ev) { nestedHtml += hzGroupEventRowHtml(ev, alloc(ev)); });
+          nestedHtml += '</div></div>';
+        });
+      }
+      const ps0 = dateOnly(grp.start);
+      const pe0 = dateOnly(grp.end);
+      const pev = inMonth.filter(function(ev) {
+        const id = getEventId(ev);
+        if (usedIds.has(id)) return false;
+        const d = dateOnly(new Date(ev.start || ev.date || ev.startTime));
+        return d >= ps0 && d <= pe0;
+      });
+      pev.forEach(function(ev) { usedIds.add(getEventId(ev)); });
+      if (!nestedHtml && !pev.length) return;
+      const spine = grp.spine === 'civic' ? 'civic' : (grp.spine === 'green' ? 'green' : 'accent');
+      parts.push('<div class="hz-group hz-group--' + spine + '">');
+      parts.push('<div class="hz-group-spine"><span class="hz-group-spine-label">' + escapeHtml(grp.spineLabel) + '</span></div>');
+      parts.push('<div class="hz-group-body">');
+      parts.push('<div class="hz-group-header">' + escapeHtml(grp.label) + '</div>');
+      parts.push(nestedHtml);
+      pev.forEach(function(ev) { parts.push(hzGroupEventRowHtml(ev, alloc(ev))); });
+      parts.push('</div></div>');
+      hasAny = true;
+    }
+
     if (SCHEDULE_HORIZON_PERIOD_GROUPS.length) {
       SCHEDULE_HORIZON_PERIOD_GROUPS.forEach(function(grp) {
         const sd = resolveMMDDInHorizonYear_(grp.startMMDD);
@@ -14048,6 +14068,8 @@
         parts.push('</div></div>');
       });
     }
+
+    getCulturalPeriodWindowsForMonth_(scheduleHorizonYear, monthStart, monthEnd).forEach(renderCulturalPeriodBlock_);
 
     const remaining = inMonth.filter(ev => !usedIds.has(getEventId(ev)));
     const stream = [];
@@ -14077,7 +14099,7 @@
 
     if (!hasAny) {
       parts.push('<div class="screen-loading" style="background:transparent;margin:20px 0">' +
-        (scheduleFilter === 'all' && scheduleTimeFilter === 'all' ? 'Nothing scheduled ahead this month.' : 'No events match this filter in this month.') +
+        (scheduleFilter === 'all' ? 'Nothing scheduled ahead this month.' : 'No events match this filter in this month.') +
         '</div>');
     }
 
@@ -14141,6 +14163,165 @@
     return null;
   }
 
+  /**
+   * US observance windows for the schedule horizon (clipped per visible month).
+   * Nested ranges claim events first; parent rows show remaining days in the month span.
+   */
+  function isLeapYearSchedule_(y) {
+    return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
+  }
+
+  function weekMonSunContainingSchedule_(y, monthIndex, dayOfMonth) {
+    const d = new Date(y, monthIndex, dayOfMonth);
+    d.setHours(0, 0, 0, 0);
+    const dow = d.getDay();
+    const deltaMon = dow === 0 ? -6 : 1 - dow;
+    const mon = new Date(y, monthIndex, dayOfMonth + deltaMon);
+    const sun = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 6);
+    return { start: dateOnly(mon), end: dateOnly(sun) };
+  }
+
+  function firstFullMondayWeekInMaySchedule_(y) {
+    for (let dom = 1; dom <= 7; dom++) {
+      const mon = new Date(y, 4, dom);
+      if (mon.getMonth() !== 4 || mon.getDay() !== 1) continue;
+      const sun = new Date(y, 4, dom + 6);
+      if (sun.getMonth() === 4) return { start: dateOnly(mon), end: dateOnly(sun) };
+    }
+    let d = new Date(y, 4, 1);
+    while (d.getMonth() === 4 && d.getDay() !== 1) d.setDate(d.getDate() + 1);
+    if (d.getMonth() !== 4) return { start: dateOnly(new Date(y, 4, 1)), end: dateOnly(new Date(y, 4, 7)) };
+    const sun = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 6);
+    return { start: dateOnly(d), end: dateOnly(sun) };
+  }
+
+  function clipDateRangeToMonthSchedule_(rangeStart, rangeEnd, monthStart, monthEnd) {
+    const ms = dateOnly(monthStart);
+    const me = dateOnly(monthEnd);
+    const s0 = dateOnly(rangeStart);
+    const e0 = dateOnly(rangeEnd);
+    const a = s0 < ms ? ms : s0;
+    const b = e0 > me ? me : e0;
+    if (a > b) return null;
+    return { start: a, end: b };
+  }
+
+  function getCulturalPeriodWindowsForMonth_(y, monthStart, monthEnd) {
+    const febLast = isLeapYearSchedule_(y) ? 29 : 28;
+    const mlk = weekMonSunContainingSchedule_(y, 0, 15);
+    const earthWeek = { start: dateOnly(new Date(y, 3, 16)), end: dateOnly(new Date(y, 3, 22)) };
+    const teacherWeek = firstFullMondayWeekInMaySchedule_(y);
+    const mentalHealthWeek = weekMonSunContainingSchedule_(y, 4, 15);
+    const tg = thanksgivingDate(y);
+    let thanksWeek = null;
+    if (tg) thanksWeek = weekMonSunContainingSchedule_(tg.getFullYear(), tg.getMonth(), tg.getDate());
+
+    const raw = [];
+
+    raw.push({
+      spineLabel: 'MLK Week',
+      label: 'MLK Week',
+      spine: 'civic',
+      start: mlk.start,
+      end: mlk.end,
+      nested: []
+    });
+    raw.push({
+      spineLabel: 'Black History',
+      label: 'Black History Month',
+      spine: 'accent',
+      start: dateOnly(new Date(y, 1, 1)),
+      end: dateOnly(new Date(y, 1, febLast)),
+      nested: []
+    });
+    raw.push({
+      spineLabel: "Women's History",
+      label: "Women's History Month",
+      spine: 'accent',
+      start: dateOnly(new Date(y, 2, 1)),
+      end: dateOnly(new Date(y, 3, 0)),
+      nested: []
+    });
+    raw.push({
+      spineLabel: 'Earth Month',
+      label: 'Earth Month',
+      spine: 'green',
+      start: dateOnly(new Date(y, 3, 1)),
+      end: dateOnly(new Date(y, 5, 0)),
+      nested: [
+        { spineLabel: 'Earth Week', label: 'Earth Week (lead-up to Earth Day, Apr 22)', spine: 'accent', start: earthWeek.start, end: earthWeek.end }
+      ]
+    });
+    raw.push({
+      spineLabel: 'May',
+      label: 'Asian Pacific American Heritage & Mental Health Awareness Month',
+      spine: 'accent',
+      start: dateOnly(new Date(y, 4, 1)),
+      end: dateOnly(new Date(y, 6, 0)),
+      nested: [
+        { spineLabel: 'Teachers', label: 'Teacher Appreciation Week (first full week of May)', spine: 'green', start: teacherWeek.start, end: teacherWeek.end },
+        { spineLabel: 'MH Week', label: 'Mental Health Awareness Week (mid-May)', spine: 'green', start: mentalHealthWeek.start, end: mentalHealthWeek.end }
+      ]
+    });
+    raw.push({
+      spineLabel: 'Pride',
+      label: 'Pride Month',
+      spine: 'accent',
+      start: dateOnly(new Date(y, 5, 1)),
+      end: dateOnly(new Date(y, 7, 0)),
+      nested: [
+        { spineLabel: 'Juneteenth', label: 'Juneteenth (June 19)', spine: 'civic', start: dateOnly(new Date(y, 5, 19)), end: dateOnly(new Date(y, 5, 19)) }
+      ]
+    });
+    raw.push({
+      spineLabel: 'Heritage',
+      label: 'Hispanic Heritage Month (Sept 15 – Oct 15)',
+      spine: 'civic',
+      start: dateOnly(new Date(y, 8, 15)),
+      end: dateOnly(new Date(y, 9, 15)),
+      nested: []
+    });
+    raw.push({
+      spineLabel: 'October',
+      label: 'Breast Cancer Awareness & Indigenous Peoples\' Month (after Hispanic Heritage through Oct 15)',
+      spine: 'accent',
+      start: dateOnly(new Date(y, 9, 16)),
+      end: dateOnly(new Date(y, 11, 0)),
+      nested: []
+    });
+    raw.push({
+      spineLabel: 'Native Heritage',
+      label: 'Native American Heritage Month',
+      spine: 'civic',
+      start: dateOnly(new Date(y, 10, 1)),
+      end: dateOnly(new Date(y, 12, 0)),
+      nested: thanksWeek
+        ? [{ spineLabel: 'Thanks Week', label: 'Thanksgiving & Native American Heritage Week', spine: 'green', start: thanksWeek.start, end: thanksWeek.end }]
+        : []
+    });
+
+    const out = [];
+    raw.forEach(function(cfg) {
+      const clip = clipDateRangeToMonthSchedule_(cfg.start, cfg.end, monthStart, monthEnd);
+      if (!clip) return;
+      const nestedClipped = [];
+      (cfg.nested || []).forEach(function(sub) {
+        const nc = clipDateRangeToMonthSchedule_(sub.start, sub.end, monthStart, monthEnd);
+        if (nc) nestedClipped.push({ spineLabel: sub.spineLabel, label: sub.label, spine: sub.spine, start: nc.start, end: nc.end });
+      });
+      out.push({
+        spineLabel: cfg.spineLabel,
+        label: cfg.label,
+        spine: cfg.spine,
+        start: clip.start,
+        end: clip.end,
+        nested: nestedClipped
+      });
+    });
+    out.sort(function(a, b) { return a.start.getTime() - b.start.getTime(); });
+    return out;
+  }
+
   function sameCalendarDate(a, b) {
     return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
   }
@@ -14177,7 +14358,6 @@
 
   let scheduleEvents = [];
   let scheduleFilter = 'all';
-  let scheduleTimeFilter = 'all'; // 'all' | 'week' | 'month'
   let scheduleFloatingInterval = null;
   const SCHEDULE_FLOATING_IMGS = ['ST1.png', 'ST2.png', 'ST3.png'];
 
@@ -14197,16 +14377,6 @@
       clearInterval(scheduleFloatingInterval);
       scheduleFloatingInterval = null;
     }
-  }
-
-  function renderScheduleTimeChips() {
-    const sel = document.getElementById('scheduleTimeSelect');
-    if (!sel) return;
-    sel.value = scheduleTimeFilter;
-    sel.onchange = () => {
-      scheduleTimeFilter = sel.value;
-      refreshScheduleMainView();
-    };
   }
 
   function renderScheduleChips() {
@@ -14234,40 +14404,14 @@
     });
   }
 
-  function filterScheduleEventsByTime(events) {
-    if (scheduleTimeFilter === 'all') return events;
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    if (scheduleTimeFilter === 'week') {
-      const end = new Date(now);
-      end.setDate(end.getDate() + 7);
-      return events.filter(ev => {
-        const d = new Date(ev.start || ev.date || ev.startTime);
-        return d >= now && d < end;
-      });
-    }
-    if (scheduleTimeFilter === 'month') {
-      const end = new Date(now.getFullYear(), now.getMonth() + 1, 1); // start of next month
-      return events.filter(ev => {
-        const d = new Date(ev.start || ev.date || ev.startTime);
-        return d >= now && d < end;
-      });
-    }
-    return events;
-  }
-
   function filterScheduleEvents(events) {
-    let result = filterScheduleEventsByTime(events);
+    let result = events.slice();
     if (scheduleFilter === 'all') return result;
     if (scheduleFilter === 'starred') {
       const starred = getStarredEvents();
       return result.filter(ev => starred.includes(getEventId(ev)));
     }
     return result.filter(ev => getEventCategory(ev) === scheduleFilter);
-  }
-
-  function eventInScheduleTimeWindow(ev) {
-    return filterScheduleEventsByTime([ev]).length > 0;
   }
 
   function addEventToCalendarFromHzBtn(btn) {
@@ -14740,13 +14884,11 @@
     const hzMain = document.getElementById('scheduleHorizonMain');
     if (hzMain) hzMain.innerHTML = '<div class="screen-loading">Loading…</div>';
     renderMunicipalAside();
-    renderScheduleTimeChips();
     renderScheduleChips();
     const user = localStorage.getItem('shasta_user');
     if (!user) {
       scheduleEvents = getCivicEvents();
       refreshScheduleMainView();
-      renderScheduleTimeChips();
       renderScheduleChips();
       return;
     }
@@ -14769,12 +14911,10 @@
         scheduleEvents = data.events.concat(civic).concat(localArr);
       }
       refreshScheduleMainView();
-      renderScheduleTimeChips();
       renderScheduleChips();
     } catch (err) {
       scheduleEvents = getCivicEvents();
       refreshScheduleMainView();
-      renderScheduleTimeChips();
       renderScheduleChips();
     }
   }
