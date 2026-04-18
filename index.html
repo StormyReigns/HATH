@@ -7885,7 +7885,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.33.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.33.3';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -8271,6 +8271,20 @@
     const u = getApiUser();
     const sep = base.indexOf('?') >= 0 ? '&' : '?';
     return base + sep + 'user=' + encodeURIComponent(u) + (extraParams || '');
+  }
+  /** Some iOS / PWA builds leave fetch() pending forever; always bound schedule reads. */
+  function fetchWithTimeout_(url, init, timeoutMs) {
+    var ms = timeoutMs == null ? 18000 : timeoutMs;
+    var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var t = null;
+    if (ctrl) {
+      t = setTimeout(function() { try { ctrl.abort(); } catch (e) {} }, ms);
+    }
+    var opt = Object.assign({ redirect: 'follow', cache: 'no-store' }, init || {});
+    if (ctrl) opt.signal = ctrl.signal;
+    return fetch(url, opt).finally(function() {
+      if (t) clearTimeout(t);
+    });
   }
   var API_REQUEST_TIMEOUT_MS = 22000;
   /** Last resort when POST and XHR both fail (common on some iOS PWA / WebKit + script.google.com). */
@@ -13953,7 +13967,7 @@
     if (!user) return [];
     const ym = scheduleHorizonYear + '-' + String(scheduleHorizonMonth0 + 1).padStart(2, '0');
     try {
-      const res = await fetch(apiUrlWithUser(API_URL, '&action=getLocalEvents&month=' + encodeURIComponent(ym)), { redirect: 'follow' });
+      const res = await fetchWithTimeout_(apiUrlWithUser(API_URL, '&action=getLocalEvents&month=' + encodeURIComponent(ym)), {}, 18000);
       const data = await res.json();
       const events = (!data.error && Array.isArray(data.events)) ? data.events : [];
       try {
@@ -15246,10 +15260,12 @@
         url += '&calendars=' + encodeURIComponent(JSON.stringify(calIds));
       }
       const [res, localArr] = await Promise.all([
-        fetch(url, { redirect: 'follow' }),
+        fetchWithTimeout_(url, {}, 18000).then(function(r) {
+          return r.json().catch(function() { return { error: true, events: [] }; });
+        }).catch(function() { return { error: true, events: [] }; }),
         fetchLocalEventsForScheduleCached()
       ]);
-      const data = await res.json();
+      const data = res;
       const civic = getCivicEvents();
       if (data.error || !data.events || data.events.length === 0) {
         scheduleEvents = civic.concat(localArr);
