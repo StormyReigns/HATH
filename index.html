@@ -3563,50 +3563,52 @@
     .hz-standalone-card .schedule-event-star.starred,
     .hz-card-actions-row .schedule-event-star.starred { color: #c9a227; }
 
+    /* Centered card (same affordance as project / paste modals), not a bottom sheet. */
     .local-event-drawer-overlay {
       position: fixed;
       inset: 0;
       z-index: 260;
-      background: rgba(0,0,0,0.35);
+      background: rgba(58, 46, 40, 0.38);
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.22s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: max(16px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
     }
     .local-event-drawer-overlay.open {
       opacity: 1;
       pointer-events: all;
     }
     .local-event-drawer {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      max-height: min(88vh, 720px);
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      max-height: min(85vh, 680px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
       background: var(--bg, #fdf8f1);
-      border-radius: 18px 18px 0 0;
-      box-shadow: 0 -10px 40px rgba(0,0,0,0.18);
-      padding: 12px 20px max(24px, env(safe-area-inset-bottom));
-      transform: translateY(100%);
-      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      border-radius: 16px;
+      border: 1px solid rgba(192, 122, 74, 0.14);
+      box-shadow: 0 12px 48px rgba(58, 46, 40, 0.18), 0 2px 12px rgba(0, 0, 0, 0.08);
+      padding: 24px 22px 22px;
+      transform: scale(0.94) translateY(10px);
+      opacity: 0;
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s ease;
       display: flex;
       flex-direction: column;
     }
     html.dark-mode .local-event-drawer {
       background: #1a1816;
+      border-color: rgba(224, 152, 104, 0.18);
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45);
     }
     .local-event-drawer-overlay.open .local-event-drawer {
-      transform: translateY(0);
-    }
-    .local-event-drawer-handle {
-      width: 40px;
-      height: 5px;
-      border-radius: 99px;
-      background: rgba(0, 0, 0, 0.12);
-      margin: 0 auto 12px;
-      flex-shrink: 0;
-    }
-    html.dark-mode .local-event-drawer-handle {
-      background: rgba(255, 255, 255, 0.14);
+      transform: scale(1) translateY(0);
+      opacity: 1;
     }
     .local-event-drawer-lede {
       font-family: 'Inter', sans-serif;
@@ -3635,7 +3637,7 @@
       margin: 16px 0 8px;
     }
     .local-event-drawer .local-event-field-label:first-of-type {
-      margin-top: 12px;
+      margin-top: 10px;
     }
     .local-event-drawer .local-event-field,
     .local-event-drawer input.local-event-field {
@@ -3673,8 +3675,8 @@
       display: flex;
       gap: 12px;
       justify-content: flex-end;
-      margin-top: auto;
-      padding-top: 20px;
+      margin-top: 20px;
+      padding-top: 4px;
       flex-shrink: 0;
     }
     .local-event-drawer .paste-cancel-btn,
@@ -7352,11 +7354,10 @@
       <div class="schedule-mini-cal-grid" id="scheduleMiniCalGrid"></div>
     </div>
 
-    <!-- Local event bottom drawer (Schedule +) -->
+    <!-- Local event modal (Schedule +) — centered like project creator -->
     <div class="local-event-drawer-overlay" id="localEventDrawerOverlay" onclick="closeLocalEventDrawer(event)">
-      <div class="local-event-drawer" onclick="event.stopPropagation()">
-        <div class="local-event-drawer-handle" aria-hidden="true"></div>
-        <h3>Add local event</h3>
+      <div class="local-event-drawer" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="localEventModalTitle">
+        <h3 id="localEventModalTitle">Add local event</h3>
         <p class="local-event-drawer-lede">Saved for both of you — appears on the schedule horizon with your other local items.</p>
         <label class="local-event-field-label" for="localEventQuickTitle">Event name</label>
         <input type="text" class="local-event-field" id="localEventQuickTitle" placeholder="What’s happening?" maxlength="200" autocomplete="off">
@@ -7787,7 +7788,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.32.3';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.32.5';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -8173,6 +8174,69 @@
     const u = getApiUser();
     const sep = base.indexOf('?') >= 0 ? '&' : '?';
     return base + sep + 'user=' + encodeURIComponent(u) + (extraParams || '');
+  }
+  /** POST JSON to API with same URL shape as authenticated GETs; XHR fallback when fetch fails (Safari “Load failed”). */
+  function apiPostJsonXhr(body) {
+    return new Promise(function(resolve, reject) {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', apiUrlWithUser(API_URL));
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.setRequestHeader('Accept', 'application/json');
+      xhr.timeout = 60000;
+      xhr.onload = function() {
+        const text = xhr.responseText || '';
+        let data;
+        try {
+          data = text ? JSON.parse(text) : {};
+        } catch (e) {
+          const snippet = text.slice(0, 120).replace(/\s+/g, ' ');
+          reject(new Error(snippet || ('Invalid JSON (HTTP ' + xhr.status + ')')));
+          return;
+        }
+        if (xhr.status >= 400) {
+          reject(new Error(data.error || ('HTTP ' + xhr.status)));
+          return;
+        }
+        if (data.error) {
+          reject(new Error(data.error));
+          return;
+        }
+        resolve(data);
+      };
+      xhr.onerror = function() { reject(new Error('Network error (XHR)')); };
+      xhr.ontimeout = function() { reject(new Error('Request timed out')); };
+      xhr.send(JSON.stringify(body));
+    });
+  }
+  async function apiPostJson(body) {
+    try {
+      const res = await fetch(apiUrlWithUser(API_URL), {
+        method: 'POST',
+        redirect: 'follow',
+        cache: 'no-store',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+      const text = await res.text();
+      let data;
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch (e) {
+        const snippet = text ? text.slice(0, 120).replace(/\s+/g, ' ') : '';
+        throw new Error(snippet || ('Invalid JSON from server (HTTP ' + res.status + ')'));
+      }
+      if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+      if (data.error) throw new Error(data.error);
+      return data;
+    } catch (err) {
+      const msg = err && err.message ? String(err.message) : '';
+      const isFetchFail = err instanceof TypeError || /Load failed|Failed to fetch|NetworkError|network error/i.test(msg);
+      if (isFetchFail) return apiPostJsonXhr(body);
+      throw err;
+    }
   }
   // Must match your Shasta Docs folder: open it in Drive, copy ID from URL (after /folders/)
   const DOCS_FOLDER_ID = '1UTVAmNx854R9a1YqTPPlZ1gA_V9nUulI';
@@ -14756,14 +14820,7 @@
     const venue = document.getElementById('localEventQuickVenue')?.value.trim() || '';
     if (!title || !date || !getApiUser()) return;
     try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        redirect: 'follow',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'addLocalEvent', user: getApiUser(), title, date, venue, url: '', source: 'Quick add', added_by: 'manual' })
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
+      await apiPostJson({ action: 'addLocalEvent', user: getApiUser(), title, date, venue, url: '', source: 'Quick add', added_by: 'manual' });
       closeLocalEventDrawer();
       await mergeFreshLocalEventsIntoSchedule();
       refreshScheduleMainView();
@@ -14779,14 +14836,7 @@
     if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error('Need title and YYYY-MM-DD date');
     const venue = draft.venue != null ? String(draft.venue).trim() : '';
     const url = draft.url != null ? String(draft.url).trim() : '';
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      redirect: 'follow',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'addLocalEvent', user: getApiUser(), title, date, venue, url, source: 'Blathers chat', added_by: 'blathers' })
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
+    await apiPostJson({ action: 'addLocalEvent', user: getApiUser(), title, date, venue, url, source: 'Blathers chat', added_by: 'blathers' });
     return true;
   }
 
