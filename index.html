@@ -3250,6 +3250,37 @@
       margin: 2px 0 0 10px;
       color: var(--muted);
     }
+
+    /* Week / single-day observances mingled in the main list (subtle, date-ordered). */
+    .hz-obs-mingle {
+      padding: 3px 8px 5px 54px;
+      margin: 0 0 4px 0;
+      max-width: 100%;
+    }
+    .hz-obs-mingle--start { opacity: 0.92; }
+    .hz-obs-mingle--end { opacity: 0.88; }
+    .hz-obs-mingle--single { opacity: 0.9; }
+    .hz-obs-mingle-line {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--muted);
+      line-height: 1.25;
+    }
+    .hz-obs-mingle-when {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      color: var(--muted);
+      opacity: 0.82;
+      margin-top: 2px;
+      padding-left: 10px;
+      border-left: 2px solid rgba(192, 122, 74, 0.22);
+      line-height: 1.3;
+    }
+    html.dark-mode .hz-obs-mingle-when {
+      border-left-color: rgba(224, 152, 104, 0.28);
+    }
     .schedule-horizon-schedule-head .schedule-event-count {
       padding-left: 2px;
       padding-right: 2px;
@@ -7678,7 +7709,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.32.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.32.2';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -13799,11 +13830,25 @@
     return dateOnly(d).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
   }
 
+  function endOfDayLocal_(d0) {
+    return new Date(d0.getFullYear(), d0.getMonth(), d0.getDate(), 23, 59, 59, 999);
+  }
+
+  /** One subtle observance row in the main schedule list (mingled by date). */
+  function hzObservanceMingleBlock_(lineTitle, whenStr, variant) {
+    return (
+      '<div class="hz-obs-mingle hz-obs-mingle--' + variant + '">' +
+        '<div class="hz-obs-mingle-line">' + escapeHtml(lineTitle) + '</div>' +
+        '<div class="hz-obs-mingle-when">' + escapeHtml(whenStr) + '</div>' +
+      '</div>'
+    );
+  }
+
   /**
-   * Cultural / optional horizon period labels: month-long = one soft callout under the chips;
-   * shorter spans = compact starts/ends copy (no list grouping).
+   * Month-long observances → soft strip under the chips only.
+   * Week / single-day spans → { mingle } rows sorted into the main list beside calendar events.
    */
-  function buildHorizonObservancesHtml_(year, monthStart, monthEnd) {
+  function collectHorizonObservanceUi_(year, monthStart, monthEnd) {
     const ms = dateOnly(monthStart).getTime();
     const me = dateOnly(monthEnd).getTime();
     const items = [];
@@ -13815,7 +13860,6 @@
       const span = horizonObservanceDaySpan_(s0, e0);
       const isMonth = horizonObservanceIsMonthLong_(s0, e0, monthStart, monthEnd);
       items.push({
-        sort: s0.getTime(),
         type: isMonth ? 'month' : 'week',
         label: label,
         start: s0,
@@ -13845,29 +13889,37 @@
       });
     }
 
-    items.sort(function(a, b) { return a.sort - b.sort; });
-    if (!items.length) return '';
+    items.sort(function(a, b) { return a.start.getTime() - b.start.getTime(); });
 
-    let html = '<div class="schedule-observances-list">';
+    const monthParts = [];
+    const mingle = [];
+
     items.forEach(function(it) {
       if (it.type === 'month') {
-        html += '<div class="schedule-observance-month">' + escapeHtml(it.label) + '</div>';
-      } else if (it.single) {
-        html += '<div class="schedule-observance-week">';
-        html += '<div class="schedule-observance-week-line">' + escapeHtml(it.label) + '</div>';
-        html += '<div class="schedule-observance-week-date">' + escapeHtml(formatHorizonObservanceWhen_(it.start)) + '</div>';
-        html += '</div>';
-      } else {
-        html += '<div class="schedule-observance-week">';
-        html += '<div class="schedule-observance-week-line">' + escapeHtml(it.label) + ' starts</div>';
-        html += '<div class="schedule-observance-week-date">' + escapeHtml(formatHorizonObservanceWhen_(it.start)) + '</div>';
-        html += '<div class="schedule-observance-week-line" style="margin-top:6px">' + escapeHtml(it.label) + ' ends</div>';
-        html += '<div class="schedule-observance-week-date">' + escapeHtml(formatHorizonObservanceWhen_(it.end)) + '</div>';
-        html += '</div>';
+        monthParts.push('<div class="schedule-observance-month">' + escapeHtml(it.label) + '</div>');
+        return;
       }
+      if (it.single) {
+        mingle.push({
+          sortT: it.start.getTime(),
+          html: hzObservanceMingleBlock_(it.label, formatHorizonObservanceWhen_(it.start), 'single')
+        });
+        return;
+      }
+      mingle.push({
+        sortT: it.start.getTime(),
+        html: hzObservanceMingleBlock_(it.label + ' starts', formatHorizonObservanceWhen_(it.start), 'start')
+      });
+      mingle.push({
+        sortT: endOfDayLocal_(it.end).getTime() - 800,
+        html: hzObservanceMingleBlock_(it.label + ' ends', formatHorizonObservanceWhen_(it.end), 'end')
+      });
     });
-    html += '</div>';
-    return html;
+
+    const monthHtml = monthParts.length
+      ? '<div class="schedule-observances-list">' + monthParts.join('') + '</div>'
+      : '';
+    return { monthHtml: monthHtml, mingle: mingle };
   }
 
   function attachHorizonScheduleBindings(main) {
@@ -13965,9 +14017,9 @@
     }
     renderScheduleChips();
 
-    const obsHtml = buildHorizonObservancesHtml_(scheduleHorizonYear, monthStart, monthEnd);
+    const obsUi = collectHorizonObservanceUi_(scheduleHorizonYear, monthStart, monthEnd);
     const obsMount = document.getElementById('scheduleHorizonObservancesMount');
-    if (obsMount) obsMount.innerHTML = obsHtml;
+    if (obsMount) obsMount.innerHTML = obsUi.monthHtml;
 
     const parts = [];
     const reg = {};
@@ -13978,17 +14030,31 @@
       return id;
     }
 
-    let hasAny = !!(obsHtml && obsHtml.replace(/\s/g, '').length);
+    let hasAny = !!(obsUi.monthHtml && obsUi.monthHtml.replace(/\s/g, '').length);
 
     const stream = [];
+    obsUi.mingle.forEach(function(m) {
+      stream.push({ kind: 'obs', t: m.sortT, html: m.html });
+    });
     inMonth.forEach(function(ev) {
       const quiet = ev.calendar === 'municipal' || ev.isMunicipalReminder;
-      stream.push({ t: new Date(ev.start || ev.date || ev.startTime).getTime(), ev: ev, quiet: quiet });
+      stream.push({
+        kind: 'ev',
+        t: new Date(ev.start || ev.date || ev.startTime).getTime(),
+        ev: ev,
+        quiet: quiet
+      });
     });
-    stream.sort(function(a, b) { return a.t - b.t; });
+    stream.sort(function(a, b) {
+      const d = a.t - b.t;
+      if (d !== 0) return d;
+      if (a.kind === b.kind) return 0;
+      return a.kind === 'obs' ? -1 : 1;
+    });
     stream.forEach(function(x) {
       hasAny = true;
-      parts.push(x.quiet ? hzStandaloneRowHtml(x.ev, { quiet: true }) : hzStandaloneRowHtml(x.ev, { quiet: false }, alloc(x.ev)));
+      if (x.kind === 'obs') parts.push(x.html);
+      else parts.push(x.quiet ? hzStandaloneRowHtml(x.ev, { quiet: true }) : hzStandaloneRowHtml(x.ev, { quiet: false }, alloc(x.ev)));
     });
 
     if (!hasAny) {
