@@ -3206,6 +3206,49 @@
       padding-right: 2px;
       margin-bottom: 2px;
     }
+    .schedule-horizon-observances-mount {
+      margin-top: 4px;
+      margin-bottom: 4px;
+      padding: 0 2px;
+    }
+    .schedule-observances-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .schedule-observance-month {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.45;
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(192, 122, 74, 0.08);
+      border: 1px solid rgba(192, 122, 74, 0.14);
+    }
+    html.dark-mode .schedule-observance-month {
+      background: rgba(192, 122, 74, 0.12);
+      border-color: rgba(224, 152, 104, 0.18);
+    }
+    .schedule-observance-week {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      line-height: 1.4;
+      color: var(--muted);
+      padding: 2px 0 2px 2px;
+    }
+    .schedule-observance-week-line {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 11px;
+      opacity: 0.9;
+    }
+    .schedule-observance-week-date {
+      font-size: 11px;
+      margin: 2px 0 0 10px;
+      color: var(--muted);
+    }
     .schedule-horizon-schedule-head .schedule-event-count {
       padding-left: 2px;
       padding-right: 2px;
@@ -3426,217 +3469,7 @@
       line-height: 1.35;
     }
 
-    .hz-group {
-      display: grid;
-      grid-template-columns: 14px 1fr;
-      border-radius: 14px;
-      overflow: hidden;
-      margin-bottom: 14px;
-      border: 1px solid rgba(192,122,74,0.18);
-      border-left: none;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-    html.dark-mode .hz-group {
-      border-color: rgba(255,255,255,0.1);
-    }
-    .hz-group-spine {
-      grid-row: 1 / span 999;
-      min-height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .hz-group--green .hz-group-spine { background: #5a9070; }
-    .hz-group--accent .hz-group-spine { background: var(--accent); }
-    .hz-group--civic .hz-group-spine { background: #2a5ba8; }
-    .hz-group-body {
-      background: rgba(192,122,74,0.06);
-      border-left: 1px solid rgba(192,122,74,0.15);
-      padding: 10px 10px 12px;
-    }
-    html.dark-mode .hz-group-body {
-      background: rgba(255,255,255,0.04);
-      border-left-color: rgba(255,255,255,0.08);
-    }
-    .hz-group--green .hz-group-body {
-      background: rgba(90,144,112,0.08);
-      border-left-color: rgba(90,144,112,0.25);
-    }
-    html.dark-mode .hz-group--green .hz-group-body {
-      background: rgba(90,144,112,0.12);
-    }
-    .hz-group--civic .hz-group-body {
-      background: rgba(42,91,168,0.08);
-      border-left-color: rgba(42,91,168,0.22);
-    }
-    html.dark-mode .hz-group--civic .hz-group-body {
-      background: rgba(42,91,168,0.14);
-    }
-    .hz-group-spine-label {
-      writing-mode: vertical-rl;
-      transform: rotate(180deg);
-      font-family: 'Inter', sans-serif;
-      font-size: 8px;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.95);
-      line-height: 1;
-      max-height: 160px;
-      text-align: center;
-    }
-    .hz-group-range-cap {
-      font-family: 'Inter', sans-serif;
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.03em;
-      color: var(--muted);
-      line-height: 1.25;
-    }
-    .hz-group-range-cap--top { margin-bottom: 6px; }
-    .hz-group-range-cap--bottom { margin-top: 10px; }
-    html.dark-mode .hz-group-range-cap { color: var(--muted); opacity: 0.95; }
-
-    .hz-group-header {
-      font-family: 'Playfair Display', serif;
-      font-size: 15px;
-      font-weight: 500;
-      color: var(--text);
-      margin-bottom: 8px;
-    }
-    .hz-nested {
-      display: grid;
-      grid-template-columns: 10px 1fr;
-      border-radius: 10px;
-      overflow: hidden;
-      margin-top: 8px;
-      margin-left: 4px;
-      border: 1px solid rgba(192,122,74,0.14);
-      border-left: none;
-    }
-    .hz-nested .hz-group-spine { min-height: 40px; }
-    .hz-nested .hz-group-body { padding: 8px; }
-
-    /* Cultural / period groups: no spine column (header + range caps only). */
-    .hz-group--cultural {
-      grid-template-columns: 1fr;
-      border-left: 1px solid rgba(192, 122, 74, 0.18);
-    }
-    html.dark-mode .hz-group--cultural { border-left-color: rgba(255, 255, 255, 0.1); }
-    .hz-group--cultural.hz-group--green { border-left-color: rgba(90, 144, 112, 0.35); }
-    .hz-group--cultural.hz-group--civic { border-left-color: rgba(42, 91, 168, 0.35); }
-    .hz-group--cultural.hz-group--accent { border-left-color: rgba(192, 122, 74, 0.22); }
-
-    /* Date column sits outside the tinted event shell (aligned with standalone rows). */
-    .hz-group-body--dated-rail {
-      background: transparent !important;
-      padding: 10px 10px 12px 0;
-    }
-    .hz-group:not(.hz-group--cultural) .hz-group-body--dated-rail {
-      border-left: 1px solid rgba(192, 122, 74, 0.15);
-    }
-    html.dark-mode .hz-group:not(.hz-group--cultural) .hz-group-body--dated-rail {
-      border-left-color: rgba(255, 255, 255, 0.08);
-    }
-    .hz-group--green .hz-group-body--dated-rail { border-left-color: rgba(90, 144, 112, 0.25) !important; }
-    .hz-group--civic .hz-group-body--dated-rail { border-left-color: rgba(42, 91, 168, 0.22) !important; }
-    html.dark-mode .hz-group--green .hz-group-body--dated-rail { border-left-color: rgba(90, 144, 112, 0.35) !important; }
-    html.dark-mode .hz-group--civic .hz-group-body--dated-rail { border-left-color: rgba(42, 91, 168, 0.3) !important; }
-
-    .hz-group-body--dated-rail > .hz-group-range-cap,
-    .hz-group-body--dated-rail > .hz-group-header {
-      margin-left: 54px;
-      margin-right: 4px;
-    }
-    .hz-group-body--dated-rail > .hz-nested {
-      margin-left: 54px;
-      margin-right: 0;
-    }
-
-    .hz-group-dated-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      margin-bottom: 2px;
-    }
-    .hz-standalone-date--group-rail {
-      width: 44px;
-      flex-shrink: 0;
-      text-align: left;
-      padding-top: 4px;
-    }
-    .hz-standalone-date--group-rail .hz-standalone-daynum {
-      font-size: 20px;
-    }
-    .hz-group-event-shell {
-      flex: 1;
-      min-width: 0;
-      border-radius: 10px;
-      padding: 2px 8px 4px;
-    }
-    .hz-group--accent .hz-group-dated-row .hz-group-event-shell {
-      background: rgba(192, 122, 74, 0.07);
-      border: 1px solid rgba(192, 122, 74, 0.12);
-    }
-    html.dark-mode .hz-group--accent .hz-group-dated-row .hz-group-event-shell {
-      background: rgba(192, 122, 74, 0.1);
-      border-color: rgba(224, 152, 104, 0.16);
-    }
-    .hz-group--green .hz-group-dated-row .hz-group-event-shell {
-      background: rgba(90, 144, 112, 0.1);
-      border: 1px solid rgba(90, 144, 112, 0.22);
-    }
-    html.dark-mode .hz-group--green .hz-group-dated-row .hz-group-event-shell {
-      background: rgba(90, 144, 112, 0.14);
-      border-color: rgba(90, 144, 112, 0.28);
-    }
-    .hz-group--civic .hz-group-dated-row .hz-group-event-shell {
-      background: rgba(42, 91, 168, 0.09);
-      border: 1px solid rgba(42, 91, 168, 0.18);
-    }
-    html.dark-mode .hz-group--civic .hz-group-dated-row .hz-group-event-shell {
-      background: rgba(42, 91, 168, 0.16);
-      border-color: rgba(42, 91, 168, 0.26);
-    }
-
-    .hz-nested .hz-group-body--dated-rail > .hz-group-range-cap { margin-left: 44px; }
-    .hz-nested .hz-group-dated-row .hz-group-event-shell {
-      padding: 2px 6px 3px;
-    }
-
-    .hz-group-event-main {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      padding: 6px 4px 8px 2px;
-      background: rgba(255, 255, 255, 0.72);
-      border: 1px solid rgba(192, 122, 74, 0.14);
-      border-radius: 8px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-    }
-    html.dark-mode .hz-group-event-main {
-      background: rgba(40, 36, 32, 0.65);
-      border-color: rgba(224, 152, 104, 0.18);
-    }
-    .hz-group-dated-row + .hz-group-dated-row {
-      margin-top: 6px;
-      padding-top: 6px;
-      border-top: 1px solid rgba(0, 0, 0, 0.06);
-    }
-    .hz-group-body--dated-rail > .hz-nested + .hz-group-dated-row {
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid rgba(0, 0, 0, 0.06);
-    }
-    html.dark-mode .hz-group-dated-row + .hz-group-dated-row,
-    html.dark-mode .hz-group-body--dated-rail > .hz-nested + .hz-group-dated-row {
-      border-top-color: rgba(255, 255, 255, 0.07);
-    }
-
-    .hz-standalone-card--hit,
-    .hz-group-event-main--hit { cursor: pointer; }
+    .hz-standalone-card--hit { cursor: pointer; }
     .hz-card-actions-row {
       display: flex;
       flex-wrap: wrap;
@@ -7327,6 +7160,7 @@
               <div class="schedule-chips-wrap h-scroll-faded schedule-chips-under-month">
                 <div class="schedule-chips" id="scheduleChips"></div>
               </div>
+              <div id="scheduleHorizonObservancesMount" class="schedule-horizon-observances-mount" aria-live="polite"></div>
               <div class="schedule-event-count" id="scheduleEventCount"></div>
             </div>
             <div class="schedule-horizon-main" id="scheduleHorizonMain"></div>
@@ -7843,7 +7677,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.31.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.32.0';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -13946,35 +13780,93 @@
     );
   }
 
-  function hzGroupEventRowHtml(ev, regId) {
-    const d = new Date(ev.start || ev.date || ev.startTime);
-    const col = hzFormatDateCol(d);
-    const title = (ev.title || ev.summary || 'Event').trim();
-    const sub = (ev.venue ? ev.venue + ' · ' : '') + ((ev.start && !ev.isAllDay) ? formatEventTime(ev.start) : '');
-    const dot = hzDotClassForEvent(ev);
-    const ymdAttr = ' data-hz-day-ymd="' + formatLocalYmd(d) + '"';
-    const regAttr = regId ? ' data-hz-reg="' + escapeHtml(regId) + '"' : '';
-    const mainHit = regId ? ' hz-group-event-main--hit' : '';
-    const legacyClick = ev.url && !regId ? ' onclick="window.open(\'' + String(ev.url).replace(/'/g, '%27') + '\', \'_blank\')"' : '';
-    const actions = regId ? hzCardActionsInnerHtml(ev) : '';
-    return (
-      '<div class="hz-group-dated-row"' + ymdAttr + regAttr + '>' +
-        '<div class="hz-standalone-date hz-standalone-date--group-rail">' +
-          '<div class="hz-standalone-dow">' + escapeHtml(col.dow) + '</div>' +
-          '<div class="hz-standalone-daynum">' + escapeHtml(col.num) + '</div>' +
-        '</div>' +
-        '<div class="hz-group-event-shell">' +
-          '<div class="hz-group-event-main' + mainHit + '"' + legacyClick + '">' +
-            '<span class="hz-dot ' + dot + '" style="margin-top:6px;flex-shrink:0"></span>' +
-            '<div class="hz-card-body">' +
-              '<div class="hz-card-title">' + escapeHtml(title) + '</div>' +
-              (sub ? '<div class="hz-card-sub">' + escapeHtml(sub.trim().replace(/\s*·\s*$/, '')) + '</div>' : '') +
-              actions +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-      '</div>'
-    );
+  function horizonObservanceDaySpan_(s, e) {
+    const a = dateOnly(s).getTime();
+    const b = dateOnly(e).getTime();
+    return Math.round((b - a) / 86400000) + 1;
+  }
+
+  function horizonObservanceIsMonthLong_(s, e, monthStart, monthEnd) {
+    const span = horizonObservanceDaySpan_(s, e);
+    if (span >= 21) return true;
+    const ms = dateOnly(monthStart).getTime();
+    const me = dateOnly(monthEnd).getTime();
+    return dateOnly(s).getTime() <= ms && dateOnly(e).getTime() >= me;
+  }
+
+  function formatHorizonObservanceWhen_(d) {
+    return dateOnly(d).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  /**
+   * Cultural / optional horizon period labels: month-long = one soft callout under the chips;
+   * shorter spans = compact starts/ends copy (no list grouping).
+   */
+  function buildHorizonObservancesHtml_(year, monthStart, monthEnd) {
+    const ms = dateOnly(monthStart).getTime();
+    const me = dateOnly(monthEnd).getTime();
+    const items = [];
+
+    function pushObservanceWindow(label, start, end) {
+      const s0 = dateOnly(start);
+      const e0 = dateOnly(end);
+      if (s0.getTime() > me || e0.getTime() < ms) return;
+      const span = horizonObservanceDaySpan_(s0, e0);
+      const isMonth = horizonObservanceIsMonthLong_(s0, e0, monthStart, monthEnd);
+      items.push({
+        sort: s0.getTime(),
+        type: isMonth ? 'month' : 'week',
+        label: label,
+        start: s0,
+        end: e0,
+        single: span <= 1
+      });
+    }
+
+    getCulturalPeriodWindowsForMonth_(year, monthStart, monthEnd).forEach(function(grp) {
+      pushObservanceWindow(grp.label, grp.start, grp.end);
+      (grp.nested || []).forEach(function(sub) {
+        pushObservanceWindow(sub.label, sub.start, sub.end);
+      });
+    });
+
+    if (typeof SCHEDULE_HORIZON_PERIOD_GROUPS !== 'undefined' && SCHEDULE_HORIZON_PERIOD_GROUPS.length) {
+      SCHEDULE_HORIZON_PERIOD_GROUPS.forEach(function(grp) {
+        const sd = resolveMMDDInHorizonYear_(grp.startMMDD);
+        const ed = resolveMMDDInHorizonYear_(grp.endMMDD);
+        if (!sd || !ed) return;
+        pushObservanceWindow(grp.label, sd, ed);
+        (grp.nested || []).forEach(function(sub) {
+          const s2 = resolveMMDDInHorizonYear_(sub.startMMDD);
+          const e2 = resolveMMDDInHorizonYear_(sub.endMMDD);
+          if (s2 && e2) pushObservanceWindow(sub.label, s2, e2);
+        });
+      });
+    }
+
+    items.sort(function(a, b) { return a.sort - b.sort; });
+    if (!items.length) return '';
+
+    let html = '<div class="schedule-observances-list">';
+    items.forEach(function(it) {
+      if (it.type === 'month') {
+        html += '<div class="schedule-observance-month">' + escapeHtml(it.label) + '</div>';
+      } else if (it.single) {
+        html += '<div class="schedule-observance-week">';
+        html += '<div class="schedule-observance-week-line">' + escapeHtml(it.label) + '</div>';
+        html += '<div class="schedule-observance-week-date">' + escapeHtml(formatHorizonObservanceWhen_(it.start)) + '</div>';
+        html += '</div>';
+      } else {
+        html += '<div class="schedule-observance-week">';
+        html += '<div class="schedule-observance-week-line">' + escapeHtml(it.label) + ' starts</div>';
+        html += '<div class="schedule-observance-week-date">' + escapeHtml(formatHorizonObservanceWhen_(it.start)) + '</div>';
+        html += '<div class="schedule-observance-week-line" style="margin-top:6px">' + escapeHtml(it.label) + ' ends</div>';
+        html += '<div class="schedule-observance-week-date">' + escapeHtml(formatHorizonObservanceWhen_(it.end)) + '</div>';
+        html += '</div>';
+      }
+    });
+    html += '</div>';
+    return html;
   }
 
   function attachHorizonScheduleBindings(main) {
@@ -13991,14 +13883,6 @@
         if (d && d.url) window.open(d.url, '_blank');
       });
     });
-    main.querySelectorAll('.hz-group-event-main--hit').forEach(function(mainEl) {
-      mainEl.addEventListener('click', function(ev) {
-        if (ev.target.closest('.hz-card-actions-row') || ev.target.closest('button')) return;
-        const row = mainEl.closest('[data-hz-reg]');
-        const d = row && row._eventData;
-        if (d && d.url) window.open(d.url, '_blank');
-      });
-    });
   }
 
   function renderScheduleHorizon() {
@@ -14009,17 +13893,6 @@
     ensureHorizonMonthCursor();
     const { start: monthStart, end: monthEnd } = horizonMonthRange();
     const cutoff = horizonDateCutoff();
-
-    /** Range caps for the visible month slice (period may extend beyond the month). */
-    function hzCapsForMonthView(rangeStart, rangeEnd) {
-      const s = dateOnly(rangeStart);
-      const e = dateOnly(rangeEnd);
-      const ms = dateOnly(monthStart);
-      const me = dateOnly(monthEnd);
-      const ds = s < ms ? ms : s;
-      const de = e > me ? me : e;
-      return hzPeriodRangeCapsPairHtml(ds, de);
-    }
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -14058,12 +13931,6 @@
     mondayExtras.forEach(function(ex) { inMonth.push(ex); });
     inMonth.sort((a, b) => new Date(a.start || a.date || a.startTime) - new Date(b.start || b.date || b.startTime));
 
-    const locals = all.filter(ev => ev.calendar === 'local').filter(ev => {
-      const d = dateOnly(new Date(ev.start || ev.date || ev.startTime));
-      return d >= monthStart && d <= monthEnd && d >= cutoff;
-    });
-    locals.sort((a, b) => new Date(a.start || a.date) - new Date(b.start || b.date));
-
     const countEl = document.getElementById('scheduleEventCount');
     if (countEl) {
       let winN = 0;
@@ -14097,6 +13964,10 @@
     }
     renderScheduleChips();
 
+    const obsHtml = buildHorizonObservancesHtml_(scheduleHorizonYear, monthStart, monthEnd);
+    const obsMount = document.getElementById('scheduleHorizonObservancesMount');
+    if (obsMount) obsMount.innerHTML = obsHtml;
+
     const parts = [];
     const reg = {};
     let regN = 0;
@@ -14106,121 +13977,10 @@
       return id;
     }
 
-    const usedIds = new Set();
-    let hasAny = false;
+    let hasAny = !!(obsHtml && obsHtml.replace(/\s/g, '').length);
 
-    function renderNestedGroups(parentDef, depth) {
-      if (depth > 1 || !parentDef.nested || !parentDef.nested.length) return '';
-      let html = '';
-      parentDef.nested.forEach(function(sub) {
-        const sd = resolveMMDDInHorizonYear_(sub.startMMDD);
-        const ed = resolveMMDDInHorizonYear_(sub.endMMDD);
-        if (!sd || !ed) return;
-        const sd0 = dateOnly(sd);
-        const ed0 = dateOnly(ed);
-        const evs = inMonth.filter(function(ev) {
-          const id = getEventId(ev);
-          if (usedIds.has(id)) return false;
-          const d = dateOnly(new Date(ev.start || ev.date || ev.startTime));
-          return d >= sd0 && d <= ed0;
-        });
-        evs.forEach(function(ev) { usedIds.add(getEventId(ev)); });
-        const spine = sub.spine === 'civic' ? 'civic' : (sub.spine === 'green' ? 'green' : 'accent');
-        html += '<div class="hz-nested hz-group hz-group--' + spine + '">';
-        html += '<div class="hz-group-spine"><span class="hz-group-spine-label">' + escapeHtml(sub.label) + '</span></div>';
-        html += '<div class="hz-group-body hz-group-body--dated-rail">';
-        const capsSub = hzCapsForMonthView(sd0, ed0);
-        html += capsSub.top;
-        evs.forEach(function(ev) { html += hzGroupEventRowHtml(ev, alloc(ev)); });
-        html += capsSub.bottom;
-        html += '</div></div>';
-      });
-      return html;
-    }
-
-    function renderCulturalPeriodBlock_(grp) {
-      let nestedHtml = '';
-      if (grp.nested && grp.nested.length) {
-        grp.nested.forEach(function(sub) {
-          const ns0 = dateOnly(sub.start);
-          const ne0 = dateOnly(sub.end);
-          const nev = inMonth.filter(function(ev) {
-            const id = getEventId(ev);
-            if (usedIds.has(id)) return false;
-            const d = dateOnly(new Date(ev.start || ev.date || ev.startTime));
-            return d >= ns0 && d <= ne0;
-          });
-          nev.forEach(function(ev) { usedIds.add(getEventId(ev)); });
-          if (!nev.length) return;
-          const sp = sub.spine === 'civic' ? 'civic' : (sub.spine === 'green' ? 'green' : 'accent');
-          nestedHtml += '<div class="hz-nested hz-group hz-group--' + sp + '">';
-          nestedHtml += '<div class="hz-group-spine"><span class="hz-group-spine-label">' + escapeHtml(sub.spineLabel) + '</span></div>';
-          nestedHtml += '<div class="hz-group-body hz-group-body--dated-rail">';
-          const capsN = hzPeriodRangeCapsPairHtml(ns0, ne0);
-          nestedHtml += capsN.top;
-          nev.forEach(function(ev) { nestedHtml += hzGroupEventRowHtml(ev, alloc(ev)); });
-          nestedHtml += capsN.bottom;
-          nestedHtml += '</div></div>';
-        });
-      }
-      const ps0 = dateOnly(grp.start);
-      const pe0 = dateOnly(grp.end);
-      const pev = inMonth.filter(function(ev) {
-        const id = getEventId(ev);
-        if (usedIds.has(id)) return false;
-        const d = dateOnly(new Date(ev.start || ev.date || ev.startTime));
-        return d >= ps0 && d <= pe0;
-      });
-      pev.forEach(function(ev) { usedIds.add(getEventId(ev)); });
-      if (!nestedHtml && !pev.length) return;
-      const spine = grp.spine === 'civic' ? 'civic' : (grp.spine === 'green' ? 'green' : 'accent');
-      parts.push('<div class="hz-group hz-group--cultural hz-group--' + spine + '">');
-      parts.push('<div class="hz-group-body hz-group-body--dated-rail">');
-      const capP = hzPeriodRangeCapsPairHtml(ps0, pe0);
-      parts.push(capP.top);
-      parts.push('<div class="hz-group-header">' + escapeHtml(grp.label) + '</div>');
-      parts.push(nestedHtml);
-      pev.forEach(function(ev) { parts.push(hzGroupEventRowHtml(ev, alloc(ev))); });
-      parts.push(capP.bottom);
-      parts.push('</div></div>');
-      hasAny = true;
-    }
-
-    if (SCHEDULE_HORIZON_PERIOD_GROUPS.length) {
-      SCHEDULE_HORIZON_PERIOD_GROUPS.forEach(function(grp) {
-        const sd = resolveMMDDInHorizonYear_(grp.startMMDD);
-        const ed = resolveMMDDInHorizonYear_(grp.endMMDD);
-        if (!sd || !ed) return;
-        const sd0 = dateOnly(sd);
-        const ed0 = dateOnly(ed);
-        const evs = inMonth.filter(function(ev) {
-          const id = getEventId(ev);
-          if (usedIds.has(id)) return false;
-          const d = dateOnly(new Date(ev.start || ev.date || ev.startTime));
-          return d >= sd0 && d <= ed0;
-        });
-        evs.forEach(function(ev) { usedIds.add(getEventId(ev)); });
-        const nestedH = renderNestedGroups(grp, 0);
-        if (evs.length || (nestedH && nestedH.length)) hasAny = true;
-        const spine = grp.spine === 'civic' ? 'civic' : (grp.spine === 'green' ? 'green' : 'accent');
-        parts.push('<div class="hz-group hz-group--' + spine + '">');
-        parts.push('<div class="hz-group-spine"><span class="hz-group-spine-label">' + escapeHtml(grp.label) + '</span></div>');
-        parts.push('<div class="hz-group-body hz-group-body--dated-rail">');
-        const capG = hzCapsForMonthView(sd0, ed0);
-        parts.push(capG.top);
-        parts.push('<div class="hz-group-header">' + escapeHtml(grp.label) + '</div>');
-        parts.push(nestedH);
-        evs.forEach(function(ev) { parts.push(hzGroupEventRowHtml(ev, alloc(ev))); });
-        parts.push(capG.bottom);
-        parts.push('</div></div>');
-      });
-    }
-
-    getCulturalPeriodWindowsForMonth_(scheduleHorizonYear, monthStart, monthEnd).forEach(renderCulturalPeriodBlock_);
-
-    const remaining = inMonth.filter(ev => !usedIds.has(getEventId(ev)));
     const stream = [];
-    remaining.forEach(function(ev) {
+    inMonth.forEach(function(ev) {
       const quiet = ev.calendar === 'municipal' || ev.isMunicipalReminder;
       stream.push({ t: new Date(ev.start || ev.date || ev.startTime).getTime(), ev: ev, quiet: quiet });
     });
@@ -14229,19 +13989,6 @@
       hasAny = true;
       parts.push(x.quiet ? hzStandaloneRowHtml(x.ev, { quiet: true }) : hzStandaloneRowHtml(x.ev, { quiet: false }, alloc(x.ev)));
     });
-
-    const localRemaining = locals.filter(function(ev) { return !usedIds.has(getEventId(ev)); });
-    if (localRemaining.length) {
-      hasAny = true;
-      parts.push('<div class="hz-group hz-group--green">');
-      parts.push('<div class="hz-group-spine"><span class="hz-group-spine-label">Around town</span></div>');
-      parts.push('<div class="hz-group-body hz-group-body--dated-rail">');
-      parts.push('<div class="hz-group-header">Around town</div>');
-      localRemaining.forEach(function(ev) {
-        parts.push(hzGroupEventRowHtml(ev, alloc(ev)));
-      });
-      parts.push('</div></div>');
-    }
 
     if (!hasAny) {
       parts.push('<div class="screen-loading" style="background:transparent;margin:20px 0">' +
@@ -14256,23 +14003,6 @@
 
   function dateOnly(dt) {
     return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
-  }
-
-  /** Tiny start/end lines for period groupings (top = range start, bottom = range end). */
-  function hzPeriodRangeCapsPairHtml(rangeStart, rangeEnd) {
-    const a = dateOnly(rangeStart);
-    const b = dateOnly(rangeEnd);
-    const same = a.getTime() === b.getTime();
-    const top = same
-      ? a.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
-      : a.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    const bot = same
-      ? a.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
-      : b.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    return {
-      top: '<div class="hz-group-range-cap hz-group-range-cap--top">' + escapeHtml(top) + '</div>',
-      bottom: '<div class="hz-group-range-cap hz-group-range-cap--bottom">' + escapeHtml(bot) + '</div>'
-    };
   }
 
   function inLandscapeWasteSeason(d) {
@@ -14328,7 +14058,7 @@
 
   /**
    * US observance windows for the schedule horizon (clipped per visible month).
-   * Nested ranges claim events first; parent rows show remaining days in the month span.
+   * Used for the soft callout under the schedule chips (not for grouping list rows).
    */
   function isLeapYearSchedule_(y) {
     return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
