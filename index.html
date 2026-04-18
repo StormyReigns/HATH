@@ -3667,9 +3667,44 @@
       border-color: rgba(224, 152, 104, 0.55);
       box-shadow: 0 0 0 3px rgba(224, 152, 104, 0.12);
     }
-    .local-event-drawer .event-date-input.local-event-field {
-      min-height: 52px;
-      padding: 12px 14px;
+    /* Date: match project creator — compact; avoid full-width + tall min-height (iOS picker overflows). */
+    .local-event-drawer .local-event-field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin-top: 16px;
+    }
+    .local-event-drawer .local-event-date-group {
+      align-items: flex-start;
+    }
+    .local-event-drawer .local-event-date-input {
+      box-sizing: border-box;
+      width: 11.5em;
+      max-width: 100%;
+      padding: 10px 12px;
+      font-size: 16px;
+      line-height: 1.35;
+      border-radius: 12px;
+      border: 1px solid rgba(192, 122, 74, 0.16);
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6);
+      font-family: inherit;
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .local-event-drawer .local-event-date-input:focus {
+      outline: none;
+      border-color: rgba(192, 122, 74, 0.45);
+      box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6), 0 0 0 3px rgba(192, 122, 74, 0.14);
+    }
+    html.dark-mode .local-event-drawer .local-event-date-input {
+      background: #252220;
+      border-color: rgba(255, 255, 255, 0.12);
+      color: var(--text);
+    }
+    html.dark-mode .local-event-drawer .local-event-date-input:focus {
+      border-color: rgba(224, 152, 104, 0.55);
+      box-shadow: 0 0 0 3px rgba(224, 152, 104, 0.12);
     }
     .local-event-drawer-actions {
       display: flex;
@@ -7361,8 +7396,10 @@
         <p class="local-event-drawer-lede">Saved for both of you — appears on the schedule horizon with your other local items.</p>
         <label class="local-event-field-label" for="localEventQuickTitle">Event name</label>
         <input type="text" class="local-event-field" id="localEventQuickTitle" placeholder="What’s happening?" maxlength="200" autocomplete="off">
-        <label class="local-event-field-label" for="localEventQuickDate">Date</label>
-        <input type="date" id="localEventQuickDate" class="event-date-input local-event-field" autocomplete="off">
+        <div class="local-event-field-group local-event-date-group">
+          <label class="project-field-hint" for="localEventQuickDate">Date</label>
+          <input type="date" id="localEventQuickDate" class="local-event-date-input" autocomplete="off">
+        </div>
         <label class="local-event-field-label" for="localEventQuickVenue">Venue (optional)</label>
         <input type="text" class="local-event-field" id="localEventQuickVenue" placeholder="Place or address" maxlength="200" autocomplete="off">
         <div class="local-event-drawer-actions">
@@ -7788,7 +7825,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.32.5';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.32.6';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -8175,13 +8212,12 @@
     const sep = base.indexOf('?') >= 0 ? '&' : '?';
     return base + sep + 'user=' + encodeURIComponent(u) + (extraParams || '');
   }
-  /** POST JSON to API with same URL shape as authenticated GETs; XHR fallback when fetch fails (Safari “Load failed”). */
+  /** POST JSON body to web app. Uses text/plain so the request stays “simple” CORS-wise (like many GAS clients); server still JSON.parse(postData.contents). XHR fallback when fetch fails. */
   function apiPostJsonXhr(body) {
     return new Promise(function(resolve, reject) {
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', apiUrlWithUser(API_URL));
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.setRequestHeader('Accept', 'application/json');
+      xhr.open('POST', API_URL);
+      xhr.setRequestHeader('Content-Type', 'text/plain');
       xhr.timeout = 60000;
       xhr.onload = function() {
         const text = xhr.responseText || '';
@@ -8210,14 +8246,11 @@
   }
   async function apiPostJson(body) {
     try {
-      const res = await fetch(apiUrlWithUser(API_URL), {
+      const res = await fetch(API_URL, {
         method: 'POST',
         redirect: 'follow',
         cache: 'no-store',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(body)
       });
       const text = await res.text();
