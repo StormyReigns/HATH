@@ -7885,7 +7885,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.33.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.33.2';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -8272,20 +8272,47 @@
     const sep = base.indexOf('?') >= 0 ? '&' : '?';
     return base + sep + 'user=' + encodeURIComponent(u) + (extraParams || '');
   }
-  /** POST JSON body to web app. Uses text/plain so the request stays “simple” CORS-wise (like many GAS clients); server still JSON.parse(postData.contents). XHR fallback when fetch fails. */
-  function apiPostJsonXhr(body) {
-    return new Promise(function(resolve, reject) {
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', API_URL);
-      xhr.setRequestHeader('Content-Type', 'text/plain');
-      xhr.timeout = 60000;
-      xhr.onload = function() {
-        const text = xhr.responseText || '';
-        let data;
+  var API_REQUEST_TIMEOUT_MS = 22000;
+  /** Last resort when POST and XHR both fail (common on some iOS PWA / WebKit + script.google.com). */
+  function apiAddLocalEventViaGet_(body) {
+    var q = '&action=addLocalEvent' +
+      '&title=' + encodeURIComponent(String(body.title || '')) +
+      '&date=' + encodeURIComponent(String(body.date || '')) +
+      '&venue=' + encodeURIComponent(String(body.venue || '')) +
+      '&url=' + encodeURIComponent(String(body.url || '')) +
+      '&source=' + encodeURIComponent(String(body.source || 'Quick add')) +
+      '&added_by=' + encodeURIComponent(String(body.added_by || 'manual')) +
+      '&_=' + Date.now();
+    var url = apiUrlWithUser(API_URL, q);
+    return fetch(url, { redirect: 'follow', cache: 'no-store' }).then(function(res) {
+      return res.text().then(function(text) {
+        var data;
         try {
           data = text ? JSON.parse(text) : {};
         } catch (e) {
-          const snippet = text.slice(0, 120).replace(/\s+/g, ' ');
+          var snippet = text ? text.slice(0, 120).replace(/\s+/g, ' ') : '';
+          throw new Error(snippet || ('Invalid JSON (HTTP ' + res.status + ')'));
+        }
+        if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+        if (data.error) throw new Error(data.error);
+        return data;
+      });
+    });
+  }
+  /** POST JSON body to web app. text/plain = simple CORS. Timeouts avoid endless “Saving…”. GET fallback for addLocalEvent when POST/XHR fail. */
+  function apiPostJsonXhr(body) {
+    return new Promise(function(resolve, reject) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', API_URL);
+      xhr.setRequestHeader('Content-Type', 'text/plain');
+      xhr.timeout = API_REQUEST_TIMEOUT_MS;
+      xhr.onload = function() {
+        var text = xhr.responseText || '';
+        var data;
+        try {
+          data = text ? JSON.parse(text) : {};
+        } catch (e) {
+          var snippet = text.slice(0, 120).replace(/\s+/g, ' ');
           reject(new Error(snippet || ('Invalid JSON (HTTP ' + xhr.status + ')')));
           return;
         }
@@ -8304,31 +8331,53 @@
       xhr.send(JSON.stringify(body));
     });
   }
-  async function apiPostJson(body) {
+  async function apiPostJsonFetchOnce_(body) {
+    var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var t = null;
+    if (ctrl) {
+      t = setTimeout(function() { try { ctrl.abort(); } catch (e) {} }, API_REQUEST_TIMEOUT_MS);
+    }
     try {
-      const res = await fetch(API_URL, {
+      var res = await fetch(API_URL, {
         method: 'POST',
+        signal: ctrl ? ctrl.signal : undefined,
         redirect: 'follow',
         cache: 'no-store',
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(body)
       });
-      const text = await res.text();
-      let data;
+      var text = await res.text();
+      var data;
       try {
         data = text ? JSON.parse(text) : {};
       } catch (e) {
-        const snippet = text ? text.slice(0, 120).replace(/\s+/g, ' ') : '';
+        var snippet = text ? text.slice(0, 120).replace(/\s+/g, ' ') : '';
         throw new Error(snippet || ('Invalid JSON from server (HTTP ' + res.status + ')'));
       }
       if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
       if (data.error) throw new Error(data.error);
       return data;
+    } finally {
+      if (t) clearTimeout(t);
+    }
+  }
+  async function apiPostJson(body) {
+    var action = body && body.action;
+    try {
+      return await apiPostJsonFetchOnce_(body);
     } catch (err) {
-      const msg = err && err.message ? String(err.message) : '';
-      const isFetchFail = err instanceof TypeError || /Load failed|Failed to fetch|NetworkError|network error/i.test(msg);
-      if (isFetchFail) return apiPostJsonXhr(body);
-      throw err;
+      var msg = err && err.message ? String(err.message) : '';
+      var name = err && err.name ? String(err.name) : '';
+      var isNetFail = err instanceof TypeError || name === 'AbortError' || /Load failed|Failed to fetch|NetworkError|network error|aborted|timed out/i.test(msg);
+      if (!isNetFail) throw err;
+      try {
+        return await apiPostJsonXhr(body);
+      } catch (err2) {
+        if (action === 'addLocalEvent') {
+          return await apiAddLocalEventViaGet_(body);
+        }
+        throw err2;
+      }
     }
   }
   // Must match your Shasta Docs folder: open it in Drive, copy ID from URL (after /folders/)
