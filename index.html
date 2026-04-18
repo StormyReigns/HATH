@@ -1778,9 +1778,10 @@
     .docs-swipe-btn.delete { background: #d94f4f; color: white; }
     .docs-swipe-btn:active { opacity: 0.9; }
     .screen-footer {
-      padding: 12px 0;
+      padding: 4px 0 5px;
       font-size: 12px;
       text-align: center;
+      flex-shrink: 0;
     }
     .screen-footer a {
       color: var(--accent);
@@ -3055,7 +3056,7 @@
 
     /* Schedule screen */
     #scheduleScreen {
-      flex-direction: column; padding: 4px 0 6px; position: relative;
+      flex-direction: column; padding: 4px 0 2px; position: relative;
       flex: 1; min-height: 0; display: flex;
     }
     .schedule-bg-icon {
@@ -3185,8 +3186,8 @@
       flex-direction: row;
       flex: 1;
       min-height: 0;
-      gap: 10px;
-      padding: 0 10px 6px;
+      gap: 8px;
+      padding: 0 0 2px 10px;
       align-items: stretch;
     }
     .schedule-horizon-main-col {
@@ -3268,7 +3269,7 @@
       overflow-x: hidden;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      padding-bottom: max(5px, env(safe-area-inset-bottom));
     }
     .schedule-horizon-month-nav {
       display: flex;
@@ -3335,7 +3336,7 @@
       width: 56px;
       flex-shrink: 0;
       border-left: 1px solid rgba(192,122,74,0.22);
-      padding: 4px 0 8px 8px;
+      padding: 4px max(2px, env(safe-area-inset-right, 0px)) 8px 8px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -7677,7 +7678,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.32.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.32.1';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
