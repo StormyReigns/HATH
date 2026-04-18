@@ -7464,7 +7464,7 @@
         </div>
         <div class="local-event-drawer-actions">
           <button type="button" class="paste-cancel-btn" onclick="closeLocalEventDrawer()">Cancel</button>
-          <button type="button" class="paste-save-btn" onclick="saveLocalEventQuick()">Save</button>
+          <button type="button" class="paste-save-btn" id="localEventQuickSaveBtn" onclick="saveLocalEventQuick()">Save</button>
         </div>
       </div>
     </div>
@@ -7885,7 +7885,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.33.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.33.1';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -14900,6 +14900,7 @@
     const chk = document.getElementById('localEventAlsoGoogle');
     const wrap = document.getElementById('localEventGoogleCalendarWrap');
     if (wrap && chk) wrap.style.display = chk.checked ? 'block' : 'none';
+    if (chk && chk.checked) populateLocalEventCalendarSelect_();
   }
 
   async function populateLocalEventCalendarSelect_() {
@@ -14944,9 +14945,8 @@
     if (dEl) dEl.value = formatLocalYmd(new Date());
     if (chk) chk.checked = false;
     if (wrap) wrap.style.display = 'none';
-    populateLocalEventCalendarSelect_().then(function() {
-      if (o) o.classList.add('open');
-    });
+    if (o) o.classList.add('open');
+    populateLocalEventCalendarSelect_();
   }
 
   function closeLocalEventDrawer(ev) {
@@ -14956,20 +14956,43 @@
   }
 
   async function saveLocalEventQuick() {
-    const title = document.getElementById('localEventQuickTitle')?.value.trim();
-    const date = document.getElementById('localEventQuickDate')?.value;
-    const venue = document.getElementById('localEventQuickVenue')?.value.trim() || '';
-    if (!title || !date || !getApiUser()) return;
-    const alsoGoogle = document.getElementById('localEventAlsoGoogle')?.checked;
-    const calendarId = document.getElementById('localEventCalendarSelect')?.value;
+    const titleEl = document.getElementById('localEventQuickTitle');
+    const dateEl = document.getElementById('localEventQuickDate');
+    const venueEl = document.getElementById('localEventQuickVenue');
+    const title = (titleEl && titleEl.value || '').trim();
+    const date = (dateEl && dateEl.value || '').trim();
+    const venue = (venueEl && venueEl.value || '').trim();
+    const user = getApiUser();
+    if (!user) {
+      alert('Sign in to save.');
+      return;
+    }
+    if (!title) {
+      alert('Add an event name.');
+      return;
+    }
+    if (!date) {
+      alert('Pick a date.');
+      return;
+    }
+    const alsoGoogleEl = document.getElementById('localEventAlsoGoogle');
+    const calSel = document.getElementById('localEventCalendarSelect');
+    const alsoGoogle = alsoGoogleEl && alsoGoogleEl.checked;
+    const calendarId = calSel && calSel.value;
+    const saveBtn = document.getElementById('localEventQuickSaveBtn');
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.dataset.prevLabel = saveBtn.textContent;
+      saveBtn.textContent = 'Saving…';
+    }
     try {
-      await apiPostJson({ action: 'addLocalEvent', user: getApiUser(), title, date, venue, url: '', source: 'Quick add', added_by: 'manual' });
+      await apiPostJson({ action: 'addLocalEvent', user: user, title, date, venue, url: '', source: 'Quick add', added_by: 'manual' });
       let gErr = null;
       if (alsoGoogle && calendarId) {
         try {
           await apiPostJson({
             action: 'createEvent',
-            user: getApiUser(),
+            user: user,
             calendarId: calendarId,
             title: title,
             start: date,
@@ -14989,6 +15012,11 @@
       }
     } catch (err) {
       alert('Could not save: ' + (err.message || 'Unknown error'));
+    } finally {
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        if (saveBtn.dataset.prevLabel) saveBtn.textContent = saveBtn.dataset.prevLabel;
+      }
     }
   }
 
