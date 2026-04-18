@@ -3720,6 +3720,55 @@
       padding: 0 20px;
       font-size: 15px;
     }
+    .local-event-google-opt {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(192, 122, 74, 0.12);
+    }
+    .local-event-inline-check {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      cursor: pointer;
+      line-height: 1.45;
+    }
+    .local-event-inline-check input {
+      margin-top: 3px;
+      accent-color: var(--accent);
+      flex-shrink: 0;
+    }
+    .local-event-google-wrap {
+      margin-top: 12px;
+    }
+    .local-event-google-wrap .project-field-hint {
+      margin-bottom: 6px;
+    }
+    .local-event-drawer select.local-event-calendar-select {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      padding: 10px 12px;
+      font-size: 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(192, 122, 74, 0.16);
+      background: rgba(255, 255, 255, 0.72);
+      font-family: inherit;
+      color: var(--text);
+    }
+    html.dark-mode .local-event-drawer select.local-event-calendar-select {
+      background: #252220;
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+    .local-event-google-hint {
+      margin: 8px 0 0;
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+    }
 
     /* BlatherBook floating chat */
     .blatherbook-fab {
@@ -7393,7 +7442,7 @@
     <div class="local-event-drawer-overlay" id="localEventDrawerOverlay" onclick="closeLocalEventDrawer(event)">
       <div class="local-event-drawer" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="localEventModalTitle">
         <h3 id="localEventModalTitle">Add local event</h3>
-        <p class="local-event-drawer-lede">Saved for both of you — appears on the schedule horizon with your other local items.</p>
+        <p class="local-event-drawer-lede">Saved to ShastApp’s list for both of you (below, with the green “Local” tag). This is not the same as the iPhone Calendar app unless you also add it to Google Calendar here.</p>
         <label class="local-event-field-label" for="localEventQuickTitle">Event name</label>
         <input type="text" class="local-event-field" id="localEventQuickTitle" placeholder="What’s happening?" maxlength="200" autocomplete="off">
         <div class="local-event-field-group local-event-date-group">
@@ -7402,6 +7451,17 @@
         </div>
         <label class="local-event-field-label" for="localEventQuickVenue">Venue (optional)</label>
         <input type="text" class="local-event-field" id="localEventQuickVenue" placeholder="Place or address" maxlength="200" autocomplete="off">
+        <div class="local-event-google-opt">
+          <label class="local-event-inline-check">
+            <input type="checkbox" id="localEventAlsoGoogle" onchange="localEventToggleGoogleCal()">
+            <span>Also add to Google Calendar (all-day)</span>
+          </label>
+          <div id="localEventGoogleCalendarWrap" class="local-event-google-wrap" style="display:none">
+            <label class="project-field-hint" for="localEventCalendarSelect">Which calendar</label>
+            <select id="localEventCalendarSelect" class="local-event-calendar-select event-calendar-select" aria-label="Google Calendar"></select>
+            <p class="local-event-google-hint">Default is Shasta Shared (both profiles). Choose Matt or Jessica for only that person.</p>
+          </div>
+        </div>
         <div class="local-event-drawer-actions">
           <button type="button" class="paste-cancel-btn" onclick="closeLocalEventDrawer()">Cancel</button>
           <button type="button" class="paste-save-btn" onclick="saveLocalEventQuick()">Save</button>
@@ -7825,7 +7885,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.32.6';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.33.0';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -13764,6 +13824,16 @@
     }
   }
 
+  /** After saving a local event, jump the horizon to that date’s month so the new row is visible. */
+  function alignScheduleHorizonToYmd(ymd) {
+    if (!ymd || !/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return;
+    const y = parseInt(ymd.slice(0, 4), 10);
+    const m0 = parseInt(ymd.slice(5, 7), 10) - 1;
+    if (isNaN(y) || m0 < 0 || m0 > 11) return;
+    scheduleHorizonYear = y;
+    scheduleHorizonMonth0 = m0;
+  }
+
   function horizonMonthRange() {
     ensureHorizonMonthCursor();
     const ys = scheduleHorizonYear;
@@ -14826,6 +14896,38 @@
     }
   }
 
+  function localEventToggleGoogleCal() {
+    const chk = document.getElementById('localEventAlsoGoogle');
+    const wrap = document.getElementById('localEventGoogleCalendarWrap');
+    if (wrap && chk) wrap.style.display = chk.checked ? 'block' : 'none';
+  }
+
+  async function populateLocalEventCalendarSelect_() {
+    const selectEl = document.getElementById('localEventCalendarSelect');
+    if (!selectEl) return;
+    const user = getApiUser();
+    if (!user) return;
+    let calendars = scheduleCalendarsList.slice();
+    if (calendars.length === 0) {
+      try {
+        const res = await fetch(`${API_URL}?action=calendarList&user=${encodeURIComponent(user)}`, { redirect: 'follow' });
+        const data = await res.json();
+        calendars = data.calendars || [];
+        scheduleCalendarsList = calendars;
+      } catch (_) {}
+    }
+    const writableCalendars = calendars.filter(function(c) { return c.key !== 'holidays'; });
+    const options = writableCalendars.length ? writableCalendars : calendars;
+    selectEl.innerHTML = options.map(function(c) {
+      return '<option value="' + escapeHtml(c.id) + '">' + escapeHtml(c.name) + '</option>';
+    }).join('');
+    let idx = options.findIndex(function(c) {
+      return c.key === 'shared' || /shared/i.test(String(c.name || ''));
+    });
+    if (idx < 0) idx = 0;
+    selectEl.selectedIndex = Math.min(idx, Math.max(0, options.length - 1));
+  }
+
   function openLocalEventDrawer() {
     if (!getApiUser()) {
       alert('Sign in to add a local event.');
@@ -14835,10 +14937,16 @@
     const t = document.getElementById('localEventQuickTitle');
     const dEl = document.getElementById('localEventQuickDate');
     const v = document.getElementById('localEventQuickVenue');
+    const chk = document.getElementById('localEventAlsoGoogle');
+    const wrap = document.getElementById('localEventGoogleCalendarWrap');
     if (t) t.value = '';
     if (v) v.value = '';
     if (dEl) dEl.value = formatLocalYmd(new Date());
-    if (o) o.classList.add('open');
+    if (chk) chk.checked = false;
+    if (wrap) wrap.style.display = 'none';
+    populateLocalEventCalendarSelect_().then(function() {
+      if (o) o.classList.add('open');
+    });
   }
 
   function closeLocalEventDrawer(ev) {
@@ -14852,11 +14960,33 @@
     const date = document.getElementById('localEventQuickDate')?.value;
     const venue = document.getElementById('localEventQuickVenue')?.value.trim() || '';
     if (!title || !date || !getApiUser()) return;
+    const alsoGoogle = document.getElementById('localEventAlsoGoogle')?.checked;
+    const calendarId = document.getElementById('localEventCalendarSelect')?.value;
     try {
       await apiPostJson({ action: 'addLocalEvent', user: getApiUser(), title, date, venue, url: '', source: 'Quick add', added_by: 'manual' });
+      let gErr = null;
+      if (alsoGoogle && calendarId) {
+        try {
+          await apiPostJson({
+            action: 'createEvent',
+            user: getApiUser(),
+            calendarId: calendarId,
+            title: title,
+            start: date,
+            end: date,
+            allDay: true
+          });
+        } catch (e) {
+          gErr = e;
+        }
+      }
       closeLocalEventDrawer();
+      alignScheduleHorizonToYmd(date);
       await mergeFreshLocalEventsIntoSchedule();
       refreshScheduleMainView();
+      if (gErr) {
+        alert('Saved in ShastApp. Google Calendar did not update: ' + (gErr.message || String(gErr)));
+      }
     } catch (err) {
       alert('Could not save: ' + (err.message || 'Unknown error'));
     }
@@ -15409,6 +15539,8 @@
       saveLocalEventFromBlathersDraft(structured.localEventDraft)
         .then(function() {
           addBlathersLocalSavedCard(turnEl, structured.localEventDraft);
+          const d = String(structured.localEventDraft.date || '').trim();
+          if (/^\d{4}-\d{2}-\d{2}$/.test(d)) alignScheduleHorizonToYmd(d);
           const sc = document.getElementById('scheduleScreen');
           if (sc && sc.classList.contains('visible')) {
             return mergeFreshLocalEventsIntoSchedule().then(function() { refreshScheduleMainView(); });
