@@ -983,7 +983,9 @@
     html.dark-mode .bottom-dock-icon img {
       filter: drop-shadow(0 0 8px rgba(255,255,255,0.45));
     }
-    html.dark-mode .bottom-dock-item[data-nav-key="recipes"] .bottom-dock-icon img,
+    html.dark-mode .bottom-dock-item[data-nav-key="recipes"] .bottom-dock-icon img {
+      filter: brightness(1.7) saturate(0.22) contrast(1.25) drop-shadow(0 0 9px rgba(255,255,255,0.98));
+    }
     html.dark-mode .bottom-dock-item[data-nav-key="civics"] .bottom-dock-icon img {
       filter: brightness(1.28) contrast(1.14) drop-shadow(0 0 9px rgba(255,255,255,0.94));
     }
@@ -8165,7 +8167,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.10';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.11';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
