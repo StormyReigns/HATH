@@ -777,8 +777,8 @@
       min-height: 100vh;
       min-height: -webkit-fill-available;
       height: calc(var(--vh, 1vh) * 100);
-      /* Reserve space for bottom bar (~72px) + minimal gap */
-      padding-bottom: calc(80px + env(safe-area-inset-bottom));
+      /* Reserve space for the enlarged bottom dock. */
+      padding-bottom: calc(106px + env(safe-area-inset-bottom));
       z-index: 1;
       display: flex; flex-direction: column;
       overflow: hidden;
@@ -888,58 +888,91 @@
       border-top-color: rgba(255,255,255,0.04);
       box-shadow: 0 -4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
     }
-    html.dark-mode .bottom-bar-btn:hover { background: rgba(255,255,255,0.06); }
-    html.dark-mode .bottom-bar-home { color: var(--accent); }
     .bottom-bar-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
       max-width: 420px;
       margin: 0 auto;
-      padding: 5px 32px;
-      gap: 16px;
+      padding: 6px 8px 4px;
     }
-    .bottom-bar-center {
-      flex: 1;
+    .bottom-dock {
+      --dock-item-width: 74px;
       display: flex;
-      justify-content: center;
+      align-items: flex-end;
+      gap: 2px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      padding: 0 12px;
+      touch-action: pan-x;
     }
-    .bottom-bar-btn {
-      width: 44px;
-      height: 44px;
+    .bottom-dock::-webkit-scrollbar { display: none; }
+    .bottom-dock-item {
+      width: var(--dock-item-width);
+      min-width: var(--dock-item-width);
       border: none;
       background: transparent;
-      border-radius: 12px;
-      display: flex;
+      border-radius: 14px;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 2px;
+      cursor: pointer;
+      color: var(--text2);
+      opacity: var(--dock-alpha, 0.56);
+      transform: scale(var(--dock-scale, 0.88));
+      transform-origin: center bottom;
+      transition: transform 0.2s ease, opacity 0.2s ease, color 0.2s ease, filter 0.2s ease;
+      scroll-snap-align: center;
+      padding: 6px 2px 5px;
+    }
+    .bottom-dock-item:active { transform: scale(calc(var(--dock-scale, 0.88) * 0.95)); }
+    .bottom-dock-item.is-center {
+      opacity: 1;
+      color: var(--accent);
+      filter: drop-shadow(0 2px 8px rgba(192,122,74,0.22));
+    }
+    .bottom-dock-item.is-active .bottom-dock-label {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .bottom-dock-icon {
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
-      transition: background 0.15s, transform 0.15s;
+      color: currentColor;
     }
-    .bottom-bar-btn:active { transform: scale(0.95); }
-    .bottom-bar-hamburger { color: var(--text2); }
-    .bottom-bar-hamburger svg { display: block; }
-    .bottom-bar-home {
-      width: 52px;
-      height: 52px;
-      background: transparent;
-      color: var(--accent);
-    }
-    .bottom-bar-home svg { display: block; }
-    .bottom-bar-home:hover { background: rgba(192,122,74,0.15); }
-    .bottom-bar-blathers {
-      width: 44px;
-      height: 44px;
-      min-width: 44px;
-      min-height: 44px;
-    }
-    .bottom-bar-blathers img {
-      width: 44px;
-      height: 44px;
+    .bottom-dock-icon img {
+      width: 27px;
+      height: 27px;
       object-fit: contain;
+      opacity: 0.96;
     }
-    .bottom-bar-btn svg { filter: drop-shadow(0 0 6px rgba(255,255,255,0.7)); }
-    .bottom-bar-blathers img { filter: drop-shadow(0 0 2px rgba(255,255,255,0.35)); }
+    .bottom-dock-icon svg {
+      width: 24px;
+      height: 24px;
+      display: block;
+      filter: drop-shadow(0 0 6px rgba(255,255,255,0.55));
+    }
+    .bottom-dock-label {
+      font-size: 11px;
+      line-height: 1.1;
+      letter-spacing: 0.01em;
+      color: inherit;
+      white-space: nowrap;
+    }
+    html.dark-mode .bottom-dock-item {
+      color: var(--text2);
+    }
+    html.dark-mode .bottom-dock-item.is-center {
+      color: #e2b489;
+      filter: drop-shadow(0 2px 12px rgba(0,0,0,0.45));
+    }
 
     /* ── WELLBEING ── */
     .wellbeing { text-align: center; padding: 10px 24px 0; flex-shrink: 0; }
@@ -973,7 +1006,7 @@
     }
     /* Reserve space for fixed input zone (Blathers + chat) when on home */
     .body:not(:has(.sub-screen.visible)) {
-      padding-bottom: 140px;
+      padding-bottom: 158px;
     }
     .body.chat-mode .hint-area { display: none !important; }
     .body:has(.sub-screen.visible) .chat-area { display: none !important; }
@@ -1002,6 +1035,73 @@
       text-align: center; letter-spacing: -0.2px; line-height: 1.3;
     }
     .hint-greeting em { font-style: italic; color: var(--accent); }
+    .home-actions-row {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 2px;
+      flex-wrap: wrap;
+    }
+    .home-settings-btn {
+      width: 38px;
+      height: 38px;
+      border: 1px solid rgba(0,0,0,0.1);
+      background: rgba(255,255,255,0.72);
+      color: var(--text);
+      border-radius: 11px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+    }
+    .home-settings-btn svg { width: 18px; height: 18px; display: block; }
+    .home-settings-btn:active { transform: scale(0.94); }
+    .home-settings-btn:hover { background: rgba(255,255,255,0.9); border-color: rgba(192,122,74,0.35); }
+    .home-signin-wrap {
+      display: inline-flex;
+      align-items: center;
+      min-height: 38px;
+    }
+    .home-account-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--text2);
+      background: rgba(255,255,255,0.68);
+      border: 1px solid rgba(0,0,0,0.06);
+      max-width: 250px;
+    }
+    .home-account-pill-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .home-account-signout {
+      border: none;
+      background: transparent;
+      color: var(--accent);
+      font-size: 11px;
+      cursor: pointer;
+      padding: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    html.dark-mode .home-settings-btn {
+      border-color: rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+    }
+    html.dark-mode .home-account-pill {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.12);
+      color: var(--text2);
+    }
 
     /* home in-progress projects scroller */
     .home-projects-scroller {
@@ -4210,6 +4310,28 @@
     }
     .settings-input::placeholder { color: var(--muted); }
     .settings-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .settings-inline-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .settings-inline-btn {
+      border: 1px solid rgba(0,0,0,0.1);
+      background: rgba(255,255,255,0.65);
+      color: var(--text2);
+      border-radius: 12px;
+      height: 38px;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.15s ease, color 0.15s ease;
+    }
+    .settings-inline-btn svg { width: 15px; height: 15px; }
+    .settings-inline-btn:hover { background: rgba(255,255,255,0.9); color: var(--text); }
+    .settings-inline-btn:active { transform: scale(0.97); }
     .settings-toggle {
       display: flex;
       align-items: center;
@@ -4237,6 +4359,15 @@
     html.dark-mode .settings-toggle input[type="checkbox"]:checked {
       background: var(--accent) !important;
       border-color: var(--accent);
+    }
+    html.dark-mode .settings-inline-btn {
+      border-color: rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.05);
+      color: var(--text2);
+    }
+    html.dark-mode .settings-inline-btn:hover {
+      background: rgba(255,255,255,0.1);
+      color: var(--text);
     }
 
     /* Font size schemes — use zoom to scale all content */
@@ -7127,6 +7258,21 @@
   <div class="body">
     <div class="hint-area" id="hintArea">
       <div class="hint-greeting" id="greetingText"></div>
+      <div class="home-actions-row" id="homeActionsRow">
+        <button type="button" class="home-settings-btn" onclick="showSettingsScreen()" aria-label="Open settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z"/>
+            <path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a1.2 1.2 0 1 1-1.7 1.7l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V19a1.2 1.2 0 1 1-2.4 0v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a1.2 1.2 0 1 1-1.7-1.7l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H5a1.2 1.2 0 1 1 0-2.4h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a1.2 1.2 0 1 1 1.7-1.7l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V5a1.2 1.2 0 1 1 2.4 0v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a1.2 1.2 0 1 1 1.7 1.7l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6H19a1.2 1.2 0 1 1 0 2.4h-.2a1 1 0 0 0-.9.6z"/>
+          </svg>
+        </button>
+        <div class="home-signin-wrap" id="homeGuestSignInWrap">
+          <div id="homeGoogleSignInBtn"></div>
+        </div>
+        <div class="home-account-pill" id="homeSignedInPill" style="display:none">
+          <span class="home-account-pill-name" id="homeSignedInName"></span>
+          <button type="button" class="home-account-signout" onclick="signOut()">Sign out</button>
+        </div>
+      </div>
 
       <div class="home-projects-scroller" id="homeProjectsScroller" onclick="closeDrawer(); showProjectsScreen()" role="button" tabindex="0" aria-label="View projects">
         <div class="home-projects-label">Projects</div>
@@ -7350,6 +7496,19 @@
           <input type="checkbox" id="settingsDumbBlathers">
         </label>
         <div class="settings-hint">Short, concise answers without the AI personality</div>
+      </div>
+      <div class="settings-section" id="settingsSectionAppActions">
+        <div class="settings-label">App</div>
+        <div class="settings-inline-actions">
+          <button type="button" class="settings-inline-btn" onclick="forceAppUpdate()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+            Get latest version
+          </button>
+          <button type="button" class="settings-inline-btn" id="settingsSignOutBtn" onclick="signOut()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign out
+          </button>
+        </div>
       </div>
       <div class="settings-section" id="civicsLocationSection">
         <div class="settings-section-title">Your Location</div>
@@ -7668,21 +7827,7 @@
   <!-- Bottom bar — outside .app so fixed anchors to viewport, covers safe area -->
   <div class="app-bottom-bar" id="appBottomBar">
     <div class="bottom-bar-inner">
-      <button type="button" class="bottom-bar-btn bottom-bar-hamburger" onclick="toggleDrawer()" aria-label="Menu">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
-        </svg>
-      </button>
-      <div class="bottom-bar-center">
-        <button type="button" class="bottom-bar-btn bottom-bar-home" id="bottomBarHome" onclick="goHome()" aria-label="Home">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/><path d="M9 21v-8h6v8"/>
-          </svg>
-        </button>
-      </div>
-      <button type="button" class="bottom-bar-btn bottom-bar-blathers" id="bottomBarBlathers" onclick="openBlatherBookPanel()" aria-label="Ask Blathers">
-        <img src="https://stormyreigns.github.io/HATH/BlatherBook.png" alt="Blathers">
-      </button>
+      <div class="bottom-dock" id="bottomDock" aria-label="Primary navigation"></div>
     </div>
   </div>
 </div><!-- end .app-screen -->
@@ -7760,10 +7905,6 @@
     </div>
   </div>
   <div class="drawer-footer">
-    <button type="button" class="drawer-update-btn" onclick="forceAppUpdate()" aria-label="Get latest app version">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
-      Get latest version
-    </button>
     Built for your home
   </div>
   <div class="drawer-blathers" id="drawerBlathersWrap">
@@ -8010,7 +8151,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.35.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.0';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -8086,6 +8227,14 @@
     if (deniedEl) deniedEl.style.display = 'none';
     var nameEl = document.getElementById('drawerAuthName');
     if (nameEl && hasUser) nameEl.textContent = getDisplayName();
+    var homeGuestWrap = document.getElementById('homeGuestSignInWrap');
+    var homeSignedInPill = document.getElementById('homeSignedInPill');
+    var homeSignedInName = document.getElementById('homeSignedInName');
+    if (homeGuestWrap) homeGuestWrap.style.display = hasUser ? 'none' : '';
+    if (homeSignedInPill) homeSignedInPill.style.display = hasUser ? 'inline-flex' : 'none';
+    if (homeSignedInName && hasUser) homeSignedInName.textContent = getDisplayName();
+    var settingsSignOutBtn = document.getElementById('settingsSignOutBtn');
+    if (settingsSignOutBtn) settingsSignOutBtn.style.display = hasUser ? '' : 'none';
 
     var schedBanner = document.getElementById('scheduleGuestBanner');
     if (schedBanner) schedBanner.style.display = hasUser ? 'none' : '';
@@ -8183,8 +8332,8 @@
     applyBgScheme(localStorage.getItem('shasta_bg_' + settingsKey) || 'peach');
     applyFontSize(localStorage.getItem('shasta_font_' + settingsKey) || 'default');
     startKeepalivePing();
-    updateBlatherBookVisibility();
-    updateBottomBarHome();
+    renderBottomDock();
+    syncBottomDockState();
     updateScreenAddFabs();
     if (typeof loadRecipesData === 'function' && !recipesState.loaded && !recipesState.loading) loadRecipesData();
     ['startled', 'thinking', 'happy'].forEach(function(key) {
@@ -8337,10 +8486,24 @@
         });
         _gsiInitialized = true;
       }
+      var loginBtn = document.getElementById('googleSignInBtn');
+      if (loginBtn && loginBtn.children.length === 0) {
+        google.accounts.id.renderButton(
+          loginBtn,
+          { theme: 'outline', size: 'large', shape: 'pill', text: 'signin_with' }
+        );
+      }
       var drawerBtn = document.getElementById('drawerGoogleSignInBtn');
       if (drawerBtn && drawerBtn.children.length === 0) {
         google.accounts.id.renderButton(
           drawerBtn,
+          { theme: 'outline', size: 'large', shape: 'pill', text: 'signin_with' }
+        );
+      }
+      var homeBtn = document.getElementById('homeGoogleSignInBtn');
+      if (homeBtn && homeBtn.children.length === 0) {
+        google.accounts.id.renderButton(
+          homeBtn,
           { theme: 'outline', size: 'large', shape: 'pill', text: 'signin_with' }
         );
       }
@@ -8967,6 +9130,158 @@
   }
 
   // ── NAVIGATION ────────────────────────────────────────────────
+  const BOTTOM_DOCK_ITEMS = [
+    { key: 'home', label: 'Home', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5z"/><path d="M9 21v-7h6v7"/></svg>' },
+    { key: 'projects', label: 'Projects', icon: '<img src="https://stormyreigns.github.io/HATH/WWChest1.png" alt="" loading="lazy">' },
+    { key: 'documents', label: 'Documents', icon: '<img src="https://stormyreigns.github.io/HATH/FFXIVIcon.png" alt="" loading="lazy">' },
+    { key: 'recipes', label: 'Recipes', icon: '<img src="https://stormyreigns.github.io/HATH/HK.png" alt="" loading="lazy">' },
+    { key: 'finances', label: 'Finances', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1.5" x2="12" y2="22.5"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>' },
+    { key: 'schedule', label: 'Schedule', icon: '<img src="https://stormyreigns.github.io/HATH/STIcon2.png" alt="" loading="lazy">' },
+    { key: 'civics', label: 'Civics', icon: '<img src="https://stormyreigns.github.io/HATH/LaytonIcon.png" alt="" loading="lazy">' }
+  ];
+  let bottomDockScrollRaf = 0;
+  let bottomDockSettleTimer = null;
+
+  function getActiveNavKey() {
+    if (document.getElementById('documentsScreen').classList.contains('visible')) return 'documents';
+    if (document.getElementById('projectsScreen').classList.contains('visible')) return 'projects';
+    if (document.getElementById('scheduleScreen').classList.contains('visible')) return 'schedule';
+    if (document.getElementById('civicsScreen').classList.contains('visible')) return 'civics';
+    if (document.getElementById('recipesScreen').classList.contains('visible')) return 'recipes';
+    return 'home';
+  }
+
+  function navFromDock(key) {
+    if (key === 'home') return goHome();
+    if (key === 'projects') return showProjectsScreen();
+    if (key === 'documents') return showDocumentsScreen();
+    if (key === 'recipes') return showRecipesScreen();
+    if (key === 'schedule') return showScheduleScreen();
+    if (key === 'civics') return showCivicsScreen();
+    if (key === 'finances') return;
+  }
+
+  function centerDockOnKey(key, smooth) {
+    const dock = document.getElementById('bottomDock');
+    if (!dock) return;
+    const candidates = Array.from(dock.querySelectorAll('.bottom-dock-item[data-nav-key="' + key + '"]'));
+    if (candidates.length === 0) return;
+    const centerX = dock.scrollLeft + dock.clientWidth / 2;
+    let best = candidates[0];
+    let bestDist = Infinity;
+    candidates.forEach(function(btn) {
+      const mid = btn.offsetLeft + btn.offsetWidth / 2;
+      const d = Math.abs(mid - centerX);
+      if (d < bestDist) {
+        best = btn;
+        bestDist = d;
+      }
+    });
+    const left = best.offsetLeft - ((dock.clientWidth - best.offsetWidth) / 2);
+    dock.scrollTo({ left: left, behavior: smooth ? 'smooth' : 'auto' });
+  }
+
+  function normalizeBottomDockLoop() {
+    const dock = document.getElementById('bottomDock');
+    if (!dock || dock.scrollWidth <= dock.clientWidth) return;
+    const segment = dock.scrollWidth / 3;
+    if (!segment || !isFinite(segment)) return;
+    if (dock.scrollLeft < segment * 0.45) {
+      dock.scrollLeft += segment;
+    } else if (dock.scrollLeft > segment * 1.55) {
+      dock.scrollLeft -= segment;
+    }
+  }
+
+  function applyBottomDockFocus() {
+    const dock = document.getElementById('bottomDock');
+    if (!dock) return;
+    const center = dock.scrollLeft + dock.clientWidth / 2;
+    let best = null;
+    let bestDist = Infinity;
+    dock.querySelectorAll('.bottom-dock-item').forEach(function(btn) {
+      const mid = btn.offsetLeft + btn.offsetWidth / 2;
+      const dist = Math.abs(mid - center);
+      const scale = Math.max(0.84, 1.24 - (dist / 350));
+      const alpha = Math.max(0.42, 1 - (dist / 220));
+      btn.style.setProperty('--dock-scale', scale.toFixed(3));
+      btn.style.setProperty('--dock-alpha', alpha.toFixed(3));
+      if (dist < bestDist) {
+        best = btn;
+        bestDist = dist;
+      }
+    });
+    dock.querySelectorAll('.bottom-dock-item').forEach(function(btn) {
+      btn.classList.toggle('is-center', btn === best);
+    });
+  }
+
+  function handleBottomDockScroll() {
+    normalizeBottomDockLoop();
+    if (!bottomDockScrollRaf) {
+      bottomDockScrollRaf = requestAnimationFrame(function() {
+        bottomDockScrollRaf = 0;
+        applyBottomDockFocus();
+      });
+    }
+    if (bottomDockSettleTimer) clearTimeout(bottomDockSettleTimer);
+    bottomDockSettleTimer = setTimeout(function() {
+      bottomDockSettleTimer = null;
+      const active = getActiveNavKey();
+      centerDockOnKey(active, true);
+    }, 120);
+  }
+
+  function renderBottomDock() {
+    const dock = document.getElementById('bottomDock');
+    if (!dock || dock.dataset.ready === '1') return;
+    const loops = 3;
+    const html = [];
+    for (let i = 0; i < loops; i++) {
+      BOTTOM_DOCK_ITEMS.forEach(function(item) {
+        html.push(
+          '<button type="button" class="bottom-dock-item" data-nav-key="' + item.key + '" aria-label="' + item.label + '">' +
+          '<span class="bottom-dock-icon">' + item.icon + '</span>' +
+          '<span class="bottom-dock-label">' + item.label + '</span>' +
+          '</button>'
+        );
+      });
+    }
+    dock.innerHTML = html.join('');
+    dock.dataset.ready = '1';
+    dock.addEventListener('scroll', handleBottomDockScroll, { passive: true });
+    dock.addEventListener('touchend', function() {
+      const active = getActiveNavKey();
+      centerDockOnKey(active, true);
+    }, { passive: true });
+    dock.addEventListener('click', function(e) {
+      const btn = e.target.closest('.bottom-dock-item');
+      if (!btn) return;
+      const key = btn.dataset.navKey;
+      navFromDock(key);
+      centerDockOnKey(key, true);
+      syncBottomDockState();
+    });
+    requestAnimationFrame(function() {
+      const segment = dock.scrollWidth / 3;
+      if (segment && isFinite(segment)) dock.scrollLeft = segment;
+      syncBottomDockState();
+      applyBottomDockFocus();
+      centerDockOnKey(getActiveNavKey(), false);
+      applyBottomDockFocus();
+    });
+  }
+
+  function syncBottomDockState() {
+    const dock = document.getElementById('bottomDock');
+    if (!dock || dock.dataset.ready !== '1') return;
+    const active = getActiveNavKey();
+    dock.querySelectorAll('.bottom-dock-item').forEach(function(btn) {
+      btn.classList.toggle('is-active', btn.dataset.navKey === active);
+    });
+    applyBottomDockFocus();
+  }
+
   function goHome() {
     closeDrawer();
     setTimeout(closeDrawer, 50);
@@ -8992,8 +9307,7 @@
     setBlathers('sleep');
     document.getElementById('greetingText').innerHTML = getRandomGreeting();
     renderHomeProjectsScroller();
-    updateBlatherBookVisibility();
-    updateBottomBarHome();
+    syncBottomDockState();
     updateScreenAddFabs();
   }
 
@@ -9027,21 +9341,16 @@
     }
     document.getElementById('inputZone').style.display = 'none';
     document.querySelector('.body').classList.add('chat-mode');
-    updateBlatherBookVisibility();
-    updateBottomBarHome();
+    syncBottomDockState();
     updateScreenAddFabs();
   }
 
   function updateBlatherBookVisibility() {
-    const blathersBtn = document.getElementById('bottomBarBlathers');
-    if (blathersBtn) blathersBtn.style.display = 'flex';
+    syncBottomDockState();
   }
 
   function updateBottomBarHome() {
-    const homeBtn = document.getElementById('bottomBarHome');
-    if (homeBtn) homeBtn.style.display = 'flex';
-    const center = homeBtn && homeBtn.parentElement;
-    if (center) center.style.display = 'flex';
+    syncBottomDockState();
   }
 
   function updateScreenAddFabs() {
@@ -9347,8 +9656,7 @@
     docsBreadcrumb = [{ id: DOCS_FOLDER_ID, name: 'ShastApp Docs' }];
     renderDocsBreadcrumb();
     loadFolderContents(DOCS_FOLDER_ID);
-    document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
-    document.querySelector('.drawer-item:nth-child(3)').classList.add('active');
+    syncBottomDockState();
   }
 
   // ── PROJECTS ─────────────────────────────────────────────────
@@ -9631,9 +9939,7 @@
     if (view) view.style.display = 'none';
     document.querySelector('.app').classList.remove('in-project-view');
     renderProjectsLanding();
-    document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
-    const projectsItem = document.querySelector('.drawer-item:nth-child(2)');
-    if (projectsItem) projectsItem.classList.add('active');
+    syncBottomDockState();
   }
 
   function renderProjectsLanding(newlyCompletedId) {
@@ -12427,9 +12733,7 @@
       };
     }
     updateBgSchemeSettingsVisibility();
-    document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
-    const settingsItem = document.querySelector('.drawer-item:nth-child(8)');
-    if (settingsItem) settingsItem.classList.add('active');
+    syncBottomDockState();
   }
 
   const SCHEDULE_FILTER_KEYWORDS = {
@@ -12934,9 +13238,7 @@
 
   function showCivicsScreen() {
     showSubScreen('civicsScreen');
-    document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
-    const civicsBtn = document.querySelector('.drawer-item[data-screen="civics"]');
-    if (civicsBtn) civicsBtn.classList.add('active');
+    syncBottomDockState();
     loadCivicsCandidates(false);
   }
 
@@ -15669,9 +15971,7 @@
   async function showScheduleScreen() {
     showSubScreen('scheduleScreen');
     startScheduleFloatingRotation();
-    document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
-    const scheduleBtn = document.querySelector('.drawer-item[data-screen="schedule"]');
-    if (scheduleBtn) scheduleBtn.classList.add('active');
+    syncBottomDockState();
     const hzMain = document.getElementById('scheduleHorizonMain');
     if (hzMain) hzMain.innerHTML = '<div class="screen-loading">Loading…</div>';
     renderMunicipalAside();
@@ -16459,9 +16759,7 @@
   function showRecipesScreen() {
     showSubScreen('recipesScreen');
     updateScreenAddFabs();
-    document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
-    const recipeBtn = document.querySelector('.drawer-item[data-screen="recipes"]');
-    if (recipeBtn) recipeBtn.classList.add('active');
+    syncBottomDockState();
     if (!recipesState.loaded && !recipesState.loading) loadRecipesData();
     initTakeoutSpots();
     setTimeout(updateCarouselFocus, 200);
