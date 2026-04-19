@@ -8164,7 +8164,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.12';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.13';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -9314,7 +9314,7 @@
         clearTimeout(bottomDockSettleTimer);
         bottomDockSettleTimer = null;
       }
-      centerDockOnKey(active, false);
+      centerDockOnKey(active, true);
     }
     applyBottomDockFocus();
   }
