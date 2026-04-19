@@ -794,9 +794,9 @@
     /* ── TOP BAR ── */
     .topbar {
       display: flex;
-      align-items: flex-end;
+      align-items: flex-start;
       justify-content: space-between;
-      padding: max(54px, env(safe-area-inset-top)) 26px 8px;
+      padding: max(54px, env(safe-area-inset-top)) 26px 0;
       flex-shrink: 0;
     }
 
@@ -816,7 +816,7 @@
     }
     .topbar.collapsed {
       padding-top: max(env(safe-area-inset-top), 14px);
-      padding-bottom: 8px;
+      padding-bottom: 0;
     }
     .topbar.collapsed .topbar-brand { display: none; }
     .wordmark {
@@ -832,17 +832,26 @@
       flex: 1;
       min-width: 0;
     }
-    /* Cog left of sign-in; bottoms align with #versionLabel (same row as brand column). */
+    /* Sign-in sits below the version line; cog is immediately left of GSI (single nowrap row). */
     .topbar-right.topbar-home-actions {
       flex: 1;
       min-width: 0;
       display: flex;
-      flex-wrap: wrap;
-      flex-direction: row;
-      justify-content: flex-end;
+      flex-direction: column;
       align-items: flex-end;
+      justify-content: flex-start;
+      /* Below wordmark + version (see .wordmark / .version-label); tweak if title metrics change */
+      padding-top: calc(1.65rem + 0.7rem + 10px);
+      box-sizing: border-box;
+    }
+    .topbar-home-actions-cluster {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: flex-end;
       gap: 10px;
-      padding-top: 2px;
+      max-width: 100%;
     }
     .topbar.collapsed .topbar-home-actions {
       display: none;
@@ -1103,12 +1112,13 @@
       background: transparent;
       color: inherit;
       display: inline-flex;
-      align-items: flex-end;
+      align-items: center;
       justify-content: center;
       cursor: pointer;
       font-size: 23px;
       line-height: 1;
-      padding: 0 4px 1px 0;
+      padding: 0 2px;
+      flex-shrink: 0;
       transition: transform 0.16s ease, opacity 0.16s ease;
     }
     .home-settings-btn svg { display: none; }
@@ -1116,8 +1126,10 @@
     .home-settings-btn:hover { opacity: 0.85; }
     .home-signin-wrap {
       display: inline-flex;
-      align-items: flex-end;
+      align-items: center;
       min-height: 0;
+      flex: 0 1 auto;
+      min-width: 0;
     }
     .home-account-pill {
       display: inline-flex;
@@ -7297,13 +7309,15 @@
       <div class="version-label" id="versionLabel"></div>
     </div>
     <div class="topbar-right topbar-home-actions" id="homeActionsRow">
-      <button type="button" class="home-settings-btn" onclick="showSettingsScreen()" aria-label="Open settings">⚙️</button>
-      <div class="home-signin-wrap" id="homeGuestSignInWrap">
-        <div id="homeGoogleSignInBtn"></div>
-      </div>
-      <div class="home-account-pill" id="homeSignedInPill" style="display:none">
-        <span class="home-account-pill-name" id="homeSignedInName"></span>
-        <button type="button" class="home-account-signout" onclick="signOut()">Sign out</button>
+      <div class="topbar-home-actions-cluster">
+        <button type="button" class="home-settings-btn" onclick="showSettingsScreen()" aria-label="Open settings">⚙️</button>
+        <div class="home-signin-wrap" id="homeGuestSignInWrap">
+          <div id="homeGoogleSignInBtn"></div>
+        </div>
+        <div class="home-account-pill" id="homeSignedInPill" style="display:none">
+          <span class="home-account-pill-name" id="homeSignedInName"></span>
+          <button type="button" class="home-account-signout" onclick="signOut()">Sign out</button>
+        </div>
       </div>
     </div>
   </div>
@@ -8193,7 +8207,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.27';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.28';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
