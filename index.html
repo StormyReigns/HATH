@@ -549,7 +549,7 @@
       align-items: flex-end;
       gap: 0;
       position: fixed;
-      bottom: calc(var(--bottom-dock-offset) + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
+      bottom: calc(var(--bottom-dock-offset-high) + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
       left: 0;
       right: 0;
       padding: 0 22px;
@@ -567,7 +567,7 @@
     /* Blathers overlaps the input bar, positioned just above submit area */
     .blathers-wrap {
       flex-shrink: 0;
-      margin-bottom: -18px;
+      margin-bottom: -8px;
       margin-left: -8px;
       z-index: 2;
       position: relative;
@@ -1029,9 +1029,10 @@
     .hint-area {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      gap: 10px; opacity: 0;
+      gap: 18px; opacity: 0;
       width: 100%;
       min-height: fit-content;
+      padding: 10px 0;
       animation: fadeUp 0.7s ease 0.3s forwards;
     }
     @media (prefers-reduced-motion: reduce) {
@@ -1052,25 +1053,25 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
-      margin-top: 2px;
+      margin-top: 6px;
       flex-wrap: wrap;
     }
     .home-settings-btn {
-      width: 38px;
-      height: 38px;
-      border: 1px solid rgba(0,0,0,0.1);
-      background: rgba(255,255,255,0.72);
-      color: var(--text);
-      border-radius: 11px;
+      border: none;
+      background: transparent;
+      color: inherit;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+      font-size: 23px;
+      line-height: 1;
+      padding: 0 2px;
+      transition: transform 0.16s ease, opacity 0.16s ease;
     }
-    .home-settings-btn svg { width: 18px; height: 18px; display: block; }
+    .home-settings-btn svg { display: none; }
     .home-settings-btn:active { transform: scale(0.94); }
-    .home-settings-btn:hover { background: rgba(255,255,255,0.9); border-color: rgba(192,122,74,0.35); }
+    .home-settings-btn:hover { opacity: 0.85; }
     .home-signin-wrap {
       display: inline-flex;
       align-items: center;
@@ -1103,11 +1104,7 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    html.dark-mode .home-settings-btn {
-      border-color: rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
-      color: var(--text);
-    }
+    html.dark-mode .home-settings-btn { color: inherit; }
     html.dark-mode .home-account-pill {
       background: rgba(255,255,255,0.05);
       border-color: rgba(255,255,255,0.12);
@@ -1118,7 +1115,7 @@
     .home-projects-scroller {
       width: 100%;
       max-width: 300px;
-      margin-top: 6px;
+      margin-top: 12px;
       opacity: 0;
       transition: opacity 0.4s ease;
       cursor: pointer;
@@ -1238,7 +1235,7 @@
     .upcoming-events {
       width: 100%;
       max-width: 300px;
-      margin-top: 6px;
+      margin-top: 12px;
       opacity: 0;
       transition: opacity 0.4s ease;
       cursor: pointer;
@@ -7166,12 +7163,10 @@
       appearance: none;
       font: inherit;
       line-height: 1;
-      border: 1px solid rgba(180,80,20,0.35);
-      border-radius: 14px;
-      background: linear-gradient(175deg, #2e1208 0%, #1a0a04 65%, #0e0602 100%);
-      box-shadow:
-        0 1px 0 rgba(255,160,60,0.08) inset,
-        0 2px 10px rgba(0,0,0,0.25);
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
       cursor: pointer;
       opacity: 0;
       pointer-events: none;
@@ -7263,19 +7258,14 @@
   </div>
 
   <div class="wellbeing" id="wellbeing">
-    <span class="well-text"><span class="well-dot" id="wellDot"></span><span id="wellLabel">Checking in…</span></span>
+    <span class="well-text"><span class="well-dot" id="wellDot"></span><span id="wellLabel"></span></span>
   </div>
 
   <div class="body">
     <div class="hint-area" id="hintArea">
       <div class="hint-greeting" id="greetingText"></div>
       <div class="home-actions-row" id="homeActionsRow">
-        <button type="button" class="home-settings-btn" onclick="showSettingsScreen()" aria-label="Open settings">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z"/>
-            <path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a1.2 1.2 0 1 1-1.7 1.7l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V19a1.2 1.2 0 1 1-2.4 0v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a1.2 1.2 0 1 1-1.7-1.7l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H5a1.2 1.2 0 1 1 0-2.4h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a1.2 1.2 0 1 1 1.7-1.7l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V5a1.2 1.2 0 1 1 2.4 0v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a1.2 1.2 0 1 1 1.7 1.7l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6H19a1.2 1.2 0 1 1 0 2.4h-.2a1 1 0 0 0-.9.6z"/>
-          </svg>
-        </button>
+        <button type="button" class="home-settings-btn" onclick="showSettingsScreen()" aria-label="Open settings">⚙️</button>
         <div class="home-signin-wrap" id="homeGuestSignInWrap">
           <div id="homeGoogleSignInBtn"></div>
         </div>
@@ -8162,7 +8152,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.7';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.8';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -8979,7 +8969,7 @@
       label.textContent = 'Needs attention';
     } else {
       dot.className = 'well-dot';
-      label.textContent = 'Everything looks fine';
+      label.textContent = '';
     }
   }
 
