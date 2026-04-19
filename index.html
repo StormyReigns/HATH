@@ -917,6 +917,10 @@
       touch-action: pan-x;
     }
     .bottom-dock::-webkit-scrollbar { display: none; }
+    /* During infinite-loop scroll correction, snap can fight scrollLeft and flash one frame — disable briefly. */
+    .bottom-dock.bottom-dock-no-snap {
+      scroll-snap-type: none;
+    }
     .bottom-dock-item {
       width: var(--dock-item-width);
       min-width: var(--dock-item-width);
@@ -8164,7 +8168,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.19';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.20';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -9156,7 +9160,7 @@
     { key: 'civics', label: 'Civics', icon: '<img src="https://stormyreigns.github.io/HATH/LaytonIcon.png" alt="" loading="lazy">' }
   ];
   let bottomDockScrollRaf = 0;
-  let bottomDockJumpRaf = 0;
+  let bottomDockSnapRestoreTimer = null;
   let bottomDockSettleTimer = null;
   /** While > Date.now(), idle snap-to-nearest is suppressed (prevents fighting smooth programmatic centering). */
   let bottomDockIdleSnapSuppressedUntil = 0;
@@ -9250,16 +9254,28 @@
     dock.scrollTo({ left: left, behavior: smooth ? 'smooth' : 'auto' });
   }
 
+  function scheduleBottomDockSnapRestore(dock) {
+    if (bottomDockSnapRestoreTimer) clearTimeout(bottomDockSnapRestoreTimer);
+    bottomDockSnapRestoreTimer = setTimeout(function() {
+      bottomDockSnapRestoreTimer = null;
+      if (dock && dock.parentNode) dock.classList.remove('bottom-dock-no-snap');
+    }, 160);
+  }
+
   function normalizeBottomDockLoop() {
     const dock = document.getElementById('bottomDock');
     if (!dock || dock.scrollWidth <= dock.clientWidth) return false;
     const segment = dock.scrollWidth / 3;
     if (!segment || !isFinite(segment)) return false;
     if (dock.scrollLeft < segment * 0.45) {
+      dock.classList.add('bottom-dock-no-snap');
       dock.scrollLeft += segment;
+      scheduleBottomDockSnapRestore(dock);
       return true;
     } else if (dock.scrollLeft > segment * 1.55) {
+      dock.classList.add('bottom-dock-no-snap');
       dock.scrollLeft -= segment;
+      scheduleBottomDockSnapRestore(dock);
       return true;
     }
     return false;
@@ -9267,22 +9283,9 @@
 
   function queueBottomDockScrollVisual() {
     if (bottomDockScrollRaf) cancelAnimationFrame(bottomDockScrollRaf);
-    if (bottomDockJumpRaf) cancelAnimationFrame(bottomDockJumpRaf);
-    bottomDockJumpRaf = 0;
     bottomDockScrollRaf = requestAnimationFrame(function() {
       bottomDockScrollRaf = 0;
-      if (Date.now() < bottomDockProgrammaticCenteringUntil) {
-        applyBottomDockFocus();
-        return;
-      }
-      const jumped = normalizeBottomDockLoop();
       applyBottomDockFocus();
-      if (jumped) {
-        bottomDockJumpRaf = requestAnimationFrame(function() {
-          bottomDockJumpRaf = 0;
-          applyBottomDockFocus();
-        });
-      }
     });
   }
 
@@ -9327,6 +9330,12 @@
   }
 
   function handleBottomDockScroll() {
+    const dock = document.getElementById('bottomDock');
+    if (dock && Date.now() >= bottomDockProgrammaticCenteringUntil) {
+      if (normalizeBottomDockLoop()) {
+        applyBottomDockFocus();
+      }
+    }
     queueBottomDockScrollVisual();
     if (Date.now() < bottomDockProgrammaticCenteringUntil) {
       if (bottomDockSettleTimer) {
