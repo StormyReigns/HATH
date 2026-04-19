@@ -1185,11 +1185,13 @@
     }
     .home-projects-scroll-wrap {
       overflow-x: auto;
-      overflow-y: hidden;
+      overflow-y: visible;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
       padding: 2px 0;
       overscroll-behavior-x: contain;
+      touch-action: pan-x;
+      /* No mask on the scrolling layer — h-scroll-faded caused heavy repaints / jank on iOS. */
     }
     .home-projects-scroll-wrap::-webkit-scrollbar { display: none; }
     .home-projects-scroll {
@@ -1213,6 +1215,9 @@
       border-radius: 12px;
       white-space: nowrap;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      touch-action: pan-x;
+      -webkit-user-select: none;
+      user-select: none;
     }
     .home-project-chip-top {
       display: flex;
@@ -7334,7 +7339,7 @@
 
       <div class="home-projects-scroller" id="homeProjectsScroller" onclick="closeDrawer(); showProjectsScreen()" role="button" tabindex="0" aria-label="View projects">
         <div class="home-projects-label">Projects</div>
-        <div class="home-projects-scroll-wrap h-scroll-faded" id="homeProjectsScrollWrap">
+        <div class="home-projects-scroll-wrap" id="homeProjectsScrollWrap">
           <div class="home-projects-scroll" id="homeProjectsScroll"></div>
         </div>
       </div>
@@ -8209,7 +8214,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.29';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.30';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
