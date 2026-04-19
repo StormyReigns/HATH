@@ -8164,7 +8164,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.13';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.14';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -9157,6 +9157,16 @@
   ];
   let bottomDockScrollRaf = 0;
   let bottomDockSettleTimer = null;
+  /** While > Date.now(), idle snap-to-nearest is suppressed (prevents fighting smooth programmatic centering). */
+  let bottomDockIdleSnapSuppressedUntil = 0;
+
+  function suppressBottomDockIdleSnap(ms) {
+    bottomDockIdleSnapSuppressedUntil = Math.max(bottomDockIdleSnapSuppressedUntil, Date.now() + (ms || 0));
+    if (bottomDockSettleTimer) {
+      clearTimeout(bottomDockSettleTimer);
+      bottomDockSettleTimer = null;
+    }
+  }
 
   function getActiveNavKey() {
     if (document.getElementById('documentsScreen').classList.contains('visible')) return 'documents';
@@ -9194,6 +9204,7 @@
       }
     });
     const left = best.offsetLeft - ((dock.clientWidth - best.offsetWidth) / 2);
+    if (smooth) suppressBottomDockIdleSnap(1400);
     dock.scrollTo({ left: left, behavior: smooth ? 'smooth' : 'auto' });
   }
 
@@ -9214,6 +9225,7 @@
       }
     });
     const left = best.offsetLeft - ((dock.clientWidth - best.offsetWidth) / 2);
+    if (smooth) suppressBottomDockIdleSnap(1400);
     dock.scrollTo({ left: left, behavior: smooth ? 'smooth' : 'auto' });
   }
 
@@ -9259,6 +9271,13 @@
         bottomDockScrollRaf = 0;
         applyBottomDockFocus();
       });
+    }
+    if (Date.now() < bottomDockIdleSnapSuppressedUntil) {
+      if (bottomDockSettleTimer) {
+        clearTimeout(bottomDockSettleTimer);
+        bottomDockSettleTimer = null;
+      }
+      return;
     }
     if (bottomDockSettleTimer) clearTimeout(bottomDockSettleTimer);
     bottomDockSettleTimer = setTimeout(function() {
