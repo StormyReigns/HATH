@@ -8164,7 +8164,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.16';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.17';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -9159,6 +9159,8 @@
   let bottomDockSettleTimer = null;
   /** While > Date.now(), idle snap-to-nearest is suppressed (prevents fighting smooth programmatic centering). */
   let bottomDockIdleSnapSuppressedUntil = 0;
+  let bottomDockCenterHighlightKey = '';
+  let bottomDockCenterHighlightTimer = null;
 
   function suppressBottomDockIdleSnap(ms) {
     bottomDockIdleSnapSuppressedUntil = Math.max(bottomDockIdleSnapSuppressedUntil, Date.now() + (ms || 0));
@@ -9166,6 +9168,17 @@
       clearTimeout(bottomDockSettleTimer);
       bottomDockSettleTimer = null;
     }
+  }
+
+  function setBottomDockCenterHighlightKey(key, ms) {
+    bottomDockCenterHighlightKey = key || '';
+    if (bottomDockCenterHighlightTimer) clearTimeout(bottomDockCenterHighlightTimer);
+    if (!bottomDockCenterHighlightKey) return;
+    bottomDockCenterHighlightTimer = setTimeout(function() {
+      bottomDockCenterHighlightKey = '';
+      bottomDockCenterHighlightTimer = null;
+      applyBottomDockFocus();
+    }, ms || 0);
   }
 
   function getActiveNavKey() {
@@ -9259,8 +9272,25 @@
         bestDist = dist;
       }
     });
+    let centerBtn = best;
+    if (bottomDockCenterHighlightKey) {
+      const pref = Array.from(dock.querySelectorAll('.bottom-dock-item[data-nav-key="' + bottomDockCenterHighlightKey + '"]'));
+      if (pref.length > 0) {
+        let pb = pref[0];
+        let pd = Infinity;
+        pref.forEach(function(btn) {
+          const mid = btn.offsetLeft + btn.offsetWidth / 2;
+          const d = Math.abs(mid - center);
+          if (d < pd) {
+            pb = btn;
+            pd = d;
+          }
+        });
+        centerBtn = pb;
+      }
+    }
     dock.querySelectorAll('.bottom-dock-item').forEach(function(btn) {
-      btn.classList.toggle('is-center', btn === best);
+      btn.classList.toggle('is-center', btn === centerBtn);
     });
   }
 
@@ -9337,6 +9367,7 @@
         bottomDockSettleTimer = null;
       }
       const keyToCenter = centerKey || active;
+      setBottomDockCenterHighlightKey(keyToCenter, 1700);
       centerDockOnKey(keyToCenter, true);
     }
     applyBottomDockFocus();
