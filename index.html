@@ -8164,7 +8164,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.14';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.15';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -9309,7 +9309,7 @@
       if (!btn) return;
       const key = btn.dataset.navKey;
       navFromDock(key);
-      syncBottomDockState(true);
+      syncBottomDockState(true, key);
     });
     requestAnimationFrame(function() {
       const segment = dock.scrollWidth / 3;
@@ -9321,7 +9321,7 @@
     });
   }
 
-  function syncBottomDockState(centerActive) {
+  function syncBottomDockState(centerActive, centerKey) {
     const dock = document.getElementById('bottomDock');
     if (!dock || dock.dataset.ready !== '1') return;
     const active = getActiveNavKey();
@@ -9329,11 +9329,13 @@
       btn.classList.toggle('is-active', btn.dataset.navKey === active);
     });
     if (centerActive) {
+      suppressBottomDockIdleSnap(1600);
       if (bottomDockSettleTimer) {
         clearTimeout(bottomDockSettleTimer);
         bottomDockSettleTimer = null;
       }
-      centerDockOnKey(active, true);
+      const keyToCenter = centerKey || active;
+      centerDockOnKey(keyToCenter, true);
     }
     applyBottomDockFocus();
   }
