@@ -7885,7 +7885,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.33.3';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.33.4';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -14768,11 +14768,20 @@
   }
 
   let scheduleCalendarsList = [];
+  async function preloadScheduleCalendarList_() {
+    const user = getApiUser();
+    if (!user || scheduleCalendarsList.length > 0) return;
+    try {
+      const res = await fetchWithTimeout_(`${API_URL}?action=calendarList&user=${encodeURIComponent(user)}`, {}, 18000);
+      const data = await res.json();
+      scheduleCalendarsList = data.calendars || [];
+    } catch (_) {}
+  }
   async function openScheduleCalendarsModal() {
     const user = localStorage.getItem('shasta_user');
     if (!user) return;
     try {
-      const res = await fetch(`${API_URL}?action=calendarList&user=${encodeURIComponent(user)}`, { redirect: 'follow' });
+      const res = await fetchWithTimeout_(`${API_URL}?action=calendarList&user=${encodeURIComponent(user)}`, {}, 18000);
       const data = await res.json();
       scheduleCalendarsList = data.calendars || [];
     } catch (_) { scheduleCalendarsList = []; }
@@ -14851,9 +14860,10 @@
     let calendars = scheduleCalendarsList.slice();
     if (calendars.length === 0) {
       try {
-        const res = await fetch(`${API_URL}?action=calendarList&user=${encodeURIComponent(user)}`, { redirect: 'follow' });
+        const res = await fetchWithTimeout_(`${API_URL}?action=calendarList&user=${encodeURIComponent(user)}`, {}, 18000);
         const data = await res.json();
         calendars = data.calendars || [];
+        scheduleCalendarsList = calendars;
       } catch (_) {}
     }
     const enabledIds = getEnabledCalendars();
@@ -14974,7 +14984,7 @@
     let calendars = scheduleCalendarsList.slice();
     if (calendars.length === 0) {
       try {
-        const res = await fetch(`${API_URL}?action=calendarList&user=${encodeURIComponent(user)}`, { redirect: 'follow' });
+        const res = await fetchWithTimeout_(`${API_URL}?action=calendarList&user=${encodeURIComponent(user)}`, {}, 18000);
         const data = await res.json();
         calendars = data.calendars || [];
         scheduleCalendarsList = calendars;
@@ -14982,6 +14992,10 @@
     }
     const writableCalendars = calendars.filter(function(c) { return c.key !== 'holidays'; });
     const options = writableCalendars.length ? writableCalendars : calendars;
+    if (options.length === 0) {
+      selectEl.innerHTML = '<option value="">Calendars unavailable — open Schedule again in a moment</option>';
+      return;
+    }
     selectEl.innerHTML = options.map(function(c) {
       return '<option value="' + escapeHtml(c.id) + '">' + escapeHtml(c.name) + '</option>';
     }).join('');
@@ -15274,10 +15288,12 @@
       }
       refreshScheduleMainView();
       renderScheduleChips();
+      preloadScheduleCalendarList_();
     } catch (err) {
       scheduleEvents = getCivicEvents();
       refreshScheduleMainView();
       renderScheduleChips();
+      preloadScheduleCalendarList_();
     }
   }
 
