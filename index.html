@@ -924,6 +924,17 @@
     .bottom-dock.bottom-dock-no-snap {
       scroll-snap-type: none;
     }
+    /* While dragging, drop per-item scale — iOS often tears filter/transform layers inside overflow-x. */
+    .bottom-dock.bottom-dock-interacting .bottom-dock-item,
+    .bottom-dock.bottom-dock-interacting .bottom-dock-item:active {
+      transform: none;
+    }
+    .bottom-dock.bottom-dock-interacting .bottom-dock-item {
+      opacity: 1;
+    }
+    .bottom-dock.bottom-dock-interacting .bottom-dock-item:not(.is-center) {
+      opacity: 0.72;
+    }
     .bottom-dock-item {
       width: var(--dock-item-width);
       min-width: var(--dock-item-width);
@@ -948,9 +959,6 @@
     .bottom-dock-item.is-center {
       opacity: 1;
       color: var(--accent);
-      /* box-shadow instead of filter: drop-shadow — filter layers clip badly inside overflow-x
-         scrollers on iOS while the finger is moving. */
-      box-shadow: 0 2px 16px rgba(192, 122, 74, 0.28);
     }
     .bottom-dock-item.is-active .bottom-dock-label {
       color: var(--text);
@@ -996,7 +1004,6 @@
     }
     html.dark-mode .bottom-dock-item.is-center {
       color: #e2b489;
-      box-shadow: 0 2px 18px rgba(0, 0, 0, 0.45);
     }
 
     /* ── WELLBEING ── */
@@ -8172,7 +8179,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.22';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.23';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -9317,10 +9324,17 @@
     queueBottomDockScrollVisual();
   }
 
+  function syncBottomDockInteractingClass() {
+    const dock = document.getElementById('bottomDock');
+    if (!dock) return;
+    dock.classList.toggle('bottom-dock-interacting', bottomDockHandsOnDock > 0);
+  }
+
   function bottomDockGlobalPointerEnd(e) {
     if (!e.isPrimary) return;
     if (bottomDockHandsOnDock <= 0) return;
     bottomDockHandsOnDock--;
+    syncBottomDockInteractingClass();
     if (bottomDockHandsOnDock === 0) flushBottomDockLoopAfterPointerRelease();
   }
 
@@ -9416,7 +9430,10 @@
       bottomDockIdleSnapSuppressedUntil = 0;
     }, { passive: true });
     dock.addEventListener('pointerdown', function(e) {
-      if (e.isPrimary) bottomDockHandsOnDock++;
+      if (e.isPrimary) {
+        bottomDockHandsOnDock++;
+        syncBottomDockInteractingClass();
+      }
       setBottomDockCenterHighlightKey('', 0);
       bottomDockProgrammaticCenteringUntil = 0;
       bottomDockIdleSnapSuppressedUntil = 0;
