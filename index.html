@@ -8164,7 +8164,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.17';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.18';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -9159,6 +9159,7 @@
   let bottomDockSettleTimer = null;
   /** While > Date.now(), idle snap-to-nearest is suppressed (prevents fighting smooth programmatic centering). */
   let bottomDockIdleSnapSuppressedUntil = 0;
+  let bottomDockProgrammaticCenteringUntil = 0;
   let bottomDockCenterHighlightKey = '';
   let bottomDockCenterHighlightTimer = null;
 
@@ -9217,7 +9218,10 @@
       }
     });
     const left = best.offsetLeft - ((dock.clientWidth - best.offsetWidth) / 2);
-    if (smooth) suppressBottomDockIdleSnap(1400);
+    if (smooth) {
+      suppressBottomDockIdleSnap(1600);
+      bottomDockProgrammaticCenteringUntil = Math.max(bottomDockProgrammaticCenteringUntil, Date.now() + 900);
+    }
     dock.scrollTo({ left: left, behavior: smooth ? 'smooth' : 'auto' });
   }
 
@@ -9238,7 +9242,10 @@
       }
     });
     const left = best.offsetLeft - ((dock.clientWidth - best.offsetWidth) / 2);
-    if (smooth) suppressBottomDockIdleSnap(1400);
+    if (smooth) {
+      suppressBottomDockIdleSnap(1600);
+      bottomDockProgrammaticCenteringUntil = Math.max(bottomDockProgrammaticCenteringUntil, Date.now() + 900);
+    }
     dock.scrollTo({ left: left, behavior: smooth ? 'smooth' : 'auto' });
   }
 
@@ -9295,6 +9302,19 @@
   }
 
   function handleBottomDockScroll() {
+    if (Date.now() < bottomDockProgrammaticCenteringUntil) {
+      if (!bottomDockScrollRaf) {
+        bottomDockScrollRaf = requestAnimationFrame(function() {
+          bottomDockScrollRaf = 0;
+          applyBottomDockFocus();
+        });
+      }
+      if (bottomDockSettleTimer) {
+        clearTimeout(bottomDockSettleTimer);
+        bottomDockSettleTimer = null;
+      }
+      return;
+    }
     normalizeBottomDockLoop();
     if (!bottomDockScrollRaf) {
       bottomDockScrollRaf = requestAnimationFrame(function() {
@@ -9333,6 +9353,16 @@
     }
     dock.innerHTML = html.join('');
     dock.dataset.ready = '1';
+    dock.addEventListener('touchstart', function() {
+      setBottomDockCenterHighlightKey('', 0);
+      bottomDockProgrammaticCenteringUntil = 0;
+      bottomDockIdleSnapSuppressedUntil = 0;
+    }, { passive: true });
+    dock.addEventListener('pointerdown', function() {
+      setBottomDockCenterHighlightKey('', 0);
+      bottomDockProgrammaticCenteringUntil = 0;
+      bottomDockIdleSnapSuppressedUntil = 0;
+    }, { passive: true });
     dock.addEventListener('scroll', handleBottomDockScroll, { passive: true });
     dock.addEventListener('click', function(e) {
       const btn = e.target.closest('.bottom-dock-item');
