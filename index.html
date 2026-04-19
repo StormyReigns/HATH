@@ -8164,7 +8164,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.15';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.16';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -9309,7 +9309,9 @@
       if (!btn) return;
       const key = btn.dataset.navKey;
       navFromDock(key);
-      syncBottomDockState(true, key);
+      requestAnimationFrame(function() {
+        syncBottomDockState(true, key);
+      });
     });
     requestAnimationFrame(function() {
       const segment = dock.scrollWidth / 3;
