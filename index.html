@@ -793,8 +793,11 @@
 
     /* ── TOP BAR ── */
     .topbar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: max(54px, env(safe-area-inset-top)) 26px 0; flex-shrink: 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: max(54px, env(safe-area-inset-top)) 26px 8px;
+      flex-shrink: 0;
     }
 
     .hamburger {
@@ -813,7 +816,7 @@
     }
     .topbar.collapsed {
       padding-top: max(env(safe-area-inset-top), 14px);
-      padding-bottom: 0;
+      padding-bottom: 8px;
     }
     .topbar.collapsed .topbar-brand { display: none; }
     .wordmark {
@@ -829,15 +832,17 @@
       flex: 1;
       min-width: 0;
     }
-    /* Sign-in + ⚙️: top-right on home; hidden when .topbar.collapsed (sub-screens). */
+    /* Cog left of sign-in; bottoms align with #versionLabel (same row as brand column). */
     .topbar-right.topbar-home-actions {
       flex: 1;
       min-width: 0;
       display: flex;
       flex-wrap: wrap;
+      flex-direction: row;
       justify-content: flex-end;
-      align-items: center;
-      gap: 6px;
+      align-items: flex-end;
+      gap: 10px;
+      padding-top: 2px;
     }
     .topbar.collapsed .topbar-home-actions {
       display: none;
@@ -1098,12 +1103,12 @@
       background: transparent;
       color: inherit;
       display: inline-flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: center;
       cursor: pointer;
       font-size: 23px;
       line-height: 1;
-      padding: 0 2px;
+      padding: 0 4px 1px 0;
       transition: transform 0.16s ease, opacity 0.16s ease;
     }
     .home-settings-btn svg { display: none; }
@@ -1111,8 +1116,8 @@
     .home-settings-btn:hover { opacity: 0.85; }
     .home-signin-wrap {
       display: inline-flex;
-      align-items: center;
-      min-height: 38px;
+      align-items: flex-end;
+      min-height: 0;
     }
     .home-account-pill {
       display: inline-flex;
@@ -7184,7 +7189,7 @@
     .home-gj-btn {
       position: absolute;
       right: max(14px, env(safe-area-inset-right));
-      bottom: calc(100% + 2px - 8px);
+      bottom: calc(100% + 2px - 8px - 16px);
       z-index: 61;
       display: flex;
       flex-direction: column;
@@ -8188,7 +8193,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.26';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.27';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
