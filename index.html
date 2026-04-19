@@ -8164,7 +8164,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.18';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.19';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -9156,6 +9156,7 @@
     { key: 'civics', label: 'Civics', icon: '<img src="https://stormyreigns.github.io/HATH/LaytonIcon.png" alt="" loading="lazy">' }
   ];
   let bottomDockScrollRaf = 0;
+  let bottomDockJumpRaf = 0;
   let bottomDockSettleTimer = null;
   /** While > Date.now(), idle snap-to-nearest is suppressed (prevents fighting smooth programmatic centering). */
   let bottomDockIdleSnapSuppressedUntil = 0;
@@ -9251,14 +9252,38 @@
 
   function normalizeBottomDockLoop() {
     const dock = document.getElementById('bottomDock');
-    if (!dock || dock.scrollWidth <= dock.clientWidth) return;
+    if (!dock || dock.scrollWidth <= dock.clientWidth) return false;
     const segment = dock.scrollWidth / 3;
-    if (!segment || !isFinite(segment)) return;
+    if (!segment || !isFinite(segment)) return false;
     if (dock.scrollLeft < segment * 0.45) {
       dock.scrollLeft += segment;
+      return true;
     } else if (dock.scrollLeft > segment * 1.55) {
       dock.scrollLeft -= segment;
+      return true;
     }
+    return false;
+  }
+
+  function queueBottomDockScrollVisual() {
+    if (bottomDockScrollRaf) cancelAnimationFrame(bottomDockScrollRaf);
+    if (bottomDockJumpRaf) cancelAnimationFrame(bottomDockJumpRaf);
+    bottomDockJumpRaf = 0;
+    bottomDockScrollRaf = requestAnimationFrame(function() {
+      bottomDockScrollRaf = 0;
+      if (Date.now() < bottomDockProgrammaticCenteringUntil) {
+        applyBottomDockFocus();
+        return;
+      }
+      const jumped = normalizeBottomDockLoop();
+      applyBottomDockFocus();
+      if (jumped) {
+        bottomDockJumpRaf = requestAnimationFrame(function() {
+          bottomDockJumpRaf = 0;
+          applyBottomDockFocus();
+        });
+      }
+    });
   }
 
   function applyBottomDockFocus() {
@@ -9302,25 +9327,13 @@
   }
 
   function handleBottomDockScroll() {
+    queueBottomDockScrollVisual();
     if (Date.now() < bottomDockProgrammaticCenteringUntil) {
-      if (!bottomDockScrollRaf) {
-        bottomDockScrollRaf = requestAnimationFrame(function() {
-          bottomDockScrollRaf = 0;
-          applyBottomDockFocus();
-        });
-      }
       if (bottomDockSettleTimer) {
         clearTimeout(bottomDockSettleTimer);
         bottomDockSettleTimer = null;
       }
       return;
-    }
-    normalizeBottomDockLoop();
-    if (!bottomDockScrollRaf) {
-      bottomDockScrollRaf = requestAnimationFrame(function() {
-        bottomDockScrollRaf = 0;
-        applyBottomDockFocus();
-      });
     }
     if (Date.now() < bottomDockIdleSnapSuppressedUntil) {
       if (bottomDockSettleTimer) {
