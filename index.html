@@ -136,7 +136,7 @@
 
     /* Prevent pull-to-refresh and text selection on UI */
     .hamburger, .wordmark, .wellbeing, .upcoming-events, .home-project-chip, .recent-upload-item,
-    .schedule-chip, .schedule-event, .schedule-event-star, .schedule-mini-cal-day,
+    .schedule-chip, .schedule-event, .schedule-event-star, .schedule-month-picker-select,
     .matt-note, .chip, .send-btn, .cancel-btn, .drawer-item, .drawer-header, .drawer-footer {
       -webkit-user-select: none;
       user-select: none;
@@ -323,12 +323,11 @@
       color: var(--text);
     }
     html.dark-mode .settings-input::placeholder { color: var(--muted); }
-    html.dark-mode .paste-modal, html.dark-mode .schedule-mini-cal {
+    html.dark-mode .paste-modal {
       background: #252220;
       box-shadow: 0 12px 40px rgba(0,0,0,0.5);
     }
     html.dark-mode .paste-modal h3,
-    html.dark-mode .schedule-mini-cal-title { color: var(--text); }
     html.dark-mode .paste-modal .paste-filename,
     html.dark-mode .paste-modal .paste-content,
     html.dark-mode .paste-modal .upload-folder-select,
@@ -374,10 +373,6 @@
     html.dark-mode .schedule-calendar-btn:hover,
     html.dark-mode .schedule-calendar-btn:active,
     html.dark-mode .schedule-calendar-btn.active { background: rgba(224,152,104,0.3); }
-    html.dark-mode .schedule-mini-cal-day.other-month { opacity: 0.5; }
-    html.dark-mode .schedule-mini-cal-day.today { background: rgba(224,152,104,0.25); }
-    html.dark-mode .schedule-mini-cal-day:hover,
-    html.dark-mode .schedule-mini-cal-day:active { background: rgba(224,152,104,0.2); }
     html.dark-mode .docs-toast { background: #252220; color: var(--text); }
     html.dark-mode .action-sheet { background: #252220; }
     html.dark-mode .action-sheet-option { color: var(--text); }
@@ -3253,9 +3248,12 @@
 
     /* Week / single-day observances mingled in the main list (subtle, date-ordered). */
     .hz-obs-mingle {
-      padding: 3px 8px 5px 54px;
+      padding: 3px 8px 5px 48px;
       margin: 0 0 4px 0;
-      max-width: 100%;
+      max-width: 360px;
+      width: 100%;
+      align-self: center;
+      box-sizing: border-box;
     }
     .hz-obs-mingle--start { opacity: 0.92; }
     .hz-obs-mingle--end { opacity: 0.88; }
@@ -3301,6 +3299,19 @@
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       padding-bottom: max(5px, env(safe-area-inset-bottom));
+      padding-left: 2px;
+      padding-right: 2px;
+      touch-action: pan-y;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .schedule-horizon-main > .screen-loading {
+      align-self: stretch;
+    }
+    .schedule-horizon-main.hz-swipe-dragging {
+      touch-action: none;
+      overscroll-behavior-x: none;
     }
     .schedule-horizon-month-nav {
       display: flex;
@@ -3422,11 +3433,15 @@
     .hz-standalone-row {
       display: flex;
       align-items: flex-start;
-      gap: 10px;
-      margin-bottom: 10px;
+      gap: 8px;
+      margin-bottom: 8px;
+      width: 100%;
+      max-width: 360px;
+      align-self: center;
+      box-sizing: border-box;
     }
     .hz-standalone-date {
-      width: 44px;
+      width: 38px;
       flex-shrink: 0;
       text-align: left;
       padding-top: 4px;
@@ -3442,7 +3457,7 @@
     }
     .hz-standalone-daynum {
       font-family: 'Playfair Display', serif;
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 500;
       color: var(--text);
       line-height: 1;
@@ -3453,10 +3468,10 @@
       background: rgba(255,255,255,0.92);
       border: 1px solid rgba(192,122,74,0.12);
       border-radius: 12px;
-      padding: 10px 12px;
+      padding: 8px 10px;
       display: flex;
       align-items: flex-start;
-      gap: 10px;
+      gap: 8px;
       cursor: pointer;
       box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
@@ -3507,8 +3522,8 @@
       flex-wrap: wrap;
       align-items: center;
       gap: 6px 8px;
-      margin-top: 8px;
-      padding-top: 8px;
+      margin-top: 6px;
+      padding-top: 6px;
       border-top: 1px solid rgba(0,0,0,0.06);
       justify-content: flex-end;
     }
@@ -4039,58 +4054,112 @@
       padding: 8px 16px 3px; font-family: 'Playfair Display', serif;
     }
     .schedule-date-header:first-of-type { padding-top: 2px; }
-    .schedule-mini-cal-overlay {
-      position: fixed; inset: 0; z-index: 200;
-      background: rgba(0,0,0,0.3);
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.2s ease;
+    .schedule-month-picker-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 260;
+      background: rgba(58, 46, 40, 0.38);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: max(16px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
     }
-    .schedule-mini-cal-overlay.open {
-      opacity: 1; pointer-events: all;
+    .schedule-month-picker-overlay.open {
+      opacity: 1;
+      pointer-events: all;
     }
-    .schedule-mini-cal {
-      position: fixed; top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 201;
-      width: calc(100vw - 48px); max-width: 320px;
+    .schedule-month-picker {
+      width: 100%;
+      max-width: 360px;
       background: #fdfaf8;
       border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.15);
-      opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(0.96);
-      transition: opacity 0.2s ease, transform 0.2s ease;
+      padding: 22px 20px 20px;
+      border: 1px solid rgba(192, 122, 74, 0.14);
+      box-shadow: 0 12px 48px rgba(58, 46, 40, 0.18), 0 2px 12px rgba(0, 0, 0, 0.08);
+      transform: scale(0.94) translateY(10px);
+      opacity: 0;
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s ease;
     }
-    .schedule-mini-cal.open {
-      opacity: 1; pointer-events: all; transform: translate(-50%, -50%) scale(1);
+    .schedule-month-picker-overlay.open .schedule-month-picker {
+      transform: scale(1) translateY(0);
+      opacity: 1;
     }
-    .schedule-mini-cal-title {
-      font-family: 'Playfair Display', serif; font-size: 18px;
-      color: var(--text); text-align: center; margin-bottom: 16px;
+    .schedule-month-picker h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 500;
+      margin: 0 0 8px;
+      color: var(--text);
+      text-align: center;
     }
-    .schedule-mini-cal-grid {
-      display: grid; grid-template-columns: repeat(7, 1fr);
-      gap: 4px; font-size: 12px;
+    .schedule-month-picker-hint {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0 0 4px;
+      line-height: 1.45;
+      text-align: center;
     }
-    .schedule-mini-cal-dow {
-      text-align: center; font-size: 10px; color: var(--muted);
-      letter-spacing: 0.04em; padding: 4px 0;
+    .schedule-month-picker-row {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 16px;
     }
-    .schedule-mini-cal-day {
-      position: relative;
-      aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
-      border-radius: 8px; cursor: pointer;
-      color: var(--text2); font-weight: 400;
-      transition: background 0.15s, color 0.15s;
+    .schedule-month-picker-row label {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
     }
-    .schedule-mini-cal-day.other-month { color: var(--muted); opacity: 0.6; }
-    .schedule-mini-cal-day.has-events::after {
-      content: ''; position: absolute; bottom: 4px;
-      width: 4px; height: 4px; border-radius: 50%;
-      background: var(--accent);
+    .schedule-month-picker-select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 14px 16px;
+      font-size: 16px;
+      line-height: 1.35;
+      border-radius: 12px;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      background: #fff;
+      font-family: inherit;
+      color: var(--text);
+      min-height: 50px;
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23666' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 40px;
     }
-    .schedule-mini-cal-day:hover, .schedule-mini-cal-day:active { background: rgba(192,122,74,0.15); }
-    .schedule-mini-cal-day.today { background: rgba(192,122,74,0.2); color: var(--accent); font-weight: 500; }
-    .schedule-mini-cal-day.today.has-events::after { background: var(--text); }
+    .schedule-month-picker-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 22px;
+      flex-wrap: wrap;
+    }
+    .schedule-month-picker-actions .paste-cancel-btn,
+    .schedule-month-picker-actions .paste-save-btn {
+      min-height: 48px;
+      padding: 0 20px;
+      font-size: 15px;
+    }
+    html.dark-mode .schedule-month-picker {
+      background: #1a1816;
+      border-color: rgba(224, 152, 104, 0.18);
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45);
+    }
+    html.dark-mode .schedule-month-picker-select {
+      background: #252220;
+      border-color: rgba(255, 255, 255, 0.12);
+      color: var(--text);
+    }
 
     /* Settings screen */
     #settingsScreen {
@@ -7376,7 +7445,7 @@
             <button type="button" class="schedule-icon-btn" onclick="openScheduleCalendarsModal()" title="Calendars" aria-label="Manage calendars">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
             </button>
-            <button type="button" class="schedule-icon-btn" id="scheduleCalendarBtn" onclick="toggleScheduleMiniCalendar()" title="Calendar" aria-label="Toggle calendar">
+            <button type="button" class="schedule-icon-btn" id="scheduleCalendarBtn" onclick="openScheduleMonthYearPicker()" title="Jump to month" aria-label="Jump to month">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </button>
           </div>
@@ -7468,11 +7537,24 @@
       </div>
     </div>
 
-    <!-- Schedule mini calendar overlay -->
-    <div class="schedule-mini-cal-overlay" id="scheduleMiniCalOverlay" onclick="closeScheduleMiniCalendar(event)"></div>
-    <div class="schedule-mini-cal" id="scheduleMiniCal" onclick="event.stopPropagation()">
-      <div class="schedule-mini-cal-title" id="scheduleMiniCalTitle"></div>
-      <div class="schedule-mini-cal-grid" id="scheduleMiniCalGrid"></div>
+    <!-- Schedule month/year picker (header calendar icon) -->
+    <div class="schedule-month-picker-overlay" id="scheduleMonthPickerOverlay" onclick="closeScheduleMonthYearPicker(event)">
+      <div class="schedule-month-picker" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="scheduleMonthPickerTitle">
+        <h3 id="scheduleMonthPickerTitle">Jump to month</h3>
+        <p class="schedule-month-picker-hint">Pick a month to load in the list below. You can still swipe between months.</p>
+        <div class="schedule-month-picker-row">
+          <label for="scheduleMonthPickerMonth">Month</label>
+          <select id="scheduleMonthPickerMonth" class="schedule-month-picker-select" aria-label="Month"></select>
+        </div>
+        <div class="schedule-month-picker-row">
+          <label for="scheduleMonthPickerYear">Year</label>
+          <select id="scheduleMonthPickerYear" class="schedule-month-picker-select" aria-label="Year"></select>
+        </div>
+        <div class="schedule-month-picker-actions">
+          <button type="button" class="paste-cancel-btn" onclick="closeScheduleMonthYearPicker()">Cancel</button>
+          <button type="button" class="paste-save-btn" onclick="applyScheduleMonthYearPicker()">Go</button>
+        </div>
+      </div>
     </div>
 
     <!-- Local event modal (Schedule +) — centered like project creator -->
@@ -7924,7 +8006,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.34.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.35.0';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -13878,44 +13960,103 @@
     renderScheduleHorizon();
   }
 
+  function clampHorizonSwipeDx(dx) {
+    ensureHorizonMonthCursor();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const minYm = new Date(today.getFullYear(), today.getMonth(), 1);
+    const cur = new Date(scheduleHorizonYear, scheduleHorizonMonth0, 1);
+    if (cur.getTime() <= minYm.getTime() && dx > 0) {
+      return Math.min(dx * 0.35, 56);
+    }
+    return dx;
+  }
+
   let scheduleLifeSwipeBound = false;
   function initScheduleLifeSwipe() {
     if (scheduleLifeSwipeBound) return;
-    const host = document.getElementById('scheduleLifeSwipeHost');
-    if (!host) return;
+    const main = document.getElementById('scheduleHorizonMain');
+    if (!main) return;
     scheduleLifeSwipeBound = true;
-    let x0 = null;
-    let y0 = null;
-    /** Only count horizontal swipes that began on the scrollable event list (not chips / month nav). */
-    let swipeFromEvents = false;
-    function resetSwipe() {
-      x0 = null;
-      y0 = null;
-      swipeFromEvents = false;
+    let state = null;
+    function resetTransform(animate) {
+      main.classList.remove('hz-swipe-dragging');
+      if (animate) {
+        main.style.transition = 'transform 0.22s cubic-bezier(0.22, 1, 0.36, 1)';
+        main.style.transform = 'translateX(0)';
+        setTimeout(function() {
+          main.style.transition = '';
+          main.style.transform = '';
+        }, 240);
+      } else {
+        main.style.transition = '';
+        main.style.transform = '';
+      }
     }
-    host.addEventListener('touchstart', function(e) {
+    main.addEventListener('touchstart', function(e) {
       if (e.touches.length !== 1) return;
-      const main = document.getElementById('scheduleHorizonMain');
-      swipeFromEvents = !!(main && main.contains(e.target));
-      if (!swipeFromEvents) return;
-      x0 = e.touches[0].clientX;
-      y0 = e.touches[0].clientY;
+      state = {
+        x0: e.touches[0].clientX,
+        y0: e.touches[0].clientY,
+        mode: null,
+        dragging: false
+      };
     }, { passive: true });
-    host.addEventListener('touchend', function(e) {
-      if (!swipeFromEvents || x0 == null || y0 == null) {
-        resetSwipe();
+    main.addEventListener('touchmove', function(e) {
+      if (!state || e.touches.length !== 1) return;
+      const x = e.touches[0].clientX;
+      const y = e.touches[0].clientY;
+      const dx = x - state.x0;
+      const dy = y - state.y0;
+      if (state.mode === null) {
+        if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+        state.mode = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
+      }
+      if (state.mode === 'v') return;
+      e.preventDefault();
+      state.dragging = true;
+      main.classList.add('hz-swipe-dragging');
+      main.style.transition = 'none';
+      main.style.transform = 'translateX(' + clampHorizonSwipeDx(dx) + 'px)';
+    }, { passive: false });
+    function endSwipe(e) {
+      if (!state) return;
+      const t = e.changedTouches && e.changedTouches[0];
+      const dx = t ? (t.clientX - state.x0) : 0;
+      const wasH = state.mode === 'h' && state.dragging;
+      state = null;
+      main.classList.remove('hz-swipe-dragging');
+      if (!wasH) {
+        resetTransform(false);
         return;
       }
-      const t = e.changedTouches[0];
-      const dx = t.clientX - x0;
-      const dy = t.clientY - y0;
-      resetSwipe();
-      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 28) return;
-      const th = 52;
-      if (dx < -th) shiftHorizonMonth(1);
-      else if (dx > th) shiftHorizonMonth(-1);
+      const th = 56;
+      if (dx < -th) {
+        if (shiftHorizonMonth(1)) {
+          main.style.transition = '';
+          main.style.transform = '';
+        } else {
+          resetTransform(true);
+        }
+        return;
+      }
+      if (dx > th) {
+        if (shiftHorizonMonth(-1)) {
+          main.style.transition = '';
+          main.style.transform = '';
+        } else {
+          resetTransform(true);
+        }
+        return;
+      }
+      resetTransform(true);
+    }
+    main.addEventListener('touchend', endSwipe, { passive: true });
+    main.addEventListener('touchcancel', function() {
+      state = null;
+      main.classList.remove('hz-swipe-dragging');
+      resetTransform(true);
     }, { passive: true });
-    host.addEventListener('touchcancel', resetSwipe, { passive: true });
   }
 
   function ensureHorizonMonthCursor() {
@@ -13955,15 +14096,15 @@
     return start;
   }
 
-  function shiftHorizonMonth(delta) {
+  function alignHorizonToMonth(y, m0) {
     ensureHorizonMonthCursor();
-    const d = new Date(scheduleHorizonYear, scheduleHorizonMonth0 + delta, 1);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const minYm = new Date(today.getFullYear(), today.getMonth(), 1);
-    if (d < minYm) return;
-    scheduleHorizonYear = d.getFullYear();
-    scheduleHorizonMonth0 = d.getMonth();
+    const target = new Date(y, m0, 1);
+    if (target < minYm) return false;
+    scheduleHorizonYear = y;
+    scheduleHorizonMonth0 = m0;
     renderScheduleHorizon();
     const u = localStorage.getItem('shasta_user');
     if (u) {
@@ -13976,6 +14117,13 @@
         renderScheduleHorizon();
       });
     }
+    return true;
+  }
+
+  function shiftHorizonMonth(delta) {
+    ensureHorizonMonthCursor();
+    const d = new Date(scheduleHorizonYear, scheduleHorizonMonth0 + delta, 1);
+    return alignHorizonToMonth(d.getFullYear(), d.getMonth());
   }
 
   function resolveMMDDInHorizonYear_(mmdd) {
@@ -15301,82 +15449,60 @@
     turnEl.appendChild(card);
   }
 
-  function toggleScheduleMiniCalendar() {
-    const overlay = document.getElementById('scheduleMiniCalOverlay');
-    const panel = document.getElementById('scheduleMiniCal');
-    const btn = document.getElementById('scheduleCalendarBtn');
-    if (!overlay || !panel || !btn) return;
-    const isOpen = overlay.classList.contains('open');
-    if (isOpen) {
-      overlay.classList.remove('open');
-      panel.classList.remove('open');
-      btn.classList.remove('active');
-    } else {
-      overlay.classList.add('open');
-      panel.classList.add('open');
-      btn.classList.add('active');
-      renderScheduleMiniCalendar();
+  const SCHEDULE_MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+  function populateScheduleMonthYearPickerSelects_() {
+    const mSel = document.getElementById('scheduleMonthPickerMonth');
+    const ySel = document.getElementById('scheduleMonthPickerYear');
+    if (!mSel || !ySel) return;
+    ensureHorizonMonthCursor();
+    const today = new Date();
+    const minY = today.getFullYear();
+    const maxY = minY + 5;
+    mSel.innerHTML = SCHEDULE_MONTH_NAMES.map(function(name, i) {
+      return '<option value="' + i + '">' + name + '</option>';
+    }).join('');
+    ySel.innerHTML = '';
+    for (let y = minY; y <= maxY; y++) {
+      ySel.innerHTML += '<option value="' + y + '">' + y + '</option>';
     }
+    mSel.value = String(scheduleHorizonMonth0);
+    let yPick = scheduleHorizonYear;
+    if (yPick < minY) yPick = minY;
+    if (yPick > maxY) yPick = maxY;
+    ySel.value = String(yPick);
+    if (parseInt(mSel.value, 10) !== scheduleHorizonMonth0) mSel.value = String(scheduleHorizonMonth0);
   }
 
-  function closeScheduleMiniCalendar(e) {
-    if (e && e.target !== document.getElementById('scheduleMiniCalOverlay')) return;
-    const overlay = document.getElementById('scheduleMiniCalOverlay');
-    const panel = document.getElementById('scheduleMiniCal');
+  function openScheduleMonthYearPicker() {
+    const overlay = document.getElementById('scheduleMonthPickerOverlay');
     const btn = document.getElementById('scheduleCalendarBtn');
+    if (!overlay) return;
+    populateScheduleMonthYearPickerSelects_();
+    overlay.classList.add('open');
+    if (btn) btn.classList.add('active');
+  }
+
+  function closeScheduleMonthYearPicker(ev) {
+    const overlay = document.getElementById('scheduleMonthPickerOverlay');
+    const btn = document.getElementById('scheduleCalendarBtn');
+    if (ev && ev.target !== overlay) return;
     if (overlay) overlay.classList.remove('open');
-    if (panel) panel.classList.remove('open');
     if (btn) btn.classList.remove('active');
   }
 
-  function renderScheduleMiniCalendar() {
-    const titleEl = document.getElementById('scheduleMiniCalTitle');
-    const gridEl = document.getElementById('scheduleMiniCalGrid');
-    if (!titleEl || !gridEl) return;
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth();
-    const first = new Date(year, month, 1);
-    const last = new Date(year, month + 1, 0);
-    titleEl.textContent = first.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-
-    const daysWithEvents = new Set();
-    scheduleEvents.forEach(ev => {
-      const d = new Date(ev.start || ev.date || ev.startTime);
-      daysWithEvents.add(d.toDateString());
-    });
-
-    const dow = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    let html = dow.map(d => `<div class="schedule-mini-cal-dow">${d}</div>`).join('');
-    const startPad = first.getDay();
-    for (let i = 0; i < startPad; i++) {
-      const prev = new Date(first);
-      prev.setDate(prev.getDate() - (startPad - i));
-      html += `<div class="schedule-mini-cal-day other-month">${prev.getDate()}</div>`;
+  function applyScheduleMonthYearPicker() {
+    const mSel = document.getElementById('scheduleMonthPickerMonth');
+    const ySel = document.getElementById('scheduleMonthPickerYear');
+    if (!mSel || !ySel) return;
+    const y = parseInt(ySel.value, 10);
+    const m0 = parseInt(mSel.value, 10);
+    if (isNaN(y) || isNaN(m0) || m0 < 0 || m0 > 11) return;
+    if (!alignHorizonToMonth(y, m0)) {
+      alert('Choose this month or a future month.');
+      return;
     }
-    const todayStr = now.toDateString();
-    for (let d = 1; d <= last.getDate(); d++) {
-      const dStr = new Date(year, month, d).toDateString();
-      const hasEvents = daysWithEvents.has(dStr);
-      const isToday = dStr === todayStr;
-      const cls = ['schedule-mini-cal-day'];
-      if (isToday) cls.push('today');
-      if (hasEvents) cls.push('has-events');
-      html += `<div class="${cls.join(' ')}" data-date="${dStr}">${d}</div>`;
-    }
-    const remaining = 42 - (startPad + last.getDate());
-    for (let i = 1; i <= remaining; i++) {
-      const next = new Date(last);
-      next.setDate(next.getDate() + i);
-      html += `<div class="schedule-mini-cal-day other-month">${next.getDate()}</div>`;
-    }
-    gridEl.innerHTML = html;
-    gridEl.querySelectorAll('.schedule-mini-cal-day[data-date]').forEach(el => {
-      el.onclick = () => {
-        scrollScheduleToDate(el.dataset.date);
-        closeScheduleMiniCalendar({ target: document.getElementById('scheduleMiniCalOverlay') });
-      };
-    });
+    closeScheduleMonthYearPicker();
   }
 
   function scrollScheduleToDate(dateStr) {
