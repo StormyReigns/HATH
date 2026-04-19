@@ -7947,13 +7947,13 @@
       <img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/WWChest1.png" alt="" loading="lazy">
       Projects
     </div>
-    <div class="drawer-item" data-guest-lock onclick="drawerNavTap(this, ()=>{ closeDrawer(); showDocumentsScreen(); })">
-      <img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/FFXIVIcon.png" alt="" loading="lazy">
-      Documents
-    </div>
     <div class="drawer-item" data-screen="recipes" onclick="drawerNavTap(this, ()=>{ closeDrawer(); showRecipesScreen(); })">
       <span class="hk-icon-circle"><img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/HK.png" alt="" loading="lazy"></span>
       Recipes
+    </div>
+    <div class="drawer-item" data-guest-lock onclick="drawerNavTap(this, ()=>{ closeDrawer(); showDocumentsScreen(); })">
+      <img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/FFXIVIcon.png" alt="" loading="lazy">
+      Documents
     </div>
     <div class="drawer-item" data-guest-lock onclick="drawerNavTap(this)">
       <svg class="drawer-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
@@ -8230,7 +8230,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.34';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.35';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -9215,8 +9215,8 @@
   const BOTTOM_DOCK_ITEMS = [
     { key: 'home', label: 'Home', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5z"/><path d="M9 21v-7h6v7"/></svg>' },
     { key: 'projects', label: 'Projects', icon: '<img src="https://stormyreigns.github.io/HATH/WWChest1.png" alt="" loading="lazy">' },
-    { key: 'documents', label: 'Documents', icon: '<img src="https://stormyreigns.github.io/HATH/FFXIVIcon.png" alt="" loading="lazy">' },
     { key: 'recipes', label: 'Recipes', icon: '<span class="hk-icon-circle"><img class="recipes-title-icon" src="https://stormyreigns.github.io/HATH/HK.png" alt="" loading="lazy"></span>' },
+    { key: 'documents', label: 'Documents', icon: '<img src="https://stormyreigns.github.io/HATH/FFXIVIcon.png" alt="" loading="lazy">' },
     { key: 'finances', label: 'Finances', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1.5" x2="12" y2="22.5"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>' },
     { key: 'schedule', label: 'Schedule', icon: '<img src="https://stormyreigns.github.io/HATH/STIcon2.png" alt="" loading="lazy">' },
     { key: 'civics', label: 'Civics', icon: '<img src="https://stormyreigns.github.io/HATH/LaytonIcon.png" alt="" loading="lazy">' }
