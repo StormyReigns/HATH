@@ -940,7 +940,6 @@
       transition: color 0.16s ease, filter 0.16s ease;
       scroll-snap-align: center;
       padding: 8px 2px 6px;
-      will-change: transform, opacity;
     }
     .bottom-dock-item:active { transform: scale(calc(var(--dock-scale, 0.88) * 0.95)); }
     .bottom-dock-item.is-center {
@@ -8168,7 +8167,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.20';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.21';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -9206,6 +9205,13 @@
     if (key === 'finances') return;
   }
 
+  /** Center X in #bottomDock scroll content coords (offsetLeft breaks when a fixed ancestor is offsetParent). */
+  function bottomDockItemCenterXContent(dock, btn) {
+    const dr = dock.getBoundingClientRect();
+    const br = btn.getBoundingClientRect();
+    return dock.scrollLeft + (br.left - dr.left) + br.width / 2;
+  }
+
   function centerDockOnKey(key, smooth) {
     const dock = document.getElementById('bottomDock');
     if (!dock) return;
@@ -9215,14 +9221,18 @@
     let best = candidates[0];
     let bestDist = Infinity;
     candidates.forEach(function(btn) {
-      const mid = btn.offsetLeft + btn.offsetWidth / 2;
+      const mid = bottomDockItemCenterXContent(dock, btn);
       const d = Math.abs(mid - centerX);
       if (d < bestDist) {
         best = btn;
         bestDist = d;
       }
     });
-    const left = best.offsetLeft - ((dock.clientWidth - best.offsetWidth) / 2);
+    const mid = bottomDockItemCenterXContent(dock, best);
+    let left = mid - dock.clientWidth / 2;
+    const maxLeft = Math.max(0, dock.scrollWidth - dock.clientWidth);
+    if (left < 0) left = 0;
+    else if (left > maxLeft) left = maxLeft;
     if (smooth) {
       suppressBottomDockIdleSnap(1600);
       bottomDockProgrammaticCenteringUntil = Math.max(bottomDockProgrammaticCenteringUntil, Date.now() + 900);
@@ -9239,14 +9249,18 @@
     let best = items[0];
     let bestDist = Infinity;
     items.forEach(function(btn) {
-      const mid = btn.offsetLeft + btn.offsetWidth / 2;
+      const mid = bottomDockItemCenterXContent(dock, btn);
       const dist = Math.abs(mid - centerX);
       if (dist < bestDist) {
         best = btn;
         bestDist = dist;
       }
     });
-    const left = best.offsetLeft - ((dock.clientWidth - best.offsetWidth) / 2);
+    const mid = bottomDockItemCenterXContent(dock, best);
+    let left = mid - dock.clientWidth / 2;
+    const maxLeft = Math.max(0, dock.scrollWidth - dock.clientWidth);
+    if (left < 0) left = 0;
+    else if (left > maxLeft) left = maxLeft;
     if (smooth) {
       suppressBottomDockIdleSnap(1600);
       bottomDockProgrammaticCenteringUntil = Math.max(bottomDockProgrammaticCenteringUntil, Date.now() + 900);
@@ -9296,7 +9310,7 @@
     let best = null;
     let bestDist = Infinity;
     dock.querySelectorAll('.bottom-dock-item').forEach(function(btn) {
-      const mid = btn.offsetLeft + btn.offsetWidth / 2;
+      const mid = bottomDockItemCenterXContent(dock, btn);
       const dist = Math.abs(mid - center);
       const scale = Math.max(0.84, 1.24 - (dist / 350));
       const alpha = Math.max(0.42, 1 - (dist / 220));
@@ -9314,7 +9328,7 @@
         let pb = pref[0];
         let pd = Infinity;
         pref.forEach(function(btn) {
-          const mid = btn.offsetLeft + btn.offsetWidth / 2;
+          const mid = bottomDockItemCenterXContent(dock, btn);
           const d = Math.abs(mid - center);
           if (d < pd) {
             pb = btn;
