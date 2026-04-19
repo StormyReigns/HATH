@@ -778,7 +778,7 @@
       min-height: -webkit-fill-available;
       height: calc(var(--vh, 1vh) * 100);
       /* Reserve space for the enlarged bottom dock. */
-      padding-bottom: calc(106px + env(safe-area-inset-bottom));
+      padding-bottom: calc(128px + env(safe-area-inset-bottom));
       z-index: 1;
       display: flex; flex-direction: column;
       overflow: hidden;
@@ -873,7 +873,7 @@
       padding-top: 0;
       /* 10px clears the home-indicator gesture zone (~8px) without noticeable dead space.
          Fixed value means bar height never changes on rotation. No env(), no media query. */
-      padding-bottom: 10px;
+      padding-bottom: 14px;
       transform: translateZ(0);
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
@@ -891,7 +891,7 @@
     .bottom-bar-inner {
       max-width: 420px;
       margin: 0 auto;
-      padding: 6px 8px 4px;
+      padding: 8px 8px 6px;
     }
     .bottom-dock {
       --dock-item-width: 74px;
@@ -905,7 +905,8 @@
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-x: contain;
-      padding: 0 12px;
+      min-height: 84px;
+      padding: 0 12px 2px;
       touch-action: pan-x;
     }
     .bottom-dock::-webkit-scrollbar { display: none; }
@@ -927,7 +928,7 @@
       transform-origin: center bottom;
       transition: transform 0.2s ease, opacity 0.2s ease, color 0.2s ease, filter 0.2s ease;
       scroll-snap-align: center;
-      padding: 6px 2px 5px;
+      padding: 10px 2px 8px;
     }
     .bottom-dock-item:active { transform: scale(calc(var(--dock-scale, 0.88) * 0.95)); }
     .bottom-dock-item.is-center {
@@ -946,6 +947,8 @@
       align-items: center;
       justify-content: center;
       color: currentColor;
+      margin-top: 2px;
+      margin-bottom: 5px;
     }
     .bottom-dock-icon img {
       width: 27px;
@@ -1006,7 +1009,7 @@
     }
     /* Reserve space for fixed input zone (Blathers + chat) when on home */
     .body:not(:has(.sub-screen.visible)) {
-      padding-bottom: 158px;
+      padding-bottom: 178px;
     }
     .body.chat-mode .hint-area { display: none !important; }
     .body:has(.sub-screen.visible) .chat-area { display: none !important; }
@@ -8151,7 +8154,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.1';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -9181,6 +9184,26 @@
     dock.scrollTo({ left: left, behavior: smooth ? 'smooth' : 'auto' });
   }
 
+  function centerNearestDockItem(smooth) {
+    const dock = document.getElementById('bottomDock');
+    if (!dock) return;
+    const centerX = dock.scrollLeft + dock.clientWidth / 2;
+    const items = Array.from(dock.querySelectorAll('.bottom-dock-item'));
+    if (items.length === 0) return;
+    let best = items[0];
+    let bestDist = Infinity;
+    items.forEach(function(btn) {
+      const mid = btn.offsetLeft + btn.offsetWidth / 2;
+      const dist = Math.abs(mid - centerX);
+      if (dist < bestDist) {
+        best = btn;
+        bestDist = dist;
+      }
+    });
+    const left = best.offsetLeft - ((dock.clientWidth - best.offsetWidth) / 2);
+    dock.scrollTo({ left: left, behavior: smooth ? 'smooth' : 'auto' });
+  }
+
   function normalizeBottomDockLoop() {
     const dock = document.getElementById('bottomDock');
     if (!dock || dock.scrollWidth <= dock.clientWidth) return;
@@ -9227,9 +9250,8 @@
     if (bottomDockSettleTimer) clearTimeout(bottomDockSettleTimer);
     bottomDockSettleTimer = setTimeout(function() {
       bottomDockSettleTimer = null;
-      const active = getActiveNavKey();
-      centerDockOnKey(active, true);
-    }, 120);
+      centerNearestDockItem(true);
+    }, 1000);
   }
 
   function renderBottomDock() {
@@ -9250,10 +9272,6 @@
     dock.innerHTML = html.join('');
     dock.dataset.ready = '1';
     dock.addEventListener('scroll', handleBottomDockScroll, { passive: true });
-    dock.addEventListener('touchend', function() {
-      const active = getActiveNavKey();
-      centerDockOnKey(active, true);
-    }, { passive: true });
     dock.addEventListener('click', function(e) {
       const btn = e.target.closest('.bottom-dock-item');
       if (!btn) return;
