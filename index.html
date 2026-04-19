@@ -807,7 +807,10 @@
     .hamburger span:nth-child(2) { width: 65%; }
     .hamburger span:nth-child(3) { width: 82%; }
 
-    .topbar-brand { display: flex; flex-direction: column; align-items: center; gap: 0; }
+    .topbar-brand {
+      display: flex; flex-direction: column; align-items: center; gap: 0;
+      flex: 0 0 auto;
+    }
     .topbar.collapsed {
       padding-top: max(env(safe-area-inset-top), 14px);
       padding-bottom: 0;
@@ -822,7 +825,23 @@
       font-size: 9px; letter-spacing: 0.08em;
       color: var(--muted); margin-top: -2px; font-weight: 400;
     }
-    .topbar-left, .topbar-right { width: 34px; }
+    .topbar-left {
+      flex: 1;
+      min-width: 0;
+    }
+    /* Sign-in + ⚙️: top-right on home; hidden when .topbar.collapsed (sub-screens). */
+    .topbar-right.topbar-home-actions {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 6px;
+    }
+    .topbar.collapsed .topbar-home-actions {
+      display: none;
+    }
 
     .scroll-fade-bottom {
       position: sticky;
@@ -1074,15 +1093,6 @@
       text-align: center; letter-spacing: -0.2px; line-height: 1.3;
     }
     .hint-greeting em { font-style: italic; color: var(--accent); }
-    .home-actions-row {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 6px;
-      flex-wrap: wrap;
-    }
     .home-settings-btn {
       border: none;
       background: transparent;
@@ -7174,7 +7184,7 @@
     .home-gj-btn {
       position: absolute;
       right: max(14px, env(safe-area-inset-right));
-      bottom: calc(100% + 2px);
+      bottom: calc(100% + 2px - 8px);
       z-index: 61;
       display: flex;
       flex-direction: column;
@@ -7281,7 +7291,16 @@
       <div class="wordmark">ShastApp</div>
       <div class="version-label" id="versionLabel"></div>
     </div>
-    <div class="topbar-right"></div>
+    <div class="topbar-right topbar-home-actions" id="homeActionsRow">
+      <button type="button" class="home-settings-btn" onclick="showSettingsScreen()" aria-label="Open settings">⚙️</button>
+      <div class="home-signin-wrap" id="homeGuestSignInWrap">
+        <div id="homeGoogleSignInBtn"></div>
+      </div>
+      <div class="home-account-pill" id="homeSignedInPill" style="display:none">
+        <span class="home-account-pill-name" id="homeSignedInName"></span>
+        <button type="button" class="home-account-signout" onclick="signOut()">Sign out</button>
+      </div>
+    </div>
   </div>
 
   <div class="wellbeing" id="wellbeing">
@@ -7291,16 +7310,6 @@
   <div class="body">
     <div class="hint-area" id="hintArea">
       <div class="hint-greeting" id="greetingText"></div>
-      <div class="home-actions-row" id="homeActionsRow">
-        <button type="button" class="home-settings-btn" onclick="showSettingsScreen()" aria-label="Open settings">⚙️</button>
-        <div class="home-signin-wrap" id="homeGuestSignInWrap">
-          <div id="homeGoogleSignInBtn"></div>
-        </div>
-        <div class="home-account-pill" id="homeSignedInPill" style="display:none">
-          <span class="home-account-pill-name" id="homeSignedInName"></span>
-          <button type="button" class="home-account-signout" onclick="signOut()">Sign out</button>
-        </div>
-      </div>
 
       <div class="home-projects-scroller" id="homeProjectsScroller" onclick="closeDrawer(); showProjectsScreen()" role="button" tabindex="0" aria-label="View projects">
         <div class="home-projects-label">Projects</div>
@@ -8179,7 +8188,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.25';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.26';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
