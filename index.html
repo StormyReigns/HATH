@@ -980,6 +980,13 @@
     html.dark-mode .bottom-dock-item {
       color: var(--text2);
     }
+    html.dark-mode .bottom-dock-icon img {
+      filter: drop-shadow(0 0 8px rgba(255,255,255,0.45));
+    }
+    html.dark-mode .bottom-dock-item[data-nav-key="recipes"] .bottom-dock-icon img,
+    html.dark-mode .bottom-dock-item[data-nav-key="civics"] .bottom-dock-icon img {
+      filter: brightness(1.1) contrast(1.08) drop-shadow(0 0 12px rgba(255,255,255,0.78));
+    }
     html.dark-mode .bottom-dock-item.is-center {
       color: #e2b489;
       filter: drop-shadow(0 2px 12px rgba(0,0,0,0.45));
@@ -993,6 +1000,12 @@
       border-radius: 50%; background: #6aad8a;
       margin-right: 6px; margin-bottom: 1px; vertical-align: middle;
       animation: softPulse 3s ease-in-out infinite;
+    }
+    .well-dot.hidden {
+      opacity: 0;
+      width: 0;
+      margin-right: 0;
+      animation: none;
     }
     .well-dot.warn { background: #c9943a; }
     .well-dot.alert { background: #c05050; }
@@ -8152,7 +8165,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.8';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.9';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -8960,15 +8973,18 @@
     const dot   = document.getElementById('wellDot');
     const label = document.getElementById('wellLabel');
     const s = (status || 'OK').toString().toUpperCase();
+    if (!dot || !label) return;
 
     if (s === 'WATCH' || s === 'WARN') {
       dot.className = 'well-dot warn';
+      dot.classList.remove('hidden');
       label.textContent = 'Worth a look';
     } else if (s === 'NO' || s === 'ALERT') {
       dot.className = 'well-dot alert';
+      dot.classList.remove('hidden');
       label.textContent = 'Needs attention';
     } else {
-      dot.className = 'well-dot';
+      dot.className = 'well-dot hidden';
       label.textContent = '';
     }
   }
