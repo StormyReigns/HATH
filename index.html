@@ -3708,11 +3708,20 @@
     }
     .local-event-drawer-actions {
       display: flex;
+      flex-wrap: wrap;
       gap: 12px;
+      align-items: center;
       justify-content: flex-end;
       margin-top: 20px;
       padding-top: 4px;
       flex-shrink: 0;
+    }
+    .local-event-actions-spacer {
+      flex: 1;
+      min-width: 0;
+    }
+    .local-event-delete-btn {
+      color: #c05050;
     }
     .local-event-drawer .paste-cancel-btn,
     .local-event-drawer .paste-save-btn {
@@ -5579,6 +5588,34 @@
     .paste-modal-overlay.open .paste-modal {
       transform: translateY(0);
     }
+    /* Google Calendar add/edit — same centered card as local event drawer (not bottom sheet). */
+    .schedule-event-modal-overlay.paste-modal-overlay {
+      align-items: center;
+      justify-content: center;
+      padding: max(16px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+      z-index: 260;
+    }
+    .schedule-event-modal-panel.paste-modal {
+      border-radius: 16px;
+      box-shadow: 0 12px 48px rgba(58, 46, 40, 0.18), 0 2px 12px rgba(0, 0, 0, 0.08);
+      margin-bottom: 0;
+      padding-bottom: 22px;
+      max-height: min(85vh, 680px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+      transform: scale(0.94) translateY(10px);
+      opacity: 0;
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s ease;
+    }
+    .schedule-event-modal-overlay.open .schedule-event-modal-panel.paste-modal {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+    html.dark-mode .schedule-event-modal-panel.paste-modal {
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45);
+    }
     .paste-modal h3 {
       font-family: 'Playfair Display', serif;
       font-size: 18px;
@@ -7442,7 +7479,7 @@
     <div class="local-event-drawer-overlay" id="localEventDrawerOverlay" onclick="closeLocalEventDrawer(event)">
       <div class="local-event-drawer" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="localEventModalTitle">
         <h3 id="localEventModalTitle">Add local event</h3>
-        <p class="local-event-drawer-lede">Saved to ShastApp’s list for both of you (below, with the green “Local” tag). This is not the same as the iPhone Calendar app unless you also add it to Google Calendar here.</p>
+        <p class="local-event-drawer-lede" id="localEventDrawerLede">Saved to ShastApp’s list for both of you (below, with the green “Local” tag). This is not the same as the iPhone Calendar app unless you also add it to Google Calendar here.</p>
         <label class="local-event-field-label" for="localEventQuickTitle">Event name</label>
         <input type="text" class="local-event-field" id="localEventQuickTitle" placeholder="What’s happening?" maxlength="200" autocomplete="off">
         <div class="local-event-field-group local-event-date-group">
@@ -7451,7 +7488,7 @@
         </div>
         <label class="local-event-field-label" for="localEventQuickVenue">Venue (optional)</label>
         <input type="text" class="local-event-field" id="localEventQuickVenue" placeholder="Place or address" maxlength="200" autocomplete="off">
-        <div class="local-event-google-opt">
+        <div class="local-event-google-opt" id="localEventGoogleOptBlock">
           <label class="local-event-inline-check">
             <input type="checkbox" id="localEventAlsoGoogle" onchange="localEventToggleGoogleCal()">
             <span>Also add to Google Calendar (all-day)</span>
@@ -7463,6 +7500,8 @@
           </div>
         </div>
         <div class="local-event-drawer-actions">
+          <button type="button" class="paste-cancel-btn local-event-delete-btn" id="localEventDeleteBtn" onclick="deleteLocalEventFromDrawer()" style="display:none">Delete</button>
+          <span class="local-event-actions-spacer" aria-hidden="true"></span>
           <button type="button" class="paste-cancel-btn" onclick="closeLocalEventDrawer()">Cancel</button>
           <button type="button" class="paste-save-btn" id="localEventQuickSaveBtn" onclick="saveLocalEventQuick()">Save</button>
         </div>
@@ -7484,9 +7523,9 @@
       </div>
     </div>
 
-    <!-- Event add/edit modal -->
-    <div class="paste-modal-overlay" id="eventModalOverlay" onclick="closeEventModal(event)">
-      <div class="paste-modal" id="eventModal" onclick="event.stopPropagation()">
+    <!-- Event add/edit modal (Google calendars — centered like local event drawer) -->
+    <div class="paste-modal-overlay schedule-event-modal-overlay" id="eventModalOverlay" onclick="closeEventModal(event)">
+      <div class="paste-modal schedule-event-modal-panel" id="eventModal" onclick="event.stopPropagation()">
       <h3 id="eventModalTitle">Add Event</h3>
       <input type="text" class="paste-filename" id="eventTitleInput" placeholder="Event title">
       <div class="event-modal-row">
@@ -7885,7 +7924,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.33.8';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.34.0';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -14083,8 +14122,11 @@
     const cat = getEventCategory(ev);
     const badge = cat ? '<span class="hz-mini-badge ' + escapeHtml(cat) + '">' + escapeHtml(cat) + '</span>' : '';
     const localBadge = ev.calendar === 'local' ? '<span class="hz-mini-badge local-pill">Local</span>' : '';
-    const canEdit = ev.calendar && ['holidays', 'civic', 'local', 'municipal'].indexOf(cal) < 0;
-    const editBtn = canEdit ? '<button type="button" class="hz-sq-btn hz-edit-btn" onclick="event.stopPropagation();openEventModalForRow(this)" title="Edit">Edit</button>' : '';
+    const canEditGoogle = ev.calendar && ['holidays', 'civic', 'local', 'municipal'].indexOf(cal) < 0;
+    const localEditBtn = cal === 'local'
+      ? '<button type="button" class="hz-sq-btn hz-edit-btn" onclick="event.stopPropagation();openLocalEventDrawerForEdit(this)" title="Edit">Edit</button>'
+      : '';
+    const editBtn = canEditGoogle ? '<button type="button" class="hz-sq-btn hz-edit-btn" onclick="event.stopPropagation();openEventModalForRow(this)" title="Edit">Edit</button>' : '';
     const bellBtn = cal === 'civic' ? '<button type="button" class="hz-sq-btn" onclick="event.stopPropagation();addEventToCalendarFromHzBtn(this)" title="Download .ics" aria-label="Add to calendar"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></button>' : '';
     const starClass = isEventStarred(ev) ? ' starred' : '';
     const starFill = isEventStarred(ev)
@@ -14094,7 +14136,7 @@
       '<div class="hz-card-actions-row">' + localBadge + badge +
       '<span class="hz-card-time">' + escapeHtml(time) + '</span>' +
       '<button type="button" class="schedule-event-star' + starClass + '" onclick="event.stopPropagation();scheduleToggleStar(event)">' + starFill + '</button>' +
-      bellBtn + editBtn + '</div>'
+      bellBtn + localEditBtn + editBtn + '</div>'
     );
   }
 
@@ -15018,11 +15060,24 @@
     selectEl.selectedIndex = Math.min(idx, Math.max(0, options.length - 1));
   }
 
+  let localEventEditing = null;
+
   function openLocalEventDrawer() {
     if (!getApiUser()) {
       alert('Sign in to add a local event.');
       return;
     }
+    localEventEditing = null;
+    const delBtn = document.getElementById('localEventDeleteBtn');
+    const titleH = document.getElementById('localEventModalTitle');
+    const lede = document.getElementById('localEventDrawerLede');
+    const gBlock = document.getElementById('localEventGoogleOptBlock');
+    const saveBtn = document.getElementById('localEventQuickSaveBtn');
+    if (delBtn) delBtn.style.display = 'none';
+    if (titleH) titleH.textContent = 'Add local event';
+    if (lede) lede.style.display = '';
+    if (gBlock) gBlock.style.display = '';
+    if (saveBtn) saveBtn.textContent = 'Save';
     const o = document.getElementById('localEventDrawerOverlay');
     const t = document.getElementById('localEventQuickTitle');
     const dEl = document.getElementById('localEventQuickDate');
@@ -15038,10 +15093,97 @@
     populateLocalEventCalendarSelect_();
   }
 
+  function openLocalEventDrawerForEdit(btn) {
+    if (!getApiUser()) {
+      alert('Sign in to edit.');
+      return;
+    }
+    const row = btn && btn.closest('[data-hz-reg]');
+    const ev = row && row._eventData;
+    if (!ev || ev.calendar !== 'local') return;
+    const srRaw = ev.sheetRow;
+    const sr = typeof srRaw === 'number' && !isNaN(srRaw) ? srRaw : parseInt(srRaw, 10);
+    if (!sr || isNaN(sr)) {
+      alert('Refresh the schedule (leave and open Schedule), then try Edit again.');
+      return;
+    }
+    localEventEditing = {
+      sheetRow: sr,
+      expectedTitle: String(ev.title || '').trim(),
+      expectedDate: String(ev.date || '').trim()
+    };
+    const o = document.getElementById('localEventDrawerOverlay');
+    const t = document.getElementById('localEventQuickTitle');
+    const dEl = document.getElementById('localEventQuickDate');
+    const v = document.getElementById('localEventQuickVenue');
+    const chk = document.getElementById('localEventAlsoGoogle');
+    const wrap = document.getElementById('localEventGoogleCalendarWrap');
+    const delBtn = document.getElementById('localEventDeleteBtn');
+    const titleH = document.getElementById('localEventModalTitle');
+    const lede = document.getElementById('localEventDrawerLede');
+    const gBlock = document.getElementById('localEventGoogleOptBlock');
+    const saveBtn = document.getElementById('localEventQuickSaveBtn');
+    if (t) t.value = String(ev.title || '').trim();
+    if (dEl) dEl.value = localEventEditing.expectedDate || formatLocalYmd(new Date());
+    if (v) v.value = String(ev.venue || '').trim();
+    if (chk) chk.checked = false;
+    if (wrap) wrap.style.display = 'none';
+    if (delBtn) delBtn.style.display = '';
+    if (titleH) titleH.textContent = 'Edit local event';
+    if (lede) lede.style.display = 'none';
+    if (gBlock) gBlock.style.display = 'none';
+    if (saveBtn) saveBtn.textContent = 'Save changes';
+    if (o) o.classList.add('open');
+  }
+
   function closeLocalEventDrawer(ev) {
     const o = document.getElementById('localEventDrawerOverlay');
     if (ev && ev.target !== o) return;
     if (o) o.classList.remove('open');
+    localEventEditing = null;
+    const delBtn = document.getElementById('localEventDeleteBtn');
+    const lede = document.getElementById('localEventDrawerLede');
+    const gBlock = document.getElementById('localEventGoogleOptBlock');
+    const saveBtn = document.getElementById('localEventQuickSaveBtn');
+    const titleH = document.getElementById('localEventModalTitle');
+    if (delBtn) delBtn.style.display = 'none';
+    if (lede) lede.style.display = '';
+    if (gBlock) gBlock.style.display = '';
+    if (saveBtn) saveBtn.textContent = 'Save';
+    if (titleH) titleH.textContent = 'Add local event';
+  }
+
+  async function deleteLocalEventFromDrawer() {
+    if (!localEventEditing || !localEventEditing.sheetRow) return;
+    if (!confirm('Remove this local event from ShastApp’s list?')) return;
+    const user = getApiUser();
+    if (!user) return;
+    const saveBtn = document.getElementById('localEventQuickSaveBtn');
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.dataset.prevLabel = saveBtn.textContent;
+      saveBtn.textContent = 'Deleting…';
+    }
+    try {
+      const ymdAfter = localEventEditing.expectedDate;
+      await apiPostJson({
+        action: 'deleteLocalEvent',
+        user: user,
+        sheetRow: localEventEditing.sheetRow,
+        expectedTitle: localEventEditing.expectedTitle,
+        expectedDate: localEventEditing.expectedDate
+      });
+      closeLocalEventDrawer();
+      alignScheduleHorizonToYmd(ymdAfter);
+      await reloadScheduleEventsFromApi_();
+    } catch (err) {
+      alert('Could not delete: ' + (err.message || 'Unknown error'));
+    } finally {
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        if (saveBtn.dataset.prevLabel) saveBtn.textContent = saveBtn.dataset.prevLabel;
+      }
+    }
   }
 
   async function saveLocalEventQuick() {
@@ -15064,6 +15206,7 @@
       alert('Pick a date.');
       return;
     }
+    const editing = localEventEditing;
     const alsoGoogleEl = document.getElementById('localEventAlsoGoogle');
     const calSel = document.getElementById('localEventCalendarSelect');
     const alsoGoogle = alsoGoogleEl && alsoGoogleEl.checked;
@@ -15075,29 +15218,43 @@
       saveBtn.textContent = 'Saving…';
     }
     try {
-      await apiPostJson({ action: 'addLocalEvent', user: user, title, date, venue, url: '', source: 'Quick add', added_by: 'manual' });
-      let gErr = null;
-      if (alsoGoogle && calendarId) {
-        try {
-          await apiPostJson({
-            action: 'createEvent',
-            user: user,
-            calendarId: calendarId,
-            title: title,
-            start: date,
-            end: date,
-            allDay: true
-          });
-        } catch (e) {
-          gErr = e;
+      if (editing && editing.sheetRow) {
+        await apiPostJson({
+          action: 'updateLocalEvent',
+          user: user,
+          sheetRow: editing.sheetRow,
+          title: title,
+          date: date,
+          venue: venue,
+          url: '',
+          expectedTitle: editing.expectedTitle,
+          expectedDate: editing.expectedDate
+        });
+      } else {
+        await apiPostJson({ action: 'addLocalEvent', user: user, title, date, venue, url: '', source: 'Quick add', added_by: 'manual' });
+        let gErr = null;
+        if (alsoGoogle && calendarId) {
+          try {
+            await apiPostJson({
+              action: 'createEvent',
+              user: user,
+              calendarId: calendarId,
+              title: title,
+              start: date,
+              end: date,
+              allDay: true
+            });
+          } catch (e) {
+            gErr = e;
+          }
+        }
+        if (gErr) {
+          alert('Saved in ShastApp + sheet. Google Calendar: ' + (gErr.message || String(gErr)));
         }
       }
       closeLocalEventDrawer();
       alignScheduleHorizonToYmd(date);
       await reloadScheduleEventsFromApi_();
-      if (gErr) {
-        alert('Saved in ShastApp + sheet. Google Calendar: ' + (gErr.message || String(gErr)));
-      }
     } catch (err) {
       alert('Could not save: ' + (err.message || 'Unknown error'));
     } finally {
