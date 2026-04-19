@@ -86,6 +86,12 @@
       --muted:  #b8a99e;
       --accent: #c07a4a;
       --vvh: 100vh;
+      --bottom-dock-clearance: 128px;
+      --bottom-dock-offset: 74px;
+      --bottom-dock-offset-mid: 86px;
+      --bottom-dock-offset-high: 98px;
+      --bottom-dock-offset-sheet: 102px;
+      --bottom-dock-scroll-clearance: 56px;
       --drawer-bg: linear-gradient(170deg, #fdf8f4 0%, #f6ead8 100%);
       --drawer-border: rgba(192,122,74,0.12);
     }
@@ -543,7 +549,7 @@
       align-items: flex-end;
       gap: 0;
       position: fixed;
-      bottom: calc(52px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
+      bottom: calc(var(--bottom-dock-offset) + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
       left: 0;
       right: 0;
       padding: 0 22px;
@@ -778,7 +784,7 @@
       min-height: -webkit-fill-available;
       height: calc(var(--vh, 1vh) * 100);
       /* Reserve space for the enlarged bottom dock. */
-      padding-bottom: calc(128px + env(safe-area-inset-bottom));
+      padding-bottom: calc(var(--bottom-dock-clearance) + env(safe-area-inset-bottom));
       z-index: 1;
       display: flex; flex-direction: column;
       overflow: hidden;
@@ -836,7 +842,7 @@
       position: fixed;
       left: 0;
       right: 0;
-      bottom: calc(64px + env(safe-area-inset-bottom));
+      bottom: calc(var(--bottom-dock-offset-mid) + env(safe-area-inset-bottom));
       height: 52px;
       margin-top: 0;
     }
@@ -863,6 +869,7 @@
     .civics-content, .screen-list, #settingsScreen {
       scrollbar-width: none;
       -ms-overflow-style: none;
+      padding-bottom: calc(var(--bottom-dock-scroll-clearance) + env(safe-area-inset-bottom, 0px));
     }
 
     .app-bottom-bar {
@@ -902,7 +909,7 @@
       overflow-y: hidden;
       scrollbar-width: none;
       -ms-overflow-style: none;
-      scroll-snap-type: x mandatory;
+      scroll-snap-type: x proximity;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-x: contain;
       min-height: 84px;
@@ -926,9 +933,10 @@
       opacity: var(--dock-alpha, 0.56);
       transform: scale(var(--dock-scale, 0.88));
       transform-origin: center bottom;
-      transition: transform 0.2s ease, opacity 0.2s ease, color 0.2s ease, filter 0.2s ease;
+      transition: color 0.16s ease, filter 0.16s ease;
       scroll-snap-align: center;
       padding: 10px 2px 8px;
+      will-change: transform, opacity;
     }
     .bottom-dock-item:active { transform: scale(calc(var(--dock-scale, 0.88) * 0.95)); }
     .bottom-dock-item.is-center {
@@ -941,8 +949,8 @@
       font-weight: 600;
     }
     .bottom-dock-icon {
-      width: 28px;
-      height: 28px;
+      width: 31px;
+      height: 31px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -951,14 +959,14 @@
       margin-bottom: 5px;
     }
     .bottom-dock-icon img {
-      width: 27px;
-      height: 27px;
+      width: 30px;
+      height: 30px;
       object-fit: contain;
       opacity: 0.96;
     }
     .bottom-dock-icon svg {
-      width: 24px;
-      height: 24px;
+      width: 26px;
+      height: 26px;
       display: block;
       filter: drop-shadow(0 0 6px rgba(255,255,255,0.55));
     }
@@ -1009,12 +1017,12 @@
     }
     /* Reserve space for fixed input zone (Blathers + chat) when on home */
     .body:not(:has(.sub-screen.visible)) {
-      padding-bottom: 178px;
+      padding-bottom: calc(var(--bottom-dock-clearance) + 50px);
     }
     .body.chat-mode .hint-area { display: none !important; }
     .body:has(.sub-screen.visible) .chat-area { display: none !important; }
     .app.in-project-view {
-      padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+      padding-bottom: calc(var(--bottom-dock-offset-sheet) + env(safe-area-inset-bottom, 0px));
     }
 
     /* ── HINT AREA ── */
@@ -2924,14 +2932,14 @@
     .takeout-drawer-overlay {
       position: fixed;
       top: 0; left: 0; right: 0;
-      bottom: calc(80px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
+      bottom: calc(var(--bottom-dock-offset-sheet) + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
       background: rgba(0,0,0,0); pointer-events: none;
       z-index: 200; transition: background 0.3s;
     }
     .takeout-drawer-overlay.open { background: rgba(0,0,0,0.25); pointer-events: all; }
     .takeout-drawer {
       position: fixed;
-      bottom: calc(80px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
+      bottom: calc(var(--bottom-dock-offset-sheet) + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
       left: 0; right: 0;
       background: #fdf8f2;
       border-radius: 22px;
@@ -4391,7 +4399,7 @@
       position: fixed;
       left: 50%;
       transform: translateX(-50%);
-      bottom: calc(52px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
+      bottom: calc(var(--bottom-dock-offset) + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
       width: 56px;
       height: 56px;
       border: none;
@@ -4419,7 +4427,7 @@
     .projects-linkmagic {
       position: fixed;
       right: 8px;
-      bottom: calc(76px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
+      bottom: calc(var(--bottom-dock-offset-high) + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
       width: 160px;
       height: auto;
       max-height: 200px;
@@ -4433,7 +4441,7 @@
     .civics-layton {
       position: fixed;
       right: 8px;
-      bottom: calc(52px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
+      bottom: calc(var(--bottom-dock-offset) + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
       width: 104px;
       height: auto;
       max-height: 130px;
@@ -4447,7 +4455,7 @@
     .schedule-floating {
       position: fixed;
       right: 8px;
-      bottom: calc(52px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
+      bottom: calc(var(--bottom-dock-offset) + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
       width: 104px;
       height: auto;
       max-height: 130px;
@@ -4641,7 +4649,7 @@
     }
     #projectsInProgressList {
       flex: 1; min-height: 0; overflow-y: auto;
-      padding-bottom: calc(72px + env(safe-area-inset-bottom));
+      padding-bottom: calc(var(--bottom-dock-offset-high) + env(safe-area-inset-bottom));
     }
     .projects-empty {
       flex: 1;
@@ -5118,7 +5126,7 @@
     }
     .app.in-project-view .projects-ocean-strip {
       position: fixed;
-      bottom: calc(52px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
+      bottom: calc(var(--bottom-dock-offset) + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
       left: 50%;
       transform: translateX(-50%);
       width: min(calc(100vw - 24px), 420px);
@@ -7030,7 +7038,7 @@
     }
     #recipesScreen.visible .recipes-gj-row {
       position: fixed;
-      bottom: calc(52px + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
+      bottom: calc(var(--bottom-dock-offset) + max(2px, min(env(safe-area-inset-bottom, 0px), 40px)));
       left: 0; right: 0;
       padding: 12px 20px 14px;
       z-index: 60;
@@ -8154,7 +8162,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.2';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
