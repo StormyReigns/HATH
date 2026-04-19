@@ -7459,7 +7459,7 @@
           <div id="localEventGoogleCalendarWrap" class="local-event-google-wrap" style="display:none">
             <label class="project-field-hint" for="localEventCalendarSelect">Which calendar</label>
             <select id="localEventCalendarSelect" class="local-event-calendar-select event-calendar-select" aria-label="Google Calendar"></select>
-            <p class="local-event-google-hint">Default is Shasta Shared (both profiles). Choose Matt or Jessica for only that person.</p>
+            <p class="local-event-google-hint">Default is Shasta Shared (both profiles). Other calendars only work if the Google account that published ShastApp can edit them (share that calendar with edit access). Uncheck to save only in ShastApp + the LocalEvents sheet.</p>
           </div>
         </div>
         <div class="local-event-drawer-actions">
@@ -7885,7 +7885,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.33.5';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.33.6';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -15082,10 +15082,9 @@
       }
       closeLocalEventDrawer();
       alignScheduleHorizonToYmd(date);
-      await mergeFreshLocalEventsIntoSchedule();
-      refreshScheduleMainView();
+      await reloadScheduleEventsFromApi_();
       if (gErr) {
-        alert('Saved in ShastApp. Google Calendar did not update: ' + (gErr.message || String(gErr)));
+        alert('Saved in ShastApp + sheet. Google Calendar: ' + (gErr.message || String(gErr)));
       }
     } catch (err) {
       alert('Could not save: ' + (err.message || 'Unknown error'));
@@ -15249,23 +15248,11 @@
     scrollToYmd();
   }
 
-  async function showScheduleScreen() {
-    showSubScreen('scheduleScreen');
-    startScheduleFloatingRotation();
-    document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
-    const scheduleBtn = document.querySelector('.drawer-item[data-screen="schedule"]');
-    if (scheduleBtn) scheduleBtn.classList.add('active');
-    const hzMain = document.getElementById('scheduleHorizonMain');
-    if (hzMain) hzMain.innerHTML = '<div class="screen-loading">Loading…</div>';
-    renderMunicipalAside();
-    renderScheduleChips();
+  /** Refetch Google Calendar + LocalEvents and repaint (use after saves; avoids stale UI). */
+  async function reloadScheduleEventsFromApi_() {
     const user = localStorage.getItem('shasta_user');
-    if (!user) {
-      scheduleEvents = getCivicEvents();
-      refreshScheduleMainView();
-      renderScheduleChips();
-      return;
-    }
+    if (!user) return;
+    invalidateLocalEventsCache();
     try {
       const daySpan = scheduleFetchDaysThroughMonthEnd();
       let url = `${API_URL}?action=calendar&user=${encodeURIComponent(user)}&days=${daySpan}`;
@@ -15287,6 +15274,31 @@
         scheduleEvents = data.events.concat(civic).concat(localArr);
       }
       refreshScheduleMainView();
+    } catch (err) {
+      await mergeFreshLocalEventsIntoSchedule();
+      refreshScheduleMainView();
+    }
+  }
+
+  async function showScheduleScreen() {
+    showSubScreen('scheduleScreen');
+    startScheduleFloatingRotation();
+    document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
+    const scheduleBtn = document.querySelector('.drawer-item[data-screen="schedule"]');
+    if (scheduleBtn) scheduleBtn.classList.add('active');
+    const hzMain = document.getElementById('scheduleHorizonMain');
+    if (hzMain) hzMain.innerHTML = '<div class="screen-loading">Loading…</div>';
+    renderMunicipalAside();
+    renderScheduleChips();
+    const user = localStorage.getItem('shasta_user');
+    if (!user) {
+      scheduleEvents = getCivicEvents();
+      refreshScheduleMainView();
+      renderScheduleChips();
+      return;
+    }
+    try {
+      await reloadScheduleEventsFromApi_();
       renderScheduleChips();
       preloadScheduleCalendarList_();
     } catch (err) {
