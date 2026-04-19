@@ -7803,7 +7803,7 @@
     <div class="local-event-drawer-overlay" id="localEventDrawerOverlay" onclick="closeLocalEventDrawer(event)">
       <div class="local-event-drawer" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="localEventModalTitle">
         <h3 id="localEventModalTitle">Add local event</h3>
-        <p class="local-event-drawer-lede" id="localEventDrawerLede">Saved to ShastApp’s list for both of you (below, with the green “Local” tag). This is not the same as the iPhone Calendar app unless you also add it to Google Calendar here.</p>
+        <p class="local-event-drawer-lede" id="localEventDrawerLede">Without the Google box below, this saves only to ShastApp’s Local list (green tag). If you check Google Calendar, it adds there only — not duplicated in the sheet — so you see one event on the schedule.</p>
         <label class="local-event-field-label" for="localEventQuickTitle">Event name</label>
         <input type="text" class="local-event-field" id="localEventQuickTitle" placeholder="What’s happening?" maxlength="200" autocomplete="off">
         <div class="local-event-field-group local-event-date-group">
@@ -8230,7 +8230,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.33';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.34';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -16023,8 +16023,6 @@
           expectedDate: editing.expectedDate
         });
       } else {
-        await apiPostJson({ action: 'addLocalEvent', user: user, title, date, venue, url: '', source: 'Quick add', added_by: 'manual' });
-        let gErr = null;
         if (alsoGoogle && calendarId) {
           try {
             await apiPostJson({
@@ -16037,11 +16035,11 @@
               allDay: true
             });
           } catch (e) {
-            gErr = e;
+            await apiPostJson({ action: 'addLocalEvent', user: user, title, date, venue, url: '', source: 'Quick add', added_by: 'manual' });
+            alert('Google Calendar could not save (' + (e.message || String(e)) + '). Saved to ShastApp’s Local list only.');
           }
-        }
-        if (gErr) {
-          alert('Saved in ShastApp + sheet. Google Calendar: ' + (gErr.message || String(gErr)));
+        } else {
+          await apiPostJson({ action: 'addLocalEvent', user: user, title, date, venue, url: '', source: 'Quick add', added_by: 'manual' });
         }
       }
       closeLocalEventDrawer();
