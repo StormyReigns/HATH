@@ -924,17 +924,7 @@
     .bottom-dock.bottom-dock-no-snap {
       scroll-snap-type: none;
     }
-    /* While dragging, drop per-item scale — iOS often tears filter/transform layers inside overflow-x. */
-    .bottom-dock.bottom-dock-interacting .bottom-dock-item,
-    .bottom-dock.bottom-dock-interacting .bottom-dock-item:active {
-      transform: none;
-    }
-    .bottom-dock.bottom-dock-interacting .bottom-dock-item {
-      opacity: 1;
-    }
-    .bottom-dock.bottom-dock-interacting .bottom-dock-item:not(.is-center) {
-      opacity: 0.72;
-    }
+    /* No transform / filter / drop-shadow on dock items (iOS overflow-x scroller compositor bug). */
     .bottom-dock-item {
       width: var(--dock-item-width);
       min-width: var(--dock-item-width);
@@ -947,20 +937,41 @@
       justify-content: flex-end;
       gap: 2px;
       cursor: pointer;
-      color: var(--text2);
-      opacity: var(--dock-alpha, 0.56);
-      transform: scale(var(--dock-scale, 0.88));
-      transform-origin: center bottom;
-      transition: color 0.16s ease, filter 0.16s ease;
+      color: #c8b4a8;
+      transition: color 0.16s ease, font-size 0.12s ease;
       scroll-snap-align: center;
       padding: 8px 2px 6px;
     }
-    .bottom-dock-item:active { transform: scale(calc(var(--dock-scale, 0.88) * 0.95)); }
-    .bottom-dock-item.is-center {
-      opacity: 1;
-      color: var(--accent);
+    .bottom-dock-item.dock-tier-0 { color: var(--accent); }
+    .bottom-dock-item.dock-tier-1 { color: #a89080; }
+    .bottom-dock-item.dock-tier-2 { color: #c8b4a8; }
+    .bottom-dock-item.dock-tier-0 .bottom-dock-label {
+      font-size: 10px;
+      font-weight: 600;
+      line-height: 1.1;
+      letter-spacing: 0.01em;
+      color: inherit;
+      white-space: nowrap;
     }
-    .bottom-dock-item.is-active .bottom-dock-label {
+    .bottom-dock-item.dock-tier-1 .bottom-dock-label {
+      font-size: 9px;
+      font-weight: 500;
+      line-height: 1.1;
+      letter-spacing: 0.01em;
+      color: inherit;
+      white-space: nowrap;
+    }
+    .bottom-dock-item.dock-tier-2 .bottom-dock-label {
+      font-size: 8px;
+      font-weight: 500;
+      line-height: 1.1;
+      letter-spacing: 0.01em;
+      color: inherit;
+      white-space: nowrap;
+    }
+    .bottom-dock-item.dock-tier-0.is-active .bottom-dock-label,
+    .bottom-dock-item.dock-tier-1.is-active .bottom-dock-label,
+    .bottom-dock-item.dock-tier-2.is-active .bottom-dock-label {
       color: var(--text);
       font-weight: 600;
     }
@@ -974,37 +985,69 @@
       margin-top: 2px;
       margin-bottom: 5px;
     }
-    .bottom-dock-icon img {
-      width: 30px;
-      height: 30px;
+    .bottom-dock-item.dock-tier-0 .bottom-dock-icon > svg {
+      width: 28px;
+      height: 28px;
+      display: block;
+    }
+    .bottom-dock-item.dock-tier-1 .bottom-dock-icon > svg {
+      width: 20px;
+      height: 20px;
+      display: block;
+    }
+    .bottom-dock-item.dock-tier-2 .bottom-dock-icon > svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+    }
+    .bottom-dock-item.dock-tier-0 .bottom-dock-icon > img {
+      width: 28px;
+      height: 28px;
       object-fit: contain;
       opacity: 0.96;
     }
-    .bottom-dock-icon svg {
-      width: 26px;
-      height: 26px;
-      display: block;
-      filter: drop-shadow(0 0 6px rgba(255,255,255,0.55));
+    .bottom-dock-item.dock-tier-1 .bottom-dock-icon > img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+      opacity: 0.96;
     }
-    .bottom-dock-label {
-      font-size: 11px;
-      line-height: 1.1;
-      letter-spacing: 0.01em;
-      color: inherit;
-      white-space: nowrap;
+    .bottom-dock-item.dock-tier-2 .bottom-dock-icon > img {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+      opacity: 0.96;
     }
-    html.dark-mode .bottom-dock-item {
-      color: var(--text2);
+    .bottom-dock-item.dock-tier-0 .hk-icon-circle {
+      width: 28px;
+      height: 28px;
     }
-    html.dark-mode .bottom-dock-icon img {
-      filter: drop-shadow(0 0 8px rgba(255,255,255,0.45));
+    .bottom-dock-item.dock-tier-0 .bottom-dock-icon .recipes-title-icon {
+      width: 22px;
+      height: 22px;
     }
-    html.dark-mode .bottom-dock-item[data-nav-key="civics"] .bottom-dock-icon img {
-      filter: brightness(1.28) contrast(1.14) drop-shadow(0 0 9px rgba(255,255,255,0.94));
+    .bottom-dock-item.dock-tier-1 .hk-icon-circle {
+      width: 20px;
+      height: 20px;
     }
-    html.dark-mode .bottom-dock-item.is-center {
-      color: #e2b489;
+    .bottom-dock-item.dock-tier-1 .bottom-dock-icon .recipes-title-icon {
+      width: 15px;
+      height: 15px;
     }
+    .bottom-dock-item.dock-tier-2 .hk-icon-circle {
+      width: 16px;
+      height: 16px;
+    }
+    .bottom-dock-item.dock-tier-2 .bottom-dock-icon .recipes-title-icon {
+      width: 12px;
+      height: 12px;
+    }
+    .bottom-dock .hk-icon-circle {
+      box-shadow: none;
+    }
+    html.dark-mode .bottom-dock-item.dock-tier-0 { color: #e2b489; }
+    html.dark-mode .bottom-dock-item.dock-tier-1 { color: #a09084; }
+    html.dark-mode .bottom-dock-item.dock-tier-2 { color: #7a7068; }
 
     /* ── WELLBEING ── */
     .wellbeing { text-align: center; padding: 10px 24px 0; flex-shrink: 0; }
@@ -8179,7 +8222,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.23';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.24';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -9344,13 +9387,12 @@
     const center = dock.scrollLeft + dock.clientWidth / 2;
     let best = null;
     let bestDist = Infinity;
-    dock.querySelectorAll('.bottom-dock-item').forEach(function(btn) {
+    const items = Array.from(dock.querySelectorAll('.bottom-dock-item'));
+    items.forEach(function(btn) {
+      btn.style.removeProperty('--dock-scale');
+      btn.style.removeProperty('--dock-alpha');
       const mid = bottomDockItemCenterXContent(dock, btn);
       const dist = Math.abs(mid - center);
-      const scale = Math.max(0.84, 1.24 - (dist / 350));
-      const alpha = Math.max(0.42, 1 - (dist / 220));
-      btn.style.setProperty('--dock-scale', scale.toFixed(3));
-      btn.style.setProperty('--dock-alpha', alpha.toFixed(3));
       if (dist < bestDist) {
         best = btn;
         bestDist = dist;
@@ -9373,8 +9415,14 @@
         centerBtn = pb;
       }
     }
-    dock.querySelectorAll('.bottom-dock-item').forEach(function(btn) {
+    const centerIndex = centerBtn ? items.indexOf(centerBtn) : -1;
+    items.forEach(function(btn, i) {
       btn.classList.toggle('is-center', btn === centerBtn);
+      let tier = 2;
+      if (btn === centerBtn) tier = 0;
+      else if (centerIndex >= 0 && (i === centerIndex - 1 || i === centerIndex + 1)) tier = 1;
+      btn.classList.remove('dock-tier-0', 'dock-tier-1', 'dock-tier-2');
+      btn.classList.add('dock-tier-' + tier);
     });
   }
 
