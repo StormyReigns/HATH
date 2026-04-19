@@ -7885,7 +7885,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.33.6';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.33.7';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -14300,7 +14300,8 @@
 
     const inMonth = all.filter(ev => {
       const d = dateOnly(new Date(ev.start || ev.date || ev.startTime));
-      return d >= monthStart && d <= monthEnd && d >= cutoff;
+      const effectiveCutoff = ev.calendar === 'local' ? monthStart : cutoff;
+      return d >= monthStart && d <= monthEnd && d >= effectiveCutoff;
     });
     mondayExtras.forEach(function(ex) { inMonth.push(ex); });
     inMonth.sort((a, b) => new Date(a.start || a.date || a.startTime) - new Date(b.start || b.date || b.startTime));
@@ -14310,7 +14311,8 @@
       let winN = 0;
       all.forEach(function(ev) {
         const d = dateOnly(new Date(ev.start || ev.date || ev.startTime));
-        if (d >= monthStart && d <= monthEnd && d >= cutoff) winN++;
+        const effectiveCutoff = ev.calendar === 'local' ? monthStart : cutoff;
+        if (d >= monthStart && d <= monthEnd && d >= effectiveCutoff) winN++;
       });
       if (scheduleFilter === 'all') {
         let s2 = new Date(monthStart.getTime());
