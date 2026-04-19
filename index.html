@@ -8214,7 +8214,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.31';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.32';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -8942,13 +8942,13 @@
 
       let calEvents = [];
       try {
-        let url = `${API_URL}?action=calendar&user=${encodeURIComponent(user)}`;
+        let url = `${API_URL}?action=calendar&user=${encodeURIComponent(user)}&_cb=${Date.now()}`;
         const calIds = getEnabledCalendars();
         if (calIds && calIds.length > 0) {
           url += '&calendars=' + encodeURIComponent(JSON.stringify(calIds));
         }
         if (forceRefresh) url += '&_t=' + Date.now();
-        const res = await fetch(url, { redirect: 'follow', cache: forceRefresh ? 'no-store' : 'default' });
+        const res = await fetch(url, { redirect: 'follow', cache: 'no-store' });
         const data = await res.json();
         if (!data.error && data.events && data.events.length > 0) {
           calEvents = data.events.map(ev => ({ ...ev, start: ev.start || ev.date || ev.startTime, calendar: ev.calendar || 'calendar' }));
@@ -15779,6 +15779,7 @@
     try {
       await apiPostJson(body);
       closeEventModal();
+      try { await loadCalendar(true); } catch (_) {}
       showScheduleScreen();
     } catch (err) {
       alert('Failed: ' + (err.message || 'Unknown error'));
@@ -15791,6 +15792,7 @@
     try {
       await apiPostJson({ action: 'deleteEvent', user: getApiUser(), eventId: eventModalEditing.googleEventId });
       closeEventModal();
+      try { await loadCalendar(true); } catch (_) {}
       showScheduleScreen();
     } catch (err) {
       alert('Failed to delete: ' + (err.message || 'Unknown error'));
@@ -16176,7 +16178,7 @@
     invalidateLocalEventsCache();
     try {
       const daySpan = scheduleFetchDaysThroughMonthEnd();
-      let url = `${API_URL}?action=calendar&user=${encodeURIComponent(user)}&days=${daySpan}`;
+      let url = `${API_URL}?action=calendar&user=${encodeURIComponent(user)}&days=${daySpan}&_cb=${Date.now()}`;
       const calIds = getEnabledCalendars();
       if (calIds && calIds.length > 0) {
         url += '&calendars=' + encodeURIComponent(JSON.stringify(calIds));
