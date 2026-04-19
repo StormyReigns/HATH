@@ -881,7 +881,8 @@
       /* 10px clears the home-indicator gesture zone (~8px) without noticeable dead space.
          Fixed value means bar height never changes on rotation. No env(), no media query. */
       padding-bottom: 12px;
-      transform: translateZ(0);
+      /* Avoid translateZ(0) here: with horizontally transformed dock children it can worsen
+         iOS scroll-layer clipping during infinite-loop scroll correction. */
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
       background: var(--edge-bg, linear-gradient(135deg, #fdf0e8 0%, #fce4d6 40%, #fad4c0 100%));
@@ -906,7 +907,9 @@
       align-items: flex-end;
       gap: 2px;
       overflow-x: auto;
-      overflow-y: hidden;
+      /* overflow-y: hidden + transformed children caused iOS to paint a vertical “seam”
+         (content to the right of ~Civics vanished mid-drag). Visible Y is harmless here. */
+      overflow-y: visible;
       scrollbar-width: none;
       -ms-overflow-style: none;
       scroll-snap-type: x proximity;
@@ -945,7 +948,9 @@
     .bottom-dock-item.is-center {
       opacity: 1;
       color: var(--accent);
-      filter: drop-shadow(0 2px 8px rgba(192,122,74,0.22));
+      /* box-shadow instead of filter: drop-shadow — filter layers clip badly inside overflow-x
+         scrollers on iOS while the finger is moving. */
+      box-shadow: 0 2px 16px rgba(192, 122, 74, 0.28);
     }
     .bottom-dock-item.is-active .bottom-dock-label {
       color: var(--text);
@@ -991,7 +996,7 @@
     }
     html.dark-mode .bottom-dock-item.is-center {
       color: #e2b489;
-      filter: drop-shadow(0 2px 12px rgba(0,0,0,0.45));
+      box-shadow: 0 2px 18px rgba(0, 0, 0, 0.45);
     }
 
     /* ── WELLBEING ── */
@@ -8167,7 +8172,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.21';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.22';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -9161,6 +9166,8 @@
   let bottomDockScrollRaf = 0;
   let bottomDockSnapRestoreTimer = null;
   let bottomDockSettleTimer = null;
+  /** Primary pointers currently down on #bottomDock — loop normalize is deferred until 0 (iOS scroll paint). */
+  let bottomDockHandsOnDock = 0;
   /** While > Date.now(), idle snap-to-nearest is suppressed (prevents fighting smooth programmatic centering). */
   let bottomDockIdleSnapSuppressedUntil = 0;
   let bottomDockProgrammaticCenteringUntil = 0;
@@ -9303,6 +9310,20 @@
     });
   }
 
+  function flushBottomDockLoopAfterPointerRelease() {
+    const dock = document.getElementById('bottomDock');
+    if (!dock || Date.now() < bottomDockProgrammaticCenteringUntil) return;
+    if (normalizeBottomDockLoop()) applyBottomDockFocus();
+    queueBottomDockScrollVisual();
+  }
+
+  function bottomDockGlobalPointerEnd(e) {
+    if (!e.isPrimary) return;
+    if (bottomDockHandsOnDock <= 0) return;
+    bottomDockHandsOnDock--;
+    if (bottomDockHandsOnDock === 0) flushBottomDockLoopAfterPointerRelease();
+  }
+
   function applyBottomDockFocus() {
     const dock = document.getElementById('bottomDock');
     if (!dock) return;
@@ -9345,7 +9366,7 @@
 
   function handleBottomDockScroll() {
     const dock = document.getElementById('bottomDock');
-    if (dock && Date.now() >= bottomDockProgrammaticCenteringUntil) {
+    if (dock && Date.now() >= bottomDockProgrammaticCenteringUntil && bottomDockHandsOnDock === 0) {
       if (normalizeBottomDockLoop()) {
         applyBottomDockFocus();
       }
@@ -9394,11 +9415,17 @@
       bottomDockProgrammaticCenteringUntil = 0;
       bottomDockIdleSnapSuppressedUntil = 0;
     }, { passive: true });
-    dock.addEventListener('pointerdown', function() {
+    dock.addEventListener('pointerdown', function(e) {
+      if (e.isPrimary) bottomDockHandsOnDock++;
       setBottomDockCenterHighlightKey('', 0);
       bottomDockProgrammaticCenteringUntil = 0;
       bottomDockIdleSnapSuppressedUntil = 0;
     }, { passive: true });
+    if (!window.__shastBottomDockPointerEndBound) {
+      window.__shastBottomDockPointerEndBound = true;
+      window.addEventListener('pointerup', bottomDockGlobalPointerEnd, true);
+      window.addEventListener('pointercancel', bottomDockGlobalPointerEnd, true);
+    }
     dock.addEventListener('scroll', handleBottomDockScroll, { passive: true });
     dock.addEventListener('click', function(e) {
       const btn = e.target.closest('.bottom-dock-item');
