@@ -91,7 +91,7 @@
       --bottom-dock-offset-mid: 77px;
       --bottom-dock-offset-high: 88px;
       --bottom-dock-offset-sheet: 92px;
-      --bottom-dock-scroll-clearance: 50px;
+      --bottom-dock-scroll-clearance: 67px;
       --drawer-bg: linear-gradient(170deg, #fdf8f4 0%, #f6ead8 100%);
       --drawer-border: rgba(192,122,74,0.12);
     }
@@ -4649,7 +4649,7 @@
     }
     #projectsInProgressList {
       flex: 1; min-height: 0; overflow-y: auto;
-      padding-bottom: calc(var(--bottom-dock-offset-high) + env(safe-area-inset-bottom));
+      padding-bottom: calc(var(--bottom-dock-offset) + env(safe-area-inset-bottom));
     }
     .projects-empty {
       flex: 1;
@@ -8162,7 +8162,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.5';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.6';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
