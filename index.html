@@ -8214,7 +8214,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.30';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.31';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -15777,9 +15777,7 @@
       ? { action: 'updateEvent', user: getApiUser(), calendarId: eventModalEditing.calendarId, eventId: eventModalEditing.googleEventId, title, start: startStr, end: endStr, allDay }
       : { action: 'createEvent', user: getApiUser(), calendarId, title, start: startStr, end: endStr, allDay };
     try {
-      const res = await fetch(API_URL, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
+      await apiPostJson(body);
       closeEventModal();
       showScheduleScreen();
     } catch (err) {
@@ -15791,9 +15789,7 @@
     if (!eventModalEditing || !eventModalEditing.googleEventId) return;
     if (!confirm('Delete this event?')) return;
     try {
-      const res = await fetch(API_URL, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'deleteEvent', user: getApiUser(), eventId: eventModalEditing.googleEventId }) });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
+      await apiPostJson({ action: 'deleteEvent', user: getApiUser(), eventId: eventModalEditing.googleEventId });
       closeEventModal();
       showScheduleScreen();
     } catch (err) {
