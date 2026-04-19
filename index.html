@@ -3313,6 +3313,10 @@
       touch-action: none;
       overscroll-behavior-x: none;
     }
+    .schedule-horizon-main.hz-horizon-slide-animating {
+      pointer-events: none;
+      touch-action: none;
+    }
     .schedule-horizon-month-nav {
       display: flex;
       align-items: center;
@@ -8006,7 +8010,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.35.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.35.1';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -13972,6 +13976,101 @@
     return dx;
   }
 
+  let horizonMonthSlideAnimating = false;
+
+  function canShiftHorizonMonth(delta) {
+    ensureHorizonMonthCursor();
+    const d = new Date(scheduleHorizonYear, scheduleHorizonMonth0 + delta, 1);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const minYm = new Date(today.getFullYear(), today.getMonth(), 1);
+    return d >= minYm;
+  }
+
+  function getHorizonMainSlideWidth_(main) {
+    const w = main.offsetWidth;
+    if (w > 0) return w;
+    const p = main.parentElement;
+    if (p && p.clientWidth > 0) return p.clientWidth;
+    return 320;
+  }
+
+  /** Full slide off → swap month → slide in (pairs with finger-driven drag). */
+  function runHorizonMonthSlideAnimation_(main, dx, delta) {
+    if (horizonMonthSlideAnimating) return;
+    const forward = delta > 0;
+    if (!canShiftHorizonMonth(delta)) {
+      main.style.transition = 'transform 0.22s cubic-bezier(0.22, 1, 0.36, 1)';
+      main.style.transform = 'translateX(0)';
+      setTimeout(function() {
+        main.style.transition = '';
+        main.style.transform = '';
+      }, 240);
+      return;
+    }
+    horizonMonthSlideAnimating = true;
+    main.classList.add('hz-horizon-slide-animating');
+    const w = getHorizonMainSlideWidth_(main);
+    const startX = clampHorizonSwipeDx(dx);
+    const exitX = forward ? -w : w;
+
+    main.style.transition = 'none';
+    main.style.transform = 'translateX(' + startX + 'px)';
+    void main.offsetWidth;
+    main.style.transition = 'transform 0.34s cubic-bezier(0.25, 0.1, 0.22, 1)';
+    main.style.transform = 'translateX(' + exitX + 'px)';
+
+    var exitDone = false;
+    var exitTimer = setTimeout(function() { finishExitPhase(); }, 420);
+
+    function finishExitPhase() {
+      if (exitDone) return;
+      exitDone = true;
+      clearTimeout(exitTimer);
+      main.removeEventListener('transitionend', onExitTransitionEnd);
+      var ok = shiftHorizonMonth(delta);
+      if (!ok) {
+        horizonMonthSlideAnimating = false;
+        main.classList.remove('hz-horizon-slide-animating');
+        main.style.transition = '';
+        main.style.transform = '';
+        return;
+      }
+      var enterFrom = forward ? w : -w;
+      main.style.transition = 'none';
+      main.style.transform = 'translateX(' + enterFrom + 'px)';
+      void main.offsetWidth;
+      main.style.transition = 'transform 0.34s cubic-bezier(0.25, 0.1, 0.22, 1)';
+      main.style.transform = 'translateX(0)';
+
+      var enterDone = false;
+      var enterTimer = setTimeout(function() { finishEnterPhase(); }, 420);
+
+      function finishEnterPhase() {
+        if (enterDone) return;
+        enterDone = true;
+        clearTimeout(enterTimer);
+        main.removeEventListener('transitionend', onEnterTransitionEnd);
+        main.style.transition = '';
+        main.style.transform = '';
+        horizonMonthSlideAnimating = false;
+        main.classList.remove('hz-horizon-slide-animating');
+      }
+
+      function onEnterTransitionEnd(ev) {
+        if (ev.propertyName !== 'transform') return;
+        finishEnterPhase();
+      }
+      main.addEventListener('transitionend', onEnterTransitionEnd);
+    }
+
+    function onExitTransitionEnd(ev) {
+      if (ev.propertyName !== 'transform') return;
+      finishExitPhase();
+    }
+    main.addEventListener('transitionend', onExitTransitionEnd);
+  }
+
   let scheduleLifeSwipeBound = false;
   function initScheduleLifeSwipe() {
     if (scheduleLifeSwipeBound) return;
@@ -13994,6 +14093,7 @@
       }
     }
     main.addEventListener('touchstart', function(e) {
+      if (horizonMonthSlideAnimating) return;
       if (e.touches.length !== 1) return;
       state = {
         x0: e.touches[0].clientX,
@@ -14032,27 +14132,18 @@
       }
       const th = 56;
       if (dx < -th) {
-        if (shiftHorizonMonth(1)) {
-          main.style.transition = '';
-          main.style.transform = '';
-        } else {
-          resetTransform(true);
-        }
+        runHorizonMonthSlideAnimation_(main, dx, 1);
         return;
       }
       if (dx > th) {
-        if (shiftHorizonMonth(-1)) {
-          main.style.transition = '';
-          main.style.transform = '';
-        } else {
-          resetTransform(true);
-        }
+        runHorizonMonthSlideAnimation_(main, dx, -1);
         return;
       }
       resetTransform(true);
     }
     main.addEventListener('touchend', endSwipe, { passive: true });
     main.addEventListener('touchcancel', function() {
+      if (horizonMonthSlideAnimating) return;
       state = null;
       main.classList.remove('hz-swipe-dragging');
       resetTransform(true);
