@@ -1174,14 +1174,28 @@
       margin-top: 12px;
       opacity: 0;
       transition: opacity 0.4s ease;
-      cursor: pointer;
     }
     .home-projects-scroller.has-projects { opacity: 1; }
-    .home-projects-scroller:active { opacity: 0.85; }
-    .home-projects-label {
-      font-size: 10px; font-weight: 500; letter-spacing: 0.08em;
-      text-transform: uppercase; color: var(--muted);
-      margin-bottom: 6px; text-align: center;
+    .home-projects-heading {
+      display: block;
+      width: 100%;
+      margin: 0 auto 6px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .home-projects-heading:active {
+      opacity: 0.85;
     }
     .home-projects-scroll-wrap {
       overflow-x: auto;
@@ -7337,8 +7351,10 @@
     <div class="hint-area" id="hintArea">
       <div class="hint-greeting" id="greetingText"></div>
 
-      <div class="home-projects-scroller" id="homeProjectsScroller" onclick="closeDrawer(); showProjectsScreen()" role="button" tabindex="0" aria-label="View projects">
-        <div class="home-projects-label">Projects</div>
+      <div class="home-projects-scroller" id="homeProjectsScroller">
+        <button type="button" class="home-projects-heading" onclick="closeDrawer(); showProjectsScreen()" aria-label="View all projects">
+          Projects
+        </button>
         <div class="home-projects-scroll-wrap" id="homeProjectsScrollWrap">
           <div class="home-projects-scroll" id="homeProjectsScroll"></div>
         </div>
@@ -8214,7 +8230,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.32';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.36.33';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
