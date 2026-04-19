@@ -1237,11 +1237,18 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 6px;
+    }
+    .home-project-chip-icon {
+      font-size: 1.05rem;
+      line-height: 1;
+      flex-shrink: 0;
     }
     .home-project-chip-title {
       font-weight: 600;
       font-family: 'Playfair Display', serif;
+      flex: 1;
+      min-width: 0;
       max-width: 110px;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -4612,6 +4619,7 @@
     }
     .projects-completed-chip:hover { transform: scale(1.03); box-shadow: 0 6px 20px rgba(180,130,50,0.35), inset 0 1px 0 rgba(255,255,255,0.8); }
     .projects-completed-chip:active { transform: scale(0.98); }
+    .projects-completed-chip-emoji { font-size: 1.05em; line-height: 1; flex-shrink: 0; }
     .projects-completed-trophy { width: 1.3em; height: 1.3em; flex-shrink: 0; object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15)); vertical-align: middle; }
     .projects-completed-chip-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .projects-completed-chip-delete {
@@ -4671,6 +4679,62 @@
       flex-shrink: 0;
     }
     .projects-list-delete-btn:hover, .projects-list-delete-btn:active { opacity: 1; background: rgba(192,50,50,0.15); }
+    .projects-favorite-btn {
+      width: 36px; height: 36px;
+      border: none; background: transparent;
+      font-size: 18px; line-height: 1;
+      opacity: 0.55;
+      cursor: pointer;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      padding: 0;
+      color: var(--accent);
+    }
+    .projects-favorite-btn.is-fav { opacity: 1; }
+    .projects-favorite-btn:hover, .projects-favorite-btn:active { opacity: 1; background: rgba(192,122,74,0.12); }
+    .projects-favorite-header-btn {
+      flex-shrink: 0;
+      width: 40px; height: 40px;
+      border: none; background: transparent;
+      font-size: 20px; line-height: 1;
+      cursor: pointer;
+      border-radius: 8px;
+      color: var(--muted);
+      padding: 0;
+    }
+    .projects-favorite-header-btn.is-fav { color: var(--accent); }
+    .projects-favorite-header-btn:active { background: rgba(0,0,0,0.06); }
+    .projects-backup-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px 12px;
+      padding: 0 4px 12px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .projects-backup-hint { flex: 1; min-width: 140px; line-height: 1.4; }
+    .projects-restore-btn {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(192,122,74,0.35);
+      background: rgba(255,255,255,0.5);
+      color: var(--accent);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .projects-restore-btn:active { background: rgba(192,122,74,0.1); }
+    html.dark-mode .projects-restore-btn { background: rgba(40,36,32,0.6); }
+    .home-project-chip-fav {
+      font-size: 11px;
+      color: var(--accent);
+      flex-shrink: 0;
+      line-height: 1;
+    }
     .projects-list-card-desc {
       font-size: 14px; color: var(--text2);
       line-height: 1.5;
@@ -4772,8 +4836,23 @@
       font-family: 'Playfair Display', serif;
       font-size: 18px; font-weight: 400;
       color: var(--text); margin: 0 0 8px;
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
       text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .projects-view-title-icon {
+      font-size: 1.15em;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .projects-view-title-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
     }
     .projects-overall-progress { margin-top: 4px; }
     .projects-progress-bar {
@@ -5492,6 +5571,55 @@
       gap: 18px;
     }
     .project-field-group { display: flex; flex-direction: column; gap: 7px; }
+    .project-icon-field { margin-top: 2px; }
+    .project-icon-picker {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .project-icon-option {
+      margin: 0;
+      padding: 8px 10px;
+      font-size: 1.15rem;
+      line-height: 1;
+      border: 1px solid rgba(192,122,74,0.22);
+      border-radius: 10px;
+      background: rgba(255,255,255,0.55);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+    }
+    .project-icon-option.selected {
+      border-color: rgba(192,122,74,0.65);
+      box-shadow: 0 0 0 2px rgba(192,122,74,0.14);
+      background: rgba(192,122,74,0.08);
+    }
+    .project-icon-option:active { transform: scale(0.96); }
+    html.dark-mode .project-icon-option {
+      background: rgba(40,36,32,0.55);
+      border-color: rgba(200,170,140,0.22);
+    }
+    html.dark-mode .project-icon-option.selected {
+      border-color: rgba(192,122,74,0.55);
+      box-shadow: 0 0 0 2px rgba(192,122,74,0.12);
+    }
+    .pjw-icon-picker-block {
+      margin-top: 18px;
+      width: 100%;
+    }
+    .pjw-icon-picker-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: rgba(100,72,48,0.55);
+      margin: 0 0 14px;
+    }
+    html.dark-mode .pjw-icon-picker-label { color: rgba(220,200,175,0.5); }
+    .pjw-project-icon-picker { margin-top: 0; justify-content: center; }
     .project-field-hint {
       font-size: 12px;
       font-weight: 600;
@@ -7731,6 +7859,10 @@
           </div>
         </div>
         <div class="projects-in-progress-label">In progress</div>
+        <div class="projects-backup-row" id="projectsBackupRow" style="display:none">
+          <span class="projects-backup-hint">Saved to your Google Sheet while signed in.</span>
+          <button type="button" class="projects-restore-btn" onclick="projectsRestoreFromCloudConfirm()">Restore from backup</button>
+        </div>
         <div class="screen-list" id="projectsInProgressList"></div>
         <div class="projects-empty" id="projectsEmpty">No projects yet. Tap + to create one.</div>
         <img class="projects-linkmagic" src="https://stormyreigns.github.io/HATH/WWScroll.png" alt="" loading="lazy">
@@ -7740,9 +7872,13 @@
         <div class="projects-view-header">
           <button type="button" class="projects-back-btn" onclick="projectsBackToLanding()" aria-label="Back">←</button>
           <div class="projects-view-title-wrap">
-            <h2 class="projects-view-title" id="projectsViewTitle"></h2>
+            <h2 class="projects-view-title" id="projectsViewTitleWrap">
+              <span class="projects-view-title-icon" id="projectsViewTitleIcon" aria-hidden="true"></span>
+              <span class="projects-view-title-text" id="projectsViewTitle"></span>
+            </h2>
             <button type="button" class="projects-undo-btn" id="projectsUndoBtn" onclick="projectsUndoProjectCompletion()" style="display:none">Undo completion</button>
           </div>
+          <button type="button" class="projects-favorite-header-btn" id="projectsViewFavoriteBtn" onclick="projectsToggleFavoriteFromView(event)" aria-label="Favorite" title="Favorite">☆</button>
           <button type="button" class="projects-edit-btn" onclick="openCreateProjectModal(projectsViewing && projectsViewing.id)" aria-label="Edit" title="Edit project">Edit</button>
         </div>
         <div class="projects-phase-cards-wrap">
@@ -8015,6 +8151,10 @@
         <label class="project-field-hint" for="projectTitleInput">Name this quest</label>
         <input type="text" class="paste-filename" id="projectTitleInput" placeholder="Kitchen refresh, taxes, the guest room…" autocomplete="off">
       </div>
+      <div class="project-field-group project-icon-field">
+        <label class="project-field-hint" id="projectIconPickerLabel">Icon</label>
+        <div class="project-icon-picker" id="projectModalIconPicker" role="group" aria-labelledby="projectIconPickerLabel"></div>
+      </div>
       <div class="project-field-group">
         <label class="project-field-hint" for="projectDescInput">Why it matters, if you like</label>
         <textarea class="paste-content" id="projectDescInput" placeholder="A line so future-you remembers what pulled you in." rows="3"></textarea>
@@ -8230,7 +8370,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.36.35';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.38.0';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -8337,6 +8477,7 @@
       renderHomeProjectsScroller();
       renderRecentUploads();
       loadCalendar();
+      maybeRestoreProjectsFromCloud();
     }
 
     if (hasUser && _lastAuthUiHadUser === false) {
@@ -9917,11 +10058,75 @@
   function getProjectsStorageKey() {
     return PROJECTS_STORAGE_KEY + '_' + (getApiUser() || 'guest');
   }
+  /** Single-character / pictograph icons only — picker whitelist (stored on each project as `icon`). */
+  const PROJECT_ICON_CHOICES = ['📋', '🥗', '🏃', '🔨', '🌿', '💻', '🏠', '📄', '💰', '🎓', '🎨', '✈️', '❤️', '🌱', '🚗', '🧵'];
+
+  function normalizeProjectIcon(s) {
+    if (s == null) return '';
+    const t = String(s).trim();
+    if (!t) return '';
+    return PROJECT_ICON_CHOICES.indexOf(t) >= 0 ? t : '';
+  }
+
+  function getProjectIcon(p) {
+    const n = normalizeProjectIcon(p && p.icon);
+    return n || '📋';
+  }
+
+  function buildProjectIconPickerButtonsHtml(selectedRaw, onClickFnName) {
+    const cur = normalizeProjectIcon(selectedRaw) || '';
+    const click = onClickFnName ? ' onclick="' + onClickFnName + '(this)"' : '';
+    return PROJECT_ICON_CHOICES.map(function(emoji) {
+      const isSel = cur ? cur === emoji : emoji === '📋';
+      const dataVal = emoji === '📋' ? '' : emoji;
+      return '<button type="button" class="project-icon-option' + (isSel ? ' selected' : '') + '"' + click +
+        ' data-icon="' + escapeHtml(dataVal) + '"' +
+        ' aria-pressed="' + (isSel ? 'true' : 'false') + '"' +
+        ' aria-label="' + escapeHtml('Icon ' + emoji) + '">' + emoji + '</button>';
+    }).join('');
+  }
+
+  function renderProjectIconPickerInto(containerId, selectedRaw, onClickFnName) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    el.innerHTML = buildProjectIconPickerButtonsHtml(selectedRaw, onClickFnName || 'projectIconOptionClickModal');
+  }
+
+  function projectIconOptionClick(btn, isWizard) {
+    const wrap = btn.closest('.project-icon-picker');
+    if (!wrap) return;
+    wrap.querySelectorAll('.project-icon-option').forEach(function(b) {
+      b.classList.toggle('selected', b === btn);
+      b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+    });
+    const raw = btn.getAttribute('data-icon');
+    const val = raw == null || raw === '' ? '' : normalizeProjectIcon(raw);
+    if (isWizard && projectsEditing) projectsEditing.icon = val;
+  }
+
+  function projectIconOptionClickModal(btn) {
+    projectIconOptionClick(btn, false);
+  }
+
+  function projectIconOptionClickWizard(btn) {
+    projectIconOptionClick(btn, true);
+  }
+
+  function readProjectIconFromModal() {
+    const sel = document.querySelector('#projectModalIconPicker .project-icon-option.selected');
+    if (!sel) return '';
+    const raw = sel.getAttribute('data-icon');
+    if (raw == null || raw === '') return '';
+    return normalizeProjectIcon(raw);
+  }
+
   let projectsEditing = null;
   let projectsViewing = null;
   let projectsCurrentPhaseIndex = 0;
   let projectWizardStep = 0;
   let projectWizardPhaseCount = 3;
+  let projectsCloudRestoreAttempted = false;
+  let projectsBackupDebounce = null;
 
   const PHASE_QUOTES = {
     makingProgress: [
@@ -10046,8 +10251,117 @@
     } catch (_) { return []; }
   }
 
-  function saveProjects(arr) {
+  function sortProjectsByFavoriteThenRecent(list) {
+    return list.slice().sort(function(a, b) {
+      const fa = a.favorite ? 1 : 0;
+      const fb = b.favorite ? 1 : 0;
+      if (fa !== fb) return fb - fa;
+      return (b.modifiedAt || 0) - (a.modifiedAt || 0);
+    });
+  }
+
+  function scheduleProjectsCloudBackup() {
+    if (!getApiUser()) return;
+    if (projectsBackupDebounce) clearTimeout(projectsBackupDebounce);
+    projectsBackupDebounce = setTimeout(function() {
+      projectsBackupDebounce = null;
+      pushProjectsBackupNow();
+    }, 2500);
+  }
+
+  function pushProjectsBackupNow() {
+    const u = getApiUser();
+    if (!u) return;
+    const arr = getProjects();
+    try {
+      fetch(API_URL, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'saveProjectsBackup', user: u, projects: arr })
+      }).catch(function() {});
+    } catch (_) {}
+  }
+
+  function maybeRestoreProjectsFromCloud() {
+    if (projectsCloudRestoreAttempted) return;
+    const u = getApiUser();
+    if (!u) return;
+    if (getProjects().length > 0) {
+      projectsCloudRestoreAttempted = true;
+      return;
+    }
+    projectsCloudRestoreAttempted = true;
+    fetchWithTimeout_(apiUrlWithUser(API_URL, '&action=getProjectsBackup'), {}, 20000)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data || data.error || !Array.isArray(data.projects) || data.projects.length === 0) return;
+        saveProjects(data.projects, true);
+        renderProjectsLanding();
+        renderHomeProjectsScroller();
+      })
+      .catch(function() {});
+  }
+
+  function projectsRestoreFromCloudConfirm() {
+    const u = getApiUser();
+    if (!u) return;
+    if (!confirm('Replace all projects on this device with the latest backup from Google? This cannot be undone here.')) return;
+    fetchWithTimeout_(apiUrlWithUser(API_URL, '&action=getProjectsBackup'), {}, 20000)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data && data.error) {
+          alert('Could not load backup: ' + data.error);
+          return;
+        }
+        const list = Array.isArray(data.projects) ? data.projects : [];
+        if (list.length === 0) {
+          alert('No backup found yet. Projects save to the sheet after you change something while signed in.');
+          return;
+        }
+        saveProjects(list, true);
+        projectsViewing = null;
+        const landing = document.getElementById('projectsLanding');
+        const view = document.getElementById('projectsView');
+        if (landing) landing.style.display = 'flex';
+        if (view) view.style.display = 'none';
+        document.querySelector('.app').classList.remove('in-project-view');
+        renderProjectsLanding();
+        renderHomeProjectsScroller();
+      })
+      .catch(function() {
+        alert('Could not reach Google right now. Try again when you are online.');
+      });
+  }
+
+  function projectsToggleFavorite(projectId, ev) {
+    if (ev) {
+      ev.stopPropagation();
+      ev.preventDefault();
+    }
+    const all = getProjects();
+    const p = all.find(function(x) { return x.id === projectId; });
+    if (!p) return;
+    if (p.favorite) delete p.favorite;
+    else p.favorite = true;
+    p.modifiedAt = Date.now();
+    saveProjects(all);
+    renderProjectsLanding();
+    renderHomeProjectsScroller();
+    if (projectsViewing && projectsViewing.id === projectId) {
+      projectsViewing = all.find(function(x) { return x.id === projectId; }) || projectsViewing;
+      renderProjectsView();
+    }
+  }
+
+  function projectsToggleFavoriteFromView(ev) {
+    if (!projectsViewing) return;
+    projectsToggleFavorite(projectsViewing.id, ev);
+  }
+
+  function saveProjects(arr, skipCloud) {
     localStorage.setItem(getProjectsStorageKey(), JSON.stringify(arr));
+    if (!skipCloud) scheduleProjectsCloudBackup();
   }
 
   function genId() { return 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9); }
@@ -10166,7 +10480,7 @@
     const wrap = document.getElementById('homeProjectsScroller');
     const scrollEl = document.getElementById('homeProjectsScroll');
     if (!wrap || !scrollEl) return;
-    const inProgress = getProjects().filter(p => !isProjectCompleted(p)).sort((a,b) => (b.modifiedAt || 0) - (a.modifiedAt || 0));
+    const inProgress = sortProjectsByFavoriteThenRecent(getProjects().filter(p => !isProjectCompleted(p)));
     if (inProgress.length === 0) {
       wrap.classList.remove('has-projects');
       wrap.style.display = 'none';
@@ -10178,7 +10492,8 @@
       const d = getProjectLandingDetails(p);
       const progPct = Math.round(d.prog);
       const phaseInfo = d.currentPhaseName ? escapeHtml(d.currentPhaseName) : (d.phaseLabel || '');
-      return `<span class="home-project-chip" onclick="event.stopPropagation(); closeDrawer(); showProjectsScreen(); projectsSelectProject('${p.id}');"><div class="home-project-chip-top"><span class="home-project-chip-title">${escapeHtml(p.title)}</span><span class="home-project-chip-pct">${progPct}%</span></div>${phaseInfo ? `<span class="home-project-chip-phase">${phaseInfo}</span>` : ''}<div class="home-project-chip-bar"><div class="home-project-chip-fill" style="width:${progPct}%"></div></div></span>`;
+      const favStar = p.favorite ? '<span class="home-project-chip-fav" aria-hidden="true">★</span>' : '';
+      return `<span class="home-project-chip" onclick="event.stopPropagation(); closeDrawer(); showProjectsScreen(); projectsSelectProject('${p.id}');"><div class="home-project-chip-top">${favStar}<span class="home-project-chip-icon" aria-hidden="true">${escapeHtml(getProjectIcon(p))}</span><span class="home-project-chip-title">${escapeHtml(p.title)}</span><span class="home-project-chip-pct">${progPct}%</span></div>${phaseInfo ? `<span class="home-project-chip-phase">${phaseInfo}</span>` : ''}<div class="home-project-chip-bar"><div class="home-project-chip-fill" style="width:${progPct}%"></div></div></span>`;
     }).join('');
   }
 
@@ -10198,7 +10513,10 @@
   function renderProjectsLanding(newlyCompletedId) {
     const all = getProjects();
     const completed = all.filter(isProjectCompleted).sort((a,b) => (b.completedAt || 0) - (a.completedAt || 0));
-    const inProgress = all.filter(p => !isProjectCompleted(p)).sort((a,b) => (b.modifiedAt || 0) - (a.modifiedAt || 0));
+    const inProgress = sortProjectsByFavoriteThenRecent(all.filter(p => !isProjectCompleted(p)));
+
+    const backupRow = document.getElementById('projectsBackupRow');
+    if (backupRow) backupRow.style.display = getApiUser() ? 'flex' : 'none';
 
     const barEl = document.getElementById('projectsCompletedBar');
     if (barEl) barEl.style.display = completed.length > 0 ? 'flex' : 'none';
@@ -10206,7 +10524,7 @@
     const scrollEl = document.getElementById('projectsCompletedScroll');
     const chipHtml = completed.map(p => {
       const animateClass = newlyCompletedId && p.id === newlyCompletedId ? ' projects-completed-chip-new' : '';
-      return `<span class="projects-completed-chip${animateClass}" onclick="projectsSelectCompleted('${p.id}')"><img src="https://stormyreigns.github.io/HATH/Triforce.webp" alt="" class="projects-completed-trophy" loading="lazy"><span class="projects-completed-chip-title">${escapeHtml(p.title)}</span><button type="button" class="projects-completed-chip-delete" onclick="event.stopPropagation();projectsConfirmDelete('${p.id}')" aria-label="Delete" title="Delete">×</button></span>`;
+      return `<span class="projects-completed-chip${animateClass}" onclick="projectsSelectCompleted('${p.id}')"><span class="projects-completed-chip-emoji" aria-hidden="true">${escapeHtml(getProjectIcon(p))}</span><img src="https://stormyreigns.github.io/HATH/Triforce.webp" alt="" class="projects-completed-trophy" loading="lazy"><span class="projects-completed-chip-title">${escapeHtml(p.title)}</span><button type="button" class="projects-completed-chip-delete" onclick="event.stopPropagation();projectsConfirmDelete('${p.id}')" aria-label="Delete" title="Delete">×</button></span>`;
     }).join('');
     if (scrollEl) scrollEl.innerHTML = completed.length > 0 ? chipHtml : '';
 
@@ -10217,11 +10535,14 @@
     listEl.innerHTML = inProgress.map(p => {
       const d = getProjectLandingDetails(p);
       const progPct = Math.round(d.prog);
+      const favClass = p.favorite ? ' projects-favorite-btn is-fav' : ' projects-favorite-btn';
+      const favChar = p.favorite ? '★' : '☆';
       return `<div class="projects-list-item" onclick="projectsSelectProject('${p.id}')">
         <div class="projects-list-card-main">
           <div class="projects-list-card-header">
-            <span class="projects-list-card-icon">📋</span>
+            <span class="projects-list-card-icon">${getProjectIcon(p)}</span>
             <h3 class="projects-list-card-title">${escapeHtml(p.title)}</h3>
+            <button type="button" class="${favClass.trim()}" onclick="event.stopPropagation();projectsToggleFavorite('${p.id}', event)" aria-label="${p.favorite ? 'Remove favorite' : 'Favorite'}" title="Favorite">${favChar}</button>
             <button type="button" class="projects-list-delete-btn" onclick="event.stopPropagation();projectsConfirmDelete('${p.id}')" aria-label="Delete" title="Delete project">🗑</button>
           </div>
           ${d.desc ? `<p class="projects-list-card-desc">${escapeHtml(d.desc)}</p>` : ''}
@@ -10380,7 +10701,17 @@
     if (!projectsViewing) return;
     const p = getProjects().find(x => x.id === projectsViewing.id) || projectsViewing;
     projectsViewing = p;
-    document.getElementById('projectsViewTitle').textContent = p.title;
+    const titleIconEl = document.getElementById('projectsViewTitleIcon');
+    const titleTextEl = document.getElementById('projectsViewTitle');
+    if (titleIconEl) titleIconEl.textContent = getProjectIcon(p);
+    if (titleTextEl) titleTextEl.textContent = p.title;
+    const favHdr = document.getElementById('projectsViewFavoriteBtn');
+    if (favHdr) {
+      favHdr.textContent = p.favorite ? '★' : '☆';
+      favHdr.classList.toggle('is-fav', !!p.favorite);
+      favHdr.setAttribute('aria-label', p.favorite ? 'Remove favorite' : 'Mark as favorite');
+      favHdr.setAttribute('title', p.favorite ? 'Favorite' : 'Favorite');
+    }
     const prog = getProjectProgress(p);
     const oceanStrip = document.getElementById('projectsOceanStrip');
     const oceanBoat = document.getElementById('oceanBoat');
@@ -10884,7 +11215,7 @@
       wrap.appendChild(kick);
       const ttl = document.createElement('div');
       ttl.className = 'blathers-snippet-title';
-      ttl.textContent = p.title || 'Untitled';
+      ttl.textContent = getProjectIcon(p) + ' ' + (p.title || 'Untitled');
       wrap.appendChild(ttl);
       const desc = (p.description || '').trim();
       if (desc) {
@@ -11245,14 +11576,20 @@
         id: existing.id,
         createdAt: existing.createdAt || Date.now(),
         completedAt: mergedComplete ? (existing.completedAt || Date.now()) : null,
-        completeQuote: mergedComplete ? existing.completeQuote : undefined
+        completeQuote: mergedComplete ? existing.completeQuote : undefined,
+        icon: draft.icon !== undefined ? normalizeProjectIcon(draft.icon) : normalizeProjectIcon(existing.icon)
       };
       persistProjectRecord(title, desc, finishDate, phases);
       projectsEditing = null;
       selectId = existing.id;
     } else {
       const newId = genId();
-      projectsEditing = { id: newId, createdAt: Date.now(), modifiedAt: Date.now() };
+      projectsEditing = {
+        id: newId,
+        createdAt: Date.now(),
+        modifiedAt: Date.now(),
+        icon: normalizeProjectIcon(draft && draft.icon)
+      };
       persistProjectRecord(title, desc, finishDate, phases);
       projectsEditing = null;
       selectId = newId;
@@ -11361,6 +11698,7 @@
     document.getElementById('projectDescInput').value = projectsEditing ? (projectsEditing.description || '') : '';
     document.getElementById('projectFinishDateInput').value = projectsEditing && projectsEditing.finishDate ? projectsEditing.finishDate : '';
     renderProjectPhasesEditors();
+    renderProjectIconPickerInto('projectModalIconPicker', projectsEditing ? projectsEditing.icon : '', 'projectIconOptionClickModal');
     const modal = document.getElementById('projectModal');
     if (modal) modal.scrollTop = 0;
     document.getElementById('projectModalOverlay').classList.add('open');
@@ -11433,7 +11771,7 @@
   }
 
   function addPhaseToProject() {
-    if (!projectsEditing) projectsEditing = { id: genId(), title: '', description: '', phases: [], createdAt: Date.now(), modifiedAt: Date.now() };
+    if (!projectsEditing) projectsEditing = { id: genId(), title: '', description: '', phases: [], createdAt: Date.now(), modifiedAt: Date.now(), icon: '' };
     if (!projectsEditing.phases) projectsEditing.phases = [];
     syncPhaseEditorsToState();
     projectsEditing.phases.push({
@@ -11473,8 +11811,17 @@
     if (isProjectCompleted(newProj)) newProj.completedAt = now;
     else if (projectsEditing && projectsEditing.completedAt) newProj.completedAt = projectsEditing.completedAt;
     if (projectsEditing && projectsEditing.completeQuote) newProj.completeQuote = projectsEditing.completeQuote;
+    if (projectsEditing) {
+      const ic = normalizeProjectIcon(projectsEditing.icon);
+      if (ic) newProj.icon = ic;
+      else delete newProj.icon;
+    }
 
     const idx = projectsEditing ? all.findIndex(p => p.id === projectsEditing.id) : -1;
+    const prevSnap = idx >= 0 ? all[idx] : null;
+    if (prevSnap && prevSnap.favorite) newProj.favorite = true;
+    else delete newProj.favorite;
+
     if (idx >= 0) {
       all[idx] = newProj;
     } else {
@@ -11495,6 +11842,7 @@
       title: '',
       description: '',
       finishDate: null,
+      icon: '',
       phases: [{ id: genId(), title: '', description: '', checklist: null, completionDate: null, completed: false, _wizardMode: 'single' }],
       createdAt: Date.now(),
       modifiedAt: Date.now()
@@ -11854,7 +12202,12 @@
       if (leadEl) leadEl.textContent = 'Give it a name you’ll like seeing on your map.';
       if (bodyEl) {
         bodyEl.innerHTML =
-          '<input type="text" class="pjw-input pjw-input-hero" id="pjwTitle" autocomplete="off" placeholder="Kitchen refresh, taxes, the guest room…" value="' + escapeHtml(projectsEditing.title || '') + '">';
+          '<input type="text" class="pjw-input pjw-input-hero" id="pjwTitle" autocomplete="off" placeholder="Kitchen refresh, taxes, the guest room…" value="' + escapeHtml(projectsEditing.title || '') + '">' +
+          '<div class="pjw-icon-picker-block">' +
+          '<span class="pjw-icon-picker-label">Icon</span>' +
+          '<div class="project-icon-picker pjw-project-icon-picker" id="wizardIconPicker" role="group" aria-label="Project icon">' +
+          buildProjectIconPickerButtonsHtml(projectsEditing.icon, 'projectIconOptionClickWizard') +
+          '</div></div>';
       }
       if (backBtn) backBtn.textContent = 'Exit';
       if (nextBtn) nextBtn.textContent = 'Continue';
@@ -12094,6 +12447,9 @@
     });
     if (phases.length === 0) {
       phases.push({ id: genId(), title: 'Phase 1', description: '', checklist: null, completionDate: null, completed: false });
+    }
+    if (projectsEditing) {
+      projectsEditing.icon = readProjectIconFromModal();
     }
     persistProjectRecord(title, desc, finishDate, phases);
     closeProjectModal();
