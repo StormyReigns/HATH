@@ -4841,19 +4841,22 @@
       100% { transform: scale(1); }
     }
     .program-act-title { font-size: 15px; font-weight: 600; color: var(--text); }
-    .program-act-sub { font-size: 12px; color: var(--muted); line-height: 1.35; }
-    .program-act-pts { font-size: 14px; font-weight: 700; color: var(--accent); letter-spacing: 0.02em; }
+    .program-act-pts { font-size: 14px; font-weight: 700; color: var(--accent); letter-spacing: 0.02em; margin-top: 2px; }
     .program-hero-card {
       display: flex; align-items: center; gap: 18px; margin-bottom: 20px;
       padding: 16px 14px; border-radius: 16px;
       background: rgba(255,255,255,0.55); border: 1px solid rgba(192,122,74,0.18);
+      overflow: visible;
     }
     html.dark-mode .program-hero-card { background: rgba(40,36,32,0.5); border-color: rgba(200,170,140,0.15); }
-    .program-donut-wrap { flex-shrink: 0; width: 108px; height: 108px; position: relative; }
-    .program-donut-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-    .program-donut-track { fill: none; stroke: rgba(0,0,0,0.08); stroke-width: 7; }
+    .program-donut-wrap {
+      flex-shrink: 0; width: 108px; height: 108px; position: relative;
+      overflow: visible; display: flex; align-items: center; justify-content: center;
+    }
+    .program-donut-svg { width: 100%; height: 100%; max-width: 100px; max-height: 100px; transform: rotate(-90deg); overflow: visible; }
+    .program-donut-track { fill: none; stroke: rgba(0,0,0,0.08); stroke-width: 5; }
     html.dark-mode .program-donut-track { stroke: rgba(255,255,255,0.08); }
-    .program-donut-fill { fill: none; stroke: var(--accent); stroke-width: 7; stroke-linecap: round; transition: stroke-dashoffset 0.45s ease; }
+    .program-donut-fill { fill: none; stroke: var(--accent); stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 0.45s ease; }
     .program-donut-center {
       position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
       pointer-events: none;
@@ -4886,14 +4889,24 @@
     }
     .pew-ongoing-btn.is-on { border-color: var(--accent); background: rgba(192,122,74,0.14); color: var(--accent); }
     html.dark-mode .pew-ongoing-btn { background: rgba(40,36,32,0.45); }
-    .pew-activity-rows { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
-    .pew-activity-row { display: flex; gap: 10px; align-items: center; }
+    .pew-activity-rows { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+    .pew-activity-row { display: flex; gap: 8px; align-items: center; }
     .pew-activity-row input.pjw-input { flex: 1; margin: 0; min-width: 0; }
     .pew-activity-pts { width: 64px; flex-shrink: 0; text-align: center; padding: 12px 8px; border-radius: 12px; border: 1px solid rgba(192,122,74,0.25); font-size: 15px; }
-    .pew-add-row-btn, .pew-remove-row-btn {
-      padding: 8px 12px; font-size: 13px; border-radius: 10px; border: 1px solid rgba(192,122,74,0.3); background: rgba(255,255,255,0.5); cursor: pointer; margin-top: 8px;
+    .pew-act-remove-spacer { width: 32px; flex-shrink: 0; }
+    .pew-act-remove {
+      flex-shrink: 0; width: 32px; height: 32px; padding: 0; margin: 0;
+      border: none; border-radius: 50%; background: rgba(0,0,0,0.06); color: var(--muted);
+      font-size: 20px; line-height: 1; cursor: pointer; -webkit-tap-highlight-color: transparent;
     }
-    .pew-remove-row-btn { margin-left: 8px; color: #a05050; border-color: rgba(160,80,80,0.35); }
+    html.dark-mode .pew-act-remove { background: rgba(255,255,255,0.08); }
+    .pew-act-remove:active { background: rgba(192,122,74,0.15); color: var(--accent); }
+    .pew-act-add-wrap { margin-top: 10px; text-align: center; }
+    .pew-act-add {
+      background: none; border: none; padding: 10px 12px; margin: 0;
+      font-size: 14px; font-weight: 600; color: var(--accent); cursor: pointer;
+      text-decoration: underline; text-underline-offset: 3px; -webkit-tap-highlight-color: transparent;
+    }
     .project-create-choice-tertiary {
       width: 100%; padding: 14px 18px; margin-top: 8px;
       font-size: 15px; font-weight: 500;
@@ -8084,7 +8097,7 @@
           <div class="program-today-block">
             <h3 class="program-section-label">Log today</h3>
             <p class="program-today-date" id="programTodayDate"></p>
-            <p class="program-log-hint">Tap to record this activity for today and add its points toward your goal.</p>
+            <p class="program-log-hint" id="programLogHint">Tap a button when you have earned it — it logs for today and adds to your rhythm total.</p>
             <div class="program-activity-buttons" id="programActivityButtons"></div>
           </div>
           <div class="program-log-block">
@@ -8307,13 +8320,13 @@
   </div>
 </div>
 
-<!-- New project: journey vs rhythm vs Blathers -->
+<!-- New project: project vs habit vs Blathers -->
 <div class="paste-modal-overlay" id="projectCreateChoiceOverlay" onclick="closeProjectCreateChoice(event)">
   <div class="paste-modal project-create-choice-modal" onclick="event.stopPropagation()">
     <h3>Start something new</h3>
-    <p class="project-create-choice-lead">Journeys use phases and a map. Rhythms track points for whatever you want to keep doing—over weeks or months.</p>
-    <button type="button" class="project-create-choice-primary" onclick="projectCreateChoiceWizard()">Step-by-step journey</button>
-    <button type="button" class="project-create-choice-secondary" onclick="projectCreateChoiceProgramEasy()">Rhythm (guided)</button>
+    <p class="project-create-choice-lead">A project uses phases and a map. A habit is for something you want to keep showing up for—log it in whatever units feel right, over weeks or months. Not sure yet? Blathers can help you talk it through.</p>
+    <button type="button" class="project-create-choice-primary" onclick="projectCreateChoiceWizard()">Track a Project</button>
+    <button type="button" class="project-create-choice-secondary" onclick="projectCreateChoiceProgramEasy()">Track a Habit</button>
     <button type="button" class="project-create-choice-tertiary" onclick="projectCreateChoiceBlathers()">Talk it through with Blathers</button>
     <button type="button" class="paste-cancel-btn project-create-choice-dismiss" onclick="closeProjectCreateChoice()">Cancel</button>
   </div>
@@ -8581,7 +8594,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.40.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.40.4';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -10411,6 +10424,11 @@
     }, 0);
   }
 
+  function programGoalUnitLabel(p) {
+    const u = p && p.goal && p.goal.unitLabel != null ? String(p.goal.unitLabel).trim() : '';
+    return u ? u.slice(0, 24) : 'points';
+  }
+
   function getProgramPointsBetween(p, startYmd, endYmd) {
     if (!projectIsProgram(p) || !Array.isArray(p.log)) return 0;
     return p.log.reduce(function(s, e) {
@@ -10562,8 +10580,29 @@
     const goal = draft.goal && typeof draft.goal === 'object' ? {
       type: draft.goal.type === 'display_cash' ? 'display_cash' : 'points',
       target: Math.max(1, parseInt(draft.goal.target, 10) || 500),
-      currencyLabel: draft.goal.currencyLabel ? String(draft.goal.currencyLabel).slice(0, 8) : undefined
-    } : { type: 'points', target: 500 };
+      currencyLabel: draft.goal.currencyLabel ? String(draft.goal.currencyLabel).slice(0, 8) : undefined,
+      unitLabel: (function() {
+        if (draft.goal.unitLabel != null && String(draft.goal.unitLabel).trim()) {
+          return String(draft.goal.unitLabel).trim().slice(0, 24);
+        }
+        if (existing && existing.goal && existing.goal.unitLabel != null && String(existing.goal.unitLabel).trim()) {
+          return String(existing.goal.unitLabel).trim().slice(0, 24);
+        }
+        return 'points';
+      })()
+    } : (function() {
+      if (existing && existing.goal) {
+        const g = existing.goal;
+        return {
+          type: g.type === 'display_cash' ? 'display_cash' : 'points',
+          target: Math.max(1, parseInt(g.target, 10) || 500),
+          currencyLabel: g.currencyLabel ? String(g.currencyLabel).slice(0, 8) : undefined,
+          unitLabel: g.unitLabel != null && String(g.unitLabel).trim()
+            ? String(g.unitLabel).trim().slice(0, 24) : 'points'
+        };
+      }
+      return { type: 'points', target: 500, unitLabel: 'points' };
+    })();
     const rules = normalizeProgramRules(draft.rules);
     const log = existing && Array.isArray(existing.log) ? existing.log.slice() : [];
     const durationSpec = draft.programDurationSpec !== undefined
@@ -10707,6 +10746,7 @@
         durationUnit: dur.durationUnit || 'months',
         activityRows: rows.length ? rows : [{ id: genId(), label: '', pts: 5 }],
         goalTarget: p.goal && p.goal.target ? p.goal.target : 400,
+        goalUnitLabel: programGoalUnitLabel(p),
         icon: p.icon || ''
       };
     } else {
@@ -10718,6 +10758,7 @@
         durationUnit: 'months',
         activityRows: [{ id: genId(), label: '', pts: 5 }, { id: genId(), label: '', pts: 5 }],
         goalTarget: 400,
+        goalUnitLabel: 'points',
         icon: ''
       };
     }
@@ -10746,14 +10787,37 @@
     programEasyWizardRender();
   }
 
+  function pewSyncActivityRowsFromDom() {
+    if (!pewDraft || pewStep !== 2) return;
+    const body = document.getElementById('pewBody');
+    const rowEls = body ? body.querySelectorAll('.pew-activity-row') : [];
+    if (!rowEls.length) return;
+    const nextRows = [];
+    rowEls.forEach(function(row, i) {
+      const lab = row.querySelector('.pew-act-label');
+      const pt = row.querySelector('.pew-act-pts');
+      const label = lab ? String(lab.value || '') : '';
+      const ptsRaw = pt ? parseInt(pt.value, 10) : NaN;
+      const prev = pewDraft.activityRows && pewDraft.activityRows[i];
+      const rid = prev && prev.id ? prev.id : genId();
+      const fallbackPts = prev && prev.pts != null ? prev.pts : 3;
+      const ptsN = Math.max(0, Math.min(500, isNaN(ptsRaw) ? fallbackPts : ptsRaw));
+      nextRows.push({ id: rid, label: label, pts: ptsN });
+    });
+    pewDraft.activityRows = nextRows;
+  }
+
   function pewAddActivityRow() {
     if (!pewDraft || !Array.isArray(pewDraft.activityRows)) return;
+    pewSyncActivityRowsFromDom();
     pewDraft.activityRows.push({ id: genId(), label: '', pts: 3 });
     programEasyWizardRender();
   }
 
   function pewRemoveActivityRow(idx) {
     if (!pewDraft || !pewDraft.activityRows || pewDraft.activityRows.length <= 1) return;
+    pewSyncActivityRowsFromDom();
+    if (!pewDraft.activityRows || pewDraft.activityRows.length <= 1) return;
     pewDraft.activityRows.splice(idx, 1);
     programEasyWizardRender();
   }
@@ -10809,27 +10873,34 @@
     } else if (pewStep === 2) {
       if (prog) prog.textContent = '3 of ' + totalSteps;
       if (h) h.textContent = 'Activities you will log';
-      if (lead) lead.textContent = 'Name each thing you want to earn points for, and how many points it is worth when you do it.';
+      if (lead) lead.textContent = 'Name each thing you want to log, and how much it adds toward your goal. On the next step you can call those amounts points, dollars, miles — whatever fits.';
+      const nAct = (pewDraft.activityRows || []).length;
       let rowsHtml = '<div class="pew-activity-rows">';
       (pewDraft.activityRows || []).forEach(function(row, i) {
+        const removeCell = nAct > 1
+          ? '<button type="button" class="pew-act-remove" onclick="pewRemoveActivityRow(' + i + ')" aria-label="Remove activity">×</button>'
+          : '<span class="pew-act-remove-spacer" aria-hidden="true"></span>';
         rowsHtml +=
           '<div class="pew-activity-row">' +
           '<input type="text" class="pjw-input pew-act-label" placeholder="What you did" value="' + escapeHtml(row.label || '') + '">' +
           '<input type="number" class="pew-activity-pts pew-act-pts" min="0" max="500" value="' + escapeHtml(String(row.pts != null ? row.pts : 3)) + '">' +
-          (i > 0 ? '<button type="button" class="pew-remove-row-btn" onclick="pewRemoveActivityRow(' + i + ')">Remove</button>' : '<span style="width:72px;flex-shrink:0"></span>') +
+          removeCell +
           '</div>';
       });
-      rowsHtml += '</div><button type="button" class="pew-add-row-btn" onclick="pewAddActivityRow()">+ Add activity</button>';
+      rowsHtml += '</div><div class="pew-act-add-wrap"><button type="button" class="pew-act-add" onclick="pewAddActivityRow()">Add another activity</button></div>';
       body.innerHTML = rowsHtml;
       if (back) back.textContent = 'Back';
       if (next) next.textContent = 'Continue';
     } else {
       if (prog) prog.textContent = '4 of ' + totalSteps;
       if (h) h.textContent = 'Goal and icon';
-      if (lead) lead.textContent = 'Total points to aim for over this rhythm, and an emoji badge if you like.';
+      if (lead) lead.textContent = 'How much you are aiming for in total, what to call that amount, and an emoji badge if you like.';
+      const u = escapeHtml(pewDraft.goalUnitLabel || 'points');
       body.innerHTML =
-        '<label class="project-field-hint" for="pewGoal">Point goal (total)</label>' +
+        '<label class="project-field-hint" for="pewGoal">Goal total</label>' +
         '<input type="number" class="pjw-input" id="pewGoal" min="50" step="10" value="' + (pewDraft.goalTarget || 400) + '">' +
+        '<label class="project-field-hint" for="pewGoalUnit" style="margin-top:16px">Call this unit (e.g. points, dollars, miles)</label>' +
+        '<input type="text" class="pjw-input" id="pewGoalUnit" maxlength="24" autocomplete="off" placeholder="points" value="' + u + '">' +
         '<label class="project-field-hint" style="margin-top:16px">Icon (optional)</label>' +
         '<div class="project-icon-picker pjw-project-icon-picker" id="pewIconHost" role="group"></div>';
       renderProjectIconPickerInto('pewIconHost', pewDraft.icon || '', 'pewIconPick');
@@ -10843,7 +10914,22 @@
       closeProgramEasyWizard();
       return;
     }
+    if (pewStep === 3 && pewDraft) {
+      const gEl = document.getElementById('pewGoal');
+      const guEl = document.getElementById('pewGoalUnit');
+      if (gEl) pewDraft.goalTarget = Math.max(50, parseInt(gEl.value, 10) || 400);
+      if (guEl) {
+        let u = String(guEl.value || '').trim();
+        pewDraft.goalUnitLabel = (u ? u : 'points').slice(0, 24);
+      }
+      pewDraft.icon = readPewWizardIcon();
+    }
     pewStep--;
+    if (pewStep === 2 && pewDraft && pewDraft.activities && pewDraft.activities.length) {
+      pewDraft.activityRows = pewDraft.activities.map(function(a) {
+        return { id: a.id, label: a.label || '', pts: a.points != null ? a.points : 0 };
+      });
+    }
     programEasyWizardRender();
   }
 
@@ -10899,7 +10985,11 @@
       return;
     }
     const gEl = document.getElementById('pewGoal');
+    const guEl = document.getElementById('pewGoalUnit');
     pewDraft.goalTarget = Math.max(50, parseInt(gEl && gEl.value, 10) || 400);
+    let unitStr = guEl ? String(guEl.value || '').trim() : '';
+    if (!unitStr) unitStr = 'points';
+    pewDraft.goalUnitLabel = unitStr.slice(0, 24);
     pewDraft.icon = readPewWizardIcon();
     const existingPre = pewEditingProgramId ? getProjects().find(function(x) { return x.id === pewEditingProgramId; }) : null;
     const periodStart = existingPre && existingPre.period && existingPre.period.start
@@ -10915,7 +11005,7 @@
       programContinuous: !!pewDraft.continuous,
       programDurationSpec: durSpec,
       period: { start: periodStart, end: endY },
-      goal: { type: 'points', target: pewDraft.goalTarget },
+      goal: { type: 'points', target: pewDraft.goalTarget, unitLabel: pewDraft.goalUnitLabel || 'points' },
       activities: pewDraft.activities,
       rules: { streakBonuses: [] }
     };
@@ -10960,7 +11050,7 @@
   }
 
   function programDonutSvgHtml(pct) {
-    const r = 15.9155;
+    const r = 14;
     const c = 2 * Math.PI * r;
     const p = Math.min(100, Math.max(0, pct));
     const dash = (p / 100) * c;
@@ -10991,6 +11081,7 @@
 
     const total = getProgramTotalPoints(fresh);
     const tgt = fresh.goal && fresh.goal.target ? fresh.goal.target : 500;
+    const unit = programGoalUnitLabel(fresh);
     const pct = tgt <= 0 ? 0 : Math.min(100, Math.round((total / tgt) * 100));
     const donut = document.getElementById('programDonutWrap');
     if (donut) {
@@ -10998,7 +11089,7 @@
         '<div class="program-donut-center"><span class="program-donut-pct">' + pct + '%</span><span class="program-donut-label">of goal</span></div>';
     }
     const hp = document.getElementById('programHeroPoints');
-    if (hp) hp.textContent = total + ' / ' + tgt + ' points';
+    if (hp) hp.textContent = total + ' / ' + tgt + ' ' + unit;
     const per = document.getElementById('programHeroPeriod');
     if (per) {
       if (fresh.programContinuous || !(fresh.period && fresh.period.end)) {
@@ -11020,9 +11111,13 @@
         const safeAid = a.id.replace(/'/g, "\\'");
         return '<button type="button" class="program-act-btn" data-act-id="' + escapeHtml(a.id) + '" onclick="programLogTap(\'' + safeId + '\',\'' + safeAid + '\', this)">' +
           '<span class="program-act-title">I did: ' + escapeHtml(a.label) + '</span>' +
-          '<span class="program-act-sub">Log it for today — counts toward your rhythm goal.</span>' +
-          '<span class="program-act-pts">+' + (a.points || 0) + ' pts</span></button>';
+          '<span class="program-act-pts">+' + (a.points || 0) + ' ' + escapeHtml(unit) + '</span></button>';
       }).join('');
+    }
+
+    const logHint = document.getElementById('programLogHint');
+    if (logHint) {
+      logHint.textContent = 'Tap when you have earned it. Each tap logs for today and adds to your total in ' + unit + '.';
     }
 
     const tdy = todayYMD();
@@ -11059,8 +11154,8 @@
       logEl.innerHTML = lines.length ? lines.map(function(e) {
         const lbl = (fresh.activities || []).find(function(x) { return x.id === e.activityId; });
         const name = lbl ? lbl.label : 'Activity';
-        const bonus = e.bonusPoints ? ' +' + e.bonusPoints + ' bonus' : '';
-        return '<div class="program-log-line">' + escapeHtml(String(e.date || '')) + ' — ' + escapeHtml(name) + ' +' + (e.pointsAwarded || 0) + bonus + '</div>';
+        const bonus = e.bonusPoints ? ' +' + e.bonusPoints + ' bonus ' + escapeHtml(unit) : '';
+        return '<div class="program-log-line">' + escapeHtml(String(e.date || '')) + ' — ' + escapeHtml(name) + ' +' + (e.pointsAwarded || 0) + ' ' + escapeHtml(unit) + bonus + '</div>';
       }).join('') : '<div class="program-log-line">Nothing logged yet. Use the buttons above when you earn it.</div>';
     }
   }
@@ -11429,7 +11524,7 @@
       return {
         prog,
         phaseLabel: 'Rhythm',
-        currentPhaseName: tot + '/' + tgt + ' pts',
+        currentPhaseName: tot + '/' + tgt + ' ' + programGoalUnitLabel(p),
         desc,
         finishStr,
         updatedStr
