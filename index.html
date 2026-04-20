@@ -4819,31 +4819,81 @@
       margin: 0 0 10px; color: var(--text);
     }
     .program-today-date { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
-    .program-activity-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+    .program-activity-buttons { display: flex; flex-direction: column; gap: 10px; }
     .program-act-btn {
-      padding: 12px 14px; border-radius: 12px;
-      border: 1px solid rgba(192,122,74,0.35);
-      background: rgba(255,255,255,0.65); font-size: 14px; cursor: pointer;
-      -webkit-tap-highlight-color: transparent; text-align: left;
+      display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
+      padding: 14px 16px; border-radius: 14px; width: 100%;
+      border: 1px solid rgba(192,122,74,0.32);
+      background: linear-gradient(165deg, rgba(255,255,255,0.9), rgba(255,248,240,0.75));
+      cursor: pointer; text-align: left; -webkit-tap-highlight-color: transparent;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.8) inset;
+      transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     }
-    html.dark-mode .program-act-btn { background: rgba(40,36,32,0.55); }
-    .program-act-btn:active { transform: scale(0.98); background: rgba(192,122,74,0.1); }
-    .program-summary-strip { font-size: 14px; color: var(--text2); margin-bottom: 18px; line-height: 1.45; }
-    .program-week-bar-wrap { display: flex; align-items: center; gap: 12px; }
-    .program-week-bar {
-      flex: 1; height: 8px; background: rgba(0,0,0,0.08); border-radius: 4px; overflow: hidden;
+    html.dark-mode .program-act-btn {
+      background: linear-gradient(165deg, rgba(52,46,40,0.95), rgba(40,36,32,0.75));
+      box-shadow: none;
     }
-    .program-week-fill {
-      height: 100%; background: linear-gradient(90deg, var(--accent), #d4956a);
-      border-radius: 4px; transition: width 0.3s; min-width: 0;
+    .program-act-btn:active { transform: scale(0.985); }
+    .program-act-btn.program-act-celebrate { animation: programActPop 0.55s ease; }
+    @keyframes programActPop {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(192,122,74,0.5); }
+      40% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(192,122,74,0); }
+      100% { transform: scale(1); }
     }
-    .program-week-label { font-size: 13px; font-weight: 600; color: var(--accent); white-space: nowrap; }
+    .program-act-title { font-size: 15px; font-weight: 600; color: var(--text); }
+    .program-act-sub { font-size: 12px; color: var(--muted); line-height: 1.35; }
+    .program-act-pts { font-size: 14px; font-weight: 700; color: var(--accent); letter-spacing: 0.02em; }
+    .program-hero-card {
+      display: flex; align-items: center; gap: 18px; margin-bottom: 20px;
+      padding: 16px 14px; border-radius: 16px;
+      background: rgba(255,255,255,0.55); border: 1px solid rgba(192,122,74,0.18);
+    }
+    html.dark-mode .program-hero-card { background: rgba(40,36,32,0.5); border-color: rgba(200,170,140,0.15); }
+    .program-donut-wrap { flex-shrink: 0; width: 108px; height: 108px; position: relative; }
+    .program-donut-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .program-donut-track { fill: none; stroke: rgba(0,0,0,0.08); stroke-width: 7; }
+    html.dark-mode .program-donut-track { stroke: rgba(255,255,255,0.08); }
+    .program-donut-fill { fill: none; stroke: var(--accent); stroke-width: 7; stroke-linecap: round; transition: stroke-dashoffset 0.45s ease; }
+    .program-donut-center {
+      position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      pointer-events: none;
+    }
+    .program-donut-pct { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; color: var(--text); line-height: 1.1; }
+    .program-donut-label { font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+    .program-hero-text { flex: 1; min-width: 0; }
+    .program-hero-points { font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .program-hero-period { font-size: 13px; color: var(--text2); line-height: 1.4; }
+    .program-rhythm-ladder { margin-bottom: 22px; display: flex; flex-direction: column; gap: 10px; }
+    .program-ladder-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+    .program-ladder-name { width: 72px; flex-shrink: 0; color: var(--muted); font-weight: 600; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; }
+    .program-ladder-bar { flex: 1; height: 8px; background: rgba(0,0,0,0.07); border-radius: 4px; overflow: hidden; }
+    html.dark-mode .program-ladder-bar { background: rgba(255,255,255,0.08); }
+    .program-ladder-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #d4956a); border-radius: 4px; transition: width 0.35s ease; min-width: 0; }
+    .program-ladder-val { width: 88px; flex-shrink: 0; text-align: right; font-variant-numeric: tabular-nums; color: var(--text2); font-size: 12px; }
+    .program-log-hint { font-size: 12px; color: var(--muted); margin: -4px 0 12px; line-height: 1.4; }
+    .program-wrap-btn { font-size: 13px; }
     .program-log-list { font-size: 13px; color: var(--text2); }
     .program-log-line { padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.06); }
-    .program-today-block, .program-week-block, .program-log-block { margin-bottom: 22px; }
-    .program-deep-date-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .program-deep-date-sep { font-size: 13px; color: var(--muted); }
-    .program-rules-textarea { font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+    .program-today-block, .program-log-block { margin-bottom: 22px; }
+    .pew-duration-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 8px; }
+    .pew-duration-num { width: 72px; padding: 12px 10px; border-radius: 12px; border: 1px solid rgba(192,122,74,0.25); font-size: 16px; text-align: center; }
+    .pew-duration-unit { flex: 1; min-width: 120px; padding: 12px 10px; border-radius: 12px; font-size: 15px; border: 1px solid rgba(192,122,74,0.25); background: rgba(255,255,255,0.6); }
+    html.dark-mode .pew-duration-unit { background: rgba(40,36,32,0.55); }
+    .pew-ongoing-btn {
+      width: 100%; margin-top: 12px; padding: 14px 16px; border-radius: 14px; font-size: 15px; font-weight: 600; cursor: pointer;
+      border: 2px solid rgba(192,122,74,0.45); background: rgba(255,255,255,0.5); color: var(--text);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pew-ongoing-btn.is-on { border-color: var(--accent); background: rgba(192,122,74,0.14); color: var(--accent); }
+    html.dark-mode .pew-ongoing-btn { background: rgba(40,36,32,0.45); }
+    .pew-activity-rows { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+    .pew-activity-row { display: flex; gap: 10px; align-items: center; }
+    .pew-activity-row input.pjw-input { flex: 1; margin: 0; min-width: 0; }
+    .pew-activity-pts { width: 64px; flex-shrink: 0; text-align: center; padding: 12px 8px; border-radius: 12px; border: 1px solid rgba(192,122,74,0.25); font-size: 15px; }
+    .pew-add-row-btn, .pew-remove-row-btn {
+      padding: 8px 12px; font-size: 13px; border-radius: 10px; border: 1px solid rgba(192,122,74,0.3); background: rgba(255,255,255,0.5); cursor: pointer; margin-top: 8px;
+    }
+    .pew-remove-row-btn { margin-left: 8px; color: #a05050; border-color: rgba(160,80,80,0.35); }
     .project-create-choice-tertiary {
       width: 100%; padding: 14px 18px; margin-top: 8px;
       font-size: 15px; font-weight: 500;
@@ -8020,17 +8070,22 @@
           </div>
           <button type="button" class="projects-favorite-header-btn" id="programViewFavoriteBtn" onclick="programToggleFavoriteFromView(event)" aria-label="Favorite" title="Favorite">☆</button>
           <button type="button" class="projects-edit-btn" onclick="openProgramEditor()" aria-label="Edit" title="Edit rhythm">Edit</button>
+          <button type="button" class="projects-edit-btn program-wrap-btn" id="programWrapUpBtn" onclick="programWrapUpRhythm()" style="display:none" title="Move to completed">Wrap up</button>
         </div>
         <div class="program-view-body" id="programViewBody">
-          <div class="program-summary-strip" id="programSummaryStrip"></div>
-          <div class="program-today-block">
-            <h3 class="program-section-label">Today</h3>
-            <p class="program-today-date" id="programTodayDate"></p>
-            <div class="program-activity-buttons" id="programActivityButtons"></div>
+          <div class="program-hero-card">
+            <div class="program-donut-wrap" id="programDonutWrap" aria-hidden="true"></div>
+            <div class="program-hero-text">
+              <div class="program-hero-points" id="programHeroPoints"></div>
+              <div class="program-hero-period" id="programHeroPeriod"></div>
+            </div>
           </div>
-          <div class="program-week-block">
-            <h3 class="program-section-label">This week</h3>
-            <div class="program-week-bar-wrap"><div class="program-week-bar"><div class="program-week-fill" id="programWeekFill"></div></div><span class="program-week-label" id="programWeekLabel"></span></div>
+          <div class="program-rhythm-ladder" id="programRhythmLadder" aria-label="Progress by time window"></div>
+          <div class="program-today-block">
+            <h3 class="program-section-label">Log today</h3>
+            <p class="program-today-date" id="programTodayDate"></p>
+            <p class="program-log-hint">Tap to record this activity for today and add its points toward your goal.</p>
+            <div class="program-activity-buttons" id="programActivityButtons"></div>
           </div>
           <div class="program-log-block">
             <h3 class="program-section-label">Recent</h3>
@@ -8258,63 +8313,9 @@
     <h3>Start something new</h3>
     <p class="project-create-choice-lead">Journeys use phases and a map. Rhythms track points for whatever you want to keep doing—over weeks or months.</p>
     <button type="button" class="project-create-choice-primary" onclick="projectCreateChoiceWizard()">Step-by-step journey</button>
-    <button type="button" class="project-create-choice-secondary" onclick="projectCreateChoiceProgramEasy()">Simple rhythm</button>
-    <button type="button" class="project-create-choice-secondary" onclick="projectCreateChoiceProgramDeep()">Full rhythm editor</button>
+    <button type="button" class="project-create-choice-secondary" onclick="projectCreateChoiceProgramEasy()">Rhythm (guided)</button>
     <button type="button" class="project-create-choice-tertiary" onclick="projectCreateChoiceBlathers()">Talk it through with Blathers</button>
     <button type="button" class="paste-cancel-btn project-create-choice-dismiss" onclick="closeProjectCreateChoice()">Cancel</button>
-  </div>
-</div>
-
-<!-- Full rhythm editor (deep) -->
-<div class="paste-modal-overlay" id="programDeepModalOverlay" onclick="closeProgramDeepModal(event)">
-  <div class="paste-modal projects-modal program-deep-modal" id="programDeepModal" onclick="event.stopPropagation()">
-    <div class="project-modal-hero">
-      <img class="project-modal-hero-icon" src="https://stormyreigns.github.io/HATH/Triforce.webp" alt="" loading="lazy" width="36" height="36">
-      <h3 id="programDeepModalTitle">Rhythm</h3>
-      <p class="project-modal-sub">Activities, dates, goals, and optional streak rules. Blathers can build this too.</p>
-    </div>
-    <div class="project-modal-fields">
-      <div class="project-field-group">
-        <label class="project-field-hint" for="programDeepTitle">Name</label>
-        <input type="text" class="paste-filename" id="programDeepTitle" placeholder="Reading year, craft season, weekend resets…" autocomplete="off">
-      </div>
-      <div class="project-field-group project-icon-field">
-        <label class="project-field-hint" id="programDeepIconLabel">Icon</label>
-        <div class="project-icon-picker" id="programDeepIconPicker" role="group" aria-labelledby="programDeepIconLabel"></div>
-      </div>
-      <div class="project-field-group">
-        <label class="project-field-hint" for="programDeepDesc">Why it matters</label>
-        <textarea class="paste-content" id="programDeepDesc" placeholder="Optional" rows="2"></textarea>
-      </div>
-      <div class="project-field-group program-deep-dates">
-        <label class="project-field-hint">Period</label>
-        <div class="program-deep-date-row">
-          <input type="date" id="programDeepStart" class="project-date-input">
-          <span class="program-deep-date-sep">to</span>
-          <input type="date" id="programDeepEnd" class="project-date-input">
-        </div>
-      </div>
-      <div class="project-field-group">
-        <label class="project-field-hint" for="programDeepGoalTarget">Point goal (total)</label>
-        <input type="number" class="paste-filename" id="programDeepGoalTarget" min="1" step="1" placeholder="500">
-      </div>
-      <div class="project-field-group">
-        <label class="project-field-hint" for="programDeepActivities">Activities (one per line: name | points)</label>
-        <textarea class="paste-content" id="programDeepActivities" placeholder="Walk | 3&#10;Cook at home | 5&#10;Bed by 10 | 4" rows="6"></textarea>
-      </div>
-      <div class="project-field-group">
-        <label class="project-field-hint" for="programDeepStreakRules">Streak bonuses (optional)</label>
-        <p class="project-field-subhint" id="programDeepStreakRulesHint">Extra points when you repeat an activity on several days in a row. One rule per line: activity name, then days in a row, bonus points, and max times per week—separated by |</p>
-        <textarea class="paste-content" id="programDeepStreakRules" placeholder="Walk | 5 | 10 | 1&#10;Cook at home | 3 | 5 | 2" rows="4" aria-describedby="programDeepStreakRulesHint"></textarea>
-      </div>
-    </div>
-    <div class="paste-modal-actions project-modal-actions">
-      <button type="button" class="project-delete-btn" id="programDeepDeleteBtn" onclick="deleteProgramFromDeepModal()" style="display:none">Delete</button>
-      <div class="project-modal-actions-right">
-        <button type="button" class="paste-cancel-btn" onclick="closeProgramDeepModal()">Close</button>
-        <button type="button" class="paste-save-btn project-modal-primary" onclick="saveProgramDeepModal()">Save</button>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -8580,7 +8581,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.39.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.40.0';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -10421,6 +10422,53 @@
     }, 0);
   }
 
+  function getProgramPointsOnDay(p, ymd) {
+    if (!projectIsProgram(p) || !Array.isArray(p.log)) return 0;
+    const d = String(ymd || '').slice(0, 10);
+    return p.log.reduce(function(s, e) {
+      if (e.isStreakBonus) return s;
+      if (String(e.date || '').slice(0, 10) !== d) return s;
+      return s + (parseInt(e.pointsAwarded, 10) || 0) + (parseInt(e.bonusPoints, 10) || 0);
+    }, 0);
+  }
+
+  function programPeriodEndYmdOrToday(p) {
+    if (p.programContinuous || !(p.period && p.period.end)) return todayYMD();
+    return String(p.period.end).slice(0, 10);
+  }
+
+  function programGoalSpanDays(p) {
+    if (!p.period || !p.period.start) return 365;
+    const s = parseYMD(p.period.start).getTime();
+    const e = parseYMD(programPeriodEndYmdOrToday(p)).getTime();
+    return Math.max(1, Math.ceil((e - s) / 86400000) + 1);
+  }
+
+  function programCalendarMonthRangeYMD() {
+    const n = new Date();
+    const a = new Date(n.getFullYear(), n.getMonth(), 1);
+    const b = new Date(n.getFullYear(), n.getMonth() + 1, 0);
+    return { start: ymdFromDate(a), end: ymdFromDate(b) };
+  }
+
+  function programCalendarYearRangeYMD() {
+    const n = new Date();
+    const a = new Date(n.getFullYear(), 0, 1);
+    const b = new Date(n.getFullYear(), 11, 31);
+    return { start: ymdFromDate(a), end: ymdFromDate(b) };
+  }
+
+  function programOverlapDaysInRange(p, rangeStart, rangeEnd) {
+    const ps = p.period && p.period.start ? String(p.period.start).slice(0, 10) : todayYMD();
+    const pe = programPeriodEndYmdOrToday(p);
+    const a = ps > rangeStart ? ps : rangeStart;
+    const b = pe < rangeEnd ? pe : rangeEnd;
+    if (a > b) return 0;
+    const da = parseYMD(a);
+    const db = parseYMD(b);
+    return Math.max(0, Math.ceil((db - da) / 86400000) + 1);
+  }
+
   function startOfWeekMonday(d) {
     const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
     const dow = x.getDay();
@@ -10485,8 +10533,14 @@
     const now = Date.now();
     const id = existing ? existing.id : genId();
     const start = draft.period && draft.period.start ? String(draft.period.start).slice(0, 10) : ymdFromDate(new Date());
-    let end = draft.period && draft.period.end ? String(draft.period.end).slice(0, 10) : null;
-    if (!end) {
+    let programContinuous = draft.programContinuous !== undefined
+      ? !!draft.programContinuous
+      : !!(existing && existing.programContinuous);
+    let end = null;
+    if (!programContinuous && draft.period && draft.period.end != null && String(draft.period.end).trim() !== '') {
+      end = String(draft.period.end).slice(0, 10);
+    }
+    if (!programContinuous && !end) {
       const d0 = parseYMD(start);
       d0.setFullYear(d0.getFullYear() + 1);
       end = ymdFromDate(d0);
@@ -10512,6 +10566,9 @@
     } : { type: 'points', target: 500 };
     const rules = normalizeProgramRules(draft.rules);
     const log = existing && Array.isArray(existing.log) ? existing.log.slice() : [];
+    const durationSpec = draft.programDurationSpec !== undefined
+      ? draft.programDurationSpec
+      : (existing && existing.programDurationSpec) || null;
     const o = {
       kind: 'program',
       id: id,
@@ -10522,6 +10579,8 @@
       icon: draft.icon !== undefined ? normalizeProjectIcon(draft.icon) : (existing ? normalizeProjectIcon(existing.icon) : ''),
       favorite: existing && existing.favorite,
       period: { start: start, end: end },
+      programContinuous: programContinuous,
+      programDurationSpec: durationSpec,
       goal: goal,
       activities: activities,
       rules: rules,
@@ -10533,21 +10592,6 @@
     };
     if (!o.icon) delete o.icon;
     return o;
-  }
-
-  function parseActivitiesFromDeepText(text) {
-    const lines = String(text || '').split('\n');
-    const out = [];
-    lines.forEach(function(line, i) {
-      const t = line.trim();
-      if (!t) return;
-      const parts = t.split('|');
-      const label = (parts[0] || '').trim();
-      const pts = parts.length > 1 ? parseInt(parts[1].trim(), 10) : NaN;
-      if (!label) return;
-      out.push({ id: genId(), label: label.slice(0, 120), points: Math.max(0, Math.min(500, isNaN(pts) ? 3 : pts)) });
-    });
-    return out;
   }
 
   function formatStreakRulesForEditor(rules) {
@@ -10594,149 +10638,89 @@
     return normalizeProgramRules({ streakBonuses: streakBonuses });
   }
 
-  function getPewActivityPresets() {
-    return [
-      { k: 'focus', label: 'Deep focus block', pts: 4 },
-      { k: 'make', label: 'Make or create something', pts: 5 },
-      { k: 'space', label: 'Tidy or reset a space', pts: 3 },
-      { k: 'out', label: 'Time outside', pts: 3 },
-      { k: 'reach', label: 'Reach out to someone', pts: 3 }
-    ];
-  }
-
-  function pewDefaultSelection() {
-    return { focus: true, make: true, space: false, out: false, reach: false };
-  }
-
-  let programDeepEditingId = null;
+  let pewEditingProgramId = null;
   let pewStep = 0;
   let pewDraft = null;
 
+  function inferProgramWizardDuration(p) {
+    if (p.programContinuous) return { continuous: true, durationValue: 1, durationUnit: 'months' };
+    if (p.programDurationSpec && typeof p.programDurationSpec === 'object' && p.programDurationSpec.continuous === true) {
+      return { continuous: true, durationValue: 1, durationUnit: 'months' };
+    }
+    if (p.programDurationSpec && typeof p.programDurationSpec === 'object' && p.programDurationSpec.continuous === false && p.programDurationSpec.value != null) {
+      return {
+        continuous: false,
+        durationValue: Math.max(1, parseInt(p.programDurationSpec.value, 10) || 1),
+        durationUnit: p.programDurationSpec.unit === 'days' || p.programDurationSpec.unit === 'years' ? p.programDurationSpec.unit : 'months'
+      };
+    }
+    if (!p.period || !p.period.start || !p.period.end) return { continuous: false, durationValue: 12, durationUnit: 'months' };
+    const s = parseYMD(p.period.start).getTime();
+    const e = parseYMD(p.period.end).getTime();
+    const days = Math.max(1, Math.round((e - s) / 86400000));
+    if (days <= 45) return { continuous: false, durationValue: days, durationUnit: 'days' };
+    const months = Math.round(days / 30);
+    if (months <= 36) return { continuous: false, durationValue: Math.max(1, months), durationUnit: 'months' };
+    return { continuous: false, durationValue: Math.max(1, Math.round(days / 365)), durationUnit: 'years' };
+  }
+
+  function pewEndYmdFromStart(startYmd, draft) {
+    if (draft.continuous) return null;
+    const d = parseYMD(startYmd);
+    const n = Math.max(1, parseInt(draft.durationValue, 10) || 1);
+    const u = draft.durationUnit || 'months';
+    if (u === 'days') d.setDate(d.getDate() + n);
+    else if (u === 'years') d.setFullYear(d.getFullYear() + n);
+    else d.setMonth(d.getMonth() + n);
+    return ymdFromDate(d);
+  }
+
   function projectCreateChoiceProgramEasy() {
     document.getElementById('projectCreateChoiceOverlay').classList.remove('open');
-    openProgramEasyWizard();
-  }
-
-  function projectCreateChoiceProgramDeep() {
-    document.getElementById('projectCreateChoiceOverlay').classList.remove('open');
-    programDeepEditingId = null;
-    openProgramDeepModal(null);
-  }
-
-  function openProgramDeepModal(editId) {
-    programDeepEditingId = editId || null;
-    const p = editId ? getProjects().find(function(x) { return x.id === editId; }) : null;
-    const isProg = p && projectIsProgram(p);
-    document.getElementById('programDeepModalTitle').textContent = isProg ? 'Edit rhythm' : 'New rhythm';
-    document.getElementById('programDeepDeleteBtn').style.display = editId ? 'block' : 'none';
-    document.getElementById('programDeepTitle').value = isProg ? (p.title || '') : '';
-    document.getElementById('programDeepDesc').value = isProg ? (p.description || '') : '';
-    const startEl = document.getElementById('programDeepStart');
-    const endEl = document.getElementById('programDeepEnd');
-    if (isProg && p.period) {
-      startEl.value = p.period.start || '';
-      endEl.value = p.period.end || '';
-    } else {
-      const t = todayYMD();
-      startEl.value = t;
-      const e = parseYMD(t);
-      e.setFullYear(e.getFullYear() + 1);
-      endEl.value = ymdFromDate(e);
-    }
-    document.getElementById('programDeepGoalTarget').value = isProg && p.goal ? (p.goal.target || 500) : 500;
-    let actText = '';
-    if (isProg && p.activities) {
-      actText = p.activities.map(function(a) { return a.label + ' | ' + a.points; }).join('\n');
-    }
-    document.getElementById('programDeepActivities').value = actText;
-    let rulesTxt = '';
-    if (isProg && p.rules) {
-      rulesTxt = formatStreakRulesForEditor(p.rules);
-    }
-    document.getElementById('programDeepStreakRules').value = rulesTxt;
-    renderProjectIconPickerInto('programDeepIconPicker', isProg ? p.icon : '', 'programDeepIconPick');
-    document.getElementById('programDeepModalOverlay').classList.add('open');
-  }
-
-  function programDeepIconPick(btn) {
-    projectIconOptionClick(btn, false);
-    const wrap = document.getElementById('programDeepIconPicker');
-    if (!wrap) return;
-  }
-
-  function closeProgramDeepModal(ev) {
-    if (ev && ev.target !== document.getElementById('programDeepModalOverlay')) return;
-    document.getElementById('programDeepModalOverlay').classList.remove('open');
-    programDeepEditingId = null;
-  }
-
-  function readProgramDeepIcon() {
-    const sel = document.querySelector('#programDeepIconPicker .project-icon-option.selected');
-    if (!sel) return '';
-    const raw = sel.getAttribute('data-icon');
-    if (raw == null || raw === '') return '';
-    return normalizeProjectIcon(raw);
-  }
-
-  function saveProgramDeepModal() {
-    const title = document.getElementById('programDeepTitle').value.trim();
-    if (!title) return;
-    const desc = document.getElementById('programDeepDesc').value.trim();
-    const start = document.getElementById('programDeepStart').value || todayYMD();
-    const end = document.getElementById('programDeepEnd').value || start;
-    const target = Math.max(1, parseInt(document.getElementById('programDeepGoalTarget').value, 10) || 500);
-    const activities = parseActivitiesFromDeepText(document.getElementById('programDeepActivities').value);
-    let rules = { streakBonuses: [] };
-    const rawRules = document.getElementById('programDeepStreakRules').value.trim();
-    if (rawRules) {
-      const parsed = parseStreakRulesInput(rawRules);
-      if (parsed == null) {
-        alert('Could not read streak bonuses. Use one line per rule: activity name | days in a row | bonus points | max per week — or leave blank.');
-        return;
-      }
-      rules = parsed;
-    }
-    const existing = programDeepEditingId ? getProjects().find(function(x) { return x.id === programDeepEditingId; }) : null;
-    const draft = {
-      title: title,
-      description: desc,
-      icon: readProgramDeepIcon(),
-      period: { start: start, end: end },
-      goal: { type: 'points', target: target },
-      activities: activities.length ? activities : [{ id: genId(), label: 'Activity', points: 3 }],
-      rules: rules
-    };
-    const merged = normalizeProgramDraft(draft, existing && projectIsProgram(existing) ? existing : null);
-    if (existing && projectIsProgram(existing)) merged.log = existing.log || [];
-    const all = getProjects();
-    const idx = merged.id ? all.findIndex(function(x) { return x.id === merged.id; }) : -1;
-    if (idx >= 0) all[idx] = merged;
-    else all.push(merged);
-    saveProjects(all);
-    closeProgramDeepModal();
-    renderProjectsLanding();
-    renderHomeProjectsScroller();
-    if (projectsViewing && projectsViewing.id === merged.id) {
-      projectsViewing = merged;
-      renderProgramView();
-    }
-  }
-
-  function deleteProgramFromDeepModal() {
-    if (!programDeepEditingId) return;
-    projectsConfirmDelete(programDeepEditingId);
-    closeProgramDeepModal();
+    openProgramEasyWizard(null);
   }
 
   function openProgramEditor() {
     const p = projectsViewing;
     if (!p || !projectIsProgram(p)) return;
-    openProgramDeepModal(p.id);
+    openProgramEasyWizard(p.id);
   }
 
-  function openProgramEasyWizard() {
+  function openProgramEasyWizard(editId) {
+    pewEditingProgramId = editId || null;
     pewStep = 0;
-    pewDraft = { title: '', description: '', periodMonths: 12, activities: [], goalTarget: 400 };
+    if (editId) {
+      const p = getProjects().find(function(x) { return x.id === editId; });
+      if (!p || !projectIsProgram(p)) {
+        pewEditingProgramId = null;
+        return;
+      }
+      const dur = inferProgramWizardDuration(p);
+      const rows = (p.activities || []).map(function(a) {
+        return { id: a.id, label: a.label || '', pts: a.points != null ? a.points : 3 };
+      });
+      pewDraft = {
+        title: p.title || '',
+        description: p.description || '',
+        continuous: !!dur.continuous,
+        durationValue: dur.durationValue,
+        durationUnit: dur.durationUnit || 'months',
+        activityRows: rows.length ? rows : [{ id: genId(), label: '', pts: 5 }],
+        goalTarget: p.goal && p.goal.target ? p.goal.target : 400,
+        icon: p.icon || ''
+      };
+    } else {
+      pewDraft = {
+        title: '',
+        description: '',
+        continuous: false,
+        durationValue: 12,
+        durationUnit: 'months',
+        activityRows: [{ id: genId(), label: '', pts: 5 }, { id: genId(), label: '', pts: 5 }],
+        goalTarget: 400,
+        icon: ''
+      };
+    }
     const o = document.getElementById('programEasyWizardOverlay');
     if (o) {
       o.classList.add('open');
@@ -10753,6 +10737,37 @@
     }
     pewDraft = null;
     pewStep = 0;
+    pewEditingProgramId = null;
+  }
+
+  function pewToggleContinuous() {
+    if (!pewDraft) return;
+    pewDraft.continuous = !pewDraft.continuous;
+    programEasyWizardRender();
+  }
+
+  function pewAddActivityRow() {
+    if (!pewDraft || !Array.isArray(pewDraft.activityRows)) return;
+    pewDraft.activityRows.push({ id: genId(), label: '', pts: 3 });
+    programEasyWizardRender();
+  }
+
+  function pewRemoveActivityRow(idx) {
+    if (!pewDraft || !pewDraft.activityRows || pewDraft.activityRows.length <= 1) return;
+    pewDraft.activityRows.splice(idx, 1);
+    programEasyWizardRender();
+  }
+
+  function pewIconPick(btn) {
+    projectIconOptionClick(btn, false);
+  }
+
+  function readPewWizardIcon() {
+    const sel = document.querySelector('#pewIconHost .project-icon-option.selected');
+    if (!sel) return '';
+    const raw = sel.getAttribute('data-icon');
+    if (raw == null || raw === '') return '';
+    return normalizeProjectIcon(raw);
   }
 
   function programEasyWizardRender() {
@@ -10762,57 +10777,65 @@
     const prog = document.getElementById('pewProgress');
     const back = document.getElementById('pewBack');
     const next = document.getElementById('pewNext');
-    if (!body) return;
+    if (!body || !pewDraft) return;
+    const totalSteps = 4;
     if (pewStep === 0) {
-      if (prog) prog.textContent = '1 of 4';
+      if (prog) prog.textContent = '1 of ' + totalSteps;
       if (h) h.textContent = 'Name this rhythm';
       if (lead) lead.textContent = 'Whatever you want to keep showing up for—work, home, creative, or care.';
-      body.innerHTML = '<input type="text" class="pjw-input pjw-input-hero" id="pewTitle" autocomplete="off" placeholder="Reading year, craft season, weekend resets…" value="' + escapeHtml(pewDraft.title || '') + '">';
+      body.innerHTML =
+        '<input type="text" class="pjw-input pjw-input-hero" id="pewTitle" autocomplete="off" placeholder="Reading year, craft season, weekend resets…" value="' + escapeHtml(pewDraft.title || '') + '">' +
+        '<label class="project-field-hint" for="pewDesc" style="margin-top:16px">Notes (optional)</label>' +
+        '<textarea class="pjw-input" id="pewDesc" rows="2" placeholder="A line or two if it helps you remember why this rhythm exists." style="min-height:72px;resize:vertical">' + escapeHtml(pewDraft.description || '') + '</textarea>';
       if (back) back.textContent = 'Exit';
       if (next) next.textContent = 'Continue';
     } else if (pewStep === 1) {
-      if (prog) prog.textContent = '2 of 4';
-      if (h) h.textContent = 'How long?';
-      if (lead) lead.textContent = 'You can adjust dates later.';
+      if (prog) prog.textContent = '2 of ' + totalSteps;
+      if (h) h.textContent = 'How long should this run?';
+      if (lead) lead.textContent = 'Pick a length, or choose Ongoing and close it yourself when you are done.';
+      const on = pewDraft.continuous ? ' is-on' : '';
+      const dis = pewDraft.continuous ? ' disabled' : '';
       body.innerHTML =
-        '<div class="pew-preset-row">' +
-        '<button type="button" class="pew-preset' + (pewDraft.periodMonths === 3 ? ' selected' : '') + '" onclick="pewSetMonths(3)">3 months</button>' +
-        '<button type="button" class="pew-preset' + (pewDraft.periodMonths === 6 ? ' selected' : '') + '" onclick="pewSetMonths(6)">6 months</button>' +
-        '<button type="button" class="pew-preset' + (pewDraft.periodMonths === 12 ? ' selected' : '') + '" onclick="pewSetMonths(12)">1 year</button>' +
-        '</div>';
+        '<button type="button" class="pew-ongoing-btn' + on + '" onclick="pewToggleContinuous()">Ongoing — I will wrap it up when I am ready</button>' +
+        '<div class="pew-duration-row" style="' + (pewDraft.continuous ? 'opacity:0.45;pointer-events:none' : '') + '">' +
+        '<input type="number" class="pew-duration-num" id="pewDurN" min="1" max="999" value="' + escapeHtml(String(pewDraft.durationValue || 1)) + '"' + dis + '>' +
+        '<select class="pew-duration-unit" id="pewDurU"' + dis + '>' +
+        '<option value="days"' + (pewDraft.durationUnit === 'days' ? ' selected' : '') + '>days</option>' +
+        '<option value="months"' + (pewDraft.durationUnit !== 'days' && pewDraft.durationUnit !== 'years' ? ' selected' : '') + '>months</option>' +
+        '<option value="years"' + (pewDraft.durationUnit === 'years' ? ' selected' : '') + '>years</option>' +
+        '</select></div>';
       if (back) back.textContent = 'Back';
       if (next) next.textContent = 'Continue';
     } else if (pewStep === 2) {
-      if (prog) prog.textContent = '3 of 4';
-      if (h) h.textContent = 'Pick a few activities';
-      if (lead) lead.textContent = 'Examples to get you started—tap to turn on or off. You can tune points later in the full editor.';
-      const presets = getPewActivityPresets();
-      if (!pewDraft._sel) pewDraft._sel = pewDefaultSelection();
-      body.innerHTML = '<div class="pew-chip-grid">' + presets.map(function(pr) {
-        const on = pewDraft._sel[pr.k] ? ' is-on' : '';
-        return '<button type="button" class="pew-chip' + on + '" onclick="pewTogglePreset(\'' + pr.k + '\')">' + escapeHtml(pr.label) + ' · ' + pr.pts + ' pts</button>';
-      }).join('') + '</div>';
+      if (prog) prog.textContent = '3 of ' + totalSteps;
+      if (h) h.textContent = 'Activities you will log';
+      if (lead) lead.textContent = 'Name each thing you want to earn points for, and how many points it is worth when you do it.';
+      let rowsHtml = '<div class="pew-activity-rows">';
+      (pewDraft.activityRows || []).forEach(function(row, i) {
+        rowsHtml +=
+          '<div class="pew-activity-row">' +
+          '<input type="text" class="pjw-input pew-act-label" placeholder="What you did" value="' + escapeHtml(row.label || '') + '">' +
+          '<input type="number" class="pew-activity-pts pew-act-pts" min="0" max="500" value="' + escapeHtml(String(row.pts != null ? row.pts : 3)) + '">' +
+          (i > 0 ? '<button type="button" class="pew-remove-row-btn" onclick="pewRemoveActivityRow(' + i + ')">Remove</button>' : '<span style="width:72px;flex-shrink:0"></span>') +
+          '</div>';
+      });
+      rowsHtml += '</div><button type="button" class="pew-add-row-btn" onclick="pewAddActivityRow()">+ Add activity</button>';
+      body.innerHTML = rowsHtml;
       if (back) back.textContent = 'Back';
       if (next) next.textContent = 'Continue';
     } else {
-      if (prog) prog.textContent = '4 of 4';
-      if (h) h.textContent = 'Point goal';
-      if (lead) lead.textContent = 'Total points you are aiming for over the whole period.';
-      body.innerHTML = '<input type="number" class="pjw-input" id="pewGoal" min="50" step="10" value="' + (pewDraft.goalTarget || 400) + '">';
+      if (prog) prog.textContent = '4 of ' + totalSteps;
+      if (h) h.textContent = 'Goal and icon';
+      if (lead) lead.textContent = 'Total points to aim for over this rhythm, and an emoji badge if you like.';
+      body.innerHTML =
+        '<label class="project-field-hint" for="pewGoal">Point goal (total)</label>' +
+        '<input type="number" class="pjw-input" id="pewGoal" min="50" step="10" value="' + (pewDraft.goalTarget || 400) + '">' +
+        '<label class="project-field-hint" style="margin-top:16px">Icon (optional)</label>' +
+        '<div class="project-icon-picker pjw-project-icon-picker" id="pewIconHost" role="group"></div>';
+      renderProjectIconPickerInto('pewIconHost', pewDraft.icon || '', 'pewIconPick');
       if (back) back.textContent = 'Back';
-      if (next) next.textContent = 'Save';
+      if (next) next.textContent = pewEditingProgramId ? 'Save changes' : 'Save';
     }
-  }
-
-  function pewSetMonths(n) {
-    pewDraft.periodMonths = n;
-    programEasyWizardRender();
-  }
-
-  function pewTogglePreset(k) {
-    if (!pewDraft._sel) pewDraft._sel = {};
-    pewDraft._sel[k] = !pewDraft._sel[k];
-    programEasyWizardRender();
   }
 
   function programEasyWizardBack() {
@@ -10825,59 +10848,128 @@
   }
 
   function programEasyWizardNext() {
+    if (!pewDraft) return;
     if (pewStep === 0) {
       const el = document.getElementById('pewTitle');
+      const de = document.getElementById('pewDesc');
       const t = el ? el.value.trim() : '';
       if (!t) return;
       pewDraft.title = t;
+      pewDraft.description = de ? String(de.value || '').trim() : '';
       pewStep++;
       programEasyWizardRender();
       return;
     }
     if (pewStep === 1) {
+      if (!pewDraft.continuous) {
+        const nEl = document.getElementById('pewDurN');
+        const uEl = document.getElementById('pewDurU');
+        const n = Math.max(1, parseInt(nEl && nEl.value, 10) || 1);
+        pewDraft.durationValue = Math.min(999, n);
+        pewDraft.durationUnit = uEl && uEl.value ? uEl.value : 'months';
+      }
       pewStep++;
       programEasyWizardRender();
       return;
     }
     if (pewStep === 2) {
-      const presets = getPewActivityPresets();
-      const sel = pewDraft._sel || {};
-      const acts = [];
-      presets.forEach(function(pr) {
-        if (sel[pr.k]) acts.push({ id: genId(), label: pr.label, points: pr.pts });
+      const body = document.getElementById('pewBody');
+      const rowEls = body ? body.querySelectorAll('.pew-activity-row') : [];
+      const activities = [];
+      const nextRows = [];
+      rowEls.forEach(function(row, i) {
+        const lab = row.querySelector('.pew-act-label');
+        const pt = row.querySelector('.pew-act-pts');
+        const label = lab ? String(lab.value || '').trim() : '';
+        const pts = pt ? parseInt(pt.value, 10) : NaN;
+        const prev = pewDraft.activityRows && pewDraft.activityRows[i];
+        const rid = prev && prev.id ? prev.id : genId();
+        const ptsN = Math.max(0, Math.min(500, isNaN(pts) ? 3 : pts));
+        nextRows.push({ id: rid, label: label, pts: ptsN });
+        if (label) activities.push({ id: rid, label: label.slice(0, 120), points: ptsN });
       });
-      if (acts.length === 0) acts.push({ id: genId(), label: 'Starter activity', points: 5 });
-      pewDraft.activities = acts;
+      if (activities.length === 0) {
+        alert('Add at least one activity with a name.');
+        return;
+      }
+      pewDraft.activityRows = nextRows;
+      pewDraft.activities = activities;
       pewStep++;
       programEasyWizardRender();
       return;
     }
     const gEl = document.getElementById('pewGoal');
     pewDraft.goalTarget = Math.max(50, parseInt(gEl && gEl.value, 10) || 400);
-    const start = todayYMD();
-    const endD = parseYMD(start);
-    endD.setMonth(endD.getMonth() + (pewDraft.periodMonths || 12));
+    pewDraft.icon = readPewWizardIcon();
+    const existingPre = pewEditingProgramId ? getProjects().find(function(x) { return x.id === pewEditingProgramId; }) : null;
+    const periodStart = existingPre && existingPre.period && existingPre.period.start
+      ? String(existingPre.period.start).slice(0, 10)
+      : todayYMD();
+    const endY = pewEndYmdFromStart(periodStart, pewDraft);
+    const durSpec = pewDraft.continuous ? { continuous: true } : { continuous: false, value: pewDraft.durationValue, unit: pewDraft.durationUnit };
+    const existing = pewEditingProgramId ? getProjects().find(function(x) { return x.id === pewEditingProgramId; }) : null;
     const draft = {
       title: pewDraft.title,
       description: pewDraft.description || '',
-      period: { start: start, end: ymdFromDate(endD) },
+      icon: pewDraft.icon,
+      programContinuous: !!pewDraft.continuous,
+      programDurationSpec: durSpec,
+      period: { start: periodStart, end: endY },
       goal: { type: 'points', target: pewDraft.goalTarget },
       activities: pewDraft.activities,
       rules: { streakBonuses: [] }
     };
-    const merged = normalizeProgramDraft(draft, null);
+    const merged = normalizeProgramDraft(draft, existing && projectIsProgram(existing) ? existing : null);
+    if (existing && projectIsProgram(existing)) merged.log = existing.log || [];
     const all = getProjects();
-    all.push(merged);
+    const idx = merged.id ? all.findIndex(function(x) { return x.id === merged.id; }) : -1;
+    if (idx >= 0) all[idx] = merged;
+    else all.push(merged);
     saveProjects(all);
+    const selId = merged.id;
     closeProgramEasyWizard();
     renderProjectsLanding();
     renderHomeProjectsScroller();
-    projectsSelectProject(merged.id);
+    projectsSelectProject(selId);
+  }
+
+  function programWrapUpRhythm() {
+    if (!projectsViewing || !projectIsProgram(projectsViewing)) return;
+    if (!confirm('Wrap up this rhythm? It moves to your completed list. You can delete it later from there.')) return;
+    const all = getProjects();
+    const p = all.find(function(x) { return x.id === projectsViewing.id; });
+    if (!p || !projectIsProgram(p)) return;
+    p.programArchived = true;
+    p.modifiedAt = Date.now();
+    saveProjects(all);
+    projectsBackToLanding();
+    renderHomeProjectsScroller();
   }
 
   function programToggleFavoriteFromView(ev) {
     if (!projectsViewing || !projectIsProgram(projectsViewing)) return;
     projectsToggleFavorite(projectsViewing.id, ev);
+  }
+
+  function programWindowTargetPoints(p, winStartYmd, winEndYmd) {
+    const tgt = p.goal && p.goal.target ? p.goal.target : 500;
+    const span = programGoalSpanDays(p);
+    const od = programOverlapDaysWithRange(p, winStartYmd, winEndYmd);
+    if (od <= 0) return 1;
+    return Math.max(1, Math.round(tgt * od / span));
+  }
+
+  function programDonutSvgHtml(pct) {
+    const r = 15.9155;
+    const c = 2 * Math.PI * r;
+    const p = Math.min(100, Math.max(0, pct));
+    const dash = (p / 100) * c;
+    const gap = c - dash;
+    return '<svg class="program-donut-svg" viewBox="0 0 36 36" aria-hidden="true">' +
+      '<circle class="program-donut-track" cx="18" cy="18" r="' + r + '" fill="none" />' +
+      '<circle class="program-donut-fill" cx="18" cy="18" r="' + r + '" fill="none" ' +
+      'stroke-dasharray="' + dash + ' ' + gap + '" stroke-dashoffset="0" />' +
+      '</svg>';
   }
 
   function renderProgramView() {
@@ -10894,33 +10986,73 @@
       fav.textContent = fresh.favorite ? '★' : '☆';
       fav.classList.toggle('is-fav', !!fresh.favorite);
     }
-    const sum = document.getElementById('programSummaryStrip');
+    const wrapUp = document.getElementById('programWrapUpBtn');
+    if (wrapUp) wrapUp.style.display = fresh.programArchived ? 'none' : '';
+
     const total = getProgramTotalPoints(fresh);
     const tgt = fresh.goal && fresh.goal.target ? fresh.goal.target : 500;
-    const pct = Math.min(100, Math.round((total / tgt) * 100));
-    if (sum) {
-      sum.textContent = total + ' / ' + tgt + ' points (' + pct + '% of goal). Period ' + (fresh.period && fresh.period.start) + ' → ' + (fresh.period && fresh.period.end) + '.';
+    const pct = tgt <= 0 ? 0 : Math.min(100, Math.round((total / tgt) * 100));
+    const donut = document.getElementById('programDonutWrap');
+    if (donut) {
+      donut.innerHTML = programDonutSvgHtml(pct) +
+        '<div class="program-donut-center"><span class="program-donut-pct">' + pct + '%</span><span class="program-donut-label">of goal</span></div>';
     }
+    const hp = document.getElementById('programHeroPoints');
+    if (hp) hp.textContent = total + ' / ' + tgt + ' points';
+    const per = document.getElementById('programHeroPeriod');
+    if (per) {
+      if (fresh.programContinuous || !(fresh.period && fresh.period.end)) {
+        const s = fresh.period && fresh.period.start ? parseYMD(fresh.period.start).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+        per.textContent = s ? 'Ongoing · started ' + s : 'Ongoing rhythm';
+      } else {
+        const a = fresh.period.start ? parseYMD(fresh.period.start).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+        const b = fresh.period.end ? parseYMD(fresh.period.end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+        per.textContent = a && b ? a + ' → ' + b : '';
+      }
+    }
+
     const td = document.getElementById('programTodayDate');
     if (td) td.textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
     const btnWrap = document.getElementById('programActivityButtons');
     if (btnWrap) {
       btnWrap.innerHTML = (fresh.activities || []).map(function(a) {
-        return '<button type="button" class="program-act-btn" onclick="programLogTap(\'' + fresh.id.replace(/'/g, "\\'") + '\',\'' + a.id.replace(/'/g, "\\'") + '\')">' +
-          escapeHtml(a.label) + ' +' + a.points + '</button>';
+        const safeId = fresh.id.replace(/'/g, "\\'");
+        const safeAid = a.id.replace(/'/g, "\\'");
+        return '<button type="button" class="program-act-btn" data-act-id="' + escapeHtml(a.id) + '" onclick="programLogTap(\'' + safeId + '\',\'' + safeAid + '\', this)">' +
+          '<span class="program-act-title">I did: ' + escapeHtml(a.label) + '</span>' +
+          '<span class="program-act-sub">Log it for today — counts toward your rhythm goal.</span>' +
+          '<span class="program-act-pts">+' + (a.points || 0) + ' pts</span></button>';
       }).join('');
     }
-    const wr = getWeekRangeYMD(todayYMD());
+
+    const tdy = todayYMD();
+    const wr = getWeekRangeYMD(tdy);
+    const mo = programCalendarMonthRangeYMD();
+    const yr = programCalendarYearRangeYMD();
+    const dayPts = getProgramPointsOnDay(fresh, tdy);
     const wkPts = getProgramPointsBetween(fresh, wr.start, wr.end);
-    const pStart = fresh.period && fresh.period.start ? parseYMD(fresh.period.start).getTime() : Date.now();
-    const pEnd = fresh.period && fresh.period.end ? parseYMD(fresh.period.end).getTime() : pStart + 86400000 * 365;
-    const weekCount = Math.max(1, Math.ceil((pEnd - pStart) / 604800000));
-    const wkTgt = Math.max(20, Math.round(tgt / weekCount));
-    const wf = document.getElementById('programWeekFill');
-    const wl = document.getElementById('programWeekLabel');
-    const wPct = Math.min(100, Math.round((wkPts / wkTgt) * 100));
-    if (wf) wf.style.width = wPct + '%';
-    if (wl) wl.textContent = wkPts + ' / ~' + wkTgt + ' this week';
+    const moPts = getProgramPointsBetween(fresh, mo.start, mo.end);
+    const yrPts = getProgramPointsBetween(fresh, yr.start, yr.end);
+    const dT = programWindowTargetPoints(fresh, tdy, tdy);
+    const wT = programWindowTargetPoints(fresh, wr.start, wr.end);
+    const mT = programWindowTargetPoints(fresh, mo.start, mo.end);
+    const yT = programWindowTargetPoints(fresh, yr.start, yr.end);
+    const ladder = document.getElementById('programRhythmLadder');
+    if (ladder) {
+      function row(label, cur, cap) {
+        const pc = cap <= 0 ? 0 : Math.min(100, Math.round((cur / cap) * 100));
+        return '<div class="program-ladder-row">' +
+          '<span class="program-ladder-name">' + label + '</span>' +
+          '<div class="program-ladder-bar"><div class="program-ladder-fill" style="width:' + pc + '%"></div></div>' +
+          '<span class="program-ladder-val">' + cur + ' / ' + cap + '</span></div>';
+      }
+      ladder.innerHTML =
+        row('Today', dayPts, dT) +
+        row('This week', wkPts, wT) +
+        row('This month', moPts, mT) +
+        row('This year', yrPts, yT);
+    }
+
     const logEl = document.getElementById('programLogList');
     if (logEl) {
       const lines = (fresh.log || []).slice(-14).reverse();
@@ -10929,11 +11061,11 @@
         const name = lbl ? lbl.label : 'Activity';
         const bonus = e.bonusPoints ? ' +' + e.bonusPoints + ' bonus' : '';
         return '<div class="program-log-line">' + escapeHtml(String(e.date || '')) + ' — ' + escapeHtml(name) + ' +' + (e.pointsAwarded || 0) + bonus + '</div>';
-      }).join('') : '<div class="program-log-line">Nothing logged yet. Tap an activity above.</div>';
+      }).join('') : '<div class="program-log-line">Nothing logged yet. Use the buttons above when you earn it.</div>';
     }
   }
 
-  function programLogTap(projectId, activityId) {
+  function programLogTap(projectId, activityId, btnEl) {
     const all = getProjects();
     const p = all.find(function(x) { return x.id === projectId; });
     if (!p || !projectIsProgram(p)) return;
@@ -10980,6 +11112,11 @@
     renderProjectsLanding();
     renderHomeProjectsScroller();
     try { if (navigator.vibrate) navigator.vibrate(12); } catch (_) {}
+    if (btnEl && btnEl.classList) {
+      btnEl.classList.remove('program-act-celebrate');
+      void btnEl.offsetWidth;
+      btnEl.classList.add('program-act-celebrate');
+    }
   }
 
   let projectsEditing = null;
@@ -11275,7 +11412,9 @@
       let desc = (p.description || '').trim();
       if (desc.length > 120) desc = desc.slice(0, 117) + '\u2026';
       let finishStr = '';
-      if (p.period && p.period.end) {
+      if (p.programContinuous || !(p.period && p.period.end)) {
+        finishStr = 'Ongoing';
+      } else if (p.period && p.period.end) {
         const d = parseYMD(p.period.end);
         finishStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
       }
@@ -12636,7 +12775,7 @@
     }
     const _pe = getProjects().find(p => p.id === editId);
     if (_pe && projectIsProgram(_pe)) {
-      openProgramDeepModal(editId);
+      openProgramEasyWizard(editId);
       return;
     }
     projectsEditing = _pe || null;
