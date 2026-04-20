@@ -164,6 +164,8 @@
     .load-screen.hidden {
       opacity: 0;
       pointer-events: none;
+      visibility: hidden;
+      transition: opacity 0.35s ease, visibility 0s linear 0.35s;
     }
     .load-screen-lottie {
       width: 160px;
@@ -8558,7 +8560,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.39.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.39.1';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -8805,13 +8807,14 @@
 
   async function preloadApp() {
     const LOAD_MIN_MS = 1200;
-    const LOAD_MAX_MS = 14000;
+    const LOAD_MAX_MS = 16000;
+    const PRELOAD_FETCH_MS = 11000;
     const start = Date.now();
 
     const fetchDocsFolder = async (folderId) => {
       try {
         const url = apiUrlWithUser(API_URL, '&action=listFolder&folder=' + encodeURIComponent(folderId));
-        const res = await fetch(url, { redirect: 'follow' });
+        const res = await fetchWithTimeout_(url, {}, PRELOAD_FETCH_MS);
         if (!res.ok) return [];
         const data = await res.json();
         if (!data.error && (data.folders || data.files)) {
@@ -8823,24 +8826,24 @@
     };
 
     const fetchBalance = () =>
-      fetch(apiUrlWithUser(API_URL), { redirect: 'follow' })
+      fetchWithTimeout_(apiUrlWithUser(API_URL), {}, PRELOAD_FETCH_MS)
         .then(r => r.json())
         .catch(() => null);
 
     const fetchTabList = () =>
-      fetch(apiUrlWithUser(API_URL, '&action=tabList'), { redirect: 'follow' })
+      fetchWithTimeout_(apiUrlWithUser(API_URL, '&action=tabList'), {}, PRELOAD_FETCH_MS)
         .then(r => r.json())
         .then(d => (d && d.tabs) ? d.tabs : [])
         .catch(() => []);
 
     const fetchDocIndex = () =>
-      fetch(apiUrlWithUser(API_URL, '&action=docIndex'), { redirect: 'follow' })
+      fetchWithTimeout_(apiUrlWithUser(API_URL, '&action=docIndex'), {}, PRELOAD_FETCH_MS)
         .then(r => r.json())
         .then(d => (d && d.files) ? d.files : [])
         .catch(() => []);
 
     const runCore = async () => {
-      const pingPromise = fetch(API_URL + '?action=ping', { redirect: 'follow' }).catch(() => null);
+      const pingPromise = fetchWithTimeout_(API_URL + '?action=ping', {}, PRELOAD_FETCH_MS).catch(() => null);
       const rootPromise = fetchDocsFolder(DOCS_FOLDER_ID);
       const balancePromise = fetchBalance();
       const tabListPromise = fetchTabList();
@@ -8921,6 +8924,10 @@
   }
 
   document.addEventListener('DOMContentLoaded', async function() {
+    const savedUser = localStorage.getItem('shasta_user');
+    const savedExp  = localStorage.getItem('shasta_auth_exp');
+    const sessionEmail = (savedUser && savedExp && Date.now() < parseInt(savedExp)) ? savedUser : null;
+
     if (!navigator.onLine) {
       hideLoadScreen();
       showOfflineScreen();
@@ -8930,30 +8937,63 @@
     window.addEventListener('offline', showOfflineScreen);
     window.addEventListener('online', hideOfflineScreen);
 
-    const savedUser = localStorage.getItem('shasta_user');
-    const savedExp  = localStorage.getItem('shasta_auth_exp');
-    const sessionEmail = (savedUser && savedExp && Date.now() < parseInt(savedExp)) ? savedUser : null;
+    const BOOT_FAILSAFE_MS = 24000;
+    let bootFailsafeId = setTimeout(function() {
+      bootFailsafeId = null;
+      try {
+        hideLoadScreen();
+      } catch (_) {}
+      try {
+        _lastPreloadBalance = _lastPreloadBalance || null;
+        launchApp(sessionEmail, null);
+      } catch (_) {}
+      try {
+        initGSIWhenReady();
+      } catch (_) {}
+    }, BOOT_FAILSAFE_MS);
 
-    let preloadResult = null;
+    function clearBootFailsafe() {
+      if (bootFailsafeId) {
+        clearTimeout(bootFailsafeId);
+        bootFailsafeId = null;
+      }
+    }
+
     try {
-      preloadResult = await preloadApp();
-      _lastPreloadBalance = preloadResult;
-      launchApp(sessionEmail, preloadResult);
-    } catch (_) {
-      _lastPreloadBalance = null;
+      let preloadResult = null;
+      try {
+        preloadResult = await preloadApp();
+        _lastPreloadBalance = preloadResult;
+        launchApp(sessionEmail, preloadResult);
+      } catch (_) {
+        _lastPreloadBalance = null;
+        try {
+          launchApp(sessionEmail, null);
+        } catch (_) {}
+      } finally {
+        clearBootFailsafe();
+        initGSIWhenReady();
+        hideLoadScreen();
+      }
+
+      var fddOverlay = document.getElementById('fundingDeepDive');
+      if (fddOverlay) {
+        fddOverlay.addEventListener('click', function(e) {
+          if (e.target === fddOverlay) closeFundingDeepDive();
+        });
+      }
+    } catch (e) {
+      console.warn('ShastApp boot:', e);
+      clearBootFailsafe();
+      try {
+        hideLoadScreen();
+      } catch (_) {}
       try {
         launchApp(sessionEmail, null);
       } catch (_) {}
-    } finally {
-      initGSIWhenReady();
-      hideLoadScreen();
-    }
-
-    var fddOverlay = document.getElementById('fundingDeepDive');
-    if (fddOverlay) {
-      fddOverlay.addEventListener('click', function(e) {
-        if (e.target === fddOverlay) closeFundingDeepDive();
-      });
+      try {
+        initGSIWhenReady();
+      } catch (_) {}
     }
   });
 
@@ -10339,7 +10379,7 @@
     const day = t.getUTCDay() || 7;
     t.setUTCDate(t.getUTCDate() + 4 - day);
     const y = t.getUTCFullYear();
-    const w = Math.ceil((((t - new Date(Date.UTC(y, 0, 1))) / 86400000 + 1) / 7);
+    const w = Math.ceil((((t - new Date(Date.UTC(y, 0, 1)))) / 86400000 + 1) / 7);
     return y + '-W' + String(w).padStart(2, '0');
   }
 
