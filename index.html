@@ -5665,12 +5665,17 @@
       background: rgba(255,255,255,0.55);
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
-      transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+      transform: scale(1);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
     }
     .project-icon-option.selected {
-      border-color: rgba(192,122,74,0.65);
-      box-shadow: 0 0 0 2px rgba(192,122,74,0.14);
-      background: rgba(192,122,74,0.08);
+      border-color: rgba(192,122,74,0.9);
+      box-shadow:
+        0 0 0 2px rgba(192,122,74,0.35),
+        0 0 18px rgba(192,122,74,0.55),
+        0 0 32px rgba(212,149,106,0.35);
+      background: rgba(192,122,74,0.12);
+      transform: scale(1.06);
     }
     .project-icon-option:active { transform: scale(0.96); }
     html.dark-mode .project-icon-option {
@@ -5678,8 +5683,12 @@
       border-color: rgba(200,170,140,0.22);
     }
     html.dark-mode .project-icon-option.selected {
-      border-color: rgba(192,122,74,0.55);
-      box-shadow: 0 0 0 2px rgba(192,122,74,0.12);
+      border-color: rgba(220,170,130,0.95);
+      box-shadow:
+        0 0 0 2px rgba(192,122,74,0.45),
+        0 0 22px rgba(192,122,74,0.45),
+        0 0 36px rgba(212,149,106,0.25);
+      background: rgba(192,122,74,0.18);
     }
     .pjw-icon-picker-block {
       margin-top: 18px;
@@ -5705,6 +5714,16 @@
       margin: 0;
     }
     html.dark-mode .project-field-hint { color: rgba(220,200,175,0.5); }
+    .project-field-subhint {
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+      text-transform: none;
+      line-height: 1.45;
+      color: var(--text2);
+      margin: -2px 0 8px;
+    }
+    html.dark-mode .project-field-subhint { color: rgba(200,185,170,0.75); }
     .projects-modal .project-field-group .paste-filename,
     .projects-modal .project-field-group .paste-content {
       margin-bottom: 0;
@@ -8237,7 +8256,7 @@
 <div class="paste-modal-overlay" id="projectCreateChoiceOverlay" onclick="closeProjectCreateChoice(event)">
   <div class="paste-modal project-create-choice-modal" onclick="event.stopPropagation()">
     <h3>Start something new</h3>
-    <p class="project-create-choice-lead">Journeys use phases and a map. Rhythms track points and habits over time.</p>
+    <p class="project-create-choice-lead">Journeys use phases and a map. Rhythms track points for whatever you want to keep doing—over weeks or months.</p>
     <button type="button" class="project-create-choice-primary" onclick="projectCreateChoiceWizard()">Step-by-step journey</button>
     <button type="button" class="project-create-choice-secondary" onclick="projectCreateChoiceProgramEasy()">Simple rhythm</button>
     <button type="button" class="project-create-choice-secondary" onclick="projectCreateChoiceProgramDeep()">Full rhythm editor</button>
@@ -8257,7 +8276,7 @@
     <div class="project-modal-fields">
       <div class="project-field-group">
         <label class="project-field-hint" for="programDeepTitle">Name</label>
-        <input type="text" class="paste-filename" id="programDeepTitle" placeholder="Year of movement, kitchen care…" autocomplete="off">
+        <input type="text" class="paste-filename" id="programDeepTitle" placeholder="Reading year, craft season, weekend resets…" autocomplete="off">
       </div>
       <div class="project-field-group project-icon-field">
         <label class="project-field-hint" id="programDeepIconLabel">Icon</label>
@@ -8284,8 +8303,9 @@
         <textarea class="paste-content" id="programDeepActivities" placeholder="Walk | 3&#10;Cook at home | 5&#10;Bed by 10 | 4" rows="6"></textarea>
       </div>
       <div class="project-field-group">
-        <label class="project-field-hint" for="programDeepRulesJson">Streak rules (JSON, optional)</label>
-        <textarea class="paste-content program-rules-textarea" id="programDeepRulesJson" placeholder='{"streakBonuses":[{"activityLabel":"Walk","consecutiveDays":5,"bonusPoints":10,"maxPerWeek":1}]}' rows="4"></textarea>
+        <label class="project-field-hint" for="programDeepStreakRules">Streak bonuses (optional)</label>
+        <p class="project-field-subhint" id="programDeepStreakRulesHint">Extra points when you repeat an activity on several days in a row. One rule per line: activity name, then days in a row, bonus points, and max times per week—separated by |</p>
+        <textarea class="paste-content" id="programDeepStreakRules" placeholder="Walk | 5 | 10 | 1&#10;Cook at home | 3 | 5 | 2" rows="4" aria-describedby="programDeepStreakRulesHint"></textarea>
       </div>
     </div>
     <div class="paste-modal-actions project-modal-actions">
@@ -8560,7 +8580,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.39.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.39.2';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -10483,7 +10503,7 @@
       }).filter(function(a) { return a.label; });
     }
     if (activities.length === 0) {
-      activities = [{ id: genId(), label: 'Healthy choice', points: 5 }];
+      activities = [{ id: genId(), label: 'Starter activity', points: 5 }];
     }
     const goal = draft.goal && typeof draft.goal === 'object' ? {
       type: draft.goal.type === 'display_cash' ? 'display_cash' : 'points',
@@ -10530,6 +10550,64 @@
     return out;
   }
 
+  function formatStreakRulesForEditor(rules) {
+    if (!rules || !Array.isArray(rules.streakBonuses) || rules.streakBonuses.length === 0) return '';
+    return rules.streakBonuses.map(function(r) {
+      const label = String(r.activityLabel || '').trim() || 'Activity';
+      return label + ' | ' + (parseInt(r.consecutiveDays, 10) || 5) + ' | ' + (parseInt(r.bonusPoints, 10) || 0) + ' | ' + (parseInt(r.maxPerWeek, 10) || 1);
+    }).join('\n');
+  }
+
+  /** Plain lines: activity | days in a row | bonus pts | max per week. # starts a comment. Leading { uses JSON (optional / legacy). */
+  function parseStreakRulesInput(raw) {
+    const t = String(raw || '').trim();
+    if (!t) return normalizeProgramRules({ streakBonuses: [] });
+    if (t.charAt(0) === '{') {
+      try {
+        return normalizeProgramRules(JSON.parse(t));
+      } catch (_) {
+        return null;
+      }
+    }
+    const lines = t.split('\n');
+    const streakBonuses = [];
+    lines.forEach(function(line, idx) {
+      const s = line.trim();
+      if (!s || s.charAt(0) === '#') return;
+      const parts = s.split('|').map(function(x) { return x.trim(); });
+      if (parts.length < 4) return;
+      const activityLabel = parts[0];
+      const consecutiveDays = parseInt(parts[1], 10);
+      const bonusPoints = parseInt(parts[2], 10);
+      const maxPerWeek = parseInt(parts[3], 10);
+      if (!activityLabel) return;
+      if (isNaN(consecutiveDays) || isNaN(bonusPoints) || isNaN(maxPerWeek)) return;
+      streakBonuses.push({
+        id: 'sb_' + idx + '_' + Date.now(),
+        activityId: null,
+        activityLabel: activityLabel.slice(0, 120),
+        consecutiveDays: Math.max(2, consecutiveDays),
+        bonusPoints: Math.max(0, bonusPoints),
+        maxPerWeek: Math.max(1, maxPerWeek)
+      });
+    });
+    return normalizeProgramRules({ streakBonuses: streakBonuses });
+  }
+
+  function getPewActivityPresets() {
+    return [
+      { k: 'focus', label: 'Deep focus block', pts: 4 },
+      { k: 'make', label: 'Make or create something', pts: 5 },
+      { k: 'space', label: 'Tidy or reset a space', pts: 3 },
+      { k: 'out', label: 'Time outside', pts: 3 },
+      { k: 'reach', label: 'Reach out to someone', pts: 3 }
+    ];
+  }
+
+  function pewDefaultSelection() {
+    return { focus: true, make: true, space: false, out: false, reach: false };
+  }
+
   let programDeepEditingId = null;
   let pewStep = 0;
   let pewDraft = null;
@@ -10573,9 +10651,9 @@
     document.getElementById('programDeepActivities').value = actText;
     let rulesTxt = '';
     if (isProg && p.rules) {
-      try { rulesTxt = JSON.stringify(p.rules, null, 2); } catch (_) { rulesTxt = ''; }
+      rulesTxt = formatStreakRulesForEditor(p.rules);
     }
-    document.getElementById('programDeepRulesJson').value = rulesTxt;
+    document.getElementById('programDeepStreakRules').value = rulesTxt;
     renderProjectIconPickerInto('programDeepIconPicker', isProg ? p.icon : '', 'programDeepIconPick');
     document.getElementById('programDeepModalOverlay').classList.add('open');
   }
@@ -10609,14 +10687,14 @@
     const target = Math.max(1, parseInt(document.getElementById('programDeepGoalTarget').value, 10) || 500);
     const activities = parseActivitiesFromDeepText(document.getElementById('programDeepActivities').value);
     let rules = { streakBonuses: [] };
-    const rj = document.getElementById('programDeepRulesJson').value.trim();
-    if (rj) {
-      try {
-        rules = normalizeProgramRules(JSON.parse(rj));
-      } catch (_) {
-        alert('Streak rules JSON could not be parsed. Check brackets and quotes.');
+    const rawRules = document.getElementById('programDeepStreakRules').value.trim();
+    if (rawRules) {
+      const parsed = parseStreakRulesInput(rawRules);
+      if (parsed == null) {
+        alert('Could not read streak bonuses. Use one line per rule: activity name | days in a row | bonus points | max per week — or leave blank.');
         return;
       }
+      rules = parsed;
     }
     const existing = programDeepEditingId ? getProjects().find(function(x) { return x.id === programDeepEditingId; }) : null;
     const draft = {
@@ -10688,8 +10766,8 @@
     if (pewStep === 0) {
       if (prog) prog.textContent = '1 of 4';
       if (h) h.textContent = 'Name this rhythm';
-      if (lead) lead.textContent = 'Something you will enjoy seeing on your list.';
-      body.innerHTML = '<input type="text" class="pjw-input pjw-input-hero" id="pewTitle" autocomplete="off" placeholder="Year of care, gentle habits…" value="' + escapeHtml(pewDraft.title || '') + '">';
+      if (lead) lead.textContent = 'Whatever you want to keep showing up for—work, home, creative, or care.';
+      body.innerHTML = '<input type="text" class="pjw-input pjw-input-hero" id="pewTitle" autocomplete="off" placeholder="Reading year, craft season, weekend resets…" value="' + escapeHtml(pewDraft.title || '') + '">';
       if (back) back.textContent = 'Exit';
       if (next) next.textContent = 'Continue';
     } else if (pewStep === 1) {
@@ -10707,15 +10785,9 @@
     } else if (pewStep === 2) {
       if (prog) prog.textContent = '3 of 4';
       if (h) h.textContent = 'Pick a few activities';
-      if (lead) lead.textContent = 'Tap to include. Points are gentle defaults.';
-      const presets = [
-        { k: 'walk', label: 'Walk or move', pts: 3 },
-        { k: 'cook', label: 'Cook at home', pts: 5 },
-        { k: 'sleep', label: 'Bed on time', pts: 4 },
-        { k: 'water', label: 'Hydrate well', pts: 2 },
-        { k: 'connect', label: 'Connect with someone', pts: 3 }
-      ];
-      if (!pewDraft._sel) pewDraft._sel = { walk: true, cook: true, sleep: false, water: false, connect: false };
+      if (lead) lead.textContent = 'Examples to get you started—tap to turn on or off. You can tune points later in the full editor.';
+      const presets = getPewActivityPresets();
+      if (!pewDraft._sel) pewDraft._sel = pewDefaultSelection();
       body.innerHTML = '<div class="pew-chip-grid">' + presets.map(function(pr) {
         const on = pewDraft._sel[pr.k] ? ' is-on' : '';
         return '<button type="button" class="pew-chip' + on + '" onclick="pewTogglePreset(\'' + pr.k + '\')">' + escapeHtml(pr.label) + ' · ' + pr.pts + ' pts</button>';
@@ -10768,19 +10840,13 @@
       return;
     }
     if (pewStep === 2) {
-      const presets = [
-        { k: 'walk', label: 'Walk or move', pts: 3 },
-        { k: 'cook', label: 'Cook at home', pts: 5 },
-        { k: 'sleep', label: 'Bed on time', pts: 4 },
-        { k: 'water', label: 'Hydrate well', pts: 2 },
-        { k: 'connect', label: 'Connect with someone', pts: 3 }
-      ];
+      const presets = getPewActivityPresets();
       const sel = pewDraft._sel || {};
       const acts = [];
       presets.forEach(function(pr) {
         if (sel[pr.k]) acts.push({ id: genId(), label: pr.label, points: pr.pts });
       });
-      if (acts.length === 0) acts.push({ id: genId(), label: 'Healthy choice', points: 5 });
+      if (acts.length === 0) acts.push({ id: genId(), label: 'Starter activity', points: 5 });
       pewDraft.activities = acts;
       pewStep++;
       programEasyWizardRender();
