@@ -1973,6 +1973,75 @@
       position: relative;
       z-index: 1;
     }
+    .fin-equity-card {
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin: 10px 0 14px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(124,196,127,0.2);
+      position: relative;
+      z-index: 1;
+    }
+    html.dark-mode .fin-equity-card {
+      background: rgba(0,0,0,0.12);
+      border-color: rgba(124,196,127,0.2);
+    }
+    .fin-equity-card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .fin-equity-rows { display: flex; flex-direction: column; gap: 10px; }
+    .fin-equity-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 6px 12px;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+    .fin-equity-k {
+      color: var(--text2);
+      min-width: 118px;
+      flex-shrink: 0;
+    }
+    .fin-equity-accent { color: var(--fin-accent); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .fin-equity-price-cell { display: inline-flex; align-items: center; gap: 6px; }
+    .fin-equity-price--muted { color: var(--muted); font-weight: 500; }
+    .fin-equity-asof {
+      width: 100%;
+      flex-basis: 100%;
+      font-size: 12px;
+      color: var(--muted);
+      padding-left: 118px;
+      box-sizing: border-box;
+    }
+    .fin-equity-retry {
+      border: none;
+      background: rgba(124,196,127,0.12);
+      color: var(--fin-accent);
+      border-radius: 8px;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      padding: 0;
+    }
+    .fin-equity-retry:hover { opacity: 0.9; }
+    .fin-equity-win-open { color: #1a8f4a; font-weight: 600; }
+    .fin-equity-win-blackout { color: #b04040; font-weight: 600; }
+    html.dark-mode .fin-equity-win-open { color: #4ecf7a; }
+    html.dark-mode .fin-equity-win-blackout { color: #e07070; }
+    .fin-equity-disclaimer {
+      font-size: 11px;
+      color: var(--muted);
+      font-style: italic;
+      margin: 14px 0 0;
+      line-height: 1.45;
+    }
     .fin-pie-panel {
       flex: 0 1 42%;
       max-width: 200px;
@@ -4186,6 +4255,8 @@
     .hz-dot--local { background: #5a9070; }
     .hz-dot--municipal { background: rgba(192,122,74,0.55); }
     .hz-dot--holidays { background: #c9a227; }
+    .hz-dot--equity { background: #00843d; }
+    html.dark-mode .hz-dot--equity { background: #00c864; }
     .hz-card-body { flex: 1; min-width: 0; }
     .hz-card-title {
       font-family: 'Inter', sans-serif;
@@ -4226,6 +4297,14 @@
     }
     .hz-mini-badge.local-pill { background: rgba(90,144,112,0.18); color: #3d6b4f; }
     html.dark-mode .hz-mini-badge.local-pill { color: #9bc9a8; }
+    .hz-mini-badge.equity {
+      background: rgba(0, 132, 61, 0.15);
+      color: #00843d;
+    }
+    html.dark-mode .hz-mini-badge.equity {
+      background: rgba(0, 200, 100, 0.15);
+      color: #00c864;
+    }
     .hz-card-time {
       font-size: 12px;
       color: var(--muted);
@@ -4705,6 +4784,14 @@
     .schedule-event-badge.pets { background: rgba(120,160,80,0.2); color: #5a8a30; }
     .schedule-event-badge.home { background: rgba(160,120,60,0.2); color: #8a6a30; }
     .schedule-event-badge.civic { background: rgba(42,91,168,0.15); color: #2a5ba8; }
+    .schedule-event-badge.equity {
+      background: rgba(0, 132, 61, 0.15);
+      color: #00843d;
+    }
+    html.dark-mode .schedule-event-badge.equity {
+      background: rgba(0, 200, 100, 0.15);
+      color: #00c864;
+    }
     .schedule-event-star {
       flex-shrink: 0; min-width: 44px; min-height: 44px;
       width: 36px; height: 36px;
@@ -8360,6 +8447,28 @@
                 </div>
               </div>
             </div>
+            <div class="fin-equity-card" id="finEquityCard">
+              <div class="fin-equity-card-title">📈 RIVN Equity</div>
+              <div class="fin-equity-rows">
+                <div class="fin-equity-row fin-equity-row--price">
+                  <span class="fin-equity-k">Current Price</span>
+                  <span class="fin-equity-price-cell">
+                    <span class="fin-equity-accent fin-equity-price" id="finEquityPrice">—</span>
+                    <button type="button" class="fin-equity-retry" id="finEquityRetryBtn" onclick="refreshFinEquityCard(true)" style="display:none" aria-label="Retry price">⟳</button>
+                  </span>
+                  <span class="fin-equity-asof" id="finEquityAsOf"></span>
+                </div>
+                <div class="fin-equity-row">
+                  <span class="fin-equity-k">Next Vest</span>
+                  <span class="fin-equity-accent" id="finEquityNextVest">—</span>
+                </div>
+                <div class="fin-equity-row">
+                  <span class="fin-equity-k">Trading Window</span>
+                  <span class="fin-equity-window" id="finEquityWindow">—</span>
+                </div>
+              </div>
+              <p class="fin-equity-disclaimer">⚠ Vest dates fixed. Window dates estimated ±2 weeks. Verify at Guidepost before trading.</p>
+            </div>
             <div id="finPeriodEmpty" class="fin-empty-quip" style="display:none"></div>
             <div id="finChartsBlock">
               <div class="fin-section-label" id="finTrendSectionLabel">Spending trend</div>
@@ -10911,6 +11020,130 @@
   /** Transactions in the selected period (for pie → category → description drill-down). */
   var _finPieLastPeriodTxs = null;
 
+  /** Yahoo RIVN quote cache for Finances equity card (15 min TTL). */
+  var _rivnPriceCache = null;
+  var RIVN_PRICE_TTL_MS = 15 * 60 * 1000;
+  var RIVN_YAHOO_CHART_URL = 'https://query1.finance.yahoo.com/v8/finance/chart/RIVN?interval=1d&range=1d';
+
+  function getNextRivnVestDate() {
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    var vestMonths = [1, 4, 7, 10];
+    var year = today.getFullYear();
+    for (var y = year; y <= year + 2; y++) {
+      for (var vi = 0; vi < vestMonths.length; vi++) {
+        var mo = vestMonths[vi];
+        var d = new Date(y, mo, 15);
+        d.setHours(0, 0, 0, 0);
+        if (d > today) return d;
+      }
+    }
+    return new Date(year + 1, 1, 15);
+  }
+
+  function getRivnWindowStatus() {
+    var today = new Date();
+    var m = today.getMonth();
+    var d = today.getDate();
+    var periods = [
+      { sm: 2, sd: 15, om: 2, od: 29 },
+      { sm: 5, sd: 15, om: 5, od: 29 },
+      { sm: 8, sd: 15, om: 8, od: 29 },
+      { sm: 11, sd: 15, om: 11, od: 29 }
+    ];
+    for (var i = 0; i < periods.length; i++) {
+      var p = periods[i];
+      if (m === p.sm && d >= p.sd && d < p.od) return 'blackout';
+    }
+    return 'open';
+  }
+
+  function applyFinEquityPriceToDom_(priceNum, marketTimeSec) {
+    var pEl = document.getElementById('finEquityPrice');
+    var aEl = document.getElementById('finEquityAsOf');
+    var rBtn = document.getElementById('finEquityRetryBtn');
+    if (pEl) {
+      pEl.textContent = '$' + Number(priceNum).toFixed(2);
+      pEl.classList.add('fin-equity-accent');
+      pEl.classList.remove('fin-equity-price--muted');
+    }
+    if (aEl && marketTimeSec) {
+      var dt = new Date(marketTimeSec * 1000);
+      aEl.textContent = 'as of ' + dt.toLocaleTimeString('en-US', {
+        timeZone: 'America/Chicago',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      }) + ' CT';
+    } else if (aEl) {
+      aEl.textContent = '';
+    }
+    if (rBtn) rBtn.style.display = 'none';
+  }
+
+  function applyFinEquityPriceFailure_(showRetry) {
+    var pEl = document.getElementById('finEquityPrice');
+    var aEl = document.getElementById('finEquityAsOf');
+    var rBtn = document.getElementById('finEquityRetryBtn');
+    if (pEl) {
+      pEl.textContent = 'Price unavailable';
+      pEl.classList.remove('fin-equity-accent');
+      pEl.classList.add('fin-equity-price--muted');
+    }
+    if (aEl) aEl.textContent = '';
+    if (rBtn) rBtn.style.display = showRetry ? '' : 'none';
+  }
+
+  function finFetchRivnQuote_() {
+    var pEl = document.getElementById('finEquityPrice');
+    if (pEl) {
+      pEl.textContent = '…';
+      pEl.classList.add('fin-equity-accent');
+      pEl.classList.remove('fin-equity-price--muted');
+    }
+    var aEl0 = document.getElementById('finEquityAsOf');
+    if (aEl0) aEl0.textContent = '';
+    var rBtn0 = document.getElementById('finEquityRetryBtn');
+    if (rBtn0) rBtn0.style.display = 'none';
+    fetch(RIVN_YAHOO_CHART_URL, { mode: 'cors' })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        var result = data.chart && data.chart.result && data.chart.result[0];
+        var meta = result && result.meta;
+        if (!meta) throw new Error('no meta');
+        var price = meta.regularMarketPrice != null ? meta.regularMarketPrice : meta.previousClose;
+        if (price == null || isNaN(Number(price))) throw new Error('no price');
+        var t = meta.regularMarketTime != null ? meta.regularMarketTime : Math.floor(Date.now() / 1000);
+        _rivnPriceCache = { price: Number(price), marketTimeSec: t, fetchedAtMs: Date.now() };
+        applyFinEquityPriceToDom_(_rivnPriceCache.price, _rivnPriceCache.marketTimeSec);
+      })
+      .catch(function() {
+        applyFinEquityPriceFailure_(true);
+      });
+  }
+
+  function refreshFinEquityCard(forcePriceRefresh) {
+    var nvEl = document.getElementById('finEquityNextVest');
+    var wEl = document.getElementById('finEquityWindow');
+    var nextV = getNextRivnVestDate();
+    if (nvEl && nextV) {
+      nvEl.textContent = nextV.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+    if (wEl) {
+      var st = getRivnWindowStatus();
+      wEl.className = 'fin-equity-window ' + (st === 'blackout' ? 'fin-equity-win-blackout' : 'fin-equity-win-open');
+      wEl.textContent = st === 'blackout' ? '🔒 Blackout Period' : '🟢 Likely Open';
+    }
+    var now = Date.now();
+    if (!forcePriceRefresh && _rivnPriceCache && (now - _rivnPriceCache.fetchedAtMs) < RIVN_PRICE_TTL_MS) {
+      applyFinEquityPriceToDom_(_rivnPriceCache.price, _rivnPriceCache.marketTimeSec);
+      var rBtn = document.getElementById('finEquityRetryBtn');
+      if (rBtn) rBtn.style.display = 'none';
+      return;
+    }
+    finFetchRivnQuote_();
+  }
+
   var FIN_PIE_COLORS = ['#7cc47f', '#5a9e9e', '#c07a4a', '#9b7aac', '#e07070', '#7a8fce', '#d4a853', '#88b082', '#c9a56d', '#8ec5d6'];
 
   var FIN_ACCOUNT_LABELS = { '6618': 'Primary', '8406': 'Matt', '8414': 'Jess' };
@@ -11470,6 +11703,8 @@
     }
 
     if (projBtn) projBtn.disabled = !getApiUser();
+
+    refreshFinEquityCard();
 
     var periodEmpty = txs.length === 0;
     if (emptyEl) {
@@ -16454,6 +16689,56 @@
       .filter(ev => new Date(ev.start) >= today);
   }
 
+  /**
+   * Rivian RSU / trading-window awareness (client-side, no API).
+   * Vests + blackout starts + estimated window opens for three calendar years.
+   */
+  function getRivianEquityEvents() {
+    const ymd = (y, monthIndex, day) => {
+      const d = new Date(y, monthIndex, day);
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const da = String(d.getDate()).padStart(2, '0');
+      return d.getFullYear() + '-' + m + '-' + da;
+    };
+    const baseYear = new Date().getFullYear();
+    const out = [];
+    for (let y = baseYear - 1; y <= baseYear + 1; y++) {
+      out.push(
+        { title: '📈 RIVN RSU Vest', date: ymd(y, 1, 15), calendar: 'equity', isAllDay: true },
+        { title: '📈 RIVN RSU Vest', date: ymd(y, 4, 15), calendar: 'equity', isAllDay: true },
+        { title: '📈 RIVN RSU Vest', date: ymd(y, 7, 15), calendar: 'equity', isAllDay: true },
+        { title: '📈 RIVN RSU Vest', date: ymd(y, 10, 15), calendar: 'equity', isAllDay: true },
+        { title: '🔒 RIVN Trading Blackout Begins', date: ymd(y, 2, 15), calendar: 'equity', isAllDay: true },
+        { title: '🔒 RIVN Trading Blackout Begins', date: ymd(y, 5, 15), calendar: 'equity', isAllDay: true },
+        { title: '🔒 RIVN Trading Blackout Begins', date: ymd(y, 8, 15), calendar: 'equity', isAllDay: true },
+        { title: '🔒 RIVN Trading Blackout Begins', date: ymd(y, 11, 15), calendar: 'equity', isAllDay: true },
+        { title: '🟢 RIVN Trading Window Est. Opens', date: ymd(y, 2, 29), calendar: 'equity', isAllDay: true },
+        { title: '🟢 RIVN Trading Window Est. Opens', date: ymd(y, 5, 29), calendar: 'equity', isAllDay: true },
+        { title: '🟢 RIVN Trading Window Est. Opens', date: ymd(y, 8, 29), calendar: 'equity', isAllDay: true },
+        { title: '🟢 RIVN Trading Window Est. Opens', date: ymd(y, 11, 29), calendar: 'equity', isAllDay: true }
+      );
+    }
+    return out.map(function(ev) {
+      return { title: ev.title, date: ev.date, start: ev.date + 'T12:00:00', calendar: 'equity', isAllDay: true };
+    });
+  }
+
+  /** Drop re-computed calendar rows so civic + equity can be reinserted fresh. */
+  function scheduleStripBuiltInCalendars_(events) {
+    return (events || []).filter(function(e) {
+      const c = String(e.calendar || '').toLowerCase();
+      return c !== 'civic' && c !== 'equity';
+    });
+  }
+
+  /** Google (or other) events + civic + equity + local, in one consistent order. */
+  function scheduleReattachCivicEquityAndLocal(googleOrNonLocalBase, localArr) {
+    return scheduleStripBuiltInCalendars_(googleOrNonLocalBase)
+      .concat(getCivicEvents())
+      .concat(getRivianEquityEvents())
+      .concat(localArr || []);
+  }
+
   function getCivicsPollingUrl() {
     const zip = getCivicsZip();
     if (zip) {
@@ -17960,7 +18245,7 @@
         const base = (typeof scheduleEvents !== 'undefined' && scheduleEvents && scheduleEvents.length)
           ? scheduleEvents.filter(function(e) { return e.calendar !== 'local'; })
           : [];
-        scheduleEvents = base.concat(fresh || []);
+        scheduleEvents = scheduleReattachCivicEquityAndLocal(base, fresh || []);
         renderScheduleHorizon();
       });
     }
@@ -18031,7 +18316,7 @@
     const base = (typeof scheduleEvents !== 'undefined' && scheduleEvents && scheduleEvents.length)
       ? scheduleEvents.filter(function(e) { return e.calendar !== 'local'; })
       : [];
-    scheduleEvents = base.concat(fresh);
+    scheduleEvents = scheduleReattachCivicEquityAndLocal(base, fresh);
   }
 
   function renderMunicipalAside() {
@@ -18099,6 +18384,7 @@
   function hzDotClassForEvent(ev) {
     const cal = String(ev.calendar || 'shared').toLowerCase();
     if (cal === 'civic') return 'hz-dot--civic';
+    if (cal === 'equity') return 'hz-dot--equity';
     if (cal === 'local') return 'hz-dot--local';
     if (cal === 'municipal') return 'hz-dot--municipal';
     if (cal === 'holidays') return 'hz-dot--holidays';
@@ -18117,7 +18403,8 @@
     const cat = getEventCategory(ev);
     const badge = cat ? '<span class="hz-mini-badge ' + escapeHtml(cat) + '">' + escapeHtml(cat) + '</span>' : '';
     const localBadge = ev.calendar === 'local' ? '<span class="hz-mini-badge local-pill">Local</span>' : '';
-    const canEditGoogle = ev.calendar && ['holidays', 'civic', 'local', 'municipal'].indexOf(cal) < 0;
+    const equityBadge = cal === 'equity' ? '<span class="hz-mini-badge equity">Equity</span>' : '';
+    const canEditGoogle = ev.calendar && ['holidays', 'civic', 'local', 'municipal', 'equity'].indexOf(cal) < 0;
     const localEditBtn = cal === 'local'
       ? '<button type="button" class="hz-sq-btn hz-edit-btn" onclick="event.stopPropagation();openLocalEventDrawerForEdit(this)" title="Edit">Edit</button>'
       : '';
@@ -18128,7 +18415,7 @@
       ? '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
       : '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
     return (
-      '<div class="hz-card-actions-row">' + localBadge + badge +
+      '<div class="hz-card-actions-row">' + localBadge + equityBadge + badge +
       '<span class="hz-card-time">' + escapeHtml(time) + '</span>' +
       '<button type="button" class="schedule-event-star' + starClass + '" onclick="event.stopPropagation();scheduleToggleStar(event)">' + starFill + '</button>' +
       bellBtn + localEditBtn + editBtn + '</div>'
@@ -18143,6 +18430,7 @@
     const subParts = [];
     if (ev.calendar === 'local') subParts.push('Around town');
     else if (ev.calendar === 'civic') subParts.push('Civic');
+    else if (ev.calendar === 'equity') subParts.push('Equity');
     if (ev.venue) subParts.push(ev.venue);
     const timeStr = (ev.start && !ev.isAllDay) ? formatEventTime(ev.start) : '';
     if (timeStr) subParts.push(timeStr);
@@ -19373,7 +19661,7 @@
           const base = (typeof scheduleEvents !== 'undefined' && scheduleEvents && scheduleEvents.length)
             ? scheduleEvents.filter(function(e) { return e.calendar !== 'local'; })
             : [];
-          scheduleEvents = base.concat(fresh || []);
+          scheduleEvents = scheduleReattachCivicEquityAndLocal(base, fresh || []);
           renderScheduleHorizon();
           requestAnimationFrame(scrollToYmd);
         });
@@ -19405,11 +19693,10 @@
         fetchLocalEventsForScheduleCached()
       ]);
       const data = res;
-      const civic = getCivicEvents();
       if (data.error || !data.events || data.events.length === 0) {
-        scheduleEvents = civic.concat(localArr);
+        scheduleEvents = scheduleReattachCivicEquityAndLocal([], localArr);
       } else {
-        scheduleEvents = data.events.concat(civic).concat(localArr);
+        scheduleEvents = scheduleReattachCivicEquityAndLocal(data.events, localArr);
       }
       refreshScheduleMainView();
     } catch (err) {
@@ -19428,7 +19715,7 @@
     renderScheduleChips();
     const user = localStorage.getItem('shasta_user');
     if (!user) {
-      scheduleEvents = getCivicEvents();
+      scheduleEvents = getCivicEvents().concat(getRivianEquityEvents());
       refreshScheduleMainView();
       renderScheduleChips();
       return;
@@ -19438,7 +19725,7 @@
       renderScheduleChips();
       preloadScheduleCalendarList_();
     } catch (err) {
-      scheduleEvents = getCivicEvents();
+      scheduleEvents = getCivicEvents().concat(getRivianEquityEvents());
       refreshScheduleMainView();
       renderScheduleChips();
       preloadScheduleCalendarList_();
