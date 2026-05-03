@@ -1751,7 +1751,7 @@
       100% { transform: translate(-18%, 6%); }
     }
     #financesScreen .fin-header,
-    #financesScreen .fin-period-chips {
+    #financesScreen .fin-view-toolbar {
       flex-shrink: 0;
     }
     #financesScreen .fin-scroll-wrap {
@@ -1783,7 +1783,58 @@
       color: var(--text);
     }
     .fin-header-mid { flex: 1; min-width: 0; }
-    .fin-asof { display: block; font-size: 12px; color: var(--muted); font-style: italic; margin-top: 2px; }
+    .fin-asof { display: block; font-size: 12px; color: var(--muted); font-style: italic; margin-top: 2px; line-height: 1.35; }
+    .fin-sync-note {
+      font-size: 11px;
+      color: var(--muted);
+      margin: 6px 0 0;
+      line-height: 1.4;
+      max-width: 42ch;
+    }
+    .fin-header-actions {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .fin-project-shortcut-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(124, 196, 127, 0.12);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      position: relative;
+      flex-shrink: 0;
+    }
+    html.dark-mode .fin-project-shortcut-btn { background: rgba(93, 160, 96, 0.14); }
+    .fin-project-shortcut-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .fin-project-shortcut-inner {
+      position: relative;
+      display: block;
+      width: 26px;
+      height: 26px;
+    }
+    .fin-project-shortcut-inner img {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+      display: block;
+    }
+    .fin-project-shortcut-plus {
+      position: absolute;
+      top: -4px;
+      right: -5px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--fin-accent);
+      line-height: 1;
+      text-shadow: 0 0 3px var(--bg), 0 0 2px var(--bg);
+    }
     .fin-refresh-btn {
       flex-shrink: 0;
       width: 40px; height: 40px;
@@ -1800,19 +1851,45 @@
     .fin-refresh-btn svg { width: 20px; height: 20px; }
     .fin-refresh-btn.fin-loading svg { animation: finSpin 0.85s linear infinite; opacity: 0.85; }
     @keyframes finSpin { to { transform: rotate(360deg); } }
-    .fin-period-chips {
+    .fin-view-toolbar {
       display: flex;
-      flex-wrap: nowrap;
-      gap: 8px;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 14px;
       margin-bottom: 12px;
-      scrollbar-width: none;
       position: relative;
       z-index: 1;
     }
-    .fin-period-chips::-webkit-scrollbar { display: none; }
+    .fin-view-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .fin-period-picker {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1 1 140px;
+      min-width: 0;
+    }
+    .fin-period-label {
+      font-size: 12px;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    .fin-period-select {
+      flex: 1;
+      min-width: 0;
+      max-width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(124, 196, 127, 0.35);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+    }
+    html.dark-mode .fin-period-select { border-color: rgba(93, 160, 96, 0.35); }
     .fin-chip {
       flex-shrink: 0;
       padding: 8px 14px;
@@ -1870,6 +1947,67 @@
       position: relative;
       z-index: 1;
     }
+    #finTrendSectionLabel { margin-bottom: 6px; }
+    .fin-bar-pie-row {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+    }
+    .fin-bar-panel {
+      flex: 1 1 58%;
+      min-width: 0;
+    }
+    .fin-pie-panel {
+      flex: 1 1 160px;
+      max-width: 220px;
+      min-width: 140px;
+      margin-left: auto;
+    }
+    @media (max-width: 380px) {
+      .fin-pie-panel { max-width: none; flex-basis: 100%; margin-left: 0; }
+      .fin-pie-mobile-label { margin-top: 4px; }
+    }
+    .fin-pie-chart-host {
+      position: relative;
+      min-height: 140px;
+    }
+    .fin-pie-svg-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .fin-pie-svg-wrap svg { display: block; max-width: 100%; height: auto; }
+    .fin-pie-legend {
+      font-size: 11px;
+      color: var(--text2);
+      width: 100%;
+      max-height: 120px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .fin-pie-legend-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 3px 0;
+      border-bottom: 1px dashed rgba(0,0,0,0.06);
+    }
+    html.dark-mode .fin-pie-legend-row { border-bottom-color: rgba(255,255,255,0.06); }
+    .fin-pie-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+    .fin-pie-legend-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .fin-pie-empty {
+      font-size: 13px;
+      color: var(--muted);
+      font-style: italic;
+      padding: 12px 4px;
+      text-align: center;
+    }
     .fin-month-chart-wrap {
       position: relative;
       z-index: 1;
@@ -1890,9 +2028,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      cursor: pointer;
       touch-action: manipulation;
     }
+    .fin-month-col.fin-col-narrow { width: 28px; }
     .fin-month-bar-stack {
       height: 88px;
       width: 100%;
@@ -1909,10 +2047,6 @@
       background: var(--fin-accent);
       opacity: 0.92;
       transition: opacity 0.15s, box-shadow 0.15s;
-    }
-    .fin-month-col.fin-month-sel .fin-month-bar-spend {
-      box-shadow: 0 0 0 2px var(--text2);
-      opacity: 1;
     }
     .fin-month-income-dot {
       width: 6px;
@@ -1993,24 +2127,6 @@
       border-bottom: 1px solid rgba(0,0,0,0.05);
     }
     html.dark-mode .fin-merchant-row { border-bottom-color: rgba(255,255,255,0.06); }
-    .fin-blathers-row { margin-top: 20px; margin-bottom: 12px; position: relative; z-index: 1; }
-    .fin-goal-btn {
-      width: 100%;
-      padding: 14px 16px;
-      border-radius: 12px;
-      border: none;
-      font-size: 15px;
-      font-family: inherit;
-      cursor: pointer;
-      background: linear-gradient(135deg, rgba(124, 196, 127, 0.35), rgba(124, 196, 127, 0.2));
-      color: var(--text);
-      box-shadow: 0 2px 12px rgba(80, 140, 85, 0.15);
-    }
-    html.dark-mode .fin-goal-btn {
-      background: linear-gradient(135deg, rgba(93, 160, 96, 0.35), rgba(93, 160, 96, 0.18));
-      box-shadow: none;
-    }
-    .fin-goal-btn:disabled { opacity: 0.45; cursor: not-allowed; }
     .fin-error-box {
       padding: 14px;
       border-radius: 10px;
@@ -2032,18 +2148,6 @@
       color: var(--text2);
       font-size: 15px;
     }
-    #finGoalModal .paste-modal { max-width: 340px; }
-    #finGoalModal .fin-goal-summary {
-      font-size: 14px;
-      line-height: 1.45;
-      color: var(--text2);
-      margin-bottom: 12px;
-    }
-    #finGoalModal textarea.paste-textarea {
-      min-height: 88px;
-      margin-bottom: 12px;
-    }
-
     /* ── DOCUMENTS SCREEN ── */
     .sub-screen {
       display: none !important;
@@ -8158,18 +8262,31 @@
         <div class="fin-header">
           <div class="fin-header-mid">
             <h2 class="fin-title">Finances</h2>
-            <span class="fin-asof" id="finAsOf">Data as of …</span>
+            <span class="fin-asof" id="finAsOf"></span>
+            <p class="fin-sync-note" id="finSyncNote"></p>
           </div>
-          <button type="button" class="fin-refresh-btn" id="finRefreshBtn" onclick="financesRefresh()" title="Refresh" aria-label="Refresh data">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-          </button>
+          <div class="fin-header-actions">
+            <button type="button" class="fin-project-shortcut-btn" id="finProjectShortcutBtn" onclick="financesOpenNewProject()" title="New project" aria-label="New project">
+              <span class="fin-project-shortcut-inner">
+                <img src="https://stormyreigns.github.io/HATH/WWChest1.png" alt="" loading="lazy">
+                <span class="fin-project-shortcut-plus" aria-hidden="true">+</span>
+              </span>
+            </button>
+            <button type="button" class="fin-refresh-btn" id="finRefreshBtn" onclick="financesRefresh()" title="Reload from sheet" aria-label="Reload data from sheet">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            </button>
+          </div>
         </div>
-        <div class="fin-period-chips" id="finPeriodChips" role="tablist">
-          <button type="button" class="fin-chip" data-fin-period="week" role="tab">This Week</button>
-          <button type="button" class="fin-chip selected" data-fin-period="month" role="tab">This Month</button>
-          <button type="button" class="fin-chip" data-fin-period="last3" role="tab">Last 3 Mo</button>
-          <button type="button" class="fin-chip" data-fin-period="year" role="tab">This Year</button>
-          <button type="button" class="fin-chip" data-fin-period="all" role="tab">All Time</button>
+        <div class="fin-view-toolbar">
+          <div class="fin-view-chips" id="finViewChips" role="tablist">
+            <button type="button" class="fin-chip" data-fin-view="week" role="tab">Week</button>
+            <button type="button" class="fin-chip selected" data-fin-view="month" role="tab">Month</button>
+            <button type="button" class="fin-chip" data-fin-view="year" role="tab">Year</button>
+          </div>
+          <div class="fin-period-picker">
+            <label class="fin-period-label" for="finPeriodSelect">Period</label>
+            <select id="finPeriodSelect" class="fin-period-select" aria-label="Select period"></select>
+          </div>
         </div>
         <div class="fin-scroll-wrap" id="finScrollWrap">
           <div id="finErrorEl"></div>
@@ -8182,15 +8299,20 @@
             </div>
             <div id="finPeriodEmpty" class="fin-empty-quip" style="display:none"></div>
             <div id="finChartsBlock">
-              <div class="fin-section-label">Spending by Month</div>
-              <div class="fin-month-chart-wrap"><div class="fin-month-chart-inner" id="finMonthChart"></div></div>
+              <div class="fin-section-label" id="finTrendSectionLabel">Spending trend</div>
+              <div class="fin-bar-pie-row">
+                <div class="fin-bar-panel">
+                  <div class="fin-month-chart-wrap h-scroll-faded"><div class="fin-month-chart-inner" id="finMonthChart"></div></div>
+                </div>
+                <div class="fin-pie-panel">
+                  <div class="fin-section-label fin-pie-mobile-label">% of spending</div>
+                  <div class="fin-pie-chart-host" id="finPieHost"></div>
+                </div>
+              </div>
               <div class="fin-section-label">By Category</div>
               <div class="fin-category-list" id="finCategoryList"></div>
               <div class="fin-section-label">Top Merchants</div>
               <div class="fin-merchant-list" id="finMerchantList"></div>
-            </div>
-            <div class="fin-blathers-row">
-              <button type="button" class="fin-goal-btn" id="finGoalBtn" onclick="openFinGoalModal()">Set a Financial Goal with Blathers 🦉</button>
             </div>
           </div>
         </div>
@@ -8708,18 +8830,6 @@
 </div>
 
 <!-- New project: project vs habit vs Blathers -->
-<div class="paste-modal-overlay" id="finGoalModal" onclick="closeFinGoalModal(event)">
-  <div class="paste-modal" onclick="event.stopPropagation()">
-    <h3>Financial goal</h3>
-    <p class="fin-goal-summary" id="finGoalSummary"></p>
-    <textarea class="paste-textarea" id="finGoalTextarea" placeholder="Ask Blathers…"></textarea>
-    <div class="paste-modal-actions">
-      <button type="button" class="paste-cancel-btn" onclick="closeFinGoalModal()">Cancel</button>
-      <button type="button" class="paste-submit-btn" id="finGoalAskBtn" onclick="submitFinGoalAsk()">Ask Blathers</button>
-    </div>
-  </div>
-</div>
-
 <div class="paste-modal-overlay" id="projectCreateChoiceOverlay" onclick="closeProjectCreateChoice(event)">
   <div class="paste-modal project-create-choice-modal" onclick="event.stopPropagation()">
     <h3>Start something new</h3>
@@ -8993,7 +9103,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.41.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.42.0';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -10723,10 +10833,12 @@
   var _finNormalized = null;
   var _finLoading = false;
   var _finFetchError = null;
-  var _finPeriodKey = 'month';
-  var _finSelectedMonthYm = null;
+  var _finViewMode = 'month';
+  /** Week: Monday date key YYYY-MM-DD · Month: YYYY-MM · Year: calendar year string */
+  var _finPeriodValue = null;
   var _finExpandedCat = null;
-  var _finGoalSending = false;
+
+  var FIN_PIE_COLORS = ['#7cc47f', '#5a9e9e', '#c07a4a', '#9b7aac', '#e07070', '#7a8fce', '#d4a853', '#88b082', '#c9a56d', '#8ec5d6'];
 
   var FIN_ACCOUNT_LABELS = { '6618': 'Primary', '8406': 'Matt', '8414': 'Jess' };
   var FIN_EXCLUDE_SPENDING = { 'Income': 1, 'Internal Transfers': 1, 'Credit Card Payment': 1, 'Cash & Checks': 1 };
@@ -10778,59 +10890,6 @@
     return out;
   }
 
-  function finWeekBoundsMonSun(now) {
-    var d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    var day = d.getDay();
-    var diff = day === 0 ? -6 : 1 - day;
-    var mon = new Date(d);
-    mon.setDate(d.getDate() + diff);
-    mon.setHours(0, 0, 0, 0);
-    var sun = new Date(mon);
-    sun.setDate(mon.getDate() + 6);
-    sun.setHours(23, 59, 59, 999);
-    return { start: mon, end: sun };
-  }
-
-  function finThisMonthBounds(now) {
-    var start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
-    var end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-    return { start: start, end: end };
-  }
-
-  function finLast3FullMonthsBounds(now) {
-    var y = now.getFullYear();
-    var m = now.getMonth();
-    var end = new Date(y, m, 0, 23, 59, 59, 999);
-    var start = new Date(y, m - 3, 1, 0, 0, 0, 0);
-    return { start: start, end: end };
-  }
-
-  function finYearToDateBounds(now) {
-    var start = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0);
-    var end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-    return { start: start, end: end };
-  }
-
-  function finAllTimeBounds() {
-    return { start: new Date(1970, 0, 1), end: new Date(2100, 11, 31, 23, 59, 59, 999) };
-  }
-
-  function finGetPeriodBounds(key, now) {
-    if (key === 'week') return finWeekBoundsMonSun(now);
-    if (key === 'month') return finThisMonthBounds(now);
-    if (key === 'last3') return finLast3FullMonthsBounds(now);
-    if (key === 'year') return finYearToDateBounds(now);
-    return finAllTimeBounds();
-  }
-
-  function finPeriodLabel(key) {
-    if (key === 'week') return 'This week';
-    if (key === 'month') return 'This month';
-    if (key === 'last3') return 'Last 3 full months';
-    if (key === 'year') return 'Year to date';
-    return 'All time';
-  }
-
   function finPad2(n) {
     return n < 10 ? '0' + n : String(n);
   }
@@ -10839,16 +10898,177 @@
     return d.getFullYear() + '-' + finPad2(d.getMonth() + 1);
   }
 
+  function finMondayOfLocalDate(d) {
+    var x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    var day = x.getDay();
+    var diff = day === 0 ? -6 : 1 - day;
+    x.setDate(x.getDate() + diff);
+    x.setHours(0, 0, 0, 0);
+    return x;
+  }
+
+  function finWeekKeyFromDate(d) {
+    var m = finMondayOfLocalDate(d);
+    return m.getFullYear() + '-' + finPad2(m.getMonth() + 1) + '-' + finPad2(m.getDate());
+  }
+
+  function finBoundsFromWeekKey(key) {
+    var p = key.split('-');
+    var mon = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+    mon.setHours(0, 0, 0, 0);
+    var sun = new Date(mon);
+    sun.setDate(mon.getDate() + 6);
+    sun.setHours(23, 59, 59, 999);
+    return { start: mon, end: sun };
+  }
+
+  function finBoundsFromMonthYm(ym) {
+    var p = ym.split('-');
+    var y = parseInt(p[0], 10);
+    var mo = parseInt(p[1], 10) - 1;
+    var start = new Date(y, mo, 1, 0, 0, 0, 0);
+    var end = new Date(y, mo + 1, 0, 23, 59, 59, 999);
+    return { start: start, end: end };
+  }
+
+  function finBoundsFromYear(ys) {
+    var y = parseInt(ys, 10);
+    return {
+      start: new Date(y, 0, 1, 0, 0, 0, 0),
+      end: new Date(y, 11, 31, 23, 59, 59, 999)
+    };
+  }
+
+  function finFormatWeekLabel(mondayKey) {
+    var b = finBoundsFromWeekKey(mondayKey);
+    var o = { month: 'short', day: 'numeric' };
+    return b.start.toLocaleDateString('en-US', o) + ' – ' + b.end.toLocaleDateString('en-US', o) + ', ' + b.end.getFullYear();
+  }
+
+  function finFormatMonthLabel(ym) {
+    var p = ym.split('-');
+    var d = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, 1);
+    return d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+  }
+
+  function finDataDateRange(norm) {
+    if (!norm || !norm.length) return null;
+    var min = norm[0].parsed;
+    var max = norm[0].parsed;
+    for (var i = 1; i < norm.length; i++) {
+      if (norm[i].parsed < min) min = norm[i].parsed;
+      if (norm[i].parsed > max) max = norm[i].parsed;
+    }
+    return { min: min, max: max };
+  }
+
   function finTxInRange(tx, start, end) {
     var d = tx.parsed;
     return d >= start && d <= end;
   }
 
-  function finFilterTxsForMonth(txs, ym) {
-    if (!ym) return txs;
-    return txs.filter(function(tx) {
-      return finYm(tx.parsed) === ym;
+  function finSumSpendInRange(txs, start, end) {
+    var s = 0;
+    for (var i = 0; i < txs.length; i++) {
+      var tx = txs[i];
+      if (tx.isExpense && !tx.excludeFromSpending && tx.parsed >= start && tx.parsed <= end) s += tx.amount;
+    }
+    return s;
+  }
+
+  function finSumIncomeInRange(txs, start, end) {
+    var s = 0;
+    for (var i = 0; i < txs.length; i++) {
+      var tx = txs[i];
+      if (tx.isIncome && tx.parsed >= start && tx.parsed <= end) s += tx.amount;
+    }
+    return s;
+  }
+
+  function finSyncViewModeFromDom() {
+    var selChip = document.querySelector('#finViewChips .fin-chip.selected');
+    _finViewMode = selChip && selChip.getAttribute('data-fin-view') ? selChip.getAttribute('data-fin-view') : 'month';
+  }
+
+  function finBuildPeriodOptions() {
+    var norm = _finNormalized || [];
+    var now = new Date();
+    finSyncViewModeFromDom();
+    if (!norm.length) {
+      if (_finViewMode === 'week') {
+        var wk = finWeekKeyFromDate(now);
+        return [{ value: wk, label: finFormatWeekLabel(wk) }];
+      }
+      if (_finViewMode === 'month') {
+        var ym0 = finYm(now);
+        return [{ value: ym0, label: finFormatMonthLabel(ym0) }];
+      }
+      return [{ value: String(now.getFullYear()), label: String(now.getFullYear()) }];
+    }
+    var wr = finDataDateRange(norm);
+    var weeks = {};
+    var months = {};
+    var years = {};
+    for (var j = 0; j < norm.length; j++) {
+      var dt = norm[j].parsed;
+      weeks[finWeekKeyFromDate(dt)] = true;
+      months[finYm(dt)] = true;
+      years[String(dt.getFullYear())] = true;
+    }
+    if (_finViewMode === 'week') {
+      var wkeys = Object.keys(weeks).sort();
+      wkeys.reverse();
+      return wkeys.map(function(k) {
+        return { value: k, label: finFormatWeekLabel(k) };
+      });
+    }
+    if (_finViewMode === 'month') {
+      var mkeys = Object.keys(months).sort();
+      mkeys.reverse();
+      return mkeys.map(function(k) {
+        return { value: k, label: finFormatMonthLabel(k) };
+      });
+    }
+    var ykeys = Object.keys(years).map(function(y) { return parseInt(y, 10); }).sort(function(a, b) { return a - b; });
+    ykeys.reverse();
+    return ykeys.map(function(y) {
+      var ys = String(y);
+      return { value: ys, label: ys };
     });
+  }
+
+  function finPopulatePeriodSelect(forceReset) {
+    var sel = document.getElementById('finPeriodSelect');
+    if (!sel) return;
+    var opts = finBuildPeriodOptions();
+    sel.innerHTML = '';
+    for (var i = 0; i < opts.length; i++) {
+      var o = opts[i];
+      var op = document.createElement('option');
+      op.value = o.value;
+      op.textContent = o.label;
+      sel.appendChild(op);
+    }
+    if (!opts.length) {
+      _finPeriodValue = null;
+      return;
+    }
+    var ok = _finPeriodValue && opts.some(function(x) { return x.value === _finPeriodValue; });
+    if (forceReset || !_finPeriodValue || !ok) _finPeriodValue = opts[0].value;
+    sel.value = _finPeriodValue;
+  }
+
+  function finGetSelectedBounds() {
+    finSyncViewModeFromDom();
+    if (!_finPeriodValue) {
+      var n = new Date();
+      if (_finViewMode === 'week') return finBoundsFromWeekKey(finWeekKeyFromDate(n));
+      if (_finViewMode === 'month') return finBoundsFromMonthYm(finYm(n));
+      return finBoundsFromYear(String(n.getFullYear()));
+    }
+    if (_finViewMode === 'week') return finBoundsFromWeekKey(_finPeriodValue);
+    if (_finViewMode === 'month') return finBoundsFromMonthYm(_finPeriodValue);
+    return finBoundsFromYear(_finPeriodValue);
   }
 
   function finFormatMoney(n) {
@@ -10858,11 +11078,6 @@
     x = Math.abs(x);
     var s = x.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
     return (neg ? '-$' : '$') + s;
-  }
-
-  function finSyncPeriodFromDom() {
-    var sel = document.querySelector('#finPeriodChips .fin-chip.selected');
-    _finPeriodKey = sel && sel.getAttribute('data-fin-period') ? sel.getAttribute('data-fin-period') : 'month';
   }
 
   function showFinancesScreen() {
@@ -10878,23 +11093,38 @@
     }
     if (guestEl) guestEl.style.display = 'none';
     if (rootEl) rootEl.style.display = '';
-    finInitPeriodChips();
+    finInitViewControls();
     finEnsureLoaded(false);
   }
 
-  function finInitPeriodChips() {
-    var wrap = document.getElementById('finPeriodChips');
-    if (!wrap || wrap.dataset.bound === '1') return;
-    wrap.dataset.bound = '1';
-    wrap.querySelectorAll('.fin-chip').forEach(function(btn) {
+  function finInitViewControls() {
+    var chipWrap = document.getElementById('finViewChips');
+    var sel = document.getElementById('finPeriodSelect');
+    if (!chipWrap || chipWrap.dataset.bound === '1') return;
+    chipWrap.dataset.bound = '1';
+    chipWrap.querySelectorAll('.fin-chip').forEach(function(btn) {
       btn.addEventListener('click', function() {
-        wrap.querySelectorAll('.fin-chip').forEach(function(b) { b.classList.toggle('selected', b === btn); });
-        _finPeriodKey = btn.getAttribute('data-fin-period') || 'month';
-        _finSelectedMonthYm = null;
+        chipWrap.querySelectorAll('.fin-chip').forEach(function(b) { b.classList.toggle('selected', b === btn); });
+        _finViewMode = btn.getAttribute('data-fin-view') || 'month';
+        _finPeriodValue = null;
+        finPopulatePeriodSelect(true);
         _finExpandedCat = null;
         renderFinancesUI();
       });
     });
+    if (sel) {
+      sel.addEventListener('change', function() {
+        _finPeriodValue = sel.value || null;
+        _finExpandedCat = null;
+        renderFinancesUI();
+      });
+    }
+  }
+
+  function financesOpenNewProject() {
+    if (!getApiUser()) return;
+    showProjectsScreen();
+    openCreateProjectModal();
   }
 
   function finEnsureLoaded(force) {
@@ -10946,15 +11176,24 @@
   }
 
   function renderFinancesUI() {
-    finSyncPeriodFromDom();
+    finSyncViewModeFromDom();
+    finPopulatePeriodSelect(false);
+
     var asof = document.getElementById('finAsOf');
-    if (asof && _finMeta && _finMeta.asOf) asof.textContent = 'Data as of ' + _finMeta.asOf;
+    var syncNote = document.getElementById('finSyncNote');
+    if (asof && _finMeta && _finMeta.asOf) {
+      asof.textContent = 'Figures come from your Finances sheet · snapshot dated ' + _finMeta.asOf + '.';
+    }
+    if (syncNote) {
+      syncNote.textContent = 'Numbers are not live. After you update the sheet in Google Drive, tap refresh to pull the latest export.';
+    }
 
     var errEl = document.getElementById('finErrorEl');
     var mainEl = document.getElementById('finMainContent');
     var chartsBlock = document.getElementById('finChartsBlock');
     var emptyEl = document.getElementById('finPeriodEmpty');
-    var goalBtn = document.getElementById('finGoalBtn');
+    var trendLbl = document.getElementById('finTrendSectionLabel');
+    var projBtn = document.getElementById('finProjectShortcutBtn');
 
     if (_finFetchError) {
       if (errEl) {
@@ -10971,13 +11210,8 @@
       return;
     }
 
-    var now = new Date();
-    var b = finGetPeriodBounds(_finPeriodKey, now);
+    var b = finGetSelectedBounds();
     var txs = _finNormalized.filter(function(tx) { return finTxInRange(tx, b.start, b.end); });
-
-    if (_finSelectedMonthYm) {
-      txs = finFilterTxsForMonth(txs, _finSelectedMonthYm);
-    }
 
     var incomeTotal = 0;
     var spentTotal = 0;
@@ -11000,112 +11234,192 @@
       netCard.classList.toggle('negative', net < 0);
     }
 
+    if (trendLbl) {
+      if (_finViewMode === 'week') trendLbl.textContent = 'Daily spending (selected week)';
+      else if (_finViewMode === 'month') trendLbl.textContent = 'Daily spending (selected month)';
+      else trendLbl.textContent = 'Monthly spending (selected year)';
+    }
+
+    if (projBtn) projBtn.disabled = !getApiUser();
+
     var periodEmpty = txs.length === 0;
     if (emptyEl) {
       emptyEl.style.display = periodEmpty ? '' : 'none';
-      emptyEl.textContent = 'Ah — no transactions to speak of in this period. How refreshing. Or perhaps the data simply hasn\'t arrived yet.';
+      emptyEl.textContent = 'Nothing in this slice yet — either nothing landed here, or the sheet hasn\'t been refreshed since your last edit.';
     }
     if (chartsBlock) chartsBlock.style.display = periodEmpty ? 'none' : '';
 
-    if (goalBtn) goalBtn.disabled = !getApiUser();
-
     if (periodEmpty) return;
 
-    finRenderMonthChart(_finNormalized, b);
+    finRenderTrendChart(b, txs);
+    finRenderPieChart(txs);
     finRenderCategories(txs);
     finRenderMerchants(txs);
-
-    setTimeout(function() {
-      try {
-        var list = document.getElementById('finCategoryList');
-        if (list && _finSelectedMonthYm) list.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      } catch (_) {}
-    }, 80);
   }
 
-  function finRenderMonthChart(allNorm, periodBounds) {
+  function finRenderTrendChart(bounds, txs) {
     var chart = document.getElementById('finMonthChart');
     if (!chart) return;
     chart.innerHTML = '';
+    finSyncViewModeFromDom();
+    var buckets = [];
+    var maxBarPx = 72;
 
-    var months = [];
-    var cur = new Date(periodBounds.start.getFullYear(), periodBounds.start.getMonth(), 1);
-    var endM = new Date(periodBounds.end.getFullYear(), periodBounds.end.getMonth(), 1);
-    while (cur <= endM) {
-      months.push(new Date(cur));
-      cur.setMonth(cur.getMonth() + 1);
-    }
-    if (months.length === 0) months.push(new Date(periodBounds.start.getFullYear(), periodBounds.start.getMonth(), 1));
-
-    var spendByYm = {};
-    var incomeByYm = {};
-    for (var i = 0; i < allNorm.length; i++) {
-      var tx = allNorm[i];
-      if (!finTxInRange(tx, periodBounds.start, periodBounds.end)) continue;
-      var ym = finYm(tx.parsed);
-      if (tx.isIncome) {
-        incomeByYm[ym] = (incomeByYm[ym] || 0) + tx.amount;
-      } else if (tx.isExpense && !tx.excludeFromSpending) {
-        spendByYm[ym] = (spendByYm[ym] || 0) + tx.amount;
+    if (_finViewMode === 'week') {
+      for (var i = 0; i < 7; i++) {
+        var dayStart = new Date(bounds.start);
+        dayStart.setDate(bounds.start.getDate() + i);
+        dayStart.setHours(0, 0, 0, 0);
+        var dayEnd = new Date(dayStart);
+        dayEnd.setHours(23, 59, 59, 999);
+        buckets.push({
+          sp: finSumSpendInRange(txs, dayStart, dayEnd),
+          inc: finSumIncomeInRange(txs, dayStart, dayEnd),
+          lab: dayStart.toLocaleDateString('en-US', { weekday: 'short' }),
+          narrow: false
+        });
+      }
+    } else if (_finViewMode === 'month') {
+      var cur = new Date(bounds.start);
+      while (cur <= bounds.end) {
+        var ds = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(), 0, 0, 0, 0);
+        var de = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(), 23, 59, 59, 999);
+        buckets.push({
+          sp: finSumSpendInRange(txs, ds, de),
+          inc: finSumIncomeInRange(txs, ds, de),
+          lab: String(cur.getDate()),
+          narrow: true
+        });
+        cur.setDate(cur.getDate() + 1);
+      }
+    } else {
+      var y = bounds.start.getFullYear();
+      for (var m = 0; m < 12; m++) {
+        var ms = new Date(y, m, 1, 0, 0, 0, 0);
+        var me = new Date(y, m + 1, 0, 23, 59, 59, 999);
+        buckets.push({
+          sp: finSumSpendInRange(txs, ms, me),
+          inc: finSumIncomeInRange(txs, ms, me),
+          lab: new Date(y, m, 1).toLocaleString('en-US', { month: 'short' }),
+          narrow: false
+        });
       }
     }
 
     var maxSpend = 0;
     var maxInc = 0;
-    months.forEach(function(m) {
-      var ym = finYm(m);
-      var sp = spendByYm[ym] || 0;
-      var inc = incomeByYm[ym] || 0;
-      if (sp > maxSpend) maxSpend = sp;
-      if (inc > maxInc) maxInc = inc;
-    });
+    for (var j = 0; j < buckets.length; j++) {
+      if (buckets[j].sp > maxSpend) maxSpend = buckets[j].sp;
+      if (buckets[j].inc > maxInc) maxInc = buckets[j].inc;
+    }
     if (maxSpend <= 0) maxSpend = 1;
     if (maxInc <= 0) maxInc = 1;
 
-    var maxBarPx = 72;
-
-    months.forEach(function(m) {
-      var ym = finYm(m);
-      var sp = spendByYm[ym] || 0;
-      var inc = incomeByYm[ym] || 0;
-      var hSpend = Math.round((sp / maxSpend) * maxBarPx);
-      var hIncDot = Math.min(22, Math.round((inc / maxInc) * 18));
-
+    for (var k = 0; k < buckets.length; k++) {
+      var bk = buckets[k];
+      var hSpend = Math.round((bk.sp / maxSpend) * maxBarPx);
+      var hIncDot = Math.min(22, Math.round((bk.inc / maxInc) * 18));
       var col = document.createElement('div');
-      col.className = 'fin-month-col' + (_finSelectedMonthYm === ym ? ' fin-month-sel' : '');
-      col.dataset.monthYm = ym;
-      col.onclick = function() {
-        if (_finSelectedMonthYm === ym) _finSelectedMonthYm = null;
-        else _finSelectedMonthYm = ym;
-        _finExpandedCat = null;
-        renderFinancesUI();
-      };
-
+      col.className = 'fin-month-col' + (bk.narrow ? ' fin-col-narrow' : '');
       var stack = document.createElement('div');
       stack.className = 'fin-month-bar-stack';
-
       var incDot = document.createElement('div');
       incDot.className = 'fin-month-income-dot';
       incDot.style.height = hIncDot + 'px';
       incDot.style.width = Math.max(4, Math.min(10, 4 + Math.round(hIncDot / 3))) + 'px';
       incDot.style.borderRadius = '4px';
-      if (inc <= 0) incDot.style.visibility = 'hidden';
-
+      if (bk.inc <= 0) incDot.style.visibility = 'hidden';
       var bar = document.createElement('div');
       bar.className = 'fin-month-bar-spend';
       bar.style.height = Math.max(2, hSpend) + 'px';
-
       stack.appendChild(incDot);
       stack.appendChild(bar);
-
       var lab = document.createElement('div');
       lab.className = 'fin-month-label';
-      lab.textContent = m.toLocaleString('en-US', { month: 'short' });
-
+      lab.textContent = bk.lab;
       col.appendChild(stack);
       col.appendChild(lab);
       chart.appendChild(col);
+    }
+  }
+
+  function finPolar(cx, cy, r, angDeg) {
+    var rad = (angDeg - 90) * Math.PI / 180;
+    return [cx + r * Math.cos(rad), cy + r * Math.sin(rad)];
+  }
+
+  function finDonutSlicePath(cx, cy, rOut, rIn, a0, a1) {
+    var large = (a1 - a0) > 180 ? 1 : 0;
+    var p1 = finPolar(cx, cy, rOut, a0);
+    var p2 = finPolar(cx, cy, rOut, a1);
+    var p3 = finPolar(cx, cy, rIn, a1);
+    var p4 = finPolar(cx, cy, rIn, a0);
+    return 'M ' + p1[0].toFixed(2) + ',' + p1[1].toFixed(2) +
+      ' A ' + rOut + ',' + rOut + ' 0 ' + large + ' 1 ' + p2[0].toFixed(2) + ',' + p2[1].toFixed(2) +
+      ' L ' + p3[0].toFixed(2) + ',' + p3[1].toFixed(2) +
+      ' A ' + rIn + ',' + rIn + ' 0 ' + large + ' 0 ' + p4[0].toFixed(2) + ',' + p4[1].toFixed(2) + ' Z';
+  }
+
+  function finRenderPieChart(txs) {
+    var host = document.getElementById('finPieHost');
+    if (!host) return;
+    host.innerHTML = '';
+    var byCat = {};
+    var total = 0;
+    for (var i = 0; i < txs.length; i++) {
+      var tx = txs[i];
+      if (!tx.isExpense || tx.excludeFromSpending) continue;
+      var k = tx.category || 'Uncategorized';
+      byCat[k] = (byCat[k] || 0) + tx.amount;
+      total += tx.amount;
+    }
+    if (total <= 0) {
+      host.innerHTML = '<div class="fin-pie-empty">No spending categories in this period (or only excluded categories).</div>';
+      return;
+    }
+    var entries = Object.keys(byCat).map(function(k) {
+      return { name: k, amt: byCat[k], pct: byCat[k] / total * 100 };
     });
+    entries.sort(function(a, b) { return b.amt - a.amt; });
+
+    var svgNs = 'http://www.w3.org/2000/svg';
+    var wrap = document.createElement('div');
+    wrap.className = 'fin-pie-svg-wrap';
+    var svg = document.createElementNS(svgNs, 'svg');
+    svg.setAttribute('viewBox', '0 0 100 100');
+    svg.setAttribute('width', '160');
+    svg.setAttribute('height', '160');
+    var cx = 50;
+    var cy = 50;
+    var rOut = 38;
+    var rIn = 22;
+    var ang = 0;
+    for (var j = 0; j < entries.length; j++) {
+      var slice = entries[j];
+      var sweep = (slice.amt / total) * 360;
+      if (sweep <= 0.01) continue;
+      var path = document.createElementNS(svgNs, 'path');
+      path.setAttribute('d', finDonutSlicePath(cx, cy, rOut, rIn, ang, ang + sweep));
+      path.setAttribute('fill', FIN_PIE_COLORS[j % FIN_PIE_COLORS.length]);
+      path.setAttribute('stroke', 'var(--bg)');
+      path.setAttribute('stroke-width', '0.75');
+      svg.appendChild(path);
+      ang += sweep;
+    }
+    wrap.appendChild(svg);
+    var leg = document.createElement('div');
+    leg.className = 'fin-pie-legend';
+    for (var z = 0; z < entries.length; z++) {
+      var e = entries[z];
+      var row = document.createElement('div');
+      row.className = 'fin-pie-legend-row';
+      row.innerHTML = '<span class="fin-pie-dot" style="background:' + FIN_PIE_COLORS[z % FIN_PIE_COLORS.length] + '"></span>' +
+        '<span class="fin-pie-legend-name">' + escapeHtml(e.name) + '</span>' +
+        '<span>' + escapeHtml(e.pct.toFixed(0)) + '%</span>';
+      leg.appendChild(row);
+    }
+    wrap.appendChild(leg);
+    host.appendChild(wrap);
   }
 
   function finRenderCategories(txs) {
@@ -11212,176 +11526,6 @@
       row.innerHTML = '<span>' + escapeHtml(m.display) + '</span><span>' + escapeHtml(finFormatMoney(m.total)) + '</span>';
       list.appendChild(row);
     });
-  }
-
-  function finBuildGoalSummaryJson() {
-    finSyncPeriodFromDom();
-    var now = new Date();
-    var b = finGetPeriodBounds(_finPeriodKey, now);
-    var txs = (_finNormalized || []).filter(function(tx) { return finTxInRange(tx, b.start, b.end); });
-    if (_finSelectedMonthYm) txs = finFilterTxsForMonth(txs, _finSelectedMonthYm);
-
-    var incomeTotal = 0;
-    var spentTotal = 0;
-    var catTotals = {};
-    for (var i = 0; i < txs.length; i++) {
-      var tx = txs[i];
-      if (tx.isIncome) incomeTotal += tx.amount;
-      else if (tx.isExpense && !tx.excludeFromSpending) {
-        spentTotal += tx.amount;
-        var ck = tx.category || 'Uncategorized';
-        catTotals[ck] = (catTotals[ck] || 0) + tx.amount;
-      }
-    }
-
-    var periodNote = finPeriodLabel(_finPeriodKey);
-    if (_finSelectedMonthYm) periodNote += ' (' + _finSelectedMonthYm + ')';
-
-    return {
-      periodLabel: periodNote,
-      incomeUsd: Math.round(incomeTotal * 100) / 100,
-      spentUsd: Math.round(spentTotal * 100) / 100,
-      netUsd: Math.round((incomeTotal - spentTotal) * 100) / 100,
-      categoryTotalsUsd: catTotals,
-      dataAsOf: _finMeta && _finMeta.asOf ? _finMeta.asOf : ''
-    };
-  }
-
-  function openFinGoalModal() {
-    if (!getApiUser()) return;
-    var sumEl = document.getElementById('finGoalSummary');
-    var ta = document.getElementById('finGoalTextarea');
-    var meta = finBuildGoalSummaryJson();
-    var topCats = Object.keys(meta.categoryTotalsUsd).sort(function(a, b) {
-      return meta.categoryTotalsUsd[b] - meta.categoryTotalsUsd[a];
-    }).slice(0, 5);
-
-    var s1 = 'For ' + meta.periodLabel.toLowerCase() + ', tracked spending is about $' +
-      Math.round(meta.spentUsd).toLocaleString('en-US') + ' and income about $' +
-      Math.round(meta.incomeUsd).toLocaleString('en-US') + ', for a net of about $' +
-      Math.round(meta.netUsd).toLocaleString('en-US') + '.';
-    var s2 = topCats.length
-      ? 'The largest expense categories are ' + topCats.map(function(c) {
-          return c + ' (~$' + Math.round(meta.categoryTotalsUsd[c]).toLocaleString('en-US') + ')';
-        }).join(', ') + '.'
-      : 'Category detail is thin for this slice — Blathers can still help you shape a goal.';
-
-    if (sumEl) sumEl.textContent = s1 + ' ' + s2;
-    if (ta) ta.value = 'Based on my spending, help me set a financial goal for next month.';
-    document.getElementById('finGoalModal').classList.add('open');
-  }
-
-  function closeFinGoalModal(ev) {
-    if (ev && ev.target !== document.getElementById('finGoalModal')) return;
-    document.getElementById('finGoalModal').classList.remove('open');
-  }
-
-  function exitFinancesToHomeChat() {
-    closeDrawer();
-    stopScheduleFloatingRotation();
-    stopDocsBgCarousel();
-    document.getElementById('documentsScreen').classList.remove('visible');
-    document.getElementById('projectsScreen').classList.remove('visible');
-    document.getElementById('scheduleScreen').classList.remove('visible');
-    document.getElementById('civicsScreen').classList.remove('visible');
-    document.getElementById('settingsScreen').classList.remove('visible');
-    document.getElementById('recipesScreen').classList.remove('visible');
-    document.getElementById('financesScreen').classList.remove('visible');
-    document.getElementById('recipeDetail').classList.remove('open');
-    var pl = document.getElementById('projectsLanding');
-    var pv = document.getElementById('projectsView');
-    if (pl) pl.style.display = 'flex';
-    if (pv) pv.style.display = 'none';
-    var pvCopilot = document.getElementById('programView');
-    if (pvCopilot) pvCopilot.style.display = 'none';
-    document.querySelector('.app').classList.remove('in-project-view');
-    projectsViewing = null;
-    var topbar = document.querySelector('.topbar');
-    if (topbar) topbar.classList.remove('collapsed');
-    document.getElementById('hintArea').style.display = 'none';
-    document.getElementById('chatArea').style.display = 'flex';
-    document.getElementById('chatArea').style.flexDirection = 'column';
-    document.querySelector('.body').classList.add('chat-mode');
-    document.getElementById('inputZone').style.display = 'flex';
-    var wb = document.getElementById('wellbeing');
-    if (wb) wb.style.display = getApiUser() ? '' : 'none';
-    updateScreenAddFabs();
-    updateBottomBarHome();
-    updateBlatherBookVisibility();
-    syncBottomDockState();
-  }
-
-  async function submitFinGoalAsk() {
-    if (_finGoalSending || isSending) return;
-    var ta = document.getElementById('finGoalTextarea');
-    var prompt = ta && ta.value ? ta.value.trim() : '';
-    if (!prompt) return;
-
-    _finGoalSending = true;
-    isSending = true;
-    var askBtn = document.getElementById('finGoalAskBtn');
-    if (askBtn) askBtn.disabled = true;
-
-    var summary = finBuildGoalSummaryJson();
-    var ctx = '[SHASTAPP_FINANCES_CONTEXT]\n```json\n' + JSON.stringify(summary) + '\n```\n\n';
-    var fullMessage = ctx + prompt;
-
-    closeFinGoalModal();
-    exitFinancesToHomeChat();
-
-    setBlathers('startled');
-    setTimeout(function() { setBlathers('thinking'); }, 600);
-
-    addBubble(prompt, 'user');
-    conversationHistory.push({ role: 'user', content: prompt });
-
-    var typing = document.createElement('div');
-    typing.className = 'typing';
-    typing.id = 'typingIndicator';
-    typing.innerHTML = '<span></span><span></span><span></span>';
-    document.getElementById('chatArea').appendChild(typing);
-    requestAnimationFrame(function() {
-      var chat = document.getElementById('chatArea');
-      if (chat) chat.scrollTop = chat.scrollHeight;
-    });
-
-    try {
-      var user = localStorage.getItem('shasta_user');
-      var history = conversationHistory.slice(-20);
-      var body = {
-        message: fullMessage,
-        user: getApiUser(),
-        history: history,
-        nickname: getDisplayName(),
-        dumbMode: !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true'),
-        clientContext: buildBlathersClientContext()
-      };
-      var res = await fetch(AI_URL, {
-        method: 'POST',
-        redirect: 'follow',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(body)
-      });
-      var text2 = await res.text();
-      var data;
-      try { data = JSON.parse(text2); } catch (_) { throw new Error('Invalid response from server'); }
-      typing.remove();
-      var reply = data.reply || friendlyBlathersError(data.error);
-      var structured = parseBlathersStructuredReply(reply);
-      var displayReply = sanitizeBlathersUserVisibleText(structured.display || reply);
-      var turn = addBubble(displayReply, 'hath');
-      conversationHistory.push({ role: 'assistant', content: displayReply });
-      applyBlathersStructuredFollowUp(turn, structured);
-    } catch (err) {
-      typing.remove();
-      var errTxt = friendlyBlathersError(err);
-      addBubble(errTxt, 'hath');
-      conversationHistory.push({ role: 'assistant', content: errTxt });
-    }
-
-    if (askBtn) askBtn.disabled = false;
-    _finGoalSending = false;
-    isSending = false;
   }
 
   // ── PROJECTS ─────────────────────────────────────────────────
