@@ -9275,7 +9275,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.46.4';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.46.5';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -9893,16 +9893,23 @@
 
   // Client-side tab routing: keyword match (words > 3 chars) in tab name or purpose
   function scoreTabsForMessage(message) {
-    const tabs = window.shastaTabs;
-    if (!Array.isArray(tabs) || tabs.length === 0) return [];
-    const words = (message || '').toLowerCase().split(/\s+/).filter(w => w.length > 3);
-    if (words.length === 0) return [];
+    const raw = message || '';
+    const lower = raw.toLowerCase();
     const matched = [];
-    tabs.forEach(t => {
-      const s = ((t.tabName || '') + ' ' + (t.purpose || '')).toLowerCase();
-      if (words.some(w => s.indexOf(w) >= 0)) matched.push(t.tabName);
-    });
-    return matched;
+    const finHints = /\b(financ|finances|spending|budget|transaction|expens|income|savings|moneys?|cashflow|bank|credit\s*cards?|dollars?|bills?|ledger|paycheck|checking|debit|groceries\s+cost|monthly\s+cost)\b/i;
+    if (finHints.test(raw)) matched.push('Finances');
+    const tabs = window.shastaTabs;
+    if (!Array.isArray(tabs) || tabs.length === 0) {
+      return matched.length ? Array.from(new Set(matched)) : [];
+    }
+    const words = lower.split(/\s+/).filter(w => w.length > 3);
+    if (words.length > 0) {
+      tabs.forEach(t => {
+        const s = ((t.tabName || '') + ' ' + (t.purpose || '')).toLowerCase();
+        if (words.some(w => s.indexOf(w) >= 0)) matched.push(t.tabName);
+      });
+    }
+    return Array.from(new Set(matched));
   }
 
   // Apps Script requires no-cors redirect following — use a JSONP-style
@@ -10030,6 +10037,7 @@
     }
     renderHomeProjectsScroller();
     loadCalendar();
+    try { financesLoad(false); } catch (_) {}
   }
 
   async function loadCalendar(forceRefresh) {
@@ -13730,13 +13738,17 @@
     if (barEl) barEl.style.display = completed.length > 0 ? 'flex' : 'none';
 
     const scrollEl = document.getElementById('projectsCompletedScroll');
-    const chipHtml = completed.map(p => {
+    const chipHtmlOne = completed.map(p => {
       const animateClass = newlyCompletedId && p.id === newlyCompletedId ? ' projects-completed-chip-new' : '';
       return `<span class="projects-completed-chip${animateClass}" onclick="projectsSelectCompleted('${p.id}')"><img src="https://stormyreigns.github.io/HATH/Triforce.webp" alt="" class="projects-completed-trophy" loading="lazy"><span class="projects-completed-chip-title">${escapeHtml(p.title)}</span><button type="button" class="projects-completed-chip-delete" onclick="event.stopPropagation();projectsConfirmDelete('${p.id}')" aria-label="Delete" title="Delete">×</button></span>`;
     }).join('');
-    if (scrollEl) scrollEl.innerHTML = completed.length > 0 ? chipHtml : '';
+    const victoriesUseLoop = completed.length > 1;
+    const chipHtml = completed.length > 0
+      ? (victoriesUseLoop ? chipHtmlOne + chipHtmlOne + chipHtmlOne : chipHtmlOne)
+      : '';
+    if (scrollEl) scrollEl.innerHTML = chipHtml;
 
-    setupVictoriesAutoScroll();
+    setupVictoriesAutoScroll(victoriesUseLoop);
 
     const listEl = document.getElementById('projectsInProgressList');
     if (!listEl) return;
@@ -13779,21 +13791,50 @@
   let victoriesResumeTimer = 0;
   const VICTORIES_SCROLL_SPEED = 0.8;
 
-  function setupVictoriesAutoScroll() {
+  function setupVictoriesAutoScroll(useLoop) {
     const viewport = document.getElementById('projectsCompletedViewport');
     if (!viewport) return;
     const scrollEl = document.getElementById('projectsCompletedScroll');
     if (!scrollEl || scrollEl.children.length === 0) return;
 
+    if (viewport._victoriesOnScroll) {
+      viewport.removeEventListener('scroll', viewport._victoriesOnScroll);
+      viewport._victoriesOnScroll = null;
+    }
     if (victoriesScrollRaf) cancelAnimationFrame(victoriesScrollRaf);
+    victoriesScrollRaf = 0;
     if (victoriesResumeTimer) clearTimeout(victoriesResumeTimer);
+    victoriesResumeTimer = 0;
+
+    function victoriesLoopAdjust() {
+      if (!useLoop || viewport._victoriesLoopJumping) return;
+      var sw = viewport.scrollWidth;
+      if (sw < 30) return;
+      var setW = sw / 3;
+      var sl = viewport.scrollLeft;
+      if (sl < setW * 0.15) {
+        viewport._victoriesLoopJumping = true;
+        viewport.scrollLeft = sl + setW;
+        requestAnimationFrame(function() { viewport._victoriesLoopJumping = false; });
+      } else if (sl > setW * 2.15) {
+        viewport._victoriesLoopJumping = true;
+        viewport.scrollLeft = sl - setW;
+        requestAnimationFrame(function() { viewport._victoriesLoopJumping = false; });
+      }
+    }
+
+    if (useLoop) {
+      viewport._victoriesOnScroll = function() { victoriesLoopAdjust(); };
+      viewport.addEventListener('scroll', viewport._victoriesOnScroll, { passive: true });
+    }
 
     function animate() {
       if (victoriesUserInteracting) return;
       var maxScroll = viewport.scrollWidth - viewport.clientWidth;
       if (maxScroll <= 0) return;
       viewport.scrollLeft += VICTORIES_SCROLL_SPEED;
-      if (viewport.scrollLeft >= maxScroll - 1) viewport.scrollLeft = 0;
+      if (useLoop) victoriesLoopAdjust();
+      else if (viewport.scrollLeft >= maxScroll - 0.5) viewport.scrollLeft = 0;
       victoriesScrollRaf = requestAnimationFrame(animate);
     }
 
@@ -13806,7 +13847,10 @@
       victoriesResumeTimer = setTimeout(function() {
         victoriesUserInteracting = false;
         victoriesResumeTimer = 0;
-        animate();
+        if (viewport.scrollWidth > viewport.clientWidth) {
+          if (victoriesScrollRaf) cancelAnimationFrame(victoriesScrollRaf);
+          victoriesScrollRaf = requestAnimationFrame(animate);
+        }
       }, 2000);
     }
 
@@ -13819,11 +13863,33 @@
     viewport.onwheel = function() { onUserStart(); setTimeout(onUserEnd, 2000); };
 
     victoriesUserInteracting = false;
-    requestAnimationFrame(function() {
+    if (useLoop) {
+      viewport._victoriesLoopJumping = false;
+      function initVictoriesLoopScroll() {
+        var sw = viewport.scrollWidth;
+        if (sw < 30) return false;
+        viewport.scrollLeft = sw / 3;
+        return true;
+      }
+      function doVictoriesInit() {
+        if (!initVictoriesLoopScroll()) {
+          requestAnimationFrame(doVictoriesInit);
+          return;
+        }
+        victoriesScrollRaf = requestAnimationFrame(animate);
+      }
       requestAnimationFrame(function() {
-        if (viewport.scrollWidth > viewport.clientWidth) animate();
+        requestAnimationFrame(doVictoriesInit);
       });
-    });
+    } else {
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          if (viewport.scrollWidth > viewport.clientWidth) {
+            victoriesScrollRaf = requestAnimationFrame(animate);
+          }
+        });
+      });
+    }
   }
 
   function projectsSelectCompleted(id) {
@@ -20026,6 +20092,12 @@
         parts.push('Open detail (' + k + '): id ' + projectsViewing.id + ' — "' + t + '".');
       }
       parts.push('Projects saved on this device:\n' + summarizeProjectsForBlathersBlock());
+      try {
+        const finSnap = buildFinGoalsSnapshotForBlathers();
+        if (finSnap) {
+          parts.push('Finances summary (same data as the Finances screen / spreadsheet Finances tab; period follows the selector in Finances if they have opened it, otherwise current month):\n' + finSnap);
+        }
+      } catch (_) {}
       const sched = summarizeScheduleForBlathers();
       if (sched) parts.push('Upcoming events (cached in app):\n' + sched);
       const favs = summarizeRecipeFavouritesForBlathers();
