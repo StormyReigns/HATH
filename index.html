@@ -1098,15 +1098,12 @@
     .app.in-project-view {
       padding-bottom: calc(var(--bottom-dock-offset-sheet) + env(safe-area-inset-bottom, 0px));
     }
-    /* Keyboard visible: .app height already matches visual viewport — drop dock clearance so chat is not “cut off” by invisible padding */
+    /* Keyboard visible: .app height already matches visual viewport — drop inner dock padding so chat flexes; keep .input-zone default bottom (dock stays visible above keyboard, z-index 80) */
     html.keyboard-open .app {
       padding-bottom: max(0px, env(safe-area-inset-bottom, 0px));
     }
     html.keyboard-open .app.in-project-view {
       padding-bottom: max(0px, env(safe-area-inset-bottom, 0px));
-    }
-    html.keyboard-open .input-zone {
-      bottom: max(8px, env(safe-area-inset-bottom, 0px));
     }
 
     /* ── HINT AREA ── */
@@ -9246,7 +9243,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.45.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.45.2';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
