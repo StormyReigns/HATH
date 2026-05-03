@@ -24,8 +24,9 @@
       if (vvh > 0) document.documentElement.style.setProperty('--vvh', vvh + 'px');
       // When keyboard opens, visualViewport shrinks. Use vv height so .app shrinks and input stays visible.
       var fullH = (navigator.standalone && sh > 0) ? sh : Math.max(vvh, iwh);
-      var keyboardOpen = fullH > 0 && vvh < fullH * 0.82;
-      if (keyboardOpen && vvh > 0) {
+      var keyboardOpen = fullH > 0 && vvh > 0 && vvh < fullH * 0.82;
+      document.documentElement.classList.toggle('keyboard-open', keyboardOpen);
+      if (keyboardOpen) {
         document.documentElement.style.setProperty('--vh', (vvh * 0.01) + 'px');
       } else {
         setVh();
@@ -1088,14 +1089,24 @@
       padding-bottom: 0;
       min-height: 0;
     }
-    /* Reserve space for fixed input zone (Blathers + chat) when on home */
-    .body:not(:has(.sub-screen.visible)) {
+    /* Reserve space for fixed input zone (Blathers + chat) when on home — not in chat (chat-mode needs full height) */
+    .body:not(:has(.sub-screen.visible)):not(.chat-mode) {
       padding-bottom: calc(var(--bottom-dock-clearance) + 50px);
     }
     .body.chat-mode .hint-area { display: none !important; }
     .body:has(.sub-screen.visible) .chat-area { display: none !important; }
     .app.in-project-view {
       padding-bottom: calc(var(--bottom-dock-offset-sheet) + env(safe-area-inset-bottom, 0px));
+    }
+    /* Keyboard visible: .app height already matches visual viewport — drop dock clearance so chat is not “cut off” by invisible padding */
+    html.keyboard-open .app {
+      padding-bottom: max(0px, env(safe-area-inset-bottom, 0px));
+    }
+    html.keyboard-open .app.in-project-view {
+      padding-bottom: max(0px, env(safe-area-inset-bottom, 0px));
+    }
+    html.keyboard-open .input-zone {
+      bottom: max(8px, env(safe-area-inset-bottom, 0px));
     }
 
     /* ── HINT AREA ── */
@@ -4569,7 +4580,7 @@
     }
     .blatherbook-panel {
       position: absolute; bottom: 0; left: 0; right: 0;
-      max-height: 70vh;
+      max-height: min(75dvh, calc(var(--vvh, 100dvh) * 0.96));
       background: #fdfaf8;
       border-radius: 20px 20px 0 0;
       box-shadow: 0 -8px 32px rgba(0,0,0,0.15);
@@ -4595,7 +4606,8 @@
     }
     .blatherbook-close:active { background: rgba(0,0,0,0.06); }
     .blatherbook-messages {
-      flex: 1; min-height: 120px; max-height: 280px;
+      flex: 1; min-height: 120px;
+      max-height: min(280px, calc(var(--vvh, 100dvh) * 0.44));
       overflow-y: auto; padding: 16px;
       display: flex; flex-direction: column; gap: 12px;
     }
@@ -9234,7 +9246,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.45.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.45.1';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -10221,25 +10233,37 @@
     }
   }
 
+  let scrollIntoViewAfterKeyboardTimer = 0;
   function scrollFocusedIntoView() {
     const el = document.activeElement;
     if (!el || !['INPUT', 'TEXTAREA'].includes(el.tagName)) return;
-    const scroll = () => {
-      el.scrollIntoView({ block: 'end', behavior: 'smooth', inline: 'nearest' });
+    const scrollOnce = () => {
+      el.scrollIntoView({ block: 'nearest', behavior: 'auto', inline: 'nearest' });
     };
-    requestAnimationFrame(() => {
-      scroll();
-      setTimeout(scroll, 100);
-      setTimeout(scroll, 250);
-      setTimeout(scroll, 450);
-    });
+    requestAnimationFrame(scrollOnce);
+    if (scrollIntoViewAfterKeyboardTimer) clearTimeout(scrollIntoViewAfterKeyboardTimer);
+    scrollIntoViewAfterKeyboardTimer = setTimeout(function() {
+      scrollIntoViewAfterKeyboardTimer = 0;
+      scrollOnce();
+    }, 280);
   }
 
+  let vvKeyboardScrollTimer = 0;
   function setupKeyboardHandling() {
     const input = document.getElementById('inputField');
     if (input) {
       input.addEventListener('focus', function() {
         scrollChatForKeyboard();
+        scrollFocusedIntoView();
+      });
+    }
+    const blatherInp = document.getElementById('blatherbookInput');
+    if (blatherInp) {
+      blatherInp.addEventListener('focus', function() {
+        const book = document.getElementById('blatherbookMessages');
+        if (book && book.scrollHeight > 0) {
+          requestAnimationFrame(() => { book.scrollTop = book.scrollHeight; });
+        }
         scrollFocusedIntoView();
       });
     }
@@ -10249,7 +10273,11 @@
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', () => {
         scrollChatForKeyboard();
-        scrollFocusedIntoView();
+        if (vvKeyboardScrollTimer) clearTimeout(vvKeyboardScrollTimer);
+        vvKeyboardScrollTimer = setTimeout(function() {
+          vvKeyboardScrollTimer = 0;
+          scrollChatForKeyboard();
+        }, 120);
       });
     }
   }
