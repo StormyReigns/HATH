@@ -5483,11 +5483,74 @@
       0%, 100% { transform: scale(1); }
       45% { transform: scale(1.09); }
     }
+    .program-streak-strip {
+      margin: -6px 0 18px; padding: 12px 14px; border-radius: 14px;
+      background: rgba(255,255,255,0.52); border: 1px solid rgba(192,122,74,0.22);
+      font-size: 13px; line-height: 1.45; color: var(--text2);
+    }
+    html.dark-mode .program-streak-strip { background: rgba(40,36,32,0.48); border-color: rgba(200,170,140,0.14); }
+    .program-streak-strip-title {
+      font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 500; color: var(--text); margin: 0 0 10px;
+    }
+    .program-streak-line + .program-streak-line { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.07); }
+    html.dark-mode .program-streak-line + .program-streak-line { border-top-color: rgba(255,255,255,0.07); }
+    .program-streak-line strong { color: var(--text); font-weight: 600; }
+    .program-undo-ribbon {
+      display: none; align-items: center; justify-content: space-between; gap: 12px;
+      margin-bottom: 14px; padding: 11px 14px; border-radius: 12px;
+      background: rgba(192,122,74,0.11); border: 1px solid rgba(192,122,74,0.26);
+    }
+    .program-undo-ribbon-text { flex: 1; font-size: 13px; color: var(--text2); line-height: 1.35; }
+    .program-undo-ribbon-btn {
+      flex-shrink: 0; font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 10px;
+      border: 1px solid rgba(192,122,74,0.42); background: rgba(255,255,255,0.78); color: var(--accent);
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+    }
+    html.dark-mode .program-undo-ribbon-btn { background: rgba(50,44,38,0.9); color: #e8b896; }
+    .program-log-block-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+    .program-log-head-title { margin-bottom: 0 !important; }
+    .program-log-fix-btn {
+      font-size: 12px; font-weight: 600; padding: 4px 0; margin: 0; border: none; background: none;
+      color: var(--accent); text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .program-donut-confetti-layer {
+      position: absolute; inset: 0; pointer-events: none; overflow: visible; z-index: 5;
+    }
+    .program-confetti-bit {
+      position: absolute; left: 50%; top: 50%; width: 5px; height: 8px; border-radius: 1px;
+      margin: -4px 0 0 -2px;
+      animation: programConfettiFly 0.78s cubic-bezier(0.22, 0.82, 0.36, 1) forwards;
+    }
+    @keyframes programConfettiFly {
+      0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+      100% { transform: translate(var(--cx), var(--cy)) rotate(var(--rot)) scale(0.2); opacity: 0; }
+    }
+    .pew-streak-lead { font-size: 14px; color: var(--text2); line-height: 1.45; margin: 0 0 14px; }
+    .pew-streak-rows { display: flex; flex-direction: column; gap: 14px; }
+    .pew-streak-row {
+      position: relative; padding: 14px 36px 12px 12px; border-radius: 14px;
+      border: 1px solid rgba(192,122,74,0.22); background: rgba(255,255,255,0.45);
+    }
+    html.dark-mode .pew-streak-row { background: rgba(40,36,32,0.42); }
+    .pew-streak-grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 8px; }
+    @media (max-width: 380px) {
+      .pew-streak-grid3 { grid-template-columns: 1fr; }
+    }
+    .pew-streak-field { display: flex; flex-direction: column; gap: 5px; margin: 0; min-width: 0; }
+    .pew-streak-lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+    .pew-streak-remove {
+      position: absolute; top: 8px; right: 6px; width: 32px; height: 32px; padding: 0; margin: 0;
+      border: none; border-radius: 50%; background: rgba(0,0,0,0.06); color: var(--muted);
+      font-size: 20px; line-height: 1; cursor: pointer; -webkit-tap-highlight-color: transparent;
+    }
+    html.dark-mode .pew-streak-remove { background: rgba(255,255,255,0.08); }
+    .pew-streak-add-wrap { margin-top: 12px; text-align: center; }
     .program-log-toast {
       display: none; align-items: center; justify-content: space-between; gap: 14px;
       position: fixed; left: 12px; right: 12px;
-      bottom: max(14px, calc(env(safe-area-inset-bottom, 0px) + 8px));
-      z-index: 320; max-width: 520px; margin: 0 auto;
+      bottom: calc(var(--bottom-dock-offset-high) + max(10px, env(safe-area-inset-bottom, 0px)) + 6px);
+      z-index: 12000; max-width: 520px; margin: 0 auto;
       padding: 12px 14px; border-radius: 14px;
       background: rgba(32, 28, 24, 0.94); color: #fdf8f1;
       box-shadow: 0 10px 36px rgba(0,0,0,0.28);
@@ -8837,20 +8900,24 @@
             </div>
           </div>
           <div class="program-rhythm-ladder" id="programRhythmLadder" aria-label="Progress by time window"></div>
+          <div class="program-streak-strip" id="programStreakStrip" style="display:none" aria-label="Streak bonuses"></div>
+          <div class="program-undo-ribbon" id="programUndoRibbon" style="display:none" role="region" aria-label="Undo last log">
+            <span class="program-undo-ribbon-text" id="programUndoRibbonText">Mistake on the last tap? You can undo it.</span>
+            <button type="button" class="program-undo-ribbon-btn" onclick="programUndoLastLogTap()">Undo</button>
+          </div>
           <div class="program-today-block">
             <h3 class="program-section-label">Log today</h3>
             <p class="program-today-date" id="programTodayDate"></p>
-            <p class="program-log-hint" id="programLogHint">Tap when you have earned it. Each tap logs for today and counts toward your habit goal. If you tap by mistake, use Undo on the confirmation bar.</p>
+            <p class="program-log-hint" id="programLogHint">Tap when you have earned it. Each tap logs for today and counts toward your habit goal. Undo appears above the tab bar and in the banner; you can remove the latest log entry from Recent.</p>
             <div class="program-activity-buttons" id="programActivityButtons"></div>
           </div>
           <div class="program-log-block">
-            <h3 class="program-section-label">Recent</h3>
+            <div class="program-log-block-head">
+              <h3 class="program-section-label program-log-head-title">Recent</h3>
+              <button type="button" class="program-log-fix-btn" id="programRemoveLastLogBtn" onclick="programRemoveLatestLogEntry()" style="display:none">Remove latest entry…</button>
+            </div>
             <div class="program-log-list" id="programLogList"></div>
           </div>
-        </div>
-        <div id="programLogToast" class="program-log-toast" style="display:none" role="status" aria-live="polite">
-          <span class="program-log-toast-msg" id="programLogToastMsg"></span>
-          <button type="button" class="program-log-toast-undo" onclick="programUndoLastLogTap()">Undo</button>
         </div>
       </div>
     </div>
@@ -8984,6 +9051,10 @@
     <div class="bottom-bar-inner">
       <div class="bottom-dock" id="bottomDock" aria-label="Primary navigation"></div>
     </div>
+  </div>
+  <div id="programLogToast" class="program-log-toast" style="display:none" role="status" aria-live="polite">
+    <span class="program-log-toast-msg" id="programLogToastMsg"></span>
+    <button type="button" class="program-log-toast-undo" onclick="programUndoLastLogTap()">Undo</button>
   </div>
 </div><!-- end .app-screen -->
 
@@ -9350,7 +9421,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.47.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.48.0';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -12944,7 +13015,7 @@
         goalTarget: p.goal && p.goal.target ? p.goal.target : 400,
         goalUnitLabel: programGoalUnitLabel(p),
         icon: p.icon || '',
-        streakRulesRaw: formatStreakRulesForEditor(p.rules)
+        streakBonusRows: pewStreakRowsFromProjectRules(p.rules, p.activities || [])
       };
     } else {
       pewDraft = {
@@ -12957,7 +13028,7 @@
         goalTarget: 400,
         goalUnitLabel: 'points',
         icon: '',
-        streakRulesRaw: ''
+        streakBonusRows: [{ ruleId: '', activityId: '', days: '7', bonus: '', maxWeek: '1' }]
       };
     }
     const o = document.getElementById('programEasyWizardOverlay');
@@ -13032,6 +13103,117 @@
     return normalizeProjectIcon(raw);
   }
 
+  function pewStreakRowsFromProjectRules(rules, activities) {
+    const arr = normalizeProgramRules(rules || {}).streakBonuses;
+    const acts = activities || [];
+    if (!arr.length) {
+      return [{ ruleId: '', activityId: '', days: '7', bonus: '', maxWeek: '1' }];
+    }
+    return arr.map(function(r) {
+      let aid = r.activityId ? String(r.activityId) : '';
+      if (!aid && r.activityLabel) {
+        const f = acts.find(function(a) { return a.label === r.activityLabel; });
+        if (f) aid = f.id;
+      }
+      return {
+        ruleId: r.id ? String(r.id) : '',
+        activityId: aid,
+        days: String(Math.max(2, parseInt(r.consecutiveDays, 10) || 7)),
+        bonus: String(Math.max(0, parseInt(r.bonusPoints, 10) || 0)),
+        maxWeek: String(Math.max(1, parseInt(r.maxPerWeek, 10) || 1))
+      };
+    });
+  }
+
+  function pewBuildStreakRulesFromRows(rows, activities) {
+    const streakBonuses = [];
+    const acts = activities || [];
+    (rows || []).forEach(function(row, idx) {
+      if (!row || !row.activityId) return;
+      const act = acts.find(function(a) { return a.id === row.activityId; });
+      if (!act) return;
+      const bonusPoints = Math.max(0, parseInt(row.bonus, 10) || 0);
+      if (bonusPoints <= 0) return;
+      const consecutiveDays = Math.max(2, parseInt(row.days, 10) || 2);
+      const maxPerWeek = Math.max(1, parseInt(row.maxWeek, 10) || 1);
+      const rid = row.ruleId && String(row.ruleId).trim() ? String(row.ruleId).trim() : ('sb_pew_' + idx + '_' + Date.now());
+      streakBonuses.push({
+        id: rid,
+        activityId: act.id,
+        activityLabel: act.label,
+        consecutiveDays: consecutiveDays,
+        bonusPoints: bonusPoints,
+        maxPerWeek: maxPerWeek
+      });
+    });
+    return normalizeProgramRules({ streakBonuses: streakBonuses });
+  }
+
+  function pewSyncStreakRowsFromDom() {
+    if (!pewDraft) return;
+    const body = document.getElementById('pewBody');
+    const rowEls = body ? body.querySelectorAll('.pew-streak-row') : [];
+    const rows = [];
+    rowEls.forEach(function(row) {
+      const sel = row.querySelector('.pew-streak-act');
+      const daysEl = row.querySelector('.pew-streak-days');
+      const bonusEl = row.querySelector('.pew-streak-bonus');
+      const mxEl = row.querySelector('.pew-streak-max');
+      const rid = row.getAttribute('data-rule-id') || '';
+      rows.push({
+        ruleId: rid,
+        activityId: sel ? String(sel.value || '').trim() : '',
+        days: daysEl ? String(daysEl.value || '7').trim() : '7',
+        bonus: bonusEl ? String(bonusEl.value || '').trim() : '',
+        maxWeek: mxEl ? String(mxEl.value || '1').trim() : '1'
+      });
+    });
+    pewDraft.streakBonusRows = rows.length ? rows : [{ ruleId: '', activityId: '', days: '7', bonus: '', maxWeek: '1' }];
+  }
+
+  function pewHtmlStreakWizardStep() {
+    const rows = pewDraft.streakBonusRows && pewDraft.streakBonusRows.length
+      ? pewDraft.streakBonusRows
+      : [{ ruleId: '', activityId: '', days: '7', bonus: '', maxWeek: '1' }];
+    const acts = pewDraft.activities || [];
+    let html = '<p class="pew-streak-lead">When you log the <strong>same activity</strong> on enough days in a row, you earn a little extra toward your goal. Skip this screen if you prefer to keep it simple.</p>';
+    html += '<div class="pew-streak-rows" id="pewStreakRowsHost">';
+    rows.forEach(function(row, i) {
+      let opts = '<option value="">Choose activity…</option>';
+      acts.forEach(function(a) {
+        opts += '<option value="' + escapeHtml(a.id) + '"' + (row.activityId === a.id ? ' selected' : '') + '>' + escapeHtml(a.label) + '</option>';
+      });
+      const reBtn = rows.length > 1
+        ? '<button type="button" class="pew-streak-remove" onclick="pewRemoveStreakRow(' + i + ')" aria-label="Remove this bonus">×</button>'
+        : '';
+      html += '<div class="pew-streak-row" data-rule-id="' + escapeHtml(row.ruleId || '') + '">' +
+        reBtn +
+        '<label class="pew-streak-field"><span class="pew-streak-lbl">Activity</span><select class="pjw-input pew-streak-act">' + opts + '</select></label>' +
+        '<div class="pew-streak-grid3">' +
+        '<label class="pew-streak-field"><span class="pew-streak-lbl">Days in a row</span><input type="number" class="pjw-input pew-streak-days" min="2" max="365" value="' + escapeHtml(row.days || '7') + '"></label>' +
+        '<label class="pew-streak-field"><span class="pew-streak-lbl">Bonus amount</span><input type="number" class="pjw-input pew-streak-bonus" min="0" max="9999" placeholder="e.g. 20" value="' + escapeHtml(row.bonus != null ? String(row.bonus) : '') + '"></label>' +
+        '<label class="pew-streak-field"><span class="pew-streak-lbl">Max / week</span><input type="number" class="pjw-input pew-streak-max" min="1" max="21" value="' + escapeHtml(row.maxWeek != null ? String(row.maxWeek) : '1') + '"></label>' +
+        '</div></div>';
+    });
+    html += '</div><div class="pew-streak-add-wrap"><button type="button" class="pew-act-add" onclick="pewAddStreakRow()">Add another streak bonus</button></div>';
+    return html;
+  }
+
+  function pewAddStreakRow() {
+    if (!pewDraft) return;
+    pewSyncStreakRowsFromDom();
+    pewDraft.streakBonusRows.push({ ruleId: '', activityId: '', days: '7', bonus: '', maxWeek: '1' });
+    programEasyWizardRender();
+  }
+
+  function pewRemoveStreakRow(idx) {
+    if (!pewDraft || !pewDraft.streakBonusRows) return;
+    pewSyncStreakRowsFromDom();
+    if (!pewDraft.streakBonusRows || pewDraft.streakBonusRows.length <= 1) return;
+    pewDraft.streakBonusRows.splice(idx, 1);
+    programEasyWizardRender();
+  }
+
   function programEasyWizardRender() {
     const h = document.getElementById('pewHeading');
     const lead = document.getElementById('pewLead');
@@ -13040,7 +13222,7 @@
     const back = document.getElementById('pewBack');
     const next = document.getElementById('pewNext');
     if (!body || !pewDraft) return;
-    const totalSteps = 4;
+    const totalSteps = 5;
     if (pewStep === 0) {
       if (prog) prog.textContent = '1 of ' + totalSteps;
       if (h) h.textContent = 'Name this habit';
@@ -13071,7 +13253,7 @@
     } else if (pewStep === 2) {
       if (prog) prog.textContent = '3 of ' + totalSteps;
       if (h) h.textContent = 'Activities you will log';
-      if (lead) lead.textContent = 'Name each thing you want to log, and how much it adds toward your goal. On the next step you can call those amounts points, dollars, miles — whatever fits.';
+      if (lead) lead.textContent = 'Name each thing you want to log, and how much it adds toward your goal. Next you will set your goal total, then optional streak bonuses.';
       const nAct = (pewDraft.activityRows || []).length;
       let rowsHtml = '<div class="pew-activity-rows">';
       (pewDraft.activityRows || []).forEach(function(row, i) {
@@ -13089,23 +13271,26 @@
       body.innerHTML = rowsHtml;
       if (back) back.textContent = 'Back';
       if (next) next.textContent = 'Continue';
-    } else {
+    } else if (pewStep === 3) {
       if (prog) prog.textContent = '4 of ' + totalSteps;
       if (h) h.textContent = 'Goal and icon';
       if (lead) lead.textContent = 'How much you are aiming for in total, what to call that amount, and an emoji badge if you like.';
       const u = escapeHtml(pewDraft.goalUnitLabel || 'points');
-      const streakRaw = escapeHtml(pewDraft.streakRulesRaw != null ? String(pewDraft.streakRulesRaw) : '');
       body.innerHTML =
         '<label class="project-field-hint" for="pewGoal">Goal total</label>' +
         '<input type="number" class="pjw-input" id="pewGoal" min="50" step="10" value="' + (pewDraft.goalTarget || 400) + '">' +
         '<label class="project-field-hint" for="pewGoalUnit" style="margin-top:16px">Call this unit (e.g. points, dollars, miles)</label>' +
         '<input type="text" class="pjw-input" id="pewGoalUnit" maxlength="24" autocomplete="off" placeholder="points" value="' + u + '">' +
         '<label class="project-field-hint" style="margin-top:16px">Icon (optional)</label>' +
-        '<div class="project-icon-picker pjw-project-icon-picker" id="pewIconHost" role="group"></div>' +
-        '<label class="project-field-hint" for="pewStreakRules" style="margin-top:18px">Streak bonuses (optional)</label>' +
-        '<p class="project-field-hint" style="margin:6px 0 8px;font-size:12px;line-height:1.45">One line per rule: activity name (same spelling as above) | days in a row | bonus points | max per week. Example: <span style="white-space:nowrap">Walk | 7 | 25 | 1</span>. Lines starting with # are ignored.</p>' +
-        '<textarea class="pjw-input" id="pewStreakRules" rows="4" maxlength="4000" autocomplete="off" placeholder="Walk | 7 | 25 | 1">' + streakRaw + '</textarea>';
+        '<div class="project-icon-picker pjw-project-icon-picker" id="pewIconHost" role="group"></div>';
       renderProjectIconPickerInto('pewIconHost', pewDraft.icon || '', 'pewIconPick');
+      if (back) back.textContent = 'Back';
+      if (next) next.textContent = 'Continue';
+    } else {
+      if (prog) prog.textContent = '5 of ' + totalSteps;
+      if (h) h.textContent = 'Streak bonuses';
+      if (lead) lead.textContent = 'Optional — celebrate consistency with a small extra reward.';
+      body.innerHTML = pewHtmlStreakWizardStep();
       if (back) back.textContent = 'Back';
       if (next) next.textContent = pewEditingProgramId ? 'Save changes' : 'Save';
     }
@@ -13116,17 +13301,16 @@
       closeProgramEasyWizard();
       return;
     }
+    if (pewStep === 4 && pewDraft) pewSyncStreakRowsFromDom();
     if (pewStep === 3 && pewDraft) {
       const gEl = document.getElementById('pewGoal');
       const guEl = document.getElementById('pewGoalUnit');
-      const stEl = document.getElementById('pewStreakRules');
       if (gEl) pewDraft.goalTarget = Math.max(50, parseInt(gEl.value, 10) || 400);
       if (guEl) {
         let u = String(guEl.value || '').trim();
         pewDraft.goalUnitLabel = (u ? u : 'points').slice(0, 24);
       }
       pewDraft.icon = readPewWizardIcon();
-      if (stEl) pewDraft.streakRulesRaw = String(stEl.value || '');
     }
     pewStep--;
     if (pewStep === 2 && pewDraft && pewDraft.activities && pewDraft.activities.length) {
@@ -13184,29 +13368,27 @@
       }
       pewDraft.activityRows = nextRows;
       pewDraft.activities = activities;
+      if (!pewDraft.streakBonusRows || !pewDraft.streakBonusRows.length) {
+        pewDraft.streakBonusRows = [{ ruleId: '', activityId: '', days: '7', bonus: '', maxWeek: '1' }];
+      }
       pewStep++;
       programEasyWizardRender();
       return;
     }
-    const gEl = document.getElementById('pewGoal');
-    const guEl = document.getElementById('pewGoalUnit');
-    pewDraft.goalTarget = Math.max(50, parseInt(gEl && gEl.value, 10) || 400);
-    let unitStr = guEl ? String(guEl.value || '').trim() : '';
-    if (!unitStr) unitStr = 'points';
-    pewDraft.goalUnitLabel = unitStr.slice(0, 24);
-    pewDraft.icon = readPewWizardIcon();
-    const streakEl = document.getElementById('pewStreakRules');
-    if (streakEl) pewDraft.streakRulesRaw = String(streakEl.value || '');
-    let rulesBlock = normalizeProgramRules({ streakBonuses: [] });
-    const streakTrim = String(pewDraft.streakRulesRaw || '').trim();
-    if (streakTrim) {
-      const pr = parseStreakRulesInput(pewDraft.streakRulesRaw);
-      if (pr === null) {
-        alert('Streak bonuses could not be parsed. Use one line per rule: Activity name | days in a row | bonus points | max per week. Or paste valid JSON. Lines starting with # are ignored.');
-        return;
-      }
-      rulesBlock = pr;
+    if (pewStep === 3) {
+      const gEl = document.getElementById('pewGoal');
+      const guEl = document.getElementById('pewGoalUnit');
+      pewDraft.goalTarget = Math.max(50, parseInt(gEl && gEl.value, 10) || 400);
+      let unitStr = guEl ? String(guEl.value || '').trim() : '';
+      if (!unitStr) unitStr = 'points';
+      pewDraft.goalUnitLabel = unitStr.slice(0, 24);
+      pewDraft.icon = readPewWizardIcon();
+      pewStep++;
+      programEasyWizardRender();
+      return;
     }
+    pewSyncStreakRowsFromDom();
+    const rulesBlock = pewBuildStreakRulesFromRows(pewDraft.streakBonusRows, pewDraft.activities);
     const existingPre = pewEditingProgramId ? getProjects().find(function(x) { return x.id === pewEditingProgramId; }) : null;
     const periodStart = existingPre && existingPre.period && existingPre.period.start
       ? String(existingPre.period.start).slice(0, 10)
@@ -13278,6 +13460,91 @@
       '</svg>';
   }
 
+  function programStreakNextInfo(streak, need) {
+    const N = Math.max(2, parseInt(need, 10) || 2);
+    const S = Math.max(0, parseInt(streak, 10) || 0);
+    if (S < N) return { daysLeft: N - S, atMilestone: false };
+    const r = S % N;
+    if (r === 0) return { daysLeft: N, atMilestone: S >= N };
+    return { daysLeft: N - r, atMilestone: false };
+  }
+
+  function programRenderStreakStrip(p, unit) {
+    const strip = document.getElementById('programStreakStrip');
+    if (!strip) return;
+    const rules = normalizeProgramRules(p.rules || {}).streakBonuses;
+    if (!rules.length) {
+      strip.style.display = 'none';
+      strip.innerHTML = '';
+      return;
+    }
+    const today = todayYMD();
+    const lines = [];
+    rules.forEach(function(rule) {
+      let aid = rule.activityId;
+      if (!aid && rule.activityLabel) {
+        const f = (p.activities || []).find(function(a) { return a.label === rule.activityLabel; });
+        if (f) aid = f.id;
+      }
+      if (!aid) return;
+      const act = (p.activities || []).find(function(a) { return a.id === aid; });
+      const name = act ? act.label : 'Activity';
+      const need = Math.max(2, rule.consecutiveDays || 2);
+      const streak = countStreakEndingOn(p, aid, today);
+      const info = programStreakNextInfo(streak, need);
+      const bonus = Math.max(0, parseInt(rule.bonusPoints, 10) || 0);
+      let line = '';
+      if (streak < 1) {
+        line = '<strong>' + escapeHtml(name) + '</strong> · log this activity today to start counting toward a <strong>' + need + '</strong>-day streak (+' + bonus + ' ' + escapeHtml(unit) + ' when you hit it).';
+      } else if (info.atMilestone) {
+        line = '<strong>' + escapeHtml(name) + '</strong> · <strong>' + streak + '-day</strong> streak — you are on a bonus milestone. Next +' + bonus + ' ' + escapeHtml(unit) + ' after <strong>' + info.daysLeft + '</strong> more consecutive logged day' + (info.daysLeft === 1 ? '' : 's') + '.';
+      } else {
+        line = '<strong>' + escapeHtml(name) + '</strong> · <strong>' + streak + '-day</strong> streak — <strong>' + info.daysLeft + '</strong> more consecutive day' + (info.daysLeft === 1 ? '' : 's') + ' until the next +' + bonus + ' ' + escapeHtml(unit) + ' bonus.';
+      }
+      lines.push('<div class="program-streak-line">' + line + '</div>');
+    });
+    if (!lines.length) {
+      strip.style.display = 'none';
+      strip.innerHTML = '';
+      return;
+    }
+    strip.style.display = 'block';
+    strip.innerHTML = '<div class="program-streak-strip-title">Streak bonuses</div>' + lines.join('');
+  }
+
+  function syncProgramUndoRibbon() {
+    const ribbon = document.getElementById('programUndoRibbon');
+    if (!ribbon) return;
+    const pv = projectsViewing;
+    const show = pv && projectIsProgram(pv) && programLogUndoPayload && programLogUndoPayload.projectId === pv.id;
+    ribbon.style.display = show ? 'flex' : 'none';
+  }
+
+  function programBurstDonutConfetti() {
+    const wrap = document.getElementById('programDonutWrap');
+    if (!wrap) return;
+    const layer = document.createElement('div');
+    layer.className = 'program-donut-confetti-layer';
+    wrap.appendChild(layer);
+    const colors = ['#c07a4a', '#e8b86a', '#7cb894', '#8bb8e8', '#d4a574', '#f0e0c8', '#c49a6c', '#a8c4a0'];
+    for (let i = 0; i < 22; i++) {
+      const bit = document.createElement('span');
+      bit.className = 'program-confetti-bit';
+      const cx = (Math.random() * 130 - 65) + 'px';
+      const cy = (-70 - Math.random() * 70) + 'px';
+      const rot = (Math.random() * 520 - 260) + 'deg';
+      bit.style.setProperty('--cx', cx);
+      bit.style.setProperty('--cy', cy);
+      bit.style.setProperty('--rot', rot);
+      bit.style.background = colors[i % colors.length];
+      bit.style.animationDelay = (Math.random() * 0.08) + 's';
+      layer.appendChild(bit);
+    }
+    setTimeout(function() {
+      try { layer.remove(); } catch (_) {}
+    }, 900);
+  }
+
   function renderProgramView() {
     const p = projectsViewing;
     if (!p || !projectIsProgram(p)) return;
@@ -13333,7 +13600,7 @@
 
     const logHint = document.getElementById('programLogHint');
     if (logHint) {
-      logHint.textContent = 'Tap when you have earned it. Each tap logs for today and adds to your total in ' + unit + '. If you tap by mistake, use Undo on the bar that appears.';
+      logHint.textContent = 'Tap when you have earned it. Each tap logs for today and adds to your total in ' + unit + '. Undo appears above the tab bar and in the soft banner; you can also remove the latest log entry below.';
     }
 
     const tdy = todayYMD();
@@ -13364,6 +13631,11 @@
         row('This year', yrPts, yT);
     }
 
+    programRenderStreakStrip(fresh, unit);
+
+    const rmBtn = document.getElementById('programRemoveLastLogBtn');
+    if (rmBtn) rmBtn.style.display = (fresh.log && fresh.log.length) ? 'inline' : 'none';
+
     const logEl = document.getElementById('programLogList');
     if (logEl) {
       const lines = (fresh.log || []).slice(-14).reverse();
@@ -13374,6 +13646,7 @@
         return '<div class="program-log-line">' + escapeHtml(String(e.date || '')) + ' — ' + escapeHtml(name) + ' +' + (e.pointsAwarded || 0) + ' ' + escapeHtml(unit) + bonus + '</div>';
       }).join('') : '<div class="program-log-line">Nothing logged yet. Use the buttons above when you earn it.</div>';
     }
+    syncProgramUndoRibbon();
   }
 
   let programLogUndoTimer = 0;
@@ -13386,6 +13659,7 @@
       clearTimeout(programLogUndoTimer);
       programLogUndoTimer = 0;
     }
+    syncProgramUndoRibbon();
   }
 
   function showProgramLogToast(htmlMsg) {
@@ -13393,6 +13667,7 @@
     const m = document.getElementById('programLogToastMsg');
     if (m) m.innerHTML = htmlMsg;
     if (t) t.style.display = 'flex';
+    syncProgramUndoRibbon();
     if (programLogUndoTimer) clearTimeout(programLogUndoTimer);
     programLogUndoTimer = setTimeout(function() {
       programLogUndoTimer = 0;
@@ -13406,8 +13681,6 @@
     const payload = programLogUndoPayload;
     const projectId = payload.projectId;
     const ids = payload.ids;
-    hideProgramLogToast();
-    programLogUndoPayload = null;
     const all = getProjects();
     const p = all.find(function(x) { return x.id === projectId; });
     if (!p || !projectIsProgram(p) || !Array.isArray(p.log)) return;
@@ -13416,6 +13689,8 @@
     const beforeLen = p.log.length;
     p.log = p.log.filter(function(e) { return !idSet[e.id]; });
     if (p.log.length === beforeLen) return;
+    programLogUndoPayload = null;
+    hideProgramLogToast();
     p.modifiedAt = Date.now();
     saveProjects(all);
     if (projectsViewing && projectsViewing.id === projectId) projectsViewing = p;
@@ -13508,6 +13783,34 @@
         dw.classList.remove('program-donut-celebrate');
       }, 720);
     }
+    programBurstDonutConfetti();
+  }
+
+  function programRemoveLatestLogEntry() {
+    if (!projectsViewing || !projectIsProgram(projectsViewing)) return;
+    if (!confirm('Remove the most recent line from your habit log? Use this if Undo is no longer available.')) return;
+    const all = getProjects();
+    const p = all.find(function(x) { return x.id === projectsViewing.id; });
+    if (!p || !projectIsProgram(p) || !Array.isArray(p.log) || p.log.length === 0) return;
+    let bestI = -1;
+    let bestKey = '';
+    p.log.forEach(function(e, i) {
+      const k = String(e.date || '').slice(0, 10) + '_' + ('000000' + i).slice(-6);
+      if (k >= bestKey) {
+        bestKey = k;
+        bestI = i;
+      }
+    });
+    if (bestI < 0) return;
+    p.log.splice(bestI, 1);
+    p.modifiedAt = Date.now();
+    saveProjects(all);
+    projectsViewing = p;
+    programLogUndoPayload = null;
+    hideProgramLogToast();
+    renderProgramView();
+    renderProjectsLanding();
+    renderHomeProjectsScroller();
   }
 
   let projectsEditing = null;
@@ -14123,6 +14426,10 @@
   }
 
   function projectsSelectProject(id) {
+    if (programLogUndoPayload && programLogUndoPayload.projectId !== id) {
+      programLogUndoPayload = null;
+      hideProgramLogToast();
+    }
     const all = getProjects();
     const p = all.find(x => x.id === id);
     if (!p) return;
