@@ -1973,75 +1973,33 @@
       position: relative;
       z-index: 1;
     }
-    .fin-equity-card {
-      border-radius: 14px;
-      padding: 14px 16px;
-      margin: 10px 0 14px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(124,196,127,0.2);
-      position: relative;
-      z-index: 1;
-    }
-    html.dark-mode .fin-equity-card {
-      background: rgba(0,0,0,0.12);
-      border-color: rgba(124,196,127,0.2);
-    }
-    .fin-equity-card-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 17px;
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: var(--text);
-    }
-    .fin-equity-rows { display: flex; flex-direction: column; gap: 10px; }
-    .fin-equity-row {
+    .fin-equity-strip {
       display: flex;
       flex-wrap: wrap;
       align-items: baseline;
-      gap: 6px 12px;
-      font-size: 14px;
-      line-height: 1.35;
-    }
-    .fin-equity-k {
-      color: var(--text2);
-      min-width: 118px;
-      flex-shrink: 0;
-    }
-    .fin-equity-accent { color: var(--fin-accent); font-weight: 600; font-variant-numeric: tabular-nums; }
-    .fin-equity-price-cell { display: inline-flex; align-items: center; gap: 6px; }
-    .fin-equity-price--muted { color: var(--muted); font-weight: 500; }
-    .fin-equity-asof {
-      width: 100%;
-      flex-basis: 100%;
+      gap: 6px 10px;
+      margin: 8px 0 12px;
+      padding: 8px 12px;
+      border-radius: 10px;
       font-size: 12px;
-      color: var(--muted);
-      padding-left: 118px;
-      box-sizing: border-box;
+      line-height: 1.4;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(124,196,127,0.2);
+      color: var(--text2);
+      position: relative;
+      z-index: 1;
     }
-    .fin-equity-retry {
-      border: none;
-      background: rgba(124,196,127,0.12);
-      color: var(--fin-accent);
-      border-radius: 8px;
-      width: 28px;
-      height: 28px;
-      cursor: pointer;
-      font-size: 16px;
-      line-height: 1;
-      padding: 0;
+    html.dark-mode .fin-equity-strip {
+      background: rgba(0,0,0,0.12);
     }
-    .fin-equity-retry:hover { opacity: 0.9; }
-    .fin-equity-win-open { color: #1a8f4a; font-weight: 600; }
-    .fin-equity-win-blackout { color: #b04040; font-weight: 600; }
+    .fin-equity-strip-label { color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; font-size: 10px; }
+    .fin-equity-strip-vest strong { color: var(--fin-accent); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .fin-equity-strip-dot { color: var(--muted); user-select: none; }
+    .fin-equity-strip-win { font-weight: 600; }
+    .fin-equity-win-open { color: #1a8f4a; }
+    .fin-equity-win-blackout { color: #b04040; }
     html.dark-mode .fin-equity-win-open { color: #4ecf7a; }
     html.dark-mode .fin-equity-win-blackout { color: #e07070; }
-    .fin-equity-disclaimer {
-      font-size: 11px;
-      color: var(--muted);
-      font-style: italic;
-      margin: 14px 0 0;
-      line-height: 1.45;
-    }
     .fin-pie-panel {
       flex: 0 1 42%;
       max-width: 200px;
@@ -3049,7 +3007,10 @@
     .fdd-row-val { font-size: 14px; font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; }
     .fdd-row-pct { font-size: 12px; color: var(--muted); margin-left: 6px; }
     #fpddRows .fpdd-row--clickable .fdd-row-header { cursor: pointer; user-select: none; }
-    #fpddRows .fdd-row:not(.fpdd-row--clickable) .fdd-row-header { cursor: default; user-select: text; }
+    #fpddRows .fpdd-row--desc .fdd-row-header { cursor: pointer; user-select: none; }
+    #fpddRows .fdd-row:not(.fpdd-row--clickable):not(.fpdd-row--desc) .fdd-row-header { cursor: default; user-select: text; }
+    .fpdd-merchant-hint { font-size: 12px; color: var(--muted); margin: 0 0 10px; line-height: 1.4; }
+    .fpdd-merchant-chart-wrap { margin-bottom: 4px; }
     .fpdd-header-wrap { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 20px; padding-right: 36px; }
     .fpdd-drill-back {
       flex-shrink: 0; margin-top: 2px;
@@ -8447,27 +8408,10 @@
                 </div>
               </div>
             </div>
-            <div class="fin-equity-card" id="finEquityCard">
-              <div class="fin-equity-card-title">📈 RIVN Equity</div>
-              <div class="fin-equity-rows">
-                <div class="fin-equity-row fin-equity-row--price">
-                  <span class="fin-equity-k">Current Price</span>
-                  <span class="fin-equity-price-cell">
-                    <span class="fin-equity-accent fin-equity-price" id="finEquityPrice">—</span>
-                    <button type="button" class="fin-equity-retry" id="finEquityRetryBtn" onclick="refreshFinEquityCard(true)" style="display:none" aria-label="Retry price">⟳</button>
-                  </span>
-                  <span class="fin-equity-asof" id="finEquityAsOf"></span>
-                </div>
-                <div class="fin-equity-row">
-                  <span class="fin-equity-k">Next Vest</span>
-                  <span class="fin-equity-accent" id="finEquityNextVest">—</span>
-                </div>
-                <div class="fin-equity-row">
-                  <span class="fin-equity-k">Trading Window</span>
-                  <span class="fin-equity-window" id="finEquityWindow">—</span>
-                </div>
-              </div>
-              <p class="fin-equity-disclaimer">⚠ Vest dates fixed. Window dates estimated ±2 weeks. Verify at Guidepost before trading.</p>
+            <div class="fin-equity-strip" id="finEquityStrip">
+              <span class="fin-equity-strip-vest"><span class="fin-equity-strip-label">RIVN · Next vest</span> <strong id="finEquityNextVest">—</strong></span>
+              <span class="fin-equity-strip-dot" aria-hidden="true">·</span>
+              <span class="fin-equity-strip-win" id="finEquityWindow">—</span>
             </div>
             <div id="finPeriodEmpty" class="fin-empty-quip" style="display:none"></div>
             <div id="finChartsBlock">
@@ -11019,11 +10963,10 @@
   var _finPieLastPeriodTitle = '';
   /** Transactions in the selected period (for pie → category → description drill-down). */
   var _finPieLastPeriodTxs = null;
-
-  /** Yahoo RIVN quote cache for Finances equity card (15 min TTL). */
-  var _rivnPriceCache = null;
-  var RIVN_PRICE_TTL_MS = 15 * 60 * 1000;
-  var RIVN_YAHOO_CHART_URL = 'https://query1.finance.yahoo.com/v8/finance/chart/RIVN?interval=1d&range=1d';
+  /** Pie modal: categories | descriptions | merchant (bar chart). */
+  var _finPieDrillState = 'categories';
+  var _finPieDrillCategory = null;
+  var _finPieDrillCatColorIdx = 0;
 
   function getNextRivnVestDate() {
     var today = new Date();
@@ -11058,71 +11001,7 @@
     return 'open';
   }
 
-  function applyFinEquityPriceToDom_(priceNum, marketTimeSec) {
-    var pEl = document.getElementById('finEquityPrice');
-    var aEl = document.getElementById('finEquityAsOf');
-    var rBtn = document.getElementById('finEquityRetryBtn');
-    if (pEl) {
-      pEl.textContent = '$' + Number(priceNum).toFixed(2);
-      pEl.classList.add('fin-equity-accent');
-      pEl.classList.remove('fin-equity-price--muted');
-    }
-    if (aEl && marketTimeSec) {
-      var dt = new Date(marketTimeSec * 1000);
-      aEl.textContent = 'as of ' + dt.toLocaleTimeString('en-US', {
-        timeZone: 'America/Chicago',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-      }) + ' CT';
-    } else if (aEl) {
-      aEl.textContent = '';
-    }
-    if (rBtn) rBtn.style.display = 'none';
-  }
-
-  function applyFinEquityPriceFailure_(showRetry) {
-    var pEl = document.getElementById('finEquityPrice');
-    var aEl = document.getElementById('finEquityAsOf');
-    var rBtn = document.getElementById('finEquityRetryBtn');
-    if (pEl) {
-      pEl.textContent = 'Price unavailable';
-      pEl.classList.remove('fin-equity-accent');
-      pEl.classList.add('fin-equity-price--muted');
-    }
-    if (aEl) aEl.textContent = '';
-    if (rBtn) rBtn.style.display = showRetry ? '' : 'none';
-  }
-
-  function finFetchRivnQuote_() {
-    var pEl = document.getElementById('finEquityPrice');
-    if (pEl) {
-      pEl.textContent = '…';
-      pEl.classList.add('fin-equity-accent');
-      pEl.classList.remove('fin-equity-price--muted');
-    }
-    var aEl0 = document.getElementById('finEquityAsOf');
-    if (aEl0) aEl0.textContent = '';
-    var rBtn0 = document.getElementById('finEquityRetryBtn');
-    if (rBtn0) rBtn0.style.display = 'none';
-    fetch(RIVN_YAHOO_CHART_URL, { mode: 'cors' })
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        var result = data.chart && data.chart.result && data.chart.result[0];
-        var meta = result && result.meta;
-        if (!meta) throw new Error('no meta');
-        var price = meta.regularMarketPrice != null ? meta.regularMarketPrice : meta.previousClose;
-        if (price == null || isNaN(Number(price))) throw new Error('no price');
-        var t = meta.regularMarketTime != null ? meta.regularMarketTime : Math.floor(Date.now() / 1000);
-        _rivnPriceCache = { price: Number(price), marketTimeSec: t, fetchedAtMs: Date.now() };
-        applyFinEquityPriceToDom_(_rivnPriceCache.price, _rivnPriceCache.marketTimeSec);
-      })
-      .catch(function() {
-        applyFinEquityPriceFailure_(true);
-      });
-  }
-
-  function refreshFinEquityCard(forcePriceRefresh) {
+  function updateFinEquityStrip() {
     var nvEl = document.getElementById('finEquityNextVest');
     var wEl = document.getElementById('finEquityWindow');
     var nextV = getNextRivnVestDate();
@@ -11131,17 +11010,9 @@
     }
     if (wEl) {
       var st = getRivnWindowStatus();
-      wEl.className = 'fin-equity-window ' + (st === 'blackout' ? 'fin-equity-win-blackout' : 'fin-equity-win-open');
-      wEl.textContent = st === 'blackout' ? '🔒 Blackout Period' : '🟢 Likely Open';
+      wEl.className = 'fin-equity-strip-win ' + (st === 'blackout' ? 'fin-equity-win-blackout' : 'fin-equity-win-open');
+      wEl.textContent = st === 'blackout' ? '🔒 Blackout' : '🟢 Window likely open';
     }
-    var now = Date.now();
-    if (!forcePriceRefresh && _rivnPriceCache && (now - _rivnPriceCache.fetchedAtMs) < RIVN_PRICE_TTL_MS) {
-      applyFinEquityPriceToDom_(_rivnPriceCache.price, _rivnPriceCache.marketTimeSec);
-      var rBtn = document.getElementById('finEquityRetryBtn');
-      if (rBtn) rBtn.style.display = 'none';
-      return;
-    }
-    finFetchRivnQuote_();
   }
 
   var FIN_PIE_COLORS = ['#7cc47f', '#5a9e9e', '#c07a4a', '#9b7aac', '#e07070', '#7a8fce', '#d4a853', '#88b082', '#c9a56d', '#8ec5d6'];
@@ -11152,7 +11023,12 @@
   function hideFinancesScreen() {
     document.getElementById('financesScreen').classList.remove('visible');
     var fpdd = document.getElementById('finPieDeepDive');
-    if (fpdd && fpdd.classList.contains('open')) fpdd.classList.remove('open');
+    if (fpdd && fpdd.classList.contains('open')) {
+      fpdd.classList.remove('open');
+      _finPieDrillState = 'categories';
+      fpddShowPieMainBlock_(true);
+      fpddSetBackButton_('categories');
+    }
     var fgo = document.getElementById('finGoalsPromptOverlay');
     if (fgo && fgo.classList.contains('open')) fgo.classList.remove('open');
     syncBottomDockState();
@@ -11704,7 +11580,7 @@
 
     if (projBtn) projBtn.disabled = !getApiUser();
 
-    refreshFinEquityCard();
+    updateFinEquityStrip();
 
     var periodEmpty = txs.length === 0;
     if (emptyEl) {
@@ -11726,14 +11602,9 @@
     finRenderMerchants(txs);
   }
 
-  function finRenderTrendChart(bounds, txs) {
-    var chart = document.getElementById('finMonthChart');
-    if (!chart) return;
-    chart.innerHTML = '';
+  function finBuildFinTrendBuckets(bounds, txs) {
     finSyncViewModeFromDom();
     var buckets = [];
-    var maxBarPx = _finViewMode === 'month' ? 58 : 64;
-
     if (_finViewMode === 'week') {
       for (var i = 0; i < 7; i++) {
         var dayStart = new Date(bounds.start);
@@ -11780,7 +11651,14 @@
         });
       }
     }
+    return buckets;
+  }
 
+  function finRenderTrendChartIntoElement(chartEl, bounds, txs) {
+    if (!chartEl) return;
+    chartEl.innerHTML = '';
+    var buckets = finBuildFinTrendBuckets(bounds, txs);
+    var maxBarPx = _finViewMode === 'month' ? 58 : 64;
     var maxSpend = 0;
     var maxInc = 0;
     for (var j = 0; j < buckets.length; j++) {
@@ -11789,7 +11667,6 @@
     }
     if (maxSpend <= 0) maxSpend = 1;
     if (maxInc <= 0) maxInc = 1;
-
     for (var k = 0; k < buckets.length; k++) {
       var bk = buckets[k];
       var hSpend = Math.round((bk.sp / maxSpend) * maxBarPx);
@@ -11814,8 +11691,13 @@
       lab.textContent = bk.lab;
       col.appendChild(stack);
       col.appendChild(lab);
-      chart.appendChild(col);
+      chartEl.appendChild(col);
     }
+  }
+
+  function finRenderTrendChart(bounds, txs) {
+    var chart = document.getElementById('finMonthChart');
+    finRenderTrendChartIntoElement(chart, bounds, txs);
   }
 
   function finPolar(cx, cy, r, angDeg) {
@@ -11917,8 +11799,57 @@
     host.appendChild(tap);
   }
 
+  /** Single canonical label for known merchant aliases (pie drill-down by description). */
+  function finCanonicalMerchantPair_(raw) {
+    var t = String(raw || '').trim();
+    if (!t) return { key: '(no description)', fixedDisplay: '(no description)' };
+    var collapsed = t.replace(/\s+/g, ' ');
+    var lower = collapsed.toLowerCase();
+    if (finLooksLikeDoordash_(collapsed, lower)) {
+      return { key: '__fin_m_doordash', fixedDisplay: 'Doordash' };
+    }
+    if (finLooksLikeUberEats_(collapsed, lower)) {
+      return { key: '__fin_m_ubereats', fixedDisplay: 'Uber Eats' };
+    }
+    if (finLooksLikeGrubhub_(collapsed, lower)) {
+      return { key: '__fin_m_grubhub', fixedDisplay: 'Grubhub' };
+    }
+    if (finLooksLikePantagraph_(collapsed, lower)) {
+      return { key: '__fin_m_pantagraph', fixedDisplay: 'Pantagraph' };
+    }
+    var key = lower;
+    if (!key) key = '(no description)';
+    return { key: key, fixedDisplay: null };
+  }
+
+  function finLooksLikeDoordash_(collapsed, lower) {
+    if (/\bdoordash\b/.test(lower)) return true;
+    if (/\bdoor\s*dash\b/.test(lower)) return true;
+    if (/^dd\s*[*•·]?\s*doordash\b/.test(lower)) return true;
+    if (/\bdd\s*[*•·]\s*doordash\b/.test(lower)) return true;
+    return false;
+  }
+
+  function finLooksLikeUberEats_(collapsed, lower) {
+    if (/\bubereats\b/.test(lower)) return true;
+    if (/\buber\s+eats\b/.test(lower)) return true;
+    return false;
+  }
+
+  function finLooksLikeGrubhub_(collapsed, lower) {
+    if (/\bgrubhub\b/.test(lower)) return true;
+    if (/\bgrub\s+hub\b/.test(lower)) return true;
+    return false;
+  }
+
+  function finLooksLikePantagraph_(collapsed, lower) {
+    if (/\bpantagraph\b/.test(lower)) return true;
+    return false;
+  }
+
   /**
-   * Group spending in `txs` (same category) by normalized description; combines case/spacing variants.
+   * Group spending in `txs` (same category) by normalized description; combines case/spacing variants
+   * and known aliases (e.g. all DoorDash-like lines → one "Doordash" row).
    * @returns {Array<{ display: string, total: number, count: number }>}
    */
   function finGroupSpendingByDescription(txs) {
@@ -11927,18 +11858,76 @@
       var tx = txs[i];
       if (!tx.isExpense || tx.excludeFromSpending) continue;
       var raw = String(tx.description || '').trim();
-      var key = raw.toLowerCase().replace(/\s+/g, ' ');
-      if (!key) key = '(no description)';
+      var canon = finCanonicalMerchantPair_(raw);
+      var key = canon.key;
       if (!byKey[key]) {
-        byKey[key] = { total: 0, display: raw || '(no description)', count: 0 };
+        var disp = canon.fixedDisplay != null ? canon.fixedDisplay : (raw || '(no description)');
+        byKey[key] = { total: 0, display: disp, count: 0, fixed: canon.fixedDisplay != null };
       }
       byKey[key].total += tx.amount;
       byKey[key].count += 1;
-      if (raw && byKey[key].display.length < raw.length) byKey[key].display = raw;
+      if (!byKey[key].fixed && raw && byKey[key].display.length < raw.length) byKey[key].display = raw;
     }
     return Object.keys(byKey).map(function(k) {
-      return { display: byKey[k].display, total: byKey[k].total, count: byKey[k].count };
+      return { display: byKey[k].display, total: byKey[k].total, count: byKey[k].count, merchantKey: k };
     }).sort(function(a, b) { return b.total - a.total; });
+  }
+
+  function fpddShowPieMainBlock_(showMain) {
+    var mainB = document.getElementById('fpddMainBlock');
+    var merB = document.getElementById('fpddMerchantBlock');
+    if (mainB) mainB.style.display = showMain ? '' : 'none';
+    if (merB) merB.style.display = showMain ? 'none' : '';
+  }
+
+  function fpddSetBackButton_(mode) {
+    var btn = document.getElementById('fpddBackBtn');
+    if (!btn) return;
+    if (mode === 'merchant') {
+      btn.style.display = '';
+      btn.textContent = '← Descriptions';
+      btn.setAttribute('aria-label', 'Back to descriptions');
+    } else if (mode === 'descriptions') {
+      btn.style.display = '';
+      btn.textContent = '← Categories';
+      btn.setAttribute('aria-label', 'Back to all categories');
+    } else {
+      btn.style.display = 'none';
+    }
+  }
+
+  function openFinPieMerchantDrill(categoryName, catColorIdx, merchantKey, displayLabel) {
+    var pool = _finPieLastPeriodTxs;
+    if (!pool || !pool.length) return;
+    var mTxs = [];
+    for (var i = 0; i < pool.length; i++) {
+      var tx = pool[i];
+      if (!tx.isExpense || tx.excludeFromSpending) continue;
+      if ((tx.category || 'Uncategorized') !== categoryName) continue;
+      if (finCanonicalMerchantPair_(tx.description).key !== merchantKey) continue;
+      mTxs.push(tx);
+    }
+    if (!mTxs.length) return;
+    _finPieDrillState = 'merchant';
+    _finPieDrillCategory = categoryName;
+    _finPieDrillCatColorIdx = catColorIdx;
+    fpddShowPieMainBlock_(false);
+    fpddSetBackButton_('merchant');
+    finSyncViewModeFromDom();
+    document.getElementById('fpddTitle').textContent = displayLabel + ' · ' + categoryName;
+    var hintEl = document.getElementById('fpddMerchantHint');
+    if (hintEl) {
+      if (_finViewMode === 'week') hintEl.textContent = 'Spending by day — matches Finances Week view for this period';
+      else if (_finViewMode === 'month') hintEl.textContent = 'Spending by week — matches Finances Month view for this period';
+      else hintEl.textContent = 'Spending by month — matches Finances Year view for this period';
+    }
+    var bounds = finGetSelectedBounds();
+    finRenderTrendChartIntoElement(document.getElementById('fpddMerchantChart'), bounds, mTxs);
+    var totalM = 0;
+    for (var j = 0; j < mTxs.length; j++) totalM += mTxs[j].amount;
+    document.getElementById('fpddSummary').textContent =
+      finFormatMoney(totalM) + ' this period · ' + mTxs.length + ' charge' + (mTxs.length === 1 ? '' : 's');
+    document.getElementById('finPieDeepDive').classList.add('open');
   }
 
   function finSetFpddDonutAndCenter(parts, overallTotal, centerLine2) {
@@ -11966,8 +11955,9 @@
     var total = 0;
     for (var i = 0; i < entries.length; i++) total += entries[i].amt;
 
-    var backBtn = document.getElementById('fpddBackBtn');
-    if (backBtn) backBtn.style.display = 'none';
+    _finPieDrillState = 'categories';
+    fpddShowPieMainBlock_(true);
+    fpddSetBackButton_('categories');
 
     document.getElementById('fpddTitle').textContent = title;
 
@@ -12012,7 +12002,7 @@
     if (top && total > 0) {
       insight += ' Largest share: ' + top.name + ' at ' + Math.round(top.amt / total * 100) + '%.';
     }
-    insight += ' Tap a category for combined descriptions.';
+    insight += ' Tap a category for combined descriptions; tap a description for a spending chart.';
     document.getElementById('fpddSummary').textContent = insight;
 
     document.getElementById('finPieDeepDive').classList.add('open');
@@ -12033,9 +12023,13 @@
     for (var j = 0; j < catTxs.length; j++) catTotal += catTxs[j].amount;
     if (catTotal <= 0) return;
 
+    _finPieDrillState = 'descriptions';
+    _finPieDrillCategory = categoryName;
+    _finPieDrillCatColorIdx = catColorIdx;
+    fpddShowPieMainBlock_(true);
+    fpddSetBackButton_('descriptions');
+
     var groups = finGroupSpendingByDescription(catTxs);
-    var backBtn = document.getElementById('fpddBackBtn');
-    if (backBtn) backBtn.style.display = '';
 
     document.getElementById('fpddTitle').textContent = categoryName + ' — by description';
 
@@ -12054,9 +12048,11 @@
       (function(g, idx) {
         var pctCat = catTotal > 0 ? Math.round(g.total / catTotal * 100) : 0;
         var row = document.createElement('div');
-        row.className = 'fdd-row';
+        row.className = 'fdd-row fpdd-row--desc';
         var head = document.createElement('div');
         head.className = 'fdd-row-header';
+        head.setAttribute('role', 'button');
+        head.setAttribute('tabindex', '0');
         var labelBits = escapeHtml(g.display);
         if (g.count > 1) {
           labelBits += ' <span style="font-weight:500;color:var(--muted);font-size:12px">· ' + g.count + '×</span>';
@@ -12065,6 +12061,16 @@
           '<span class="fdd-row-label">' + labelBits + '</span>' +
           '<span class="fdd-row-val">' + finFormatMoney(g.total) + '</span>' +
           '<span class="fdd-row-pct">(' + pctCat + '%)</span>';
+        head.onclick = function(ev) {
+          ev.preventDefault();
+          openFinPieMerchantDrill(categoryName, catColorIdx, g.merchantKey, g.display);
+        };
+        head.onkeydown = function(ev) {
+          if (ev.key === 'Enter' || ev.key === ' ') {
+            ev.preventDefault();
+            openFinPieMerchantDrill(categoryName, catColorIdx, g.merchantKey, g.display);
+          }
+        };
         row.appendChild(head);
         rowsEl.appendChild(row);
       })(groups[r], r);
@@ -12075,20 +12081,26 @@
     if (topG && catTotal > 0) {
       summ += ' Largest: ' + topG.display + ' (' + Math.round(topG.total / catTotal * 100) + '% of this category).';
     }
+    summ += ' Tap a line for spending by day / week / month (matches Finances filter).';
     document.getElementById('fpddSummary').textContent = summ;
 
     document.getElementById('finPieDeepDive').classList.add('open');
   }
 
   function finPieDeepDiveBack() {
+    if (_finPieDrillState === 'merchant' && _finPieDrillCategory != null) {
+      openFinPieCategoryDrill(_finPieDrillCategory, _finPieDrillCatColorIdx);
+      return;
+    }
     openFinPieDeepDive();
   }
 
   function closeFinPieDeepDive(ev) {
     if (ev && ev.target !== document.getElementById('finPieDeepDive')) return;
     document.getElementById('finPieDeepDive').classList.remove('open');
-    var backBtn = document.getElementById('fpddBackBtn');
-    if (backBtn) backBtn.style.display = 'none';
+    _finPieDrillState = 'categories';
+    fpddShowPieMainBlock_(true);
+    fpddSetBackButton_('categories');
   }
 
   function finRenderCategories(txs) {
@@ -22324,14 +22336,22 @@
       <button type="button" class="fpdd-drill-back" id="fpddBackBtn" onclick="finPieDeepDiveBack()" style="display:none" aria-label="Back to all categories">← Categories</button>
       <div class="funding-deepdive-name" id="fpddTitle">Spending breakdown</div>
     </div>
-    <div class="funding-deepdive-donut-wrap">
-      <div class="funding-deepdive-donut" id="fpddDonut">
-        <div class="funding-deepdive-donut-hole">
-          <div class="funding-deepdive-donut-center-label" id="fpddCenterLabel"></div>
+    <div id="fpddMainBlock">
+      <div class="funding-deepdive-donut-wrap">
+        <div class="funding-deepdive-donut" id="fpddDonut">
+          <div class="funding-deepdive-donut-hole">
+            <div class="funding-deepdive-donut-center-label" id="fpddCenterLabel"></div>
+          </div>
         </div>
       </div>
+      <div class="funding-deepdive-rows" id="fpddRows"></div>
     </div>
-    <div class="funding-deepdive-rows" id="fpddRows"></div>
+    <div id="fpddMerchantBlock" style="display:none">
+      <p class="fpdd-merchant-hint" id="fpddMerchantHint"></p>
+      <div class="fin-month-chart-wrap h-scroll-faded fpdd-merchant-chart-wrap">
+        <div class="fin-month-chart-inner" id="fpddMerchantChart"></div>
+      </div>
+    </div>
     <div class="funding-deepdive-summary" id="fpddSummaryWrap">
       <div class="funding-deepdive-summary-text" id="fpddSummary"></div>
     </div>
