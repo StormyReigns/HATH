@@ -1901,12 +1901,34 @@
       border-color: var(--fin-accent);
     }
     html.dark-mode .fin-chip.selected { background: rgba(93, 160, 96, 0.2); }
-    .fin-summary-row {
+    .fin-pie-summary-row {
       display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: flex-start;
       gap: 10px;
-      margin-bottom: 16px;
+      margin-bottom: 6px;
       position: relative;
       z-index: 1;
+    }
+    .fin-pie-strip {
+      flex: 0 1 42%;
+      max-width: 200px;
+      min-width: 118px;
+    }
+    .fin-pie-strip .fin-pie-panel {
+      margin-left: 0;
+      max-width: none;
+    }
+    .fin-summary-stack {
+      flex: 1 1 0;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .fin-summary-stack .fin-card {
+      flex: 0 0 auto;
     }
     .fin-card {
       flex: 1;
@@ -1940,20 +1962,13 @@
       position: relative;
       z-index: 1;
     }
-    #finTrendSectionLabel { margin-bottom: 6px; }
-    .fin-bar-pie-row {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: nowrap;
-      align-items: flex-start;
-      gap: 10px;
+    #finTrendSectionLabel { margin-bottom: 6px; margin-top: 10px; }
+    .fin-trend-bar-block {
+      width: 100%;
+      min-width: 0;
       margin-bottom: 6px;
       position: relative;
       z-index: 1;
-    }
-    .fin-bar-panel {
-      flex: 1 1 56%;
-      min-width: 0;
     }
     .fin-pie-panel {
       flex: 0 1 42%;
@@ -1987,8 +2002,8 @@
       outline-offset: 2px;
     }
     @media (max-width: 340px) {
-      .fin-bar-pie-row { flex-wrap: wrap; }
-      .fin-pie-panel { max-width: none; flex: 1 1 100%; margin-left: 0; }
+      .fin-pie-strip { max-width: none; flex: 1 1 100%; min-width: 0; }
+      .fin-summary-stack { flex: 1 1 100%; }
       .fin-pie-mobile-label { margin-top: 4px; }
     }
     .fin-pie-chart-host {
@@ -2953,7 +2968,16 @@
     .fdd-row-label { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
     .fdd-row-val { font-size: 14px; font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; }
     .fdd-row-pct { font-size: 12px; color: var(--muted); margin-left: 6px; }
-    #fpddRows .fdd-row-header { cursor: default; user-select: text; }
+    #fpddRows .fpdd-row--clickable .fdd-row-header { cursor: pointer; user-select: none; }
+    #fpddRows .fdd-row:not(.fpdd-row--clickable) .fdd-row-header { cursor: default; user-select: text; }
+    .fpdd-header-wrap { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 20px; padding-right: 36px; }
+    .fpdd-drill-back {
+      flex-shrink: 0; margin-top: 2px;
+      padding: 6px 10px; border-radius: 10px; border: 1px solid rgba(124, 196, 127, 0.35);
+      background: transparent; color: var(--text2); font-size: 13px; font-family: inherit; cursor: pointer;
+    }
+    html.dark-mode .fpdd-drill-back { border-color: rgba(93, 160, 96, 0.35); }
+    .fpdd-header-wrap .funding-deepdive-name { margin-bottom: 0; flex: 1; min-width: 0; padding-right: 0; }
     .fdd-row-chevron {
       font-size: 11px; color: var(--muted); transition: transform 0.2s ease; margin-left: 4px;
     }
@@ -8311,23 +8335,25 @@
           <div id="finErrorEl"></div>
           <div id="finLoadingEl" class="screen-loading" style="display:none">Loading…</div>
           <div id="finMainContent" style="display:none">
-            <div class="fin-summary-row">
-              <div class="fin-card income"><label>Income</label><span class="fin-card-val" id="finSumIncome">$0</span></div>
-              <div class="fin-card spent"><label>Spent</label><span class="fin-card-val" id="finSumSpent">$0</span></div>
-              <div class="fin-card net" id="finCardNet"><label>Net</label><span class="fin-card-val" id="finSumNet">$0</span></div>
-            </div>
-            <div id="finPeriodEmpty" class="fin-empty-quip" style="display:none"></div>
-            <div id="finChartsBlock">
-              <div class="fin-section-label" id="finTrendSectionLabel">Spending trend</div>
-              <div class="fin-bar-pie-row">
-                <div class="fin-bar-panel">
-                  <div class="fin-month-chart-wrap h-scroll-faded"><div class="fin-month-chart-inner" id="finMonthChart"></div></div>
-                </div>
+            <div class="fin-pie-summary-row">
+              <div id="finPieStrip" class="fin-pie-strip">
                 <div class="fin-pie-panel">
                   <div class="fin-section-label fin-pie-mobile-label">% of spending</div>
                   <p class="fin-pie-tap-hint" id="finPieTapHint">Tap chart for details</p>
                   <div class="fin-pie-chart-host" id="finPieHost"></div>
                 </div>
+              </div>
+              <div class="fin-summary-stack">
+                <div class="fin-card income"><label>Income</label><span class="fin-card-val" id="finSumIncome">$0</span></div>
+                <div class="fin-card spent"><label>Spent</label><span class="fin-card-val" id="finSumSpent">$0</span></div>
+                <div class="fin-card net" id="finCardNet"><label>Net</label><span class="fin-card-val" id="finSumNet">$0</span></div>
+              </div>
+            </div>
+            <div id="finPeriodEmpty" class="fin-empty-quip" style="display:none"></div>
+            <div id="finChartsBlock">
+              <div class="fin-section-label" id="finTrendSectionLabel">Spending trend</div>
+              <div class="fin-trend-bar-block">
+                <div class="fin-month-chart-wrap h-scroll-faded"><div class="fin-month-chart-inner" id="finMonthChart"></div></div>
               </div>
               <div class="fin-section-label">By Category</div>
               <div class="fin-category-list" id="finCategoryList"></div>
@@ -10869,6 +10895,8 @@
   /** Last category breakdown rendered (for spending deep-dive overlay). */
   var _finPieLastEntries = null;
   var _finPieLastPeriodTitle = '';
+  /** Transactions in the selected period (for pie → category → description drill-down). */
+  var _finPieLastPeriodTxs = null;
 
   var FIN_PIE_COLORS = ['#7cc47f', '#5a9e9e', '#c07a4a', '#9b7aac', '#e07070', '#7a8fce', '#d4a853', '#88b082', '#c9a56d', '#8ec5d6'];
 
@@ -11357,6 +11385,7 @@
     var errEl = document.getElementById('finErrorEl');
     var mainEl = document.getElementById('finMainContent');
     var chartsBlock = document.getElementById('finChartsBlock');
+    var pieStrip = document.getElementById('finPieStrip');
     var emptyEl = document.getElementById('finPeriodEmpty');
     var trendLbl = document.getElementById('finTrendSectionLabel');
     var projBtn = document.getElementById('finProjectShortcutBtn');
@@ -11414,6 +11443,7 @@
       emptyEl.textContent = 'Nothing in this slice yet — either nothing landed here, or the sheet hasn\'t been refreshed since your last edit.';
     }
     if (chartsBlock) chartsBlock.style.display = periodEmpty ? 'none' : '';
+    if (pieStrip) pieStrip.style.display = periodEmpty ? 'none' : '';
 
     if (periodEmpty) {
       var thEmpty = document.getElementById('finPieTapHint');
@@ -11542,6 +11572,7 @@
     if (!host) return;
     host.innerHTML = '';
     _finPieLastEntries = null;
+    _finPieLastPeriodTxs = null;
     _finPieLastPeriodTitle = finFormatSelectedPeriodTitle();
     var byCat = {};
     var total = 0;
@@ -11555,8 +11586,10 @@
     if (total <= 0) {
       if (tapHint) tapHint.style.display = 'none';
       host.innerHTML = '<div class="fin-pie-empty">No spending categories in this period (or only excluded categories).</div>';
+      _finPieLastPeriodTxs = null;
       return;
     }
+    _finPieLastPeriodTxs = txs;
     if (tapHint) tapHint.style.display = '';
     var entries = Object.keys(byCat).map(function(k) {
       return { name: k, amt: byCat[k], pct: byCat[k] / total * 100 };
@@ -11615,6 +11648,48 @@
     host.appendChild(tap);
   }
 
+  /**
+   * Group spending in `txs` (same category) by normalized description; combines case/spacing variants.
+   * @returns {Array<{ display: string, total: number, count: number }>}
+   */
+  function finGroupSpendingByDescription(txs) {
+    var byKey = {};
+    for (var i = 0; i < txs.length; i++) {
+      var tx = txs[i];
+      if (!tx.isExpense || tx.excludeFromSpending) continue;
+      var raw = String(tx.description || '').trim();
+      var key = raw.toLowerCase().replace(/\s+/g, ' ');
+      if (!key) key = '(no description)';
+      if (!byKey[key]) {
+        byKey[key] = { total: 0, display: raw || '(no description)', count: 0 };
+      }
+      byKey[key].total += tx.amount;
+      byKey[key].count += 1;
+      if (raw && byKey[key].display.length < raw.length) byKey[key].display = raw;
+    }
+    return Object.keys(byKey).map(function(k) {
+      return { display: byKey[k].display, total: byKey[k].total, count: byKey[k].count };
+    }).sort(function(a, b) { return b.total - a.total; });
+  }
+
+  function finSetFpddDonutAndCenter(parts, overallTotal, centerLine2) {
+    var acc = 0;
+    var stops = [];
+    for (var j = 0; j < parts.length; j++) {
+      var p = parts[j];
+      if (p.amt <= 0) continue;
+      var c = p.color || FIN_PIE_COLORS[j % FIN_PIE_COLORS.length];
+      var p0 = acc / overallTotal * 100;
+      acc += p.amt;
+      var p1 = acc / overallTotal * 100;
+      stops.push(c + ' ' + p0 + '% ' + p1 + '%');
+    }
+    var donutEl = document.getElementById('fpddDonut');
+    donutEl.style.background = stops.length ? 'conic-gradient(from 0deg, ' + stops.join(', ') + ')' : '#888';
+    var center = document.getElementById('fpddCenterLabel');
+    center.textContent = finFormatMoney(overallTotal) + '\n' + (centerLine2 || 'spent');
+  }
+
   function openFinPieDeepDive() {
     var entries = _finPieLastEntries;
     if (!entries || !entries.length) return;
@@ -11622,35 +11697,45 @@
     var total = 0;
     for (var i = 0; i < entries.length; i++) total += entries[i].amt;
 
+    var backBtn = document.getElementById('fpddBackBtn');
+    if (backBtn) backBtn.style.display = 'none';
+
     document.getElementById('fpddTitle').textContent = title;
 
-    var acc = 0;
-    var stops = [];
-    for (var j = 0; j < entries.length; j++) {
-      var e = entries[j];
-      if (e.amt <= 0) continue;
-      var c = FIN_PIE_COLORS[j % FIN_PIE_COLORS.length];
-      var p0 = acc / total * 100;
-      acc += e.amt;
-      var p1 = acc / total * 100;
-      stops.push(c + ' ' + p0 + '% ' + p1 + '%');
+    var parts = entries.map(function(e, idx) {
+      return { amt: e.amt, color: FIN_PIE_COLORS[idx % FIN_PIE_COLORS.length] };
+    });
+    finSetFpddDonutAndCenter(parts, total, 'spent');
+
+    var rowsEl = document.getElementById('fpddRows');
+    rowsEl.innerHTML = '';
+    for (var z = 0; z < entries.length; z++) {
+      (function(entry, idx) {
+        var pct = total > 0 ? Math.round(entry.amt / total * 100) : 0;
+        var row = document.createElement('div');
+        row.className = 'fdd-row fpdd-row--clickable';
+        var head = document.createElement('div');
+        head.className = 'fdd-row-header';
+        head.setAttribute('role', 'button');
+        head.setAttribute('tabindex', '0');
+        head.innerHTML = '<span class="fdd-row-dot" style="background:' + FIN_PIE_COLORS[idx % FIN_PIE_COLORS.length] + '"></span>' +
+          '<span class="fdd-row-label">' + escapeHtml(entry.name) + '</span>' +
+          '<span class="fdd-row-val">' + finFormatMoney(entry.amt) + '</span>' +
+          '<span class="fdd-row-pct">(' + pct + '%)</span>';
+        head.onclick = function(ev) {
+          ev.preventDefault();
+          openFinPieCategoryDrill(entry.name, idx);
+        };
+        head.onkeydown = function(ev) {
+          if (ev.key === 'Enter' || ev.key === ' ') {
+            ev.preventDefault();
+            openFinPieCategoryDrill(entry.name, idx);
+          }
+        };
+        row.appendChild(head);
+        rowsEl.appendChild(row);
+      })(entries[z], z);
     }
-    var donutEl = document.getElementById('fpddDonut');
-    donutEl.style.background = stops.length ? 'conic-gradient(from 0deg, ' + stops.join(', ') + ')' : '#888';
-
-    document.getElementById('fpddCenterLabel').textContent = finFormatMoney(total) + '\nspent';
-
-    var rowsHtml = entries.map(function(entry, idx) {
-      var pct = total > 0 ? Math.round(entry.amt / total * 100) : 0;
-      return '<div class="fdd-row">' +
-        '<div class="fdd-row-header">' +
-        '<span class="fdd-row-dot" style="background:' + FIN_PIE_COLORS[idx % FIN_PIE_COLORS.length] + '"></span>' +
-        '<span class="fdd-row-label">' + escapeHtml(entry.name) + '</span>' +
-        '<span class="fdd-row-val">' + finFormatMoney(entry.amt) + '</span>' +
-        '<span class="fdd-row-pct">(' + pct + '%)</span>' +
-        '</div></div>';
-    }).join('');
-    document.getElementById('fpddRows').innerHTML = rowsHtml;
 
     var top = entries[0];
     var n = entries.length;
@@ -11658,14 +11743,83 @@
     if (top && total > 0) {
       insight += ' Largest share: ' + top.name + ' at ' + Math.round(top.amt / total * 100) + '%.';
     }
+    insight += ' Tap a category for combined descriptions.';
     document.getElementById('fpddSummary').textContent = insight;
 
     document.getElementById('finPieDeepDive').classList.add('open');
   }
 
+  function openFinPieCategoryDrill(categoryName, catColorIdx) {
+    var pool = _finPieLastPeriodTxs;
+    if (!pool || !pool.length) return;
+    var catTxs = [];
+    for (var i = 0; i < pool.length; i++) {
+      var tx = pool[i];
+      if (!tx.isExpense || tx.excludeFromSpending) continue;
+      var k = tx.category || 'Uncategorized';
+      if (k !== categoryName) continue;
+      catTxs.push(tx);
+    }
+    var catTotal = 0;
+    for (var j = 0; j < catTxs.length; j++) catTotal += catTxs[j].amount;
+    if (catTotal <= 0) return;
+
+    var groups = finGroupSpendingByDescription(catTxs);
+    var backBtn = document.getElementById('fpddBackBtn');
+    if (backBtn) backBtn.style.display = '';
+
+    document.getElementById('fpddTitle').textContent = categoryName + ' — by description';
+
+    var parts = [];
+    for (var g = 0; g < groups.length; g++) {
+      parts.push({
+        amt: groups[g].total,
+        color: FIN_PIE_COLORS[(catColorIdx + g) % FIN_PIE_COLORS.length]
+      });
+    }
+    finSetFpddDonutAndCenter(parts, catTotal, 'in category');
+
+    var rowsEl = document.getElementById('fpddRows');
+    rowsEl.innerHTML = '';
+    for (var r = 0; r < groups.length; r++) {
+      (function(g, idx) {
+        var pctCat = catTotal > 0 ? Math.round(g.total / catTotal * 100) : 0;
+        var row = document.createElement('div');
+        row.className = 'fdd-row';
+        var head = document.createElement('div');
+        head.className = 'fdd-row-header';
+        var labelBits = escapeHtml(g.display);
+        if (g.count > 1) {
+          labelBits += ' <span style="font-weight:500;color:var(--muted);font-size:12px">· ' + g.count + '×</span>';
+        }
+        head.innerHTML = '<span class="fdd-row-dot" style="background:' + FIN_PIE_COLORS[(catColorIdx + idx) % FIN_PIE_COLORS.length] + '"></span>' +
+          '<span class="fdd-row-label">' + labelBits + '</span>' +
+          '<span class="fdd-row-val">' + finFormatMoney(g.total) + '</span>' +
+          '<span class="fdd-row-pct">(' + pctCat + '%)</span>';
+        row.appendChild(head);
+        rowsEl.appendChild(row);
+      })(groups[r], r);
+    }
+
+    var topG = groups[0];
+    var summ = groups.length + ' description' + (groups.length === 1 ? '' : 's') + ' in ' + categoryName + '.';
+    if (topG && catTotal > 0) {
+      summ += ' Largest: ' + topG.display + ' (' + Math.round(topG.total / catTotal * 100) + '% of this category).';
+    }
+    document.getElementById('fpddSummary').textContent = summ;
+
+    document.getElementById('finPieDeepDive').classList.add('open');
+  }
+
+  function finPieDeepDiveBack() {
+    openFinPieDeepDive();
+  }
+
   function closeFinPieDeepDive(ev) {
     if (ev && ev.target !== document.getElementById('finPieDeepDive')) return;
     document.getElementById('finPieDeepDive').classList.remove('open');
+    var backBtn = document.getElementById('fpddBackBtn');
+    if (backBtn) backBtn.style.display = 'none';
   }
 
   function finRenderCategories(txs) {
@@ -21845,7 +21999,10 @@
 <div class="funding-deepdive-overlay" id="finPieDeepDive" aria-modal="true" role="dialog" onclick="closeFinPieDeepDive(event)">
   <div class="funding-deepdive-card" id="finPieDeepDiveCard" onclick="event.stopPropagation()">
     <button type="button" class="funding-deepdive-close" onclick="closeFinPieDeepDive()" aria-label="Close">✕</button>
-    <div class="funding-deepdive-name" id="fpddTitle">Spending breakdown</div>
+    <div class="fpdd-header-wrap">
+      <button type="button" class="fpdd-drill-back" id="fpddBackBtn" onclick="finPieDeepDiveBack()" style="display:none" aria-label="Back to all categories">← Categories</button>
+      <div class="funding-deepdive-name" id="fpddTitle">Spending breakdown</div>
+    </div>
     <div class="funding-deepdive-donut-wrap">
       <div class="funding-deepdive-donut" id="fpddDonut">
         <div class="funding-deepdive-donut-hole">
