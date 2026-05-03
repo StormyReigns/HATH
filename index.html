@@ -559,6 +559,17 @@
       box-sizing: border-box;
       flex-shrink: 0;
       z-index: 60;
+      transition: bottom 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    html.keyboard-open .input-zone {
+      bottom: max(10px, env(safe-area-inset-bottom, 0px));
+      z-index: 95;
+    }
+    /* GJ sits above the composer — hide while keyboard is up (avoids overlap with right-aligned user bubbles) */
+    html.keyboard-open .input-zone .home-gj-btn {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      transform: translateY(6px);
     }
     /* Hide Blathers input when any sub-screen is visible (direct sibling selector) */
     #documentsScreen.visible ~ .input-zone,
@@ -793,6 +804,7 @@
       display: flex; flex-direction: column;
       overflow: hidden;
       background: transparent;
+      transition: height 0.24s cubic-bezier(0.32, 0.72, 0, 1), padding-bottom 0.24s cubic-bezier(0.32, 0.72, 0, 1);
     }
 
     /* ── TOP BAR ── */
@@ -937,6 +949,13 @@
       box-shadow: 0 -4px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.4);
       z-index: 80;
       flex-shrink: 0;
+      transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.22s ease;
+    }
+    /* Messenger-style: tab bar slides away while typing so the composer sits on the keyboard edge */
+    html.keyboard-open .app-bottom-bar {
+      transform: translateY(calc(100% + 16px));
+      opacity: 0;
+      pointer-events: none;
     }
     html.dark-mode .app-bottom-bar {
       background: #1a1816;
@@ -1098,12 +1117,16 @@
     .app.in-project-view {
       padding-bottom: calc(var(--bottom-dock-offset-sheet) + env(safe-area-inset-bottom, 0px));
     }
-    /* Keyboard visible: .app height already matches visual viewport — drop inner dock padding so chat flexes; keep .input-zone default bottom (dock stays visible above keyboard, z-index 80) */
+    /* Keyboard visible: .app height matches visual viewport; inner dock padding dropped; dock slides off-screen (see .app-bottom-bar) */
     html.keyboard-open .app {
       padding-bottom: max(0px, env(safe-area-inset-bottom, 0px));
     }
     html.keyboard-open .app.in-project-view {
       padding-bottom: max(0px, env(safe-area-inset-bottom, 0px));
+    }
+    html.keyboard-open .body.chat-mode .chat-area {
+      scroll-padding-bottom: 28px;
+      padding-bottom: 14px;
     }
 
     /* ── HINT AREA ── */
@@ -1118,6 +1141,9 @@
     }
     @media (prefers-reduced-motion: reduce) {
       .hint-area { opacity: 1; animation: none; }
+      .app,
+      .app-bottom-bar,
+      .input-zone { transition: none !important; }
     }
 
     @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
@@ -9243,7 +9269,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.45.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.45.3';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
