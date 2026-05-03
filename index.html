@@ -1124,10 +1124,6 @@
     html.keyboard-open .app.in-project-view {
       padding-bottom: max(0px, env(safe-area-inset-bottom, 0px));
     }
-    html.keyboard-open .body.chat-mode .chat-area {
-      scroll-padding-bottom: 28px;
-      padding-bottom: 14px;
-    }
 
     /* ── HINT AREA ── */
     .hint-area {
@@ -1434,9 +1430,15 @@
       min-height: 0;
       scrollbar-width: none;
     }
-    /* Messenger-style: thread sits on the composer; short chats align to bottom instead of top whitespace */
+    /* Messenger-style: thread sits on the composer; generous bottom padding so bubbles clear fixed Blathers + field */
     .body.chat-mode .chat-area {
       justify-content: flex-end;
+      padding-bottom: calc(var(--bottom-dock-offset-high) + 150px);
+      scroll-padding-bottom: calc(var(--bottom-dock-offset-high) + 130px);
+    }
+    html.keyboard-open .body.chat-mode .chat-area {
+      padding-bottom: max(150px, calc(env(safe-area-inset-bottom, 0px) + 140px));
+      scroll-padding-bottom: max(130px, calc(env(safe-area-inset-bottom, 0px) + 120px));
     }
     .chat-area::-webkit-scrollbar { display: none; }
 
@@ -9273,7 +9275,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.46.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.46.2';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -11481,16 +11483,14 @@
     + '• A name or phrase that feels right to call it\n'
     + '• Whether you imagine a phased journey or more of a steady rhythm\n'
     + '• Rough timing—weeks, months, or a softer horizon\n'
-    + '• What "done" or good progress would feel like to you\n\n'
-    + 'None of that has to be final—just what is on your mind. One moment while I think of where to pick up with you.';
+    + '• What "done" or good progress would feel like to you';
 
   var FIN_GOALS_COPILOT_PREAMBLE_TEXT = '[HAPPY] So you want to start a Finances project!\n\n'
     + 'Here are some of the things to consider:\n\n'
     + '• What you are aiming for—save more, spend less in a spot, track a bill, or something else\n'
     + '• A timeframe that feels kind, not punishing\n'
     + '• What would actually count as progress—numbers, categories, or a gut check\n'
-    + '• Whether anything in your recent spending picture should weigh in (only if that helps you)\n\n'
-    + 'Hold tight—I am lining up what to say next.';
+    + '• Whether anything in your recent spending picture should weigh in (only if that helps you)';
 
   function appendProjectCopilotPreambleThenTyping(preambleTaggedText) {
     var chat = document.getElementById('chatArea');
