@@ -5255,42 +5255,62 @@
     }
     .projects-list-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
     .projects-list-item:active { background: rgba(192,122,74,0.06); box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
-    .projects-list-card-main { padding: 18px; }
+    .projects-list-card-main { padding: 12px 12px 14px 14px; }
     .projects-list-card-header {
-      display: flex; align-items: flex-start; gap: 12px;
-      margin-bottom: 6px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: start;
+      gap: 8px 10px;
+      margin-bottom: 4px;
     }
-    .projects-list-card-icon { font-size: 22px; line-height: 1; flex-shrink: 0; }
+    .projects-list-card-icon { font-size: 20px; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+    .projects-list-card-title-wrap { min-width: 0; }
     .projects-list-card-title {
-      flex: 1; min-width: 0;
       font-family: 'Playfair Display', serif;
-      font-size: 18px; font-weight: 500;
+      font-size: 17px; font-weight: 500;
       color: var(--text);
       margin: 0;
-      line-height: 1.3;
-      overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical;
+      line-height: 1.28;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      word-break: break-word;
+    }
+    .projects-list-card-actions {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 0;
+      flex-shrink: 0;
+      margin: -2px -4px 0 0;
     }
     .projects-list-delete-btn {
-      width: 36px; height: 36px;
+      width: 30px; height: 30px;
       border: none; background: transparent;
-      font-size: 16px; opacity: 0.5;
+      font-size: 15px; opacity: 0.5;
       cursor: pointer;
-      border-radius: 8px;
+      border-radius: 6px;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
     }
     .projects-list-delete-btn:hover, .projects-list-delete-btn:active { opacity: 1; background: rgba(192,50,50,0.15); }
     .projects-favorite-btn {
-      width: 36px; height: 36px;
+      width: 30px; height: 30px;
       border: none; background: transparent;
-      font-size: 18px; line-height: 1;
+      font-size: 16px; line-height: 1;
       opacity: 0.55;
       cursor: pointer;
-      border-radius: 8px;
+      border-radius: 6px;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
       padding: 0;
       color: var(--accent);
+      -webkit-tap-highlight-color: transparent;
     }
     .projects-favorite-btn.is-fav { opacity: 1; }
     .projects-favorite-btn:hover, .projects-favorite-btn:active { opacity: 1; background: rgba(192,122,74,0.12); }
@@ -5337,21 +5357,25 @@
       line-height: 1;
     }
     .projects-list-card-desc {
-      font-size: 14px; color: var(--text2);
-      line-height: 1.5;
-      margin: 0 0 10px;
+      font-size: 13px; color: var(--text2);
+      line-height: 1.45;
+      margin: 0 0 8px;
       display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical;
       overflow: hidden;
     }
     .projects-list-card-meta {
-      display: flex; flex-wrap: wrap; gap: 8px 14px;
-      font-size: 12px; color: var(--muted);
-      margin-bottom: 12px;
+      display: flex; flex-wrap: wrap; align-items: center;
+      gap: 6px 10px;
+      font-size: 11px; color: var(--muted);
+      margin-bottom: 8px;
+      line-height: 1.35;
     }
-    .projects-list-card-phases { font-weight: 500; color: var(--accent); }
-    .projects-list-card-updated { margin-left: auto; }
+    .projects-list-card-phases { font-weight: 600; color: var(--accent); font-size: 11px; }
+    .projects-list-card-current { font-size: 11px; }
+    .projects-list-card-due { font-size: 11px; opacity: 0.95; }
+    .projects-list-card-updated { margin-left: auto; font-size: 10px; opacity: 0.85; }
     .projects-list-card-progress-wrap {
-      display: flex; align-items: center; gap: 12px;
+      display: flex; align-items: center; gap: 10px;
     }
     .projects-list-card-progress-bar {
       flex: 1; height: 6px;
@@ -5366,9 +5390,9 @@
       transition: width 0.3s ease;
     }
     .projects-list-card-progress-pct {
-      font-size: 13px; font-weight: 600;
+      font-size: 12px; font-weight: 600;
       color: var(--accent);
-      min-width: 36px; text-align: right;
+      min-width: 34px; text-align: right;
     }
     .projects-delete-btn {
       flex-shrink: 0;
@@ -5515,9 +5539,18 @@
     }
     html.dark-mode .project-create-choice-tertiary { background: rgba(40,36,32,0.45); }
     .projects-list-kind {
-      font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
-      color: var(--muted); flex-shrink: 0; margin-right: 4px;
+      display: inline-block;
+      font-size: 9px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+      color: var(--muted);
+      flex-shrink: 0;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(192,122,74,0.12);
+      line-height: 1.2;
+      vertical-align: middle;
+      margin-right: 4px;
     }
+    html.dark-mode .projects-list-kind { background: rgba(224,152,104,0.12); }
     .pew-preset-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
     .pew-preset {
       flex: 1; min-width: 88px; padding: 12px 10px; border-radius: 12px; font-size: 14px; cursor: pointer;
@@ -6116,6 +6149,10 @@
       transition: opacity 0.3s ease, visibility 0.3s ease;
       z-index: 10;
     }
+    /* Full-project completion must sit above .projects-korl-quote (z-index 70) and fixed ocean (60). */
+    .celebration-overlay.celebration-project {
+      z-index: 200;
+    }
     .celebration-project-full { position: absolute; }
     .celebration-overlay.show { opacity: 1; visibility: visible; pointer-events: auto; }
     .celebration-content {
@@ -6171,12 +6208,15 @@
       line-height: 1.5;
       max-width: 320px;
       text-align: center;
+      position: relative;
+      z-index: 1;
     }
     .celebration-continue-btn {
       position: absolute;
       bottom: -20px;
       left: 50%;
       transform: translateX(-50%);
+      z-index: 2;
       padding: 12px 32px;
       font-size: 16px; font-weight: 600;
       font-family: 'Inter', sans-serif;
@@ -9275,7 +9315,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.46.6';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.46.8';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -13802,17 +13842,23 @@
       const progPct = Math.round(d.prog);
       const favClass = p.favorite ? ' projects-favorite-btn is-fav' : ' projects-favorite-btn';
       const favChar = p.favorite ? '★' : '☆';
+      const kindShort = projectIsProgram(p) ? 'Habit' : 'Project';
+      const kindFull = projectIsProgram(p) ? 'Habit Tracker' : 'Project Tracker';
       return `<div class="projects-list-item" onclick="projectsSelectProject('${p.id}')">
         <div class="projects-list-card-main">
           <div class="projects-list-card-header">
             <span class="projects-list-card-icon">${getProjectIcon(p)}</span>
-            <span class="projects-list-kind">${projectIsProgram(p) ? 'Habit Tracker' : 'Project Tracker'}</span>
-            <h3 class="projects-list-card-title">${escapeHtml(p.title)}</h3>
-            <button type="button" class="${favClass.trim()}" onclick="event.stopPropagation();projectsToggleFavorite('${p.id}', event)" aria-label="${p.favorite ? 'Remove favorite' : 'Favorite'}" title="Favorite">${favChar}</button>
-            <button type="button" class="projects-list-delete-btn" onclick="event.stopPropagation();projectsConfirmDelete('${p.id}')" aria-label="Delete" title="Delete project">🗑</button>
+            <div class="projects-list-card-title-wrap">
+              <h3 class="projects-list-card-title">${escapeHtml(p.title)}</h3>
+            </div>
+            <div class="projects-list-card-actions">
+              <button type="button" class="${favClass.trim()}" onclick="event.stopPropagation();projectsToggleFavorite('${p.id}', event)" aria-label="${p.favorite ? 'Remove favorite' : 'Favorite'}" title="Favorite">${favChar}</button>
+              <button type="button" class="projects-list-delete-btn" onclick="event.stopPropagation();projectsConfirmDelete('${p.id}')" aria-label="Delete" title="Delete project">🗑</button>
+            </div>
           </div>
           ${d.desc ? `<p class="projects-list-card-desc">${escapeHtml(d.desc)}</p>` : ''}
           <div class="projects-list-card-meta">
+            <span class="projects-list-kind" title="${kindFull}">${kindShort}</span>
             <span class="projects-list-card-phases">${escapeHtml(d.phaseLabel)}</span>
             ${d.currentPhaseName ? `<span class="projects-list-card-current">${escapeHtml(d.currentPhaseName)}</span>` : ''}
             ${d.finishStr ? `<span class="projects-list-card-due">Due ${escapeHtml(d.finishStr)}</span>` : ''}
