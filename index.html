@@ -5458,11 +5458,19 @@
       box-shadow: none;
     }
     .program-act-btn:active { transform: scale(0.93); filter: brightness(0.98); }
-    .program-act-btn.program-act-celebrate { animation: programActCelebrate 0.72s cubic-bezier(0.34, 1.35, 0.64, 1); }
+    .program-act-btn.program-act-press {
+      transform: scale(0.9) !important;
+      transition: transform 0.07s ease-out !important;
+    }
+    .program-act-btn.program-act-celebrate {
+      animation: programActCelebrate 0.78s cubic-bezier(0.32, 1.55, 0.45, 1);
+      transition: none;
+    }
     @keyframes programActCelebrate {
-      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(192,122,74,0.5); filter: brightness(1); }
-      38% { transform: scale(1.055); box-shadow: 0 0 0 14px rgba(192,122,74,0); filter: brightness(1.07); }
-      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(192,122,74,0); filter: brightness(1); }
+      0% { transform: scale(1) rotate(0deg); box-shadow: 0 0 0 0 rgba(192,122,74,0.55); filter: brightness(1); }
+      32% { transform: scale(1.09) rotate(-1.2deg); box-shadow: 0 0 0 16px rgba(192,122,74,0); filter: brightness(1.1); }
+      70% { transform: scale(1.02) rotate(0.6deg); filter: brightness(1.04); }
+      100% { transform: scale(1) rotate(0deg); box-shadow: 0 0 0 0 rgba(192,122,74,0); filter: brightness(1); }
     }
     .program-act-title { font-size: 15px; font-weight: 600; color: var(--text); }
     .program-act-pts { font-size: 14px; font-weight: 700; color: var(--accent); letter-spacing: 0.02em; margin-top: 2px; }
@@ -5537,6 +5545,29 @@
     }
     .program-after-log-actions {
       display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 14px;
+    }
+    .program-afterlog-hint {
+      font-size: 12px; color: var(--muted); margin: 10px 0 0; line-height: 1.4;
+    }
+    .program-afterlog-muted { opacity: 0.42; }
+    .program-log-purpose {
+      font-size: 12px; color: var(--text2); margin: -4px 0 10px; line-height: 1.4;
+    }
+    .program-streak-block { margin-bottom: 14px; }
+    .program-streak-block:last-child { margin-bottom: 0; }
+    .program-streak-dots {
+      display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin-top: 10px;
+    }
+    .program-streak-dot {
+      width: 9px; height: 14px; border-radius: 4px;
+      background: rgba(0,0,0,0.08); border: 1px solid rgba(192,122,74,0.15);
+      transition: background 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+    }
+    html.dark-mode .program-streak-dot { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.1); }
+    .program-streak-dot.is-on {
+      background: linear-gradient(165deg, rgba(192,122,74,0.85), rgba(212,149,106,0.95));
+      border-color: rgba(192,122,74,0.45);
+      transform: scaleY(1.05);
     }
     .program-afterlog-btn {
       flex: 1; min-width: 120px; padding: 11px 14px; border-radius: 12px; font-size: 14px; font-weight: 600;
@@ -8934,16 +8965,18 @@
           <div class="program-today-block">
             <h3 class="program-section-label">Log today</h3>
             <p class="program-today-date" id="programTodayDate"></p>
-            <p class="program-log-hint" id="programLogHint">Tap when you have earned it. Each tap logs for today and counts toward your habit goal. Use the buttons below to undo a fresh tap or remove the latest line from your log.</p>
+            <p class="program-log-hint" id="programLogHint">Tap when you have earned it. Each tap logs for today and counts toward your habit goal.</p>
             <div class="program-activity-buttons" id="programActivityButtons"></div>
             <div class="program-after-log-actions" id="programAfterLogActions">
-              <button type="button" class="program-afterlog-btn" id="programInlineUndoBtn" onclick="programTryUndoLastLogTap()">Undo last log</button>
-              <button type="button" class="program-afterlog-btn program-afterlog-secondary" id="programInlineRemoveBtn" onclick="programRemoveLatestLogEntry()">Remove latest…</button>
+              <button type="button" class="program-afterlog-btn program-afterlog-primary" id="programInlineUndoBtn" onclick="programTryUndoLastLogTap()">Undo last tap</button>
+              <button type="button" class="program-afterlog-btn program-afterlog-secondary" id="programInlineRemoveBtn" onclick="programRemoveLatestLogEntry()">Remove last line</button>
             </div>
+            <p class="program-afterlog-hint">Undo only works for a short time right after <strong>I did</strong>. Remove last line drops the newest saved row anytime (see Activity log below).</p>
           </div>
           <div class="program-log-block">
             <h3 class="program-section-label program-log-head-title">Activity log</h3>
-            <p class="program-log-sub" id="programLogSub" style="display:none;font-size:12px;color:var(--muted);margin:-4px 0 10px;line-height:1.35"></p>
+            <p class="program-log-purpose">Each row is one save from an <strong>I did</strong> tap (newest first). Streaks read from these dates.</p>
+            <p class="program-log-sub" id="programLogSub" style="display:none;font-size:12px;color:var(--muted);margin:4px 0 10px;line-height:1.35"></p>
             <div class="program-log-list" id="programLogList"></div>
           </div>
         </div>
@@ -9445,7 +9478,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.48.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.48.2';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -12785,9 +12818,10 @@
   function countStreakEndingOn(p, activityId, endYmd) {
     if (!projectIsProgram(p) || !Array.isArray(p.log)) return 0;
     const dates = {};
+    const actKey = String(activityId || '');
     p.log.forEach(function(e) {
       if (e.isStreakBonus) return;
-      if (e.activityId !== activityId) return;
+      if (String(e.activityId || '') !== actKey) return;
       const y = String(e.date || '').slice(0, 10);
       if (y) dates[y] = true;
     });
@@ -12806,7 +12840,8 @@
     if (!projectIsProgram(p) || !Array.isArray(p.log)) return 0;
     const wk = getISOWeekKey(todayYMD());
     return p.log.filter(function(e) {
-      return e.isStreakBonus && e.streakRuleId === ruleId && getISOWeekKey(String(e.date || '')) === wk;
+      return e.isStreakBonus && String(e.streakRuleId || '') === String(ruleId || '')
+        && getISOWeekKey(String(e.date || '')) === wk;
     }).length;
   }
 
@@ -13499,23 +13534,46 @@
     return { daysLeft: N - r, atMilestone: false };
   }
 
-  function ensureProgramLogArray(p) {
-    if (!p || !projectIsProgram(p)) return false;
-    if (Array.isArray(p.log)) return false;
-    if (p.log == null || p.log === '') {
-      p.log = [];
-      return true;
-    }
-    if (typeof p.log === 'string') {
+  function programCoerceLogArray(raw) {
+    if (Array.isArray(raw)) return raw;
+    if (raw == null || raw === '') return [];
+    if (typeof raw === 'string') {
       try {
-        const j = JSON.parse(p.log);
-        p.log = Array.isArray(j) ? j : [];
+        return programCoerceLogArray(JSON.parse(raw));
       } catch (_) {
-        p.log = [];
+        return [];
       }
-      return true;
     }
-    p.log = [];
+    if (typeof raw === 'object') {
+      const keys = Object.keys(raw);
+      if (!keys.length) return [];
+      if (keys.every(function(k) { return /^\d+$/.test(k); })) {
+        return keys.sort(function(a, b) { return parseInt(a, 10) - parseInt(b, 10); })
+          .map(function(k) { return raw[k]; })
+          .filter(function(x) { return x && typeof x === 'object'; });
+      }
+    }
+    return [];
+  }
+
+  function programRepairLogEntryIds(logArr) {
+    if (!Array.isArray(logArr)) return false;
+    let ch = false;
+    logArr.forEach(function(e) {
+      if (!e || e.id) return;
+      e.id = genId();
+      ch = true;
+    });
+    return ch;
+  }
+
+  function normalizeProgramLogField(p) {
+    if (!p || !projectIsProgram(p)) return false;
+    if (Array.isArray(p.log)) {
+      return programRepairLogEntryIds(p.log);
+    }
+    p.log = programCoerceLogArray(p.log);
+    programRepairLogEntryIds(p.log);
     return true;
   }
 
@@ -13557,17 +13615,23 @@
         lines.push('<div class="program-streak-line">Bonus rule for <strong>' + escapeHtml(name) + '</strong> is not linked to a current activity. Tap <strong>Edit</strong> and re-save streak bonuses so the activity matches.</div>');
         return;
       }
-      const streak = countStreakEndingOn(p, aid, today);
+      const streak = countStreakEndingOn(p, String(aid), today);
       const info = programStreakNextInfo(streak, need);
+      const inCycle = streak <= 0 ? 0 : (streak % need === 0 ? need : streak % need);
+      let dots = '<div class="program-streak-dots" title="' + inCycle + ' of ' + need + ' days in this stretch">';
+      for (let di = 0; di < need; di++) {
+        dots += '<span class="program-streak-dot' + (di < inCycle ? ' is-on' : '') + '" aria-hidden="true"></span>';
+      }
+      dots += '</div>';
       let line = '';
       if (streak < 1) {
-        line = '<strong>' + escapeHtml(name) + '</strong> · log this activity to start a <strong>' + need + '</strong>-day streak (+' + bonus + ' ' + escapeHtml(unit) + ' when you hit it).';
+        line = '<strong>' + escapeHtml(name) + '</strong> · each day you log fills one dot toward a <strong>' + need + '</strong>-day streak (+' + bonus + ' ' + escapeHtml(unit) + ' when all fill).';
       } else if (info.atMilestone) {
-        line = '<strong>' + escapeHtml(name) + '</strong> · <strong>' + streak + '-day</strong> streak — bonus milestone. Next +' + bonus + ' ' + escapeHtml(unit) + ' after <strong>' + info.daysLeft + '</strong> more consecutive logged day' + (info.daysLeft === 1 ? '' : 's') + '.';
+        line = '<strong>' + escapeHtml(name) + '</strong> · <strong>' + streak + '-day</strong> streak — row is full; next bonus after <strong>' + info.daysLeft + '</strong> more consecutive logged day' + (info.daysLeft === 1 ? '' : 's') + '.';
       } else {
-        line = '<strong>' + escapeHtml(name) + '</strong> · <strong>' + streak + '-day</strong> streak — <strong>' + info.daysLeft + '</strong> more consecutive day' + (info.daysLeft === 1 ? '' : 's') + ' until the next +' + bonus + ' ' + escapeHtml(unit) + ' bonus.';
+        line = '<strong>' + escapeHtml(name) + '</strong> · <strong>' + streak + '-day</strong> streak — <strong>' + info.daysLeft + '</strong> more day' + (info.daysLeft === 1 ? '' : 's') + ' until the next +' + bonus + ' ' + escapeHtml(unit) + ' bonus.';
       }
-      lines.push('<div class="program-streak-line">' + line + '</div>');
+      lines.push('<div class="program-streak-block"><div class="program-streak-line">' + line + '</div>' + dots + '</div>');
     });
     strip.innerHTML = '<div class="program-streak-strip-title">Streak bonuses</div>' + lines.join('');
   }
@@ -13578,6 +13642,18 @@
     const pv = projectsViewing;
     const show = pv && projectIsProgram(pv) && programLogUndoPayload && programLogUndoPayload.projectId === pv.id;
     ribbon.style.display = show ? 'flex' : 'none';
+  }
+
+  function programActBtnTouchStart(ev) {
+    const t = ev.target;
+    const b = t && t.closest ? t.closest('.program-act-btn') : null;
+    if (b) b.classList.add('program-act-press');
+  }
+
+  function programActBtnTouchEnd() {
+    document.querySelectorAll('.program-act-btn.program-act-press').forEach(function(el) {
+      el.classList.remove('program-act-press');
+    });
   }
 
   function programBurstDonutConfetti() {
@@ -13624,7 +13700,7 @@
     if (!p || !projectIsProgram(p)) return;
     const fresh = getProjects().find(function(x) { return x.id === p.id; }) || p;
     projectsViewing = fresh;
-    if (ensureProgramLogArray(fresh)) {
+    if (normalizeProgramLogField(fresh)) {
       const allFix = getProjects();
       const ixFix = allFix.findIndex(function(x) { return x.id === fresh.id; });
       if (ixFix >= 0) {
@@ -13683,11 +13759,18 @@
           '<span class="program-act-title">I did: ' + escapeHtml(a.label) + '</span>' +
           '<span class="program-act-pts">+' + (a.points || 0) + ' ' + escapeHtml(unit) + '</span></button>';
       }).join('');
+      const pvb = document.getElementById('programViewBody');
+      if (pvb && !pvb.dataset.programActTouch) {
+        pvb.dataset.programActTouch = '1';
+        pvb.addEventListener('touchstart', programActBtnTouchStart, { passive: true });
+        pvb.addEventListener('touchend', programActBtnTouchEnd, { passive: true });
+        pvb.addEventListener('touchcancel', programActBtnTouchEnd, { passive: true });
+      }
     }
 
     const logHint = document.getElementById('programLogHint');
     if (logHint) {
-      logHint.textContent = 'Tap when you have earned it. Each tap logs for today and adds to your total in ' + unit + '. Undo last log works for a few seconds after each tap; Remove latest drops the newest line in your log anytime.';
+      logHint.textContent = 'Tap when you have earned it. Each tap logs for today and adds to your total in ' + unit + '.';
     }
 
     const tdy = todayYMD();
@@ -13725,7 +13808,7 @@
     if (logEl) {
       const lines = logArr.slice(-14).reverse();
       logEl.innerHTML = lines.length ? lines.map(function(e) {
-        const lbl = (fresh.activities || []).find(function(x) { return x.id === e.activityId; });
+        const lbl = (fresh.activities || []).find(function(x) { return String(x.id) === String(e.activityId); });
         const name = lbl ? lbl.label : 'Activity';
         const bonus = e.bonusPoints ? ' +' + e.bonusPoints + ' bonus ' + escapeHtml(unit) : '';
         return '<div class="program-log-line">' + escapeHtml(String(e.date || '')) + ' — ' + escapeHtml(name) + ' +' + (e.pointsAwarded || 0) + ' ' + escapeHtml(unit) + bonus + '</div>';
@@ -13739,15 +13822,17 @@
     const u = document.getElementById('programInlineUndoBtn');
     const r = document.getElementById('programInlineRemoveBtn');
     const pv = projectsViewing;
-    const okUndo = pv && projectIsProgram(pv) && programLogUndoPayload && programLogUndoPayload.projectId === pv.id;
+    const live = pv && projectIsProgram(pv) ? getProjects().find(function(x) { return x.id === pv.id; }) : null;
+    const okUndo = !!(live && programLogUndoPayload && programLogUndoPayload.projectId === live.id);
+    let logN = 0;
+    if (live && Array.isArray(live.log)) logN = live.log.length;
     if (u) {
-      u.disabled = !okUndo;
-      u.setAttribute('aria-disabled', okUndo ? 'false' : 'true');
+      u.classList.toggle('program-afterlog-muted', !okUndo);
+      u.setAttribute('aria-label', okUndo ? 'Undo the tap you just saved' : 'After you tap I did, Undo is available here for a few seconds');
     }
-    const logN = pv && projectIsProgram(pv) && Array.isArray(pv.log) ? pv.log.length : 0;
     if (r) {
-      r.disabled = logN < 1;
-      r.setAttribute('aria-disabled', logN < 1 ? 'true' : 'false');
+      r.classList.toggle('program-afterlog-muted', logN < 1);
+      r.setAttribute('aria-label', logN < 1 ? 'Nothing in the log yet' : 'Remove the newest line from your activity log');
     }
   }
 
@@ -13778,8 +13863,9 @@
   }
 
   function programTryUndoLastLogTap() {
-    if (programLogUndoPayload && projectsViewing && projectIsProgram(projectsViewing)
-      && programLogUndoPayload.projectId === projectsViewing.id) {
+    const live = projectsViewing && projectIsProgram(projectsViewing)
+      ? getProjects().find(function(x) { return x.id === projectsViewing.id; }) : null;
+    if (programLogUndoPayload && live && programLogUndoPayload.projectId === live.id) {
       programUndoLastLogTap();
       return;
     }
@@ -13805,9 +13891,9 @@
     const p = all.find(function(x) { return x.id === projectId; });
     if (!p || !projectIsProgram(p) || !Array.isArray(p.log)) return;
     const idSet = {};
-    ids.forEach(function(id) { idSet[id] = true; });
+    ids.forEach(function(id) { idSet[String(id)] = true; });
     const beforeLen = p.log.length;
-    p.log = p.log.filter(function(e) { return !idSet[e.id]; });
+    p.log = p.log.filter(function(e) { return !idSet[String(e.id)]; });
     if (p.log.length === beforeLen) return;
     programLogUndoPayload = null;
     hideProgramLogToast();
@@ -13823,8 +13909,8 @@
     const all = getProjects();
     const p = all.find(function(x) { return x.id === projectId; });
     if (!p || !projectIsProgram(p)) return;
-    ensureProgramLogArray(p);
-    const act = (p.activities || []).find(function(a) { return a.id === activityId; });
+    normalizeProgramLogField(p);
+    const act = (p.activities || []).find(function(a) { return String(a.id) === String(activityId); });
     if (!act) return;
     const today = todayYMD();
     if (!Array.isArray(p.log)) p.log = [];
@@ -13835,18 +13921,20 @@
     p.log.push({
       id: baseEntryId,
       date: today,
-      activityId: activityId,
+      activityId: String(activityId),
       pointsAwarded: basePts,
       bonusPoints: 0
     });
     const rulesArr = normalizeProgramRules(p.rules || {}).streakBonuses;
+    const actTap = String(activityId);
     rulesArr.forEach(function(rule) {
       let aid = rule.activityId;
       if (!aid && rule.activityLabel) {
-        const fnd = (p.activities || []).find(function(a) { return a.label === rule.activityLabel; });
+        const lab = String(rule.activityLabel).trim().toLowerCase();
+        const fnd = (p.activities || []).find(function(a) { return String(a.label || '').trim().toLowerCase() === lab; });
         if (fnd) aid = fnd.id;
       }
-      if (!aid || aid !== activityId) return;
+      if (!aid || String(aid) !== actTap) return;
       const need = Math.max(2, rule.consecutiveDays || 5);
       const streak = countStreakEndingOn(p, aid, today);
       if (streak < need || streak % need !== 0) return;
@@ -13858,7 +13946,7 @@
       p.log.push({
         id: bonusEntryId,
         date: today,
-        activityId: aid,
+        activityId: String(aid),
         pointsAwarded: 0,
         bonusPoints: bonus,
         isStreakBonus: true,
@@ -13884,7 +13972,7 @@
     if (actWrap) {
       const nodes = actWrap.querySelectorAll('button.program-act-btn');
       for (var bi = 0; bi < nodes.length; bi++) {
-        if (nodes[bi].getAttribute('data-act-id') === activityId) {
+        if (String(nodes[bi].getAttribute('data-act-id') || '') === String(activityId)) {
           pulseBtn = nodes[bi];
           break;
         }
@@ -13913,8 +14001,15 @@
     const all = getProjects();
     const p = all.find(function(x) { return x.id === projectsViewing.id; });
     if (!p || !projectIsProgram(p)) return;
-    ensureProgramLogArray(p);
-    if (!Array.isArray(p.log) || p.log.length === 0) return;
+    const repaired = normalizeProgramLogField(p);
+    if (!Array.isArray(p.log) || p.log.length === 0) {
+      if (repaired) {
+        saveProjects(all);
+        projectsViewing = p;
+        renderProgramView();
+      }
+      return;
+    }
     let bestI = -1;
     let bestKey = '';
     p.log.forEach(function(e, i) {
