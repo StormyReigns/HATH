@@ -1906,15 +1906,17 @@
       flex-direction: row;
       flex-wrap: wrap;
       align-items: flex-start;
+      justify-content: space-between;
       gap: 10px;
       margin-bottom: 6px;
       position: relative;
       z-index: 1;
     }
     .fin-pie-strip {
-      flex: 0 1 42%;
-      max-width: 200px;
-      min-width: 118px;
+      flex: 0 0 auto;
+      margin-left: auto;
+      max-width: 168px;
+      min-width: 100px;
     }
     .fin-pie-strip .fin-pie-panel {
       margin-left: 0;
@@ -1923,9 +1925,10 @@
     .fin-summary-stack {
       flex: 1 1 0;
       min-width: 0;
+      max-width: min(56%, 280px);
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
     }
     .fin-summary-stack .fin-card {
       flex: 0 0 auto;
@@ -1976,12 +1979,17 @@
       min-width: 118px;
       margin-left: auto;
     }
+    .fin-pie-panel .fin-section-label.fin-pie-mobile-label {
+      font-size: 14px;
+      margin: 4px 0 2px;
+      text-align: right;
+    }
     .fin-pie-tap-hint {
-      font-size: 10px;
+      font-size: 9px;
       color: var(--muted);
-      margin: 0 0 4px;
-      text-align: center;
-      line-height: 1.3;
+      margin: 0 0 2px;
+      text-align: right;
+      line-height: 1.25;
     }
     .fin-pie-tap-wrap {
       display: block;
@@ -2002,28 +2010,31 @@
       outline-offset: 2px;
     }
     @media (max-width: 340px) {
-      .fin-pie-strip { max-width: none; flex: 1 1 100%; min-width: 0; }
-      .fin-summary-stack { flex: 1 1 100%; }
+      .fin-pie-strip { max-width: none; flex: 1 1 100%; min-width: 0; margin-left: 0; }
+      .fin-summary-stack { flex: 1 1 100%; max-width: none; }
       .fin-pie-mobile-label { margin-top: 4px; }
+      .fin-pie-panel .fin-section-label.fin-pie-mobile-label,
+      .fin-pie-tap-hint { text-align: center; }
     }
     .fin-pie-chart-host {
       position: relative;
-      min-height: 118px;
+      min-height: 72px;
     }
     .fin-pie-svg-wrap {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 6px;
+      align-items: flex-end;
+      gap: 4px;
     }
     .fin-pie-svg-wrap svg { display: block; max-width: 100%; height: auto; }
     .fin-pie-legend {
-      font-size: 10px;
+      font-size: 9px;
       color: var(--text2);
       width: 100%;
-      max-height: 88px;
+      max-height: 56px;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+      text-align: right;
     }
     .fin-pie-legend-row {
       display: flex;
@@ -8336,17 +8347,17 @@
           <div id="finLoadingEl" class="screen-loading" style="display:none">Loading…</div>
           <div id="finMainContent" style="display:none">
             <div class="fin-pie-summary-row">
+              <div class="fin-summary-stack">
+                <div class="fin-card income"><label>Income</label><span class="fin-card-val" id="finSumIncome">$0</span></div>
+                <div class="fin-card spent"><label>Spent</label><span class="fin-card-val" id="finSumSpent">$0</span></div>
+                <div class="fin-card net" id="finCardNet"><label>Net</label><span class="fin-card-val" id="finSumNet">$0</span></div>
+              </div>
               <div id="finPieStrip" class="fin-pie-strip">
                 <div class="fin-pie-panel">
                   <div class="fin-section-label fin-pie-mobile-label">% of spending</div>
                   <p class="fin-pie-tap-hint" id="finPieTapHint">Tap chart for details</p>
                   <div class="fin-pie-chart-host" id="finPieHost"></div>
                 </div>
-              </div>
-              <div class="fin-summary-stack">
-                <div class="fin-card income"><label>Income</label><span class="fin-card-val" id="finSumIncome">$0</span></div>
-                <div class="fin-card spent"><label>Spent</label><span class="fin-card-val" id="finSumSpent">$0</span></div>
-                <div class="fin-card net" id="finCardNet"><label>Net</label><span class="fin-card-val" id="finSumNet">$0</span></div>
               </div>
             </div>
             <div id="finPeriodEmpty" class="fin-empty-quip" style="display:none"></div>
@@ -10891,6 +10902,8 @@
   var _finViewMode = 'month';
   /** Week: Monday date key YYYY-MM-DD · Month: YYYY-MM · Year: calendar year string */
   var _finPeriodValue = null;
+  /** True while repopulating #finPeriodSelect so `change` does not fight programmatic updates. */
+  var _finPeriodSelectApplying = false;
   var _finExpandedCat = null;
   /** Last category breakdown rendered (for spending deep-dive overlay). */
   var _finPieLastEntries = null;
@@ -11170,21 +11183,41 @@
     var sel = document.getElementById('finPeriodSelect');
     if (!sel) return;
     var opts = finBuildPeriodOptions();
-    sel.innerHTML = '';
-    for (var i = 0; i < opts.length; i++) {
-      var o = opts[i];
-      var op = document.createElement('option');
-      op.value = o.value;
-      op.textContent = o.label;
-      sel.appendChild(op);
-    }
     if (!opts.length) {
       _finPeriodValue = null;
       return;
     }
-    var ok = _finPeriodValue && opts.some(function(x) { return x.value === _finPeriodValue; });
-    if (forceReset || !_finPeriodValue || !ok) _finPeriodValue = opts[0].value;
-    sel.value = _finPeriodValue;
+    var sig = opts.map(function(o) { return o.value; }).join('\x01');
+    if (!forceReset && sel.getAttribute('data-fin-opt-sig') === sig) {
+      var okCached = _finPeriodValue && opts.some(function(x) { return x.value === _finPeriodValue; });
+      if (!_finPeriodValue || !okCached) _finPeriodValue = opts[0].value;
+      if (sel.value !== _finPeriodValue) {
+        _finPeriodSelectApplying = true;
+        try {
+          sel.value = _finPeriodValue;
+        } finally {
+          _finPeriodSelectApplying = false;
+        }
+      }
+      return;
+    }
+    sel.setAttribute('data-fin-opt-sig', sig);
+    _finPeriodSelectApplying = true;
+    try {
+      sel.innerHTML = '';
+      for (var i = 0; i < opts.length; i++) {
+        var o = opts[i];
+        var op = document.createElement('option');
+        op.value = o.value;
+        op.textContent = o.label;
+        sel.appendChild(op);
+      }
+      var ok = _finPeriodValue && opts.some(function(x) { return x.value === _finPeriodValue; });
+      if (forceReset || !_finPeriodValue || !ok) _finPeriodValue = opts[0].value;
+      sel.value = _finPeriodValue;
+    } finally {
+      _finPeriodSelectApplying = false;
+    }
   }
 
   function finGetSelectedBounds() {
@@ -11243,6 +11276,7 @@
     });
     if (sel) {
       sel.addEventListener('change', function() {
+        if (_finPeriodSelectApplying) return;
         _finPeriodValue = sel.value || null;
         _finExpandedCat = null;
         renderFinancesUI();
@@ -11602,8 +11636,8 @@
     wrap.className = 'fin-pie-svg-wrap';
     var svg = document.createElementNS(svgNs, 'svg');
     svg.setAttribute('viewBox', '0 0 100 100');
-    svg.setAttribute('width', '128');
-    svg.setAttribute('height', '128');
+    svg.setAttribute('width', '92');
+    svg.setAttribute('height', '92');
     svg.setAttribute('aria-hidden', 'true');
     var cx = 50;
     var cy = 50;
