@@ -1434,6 +1434,10 @@
       min-height: 0;
       scrollbar-width: none;
     }
+    /* Messenger-style: thread sits on the composer; short chats align to bottom instead of top whitespace */
+    .body.chat-mode .chat-area {
+      justify-content: flex-end;
+    }
     .chat-area::-webkit-scrollbar { display: none; }
 
     .bubble {
@@ -9269,7 +9273,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.46.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.46.1';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -10277,7 +10281,9 @@
     if (input) {
       input.addEventListener('focus', function() {
         scrollChatForKeyboard();
-        scrollFocusedIntoView();
+        requestAnimationFrame(function() { scrollChatForKeyboard(); });
+        var bod = document.querySelector('.body');
+        if (!bod || !bod.classList.contains('chat-mode')) scrollFocusedIntoView();
       });
     }
     const blatherInp = document.getElementById('blatherbookInput');
@@ -11470,15 +11476,21 @@
   }
 
   /** Shown immediately while the copilot request runs; not added to conversationHistory (API still gets history: []). */
-  var PROJECT_COPILOT_PREAMBLE_TEXT = '[HAPPY] So you want to shape something new in Projects—that is lovely.\n\n'
-    + 'What usually helps is having a working title in mind, a sense of how long you might like to give it, '
-    + 'and a loose picture of what would feel like progress—not as homework, just as something you may already be carrying.\n\n'
-    + 'I am gathering my thoughts and will be right with you.';
+  var PROJECT_COPILOT_PREAMBLE_TEXT = '[HAPPY] So you want to start a project in Projects!\n\n'
+    + 'Here are some of the things to consider:\n\n'
+    + '• A name or phrase that feels right to call it\n'
+    + '• Whether you imagine a phased journey or more of a steady rhythm\n'
+    + '• Rough timing—weeks, months, or a softer horizon\n'
+    + '• What "done" or good progress would feel like to you\n\n'
+    + 'None of that has to be final—just what is on your mind. One moment while I think of where to pick up with you.';
 
-  var FIN_GOALS_COPILOT_PREAMBLE_TEXT = '[HAPPY] Starting from Finances is a thoughtful way to frame a goal.\n\n'
-    + 'Often it helps to reflect on what you are aiming toward, what kind of timeline feels kind rather than punishing, '
-    + 'and what would actually count as progress for you—numbers if you have them, or instincts if you do not yet.\n\n'
-    + 'Hold tight; I am putting something together for you.';
+  var FIN_GOALS_COPILOT_PREAMBLE_TEXT = '[HAPPY] So you want to start a Finances project!\n\n'
+    + 'Here are some of the things to consider:\n\n'
+    + '• What you are aiming for—save more, spend less in a spot, track a bill, or something else\n'
+    + '• A timeframe that feels kind, not punishing\n'
+    + '• What would actually count as progress—numbers, categories, or a gut check\n'
+    + '• Whether anything in your recent spending picture should weigh in (only if that helps you)\n\n'
+    + 'Hold tight—I am lining up what to say next.';
 
   function appendProjectCopilotPreambleThenTyping(preambleTaggedText) {
     var chat = document.getElementById('chatArea');
