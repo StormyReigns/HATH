@@ -1784,13 +1784,6 @@
     }
     .fin-header-mid { flex: 1; min-width: 0; }
     .fin-asof { display: block; font-size: 12px; color: var(--muted); font-style: italic; margin-top: 2px; line-height: 1.35; }
-    .fin-sync-note {
-      font-size: 11px;
-      color: var(--muted);
-      margin: 6px 0 0;
-      line-height: 1.4;
-      max-width: 42ch;
-    }
     .fin-header-actions {
       display: flex;
       align-items: flex-start;
@@ -1951,51 +1944,77 @@
     .fin-bar-pie-row {
       display: flex;
       flex-direction: row;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       align-items: flex-start;
-      gap: 14px;
-      margin-bottom: 8px;
+      gap: 10px;
+      margin-bottom: 6px;
       position: relative;
       z-index: 1;
     }
     .fin-bar-panel {
-      flex: 1 1 58%;
+      flex: 1 1 56%;
       min-width: 0;
     }
     .fin-pie-panel {
-      flex: 1 1 160px;
-      max-width: 220px;
-      min-width: 140px;
+      flex: 0 1 42%;
+      max-width: 200px;
+      min-width: 118px;
       margin-left: auto;
     }
-    @media (max-width: 380px) {
-      .fin-pie-panel { max-width: none; flex-basis: 100%; margin-left: 0; }
+    .fin-pie-tap-hint {
+      font-size: 10px;
+      color: var(--muted);
+      margin: 0 0 4px;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .fin-pie-tap-wrap {
+      display: block;
+      width: 100%;
+      padding: 0;
+      margin: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font: inherit;
+      color: inherit;
+      text-align: center;
+      -webkit-tap-highlight-color: transparent;
+      border-radius: 12px;
+    }
+    .fin-pie-tap-wrap:focus-visible {
+      outline: 2px solid var(--fin-accent);
+      outline-offset: 2px;
+    }
+    @media (max-width: 340px) {
+      .fin-bar-pie-row { flex-wrap: wrap; }
+      .fin-pie-panel { max-width: none; flex: 1 1 100%; margin-left: 0; }
       .fin-pie-mobile-label { margin-top: 4px; }
     }
     .fin-pie-chart-host {
       position: relative;
-      min-height: 140px;
+      min-height: 118px;
     }
     .fin-pie-svg-wrap {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
     .fin-pie-svg-wrap svg { display: block; max-width: 100%; height: auto; }
     .fin-pie-legend {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--text2);
       width: 100%;
-      max-height: 120px;
+      max-height: 88px;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
     }
     .fin-pie-legend-row {
       display: flex;
       justify-content: space-between;
-      gap: 8px;
-      padding: 3px 0;
+      gap: 6px;
+      padding: 2px 0;
       border-bottom: 1px dashed rgba(0,0,0,0.06);
     }
     html.dark-mode .fin-pie-legend-row { border-bottom-color: rgba(255,255,255,0.06); }
@@ -2018,8 +2037,8 @@
     .fin-month-chart-inner {
       display: flex;
       align-items: flex-end;
-      gap: 8px;
-      min-height: 120px;
+      gap: 6px;
+      min-height: 100px;
       padding-bottom: 4px;
     }
     .fin-month-col {
@@ -2032,7 +2051,7 @@
     }
     .fin-month-col.fin-col-narrow { width: 28px; }
     .fin-month-bar-stack {
-      height: 88px;
+      height: 72px;
       width: 100%;
       display: flex;
       flex-direction: column;
@@ -2934,6 +2953,7 @@
     .fdd-row-label { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
     .fdd-row-val { font-size: 14px; font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; }
     .fdd-row-pct { font-size: 12px; color: var(--muted); margin-left: 6px; }
+    #fpddRows .fdd-row-header { cursor: default; user-select: text; }
     .fdd-row-chevron {
       font-size: 11px; color: var(--muted); transition: transform 0.2s ease; margin-left: 4px;
     }
@@ -8263,10 +8283,9 @@
           <div class="fin-header-mid">
             <h2 class="fin-title">Finances</h2>
             <span class="fin-asof" id="finAsOf"></span>
-            <p class="fin-sync-note" id="finSyncNote"></p>
           </div>
           <div class="fin-header-actions">
-            <button type="button" class="fin-project-shortcut-btn" id="finProjectShortcutBtn" onclick="financesOpenNewProject()" title="New project" aria-label="New project">
+            <button type="button" class="fin-project-shortcut-btn" id="finProjectShortcutBtn" onclick="financesPromptFinGoals()" title="Financial goals with Blathers" aria-label="Financial goals with Blathers">
               <span class="fin-project-shortcut-inner">
                 <img src="https://stormyreigns.github.io/HATH/WWChest1.png" alt="" loading="lazy">
                 <span class="fin-project-shortcut-plus" aria-hidden="true">+</span>
@@ -8306,6 +8325,7 @@
                 </div>
                 <div class="fin-pie-panel">
                   <div class="fin-section-label fin-pie-mobile-label">% of spending</div>
+                  <p class="fin-pie-tap-hint" id="finPieTapHint">Tap chart for details</p>
                   <div class="fin-pie-chart-host" id="finPieHost"></div>
                 </div>
               </div>
@@ -8830,6 +8850,15 @@
 </div>
 
 <!-- New project: project vs habit vs Blathers -->
+<div class="paste-modal-overlay" id="finGoalsPromptOverlay" onclick="closeFinGoalsPrompt(event)">
+  <div class="paste-modal project-create-choice-modal" onclick="event.stopPropagation()">
+    <h3>Track financial goals?</h3>
+    <p class="project-create-choice-lead">Ask Blathers to help you set up a project or habit for budgeting, saving, or spending less—he’ll walk through it with you at your pace.</p>
+    <button type="button" class="project-create-choice-primary" onclick="beginFinGoalsCopilotFromFinances()">Yes, ask Blathers</button>
+    <button type="button" class="paste-cancel-btn project-create-choice-dismiss" onclick="closeFinGoalsPrompt()">Not now</button>
+  </div>
+</div>
+
 <div class="paste-modal-overlay" id="projectCreateChoiceOverlay" onclick="closeProjectCreateChoice(event)">
   <div class="paste-modal project-create-choice-modal" onclick="event.stopPropagation()">
     <h3>Start something new</h3>
@@ -9103,7 +9132,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.42.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.43.0';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -10837,6 +10866,9 @@
   /** Week: Monday date key YYYY-MM-DD · Month: YYYY-MM · Year: calendar year string */
   var _finPeriodValue = null;
   var _finExpandedCat = null;
+  /** Last category breakdown rendered (for spending deep-dive overlay). */
+  var _finPieLastEntries = null;
+  var _finPieLastPeriodTitle = '';
 
   var FIN_PIE_COLORS = ['#7cc47f', '#5a9e9e', '#c07a4a', '#9b7aac', '#e07070', '#7a8fce', '#d4a853', '#88b082', '#c9a56d', '#8ec5d6'];
 
@@ -10845,6 +10877,10 @@
 
   function hideFinancesScreen() {
     document.getElementById('financesScreen').classList.remove('visible');
+    var fpdd = document.getElementById('finPieDeepDive');
+    if (fpdd && fpdd.classList.contains('open')) fpdd.classList.remove('open');
+    var fgo = document.getElementById('finGoalsPromptOverlay');
+    if (fgo && fgo.classList.contains('open')) fgo.classList.remove('open');
     syncBottomDockState();
     updateScreenAddFabs();
   }
@@ -10949,6 +10985,71 @@
     var p = ym.split('-');
     var d = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, 1);
     return d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+  }
+
+  function finShortWeekLabel(d0, d1) {
+    var a = new Date(d0.getFullYear(), d0.getMonth(), d0.getDate());
+    var b = new Date(d1.getFullYear(), d1.getMonth(), d1.getDate());
+    if (a.getTime() === b.getTime()) {
+      return a.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+    if (a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear()) {
+      return a.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + '–' + b.getDate();
+    }
+    return a.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + '–' +
+      b.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  function finGetLastTransactionDisplayStr() {
+    var norm = _finNormalized;
+    if (!norm || !norm.length) return '';
+    var max = norm[0].parsed;
+    for (var i = 1; i < norm.length; i++) {
+      if (norm[i].parsed > max) max = norm[i].parsed;
+    }
+    return max.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function finFormatSelectedPeriodTitle() {
+    finSyncViewModeFromDom();
+    if (_finViewMode === 'week' && _finPeriodValue) return finFormatWeekLabel(_finPeriodValue);
+    if (_finViewMode === 'month' && _finPeriodValue) return finFormatMonthLabel(_finPeriodValue);
+    if (_finViewMode === 'year' && _finPeriodValue) return 'Year ' + _finPeriodValue;
+    return 'Selected period';
+  }
+
+  function buildFinGoalsSnapshotForBlathers() {
+    try {
+      if (!_finNormalized || !_finNormalized.length) return '';
+      var b = finGetSelectedBounds();
+      var txs = _finNormalized.filter(function(tx) { return finTxInRange(tx, b.start, b.end); });
+      var inc = 0;
+      var sp = 0;
+      for (var i = 0; i < txs.length; i++) {
+        var t = txs[i];
+        if (t.isIncome) inc += t.amount;
+        else if (t.isExpense && !t.excludeFromSpending) sp += t.amount;
+      }
+      var lines = [
+        'Period: ' + finFormatSelectedPeriodTitle() + '.',
+        'Income ' + finFormatMoney(inc) + ', spending ' + finFormatMoney(sp) + ', net ' + finFormatMoney(inc - sp) + '.'
+      ];
+      var byCat = {};
+      for (var j = 0; j < txs.length; j++) {
+        var x = txs[j];
+        if (!x.isExpense || x.excludeFromSpending) continue;
+        var k = x.category || 'Uncategorized';
+        byCat[k] = (byCat[k] || 0) + x.amount;
+      }
+      var ent = Object.keys(byCat).map(function(k) { return { name: k, amt: byCat[k] }; });
+      ent.sort(function(a, b) { return b.amt - a.amt; });
+      for (var z = 0; z < Math.min(5, ent.length); z++) {
+        lines.push('- ' + ent[z].name + ': ' + finFormatMoney(ent[z].amt));
+      }
+      return lines.join('\n');
+    } catch (_) {
+      return '';
+    }
   }
 
   function finDataDateRange(norm) {
@@ -11121,10 +11222,78 @@
     }
   }
 
-  function financesOpenNewProject() {
+  function financesPromptFinGoals() {
     if (!getApiUser()) return;
-    showProjectsScreen();
-    openCreateProjectModal();
+    document.getElementById('finGoalsPromptOverlay').classList.add('open');
+  }
+
+  function closeFinGoalsPrompt(ev) {
+    if (ev && ev.target !== document.getElementById('finGoalsPromptOverlay')) return;
+    document.getElementById('finGoalsPromptOverlay').classList.remove('open');
+  }
+
+  async function beginFinGoalsCopilotFromFinances() {
+    if (isSending || !getApiUser()) return;
+    document.getElementById('finGoalsPromptOverlay').classList.remove('open');
+    var finSnap = buildFinGoalsSnapshotForBlathers();
+    isSending = true;
+    activeController = new AbortController();
+    setSendButtonMode('stop');
+    navigateHomeForProjectCopilot();
+    conversationHistory.length = 0;
+    window.projectCopilotActive = true;
+    const chat = document.getElementById('chatArea');
+    chat.innerHTML = '';
+    setBlathers('startled');
+    setTimeout(function() { setBlathers('thinking'); }, 600);
+    const typing = document.createElement('div');
+    typing.className = 'typing';
+    typing.id = 'typingIndicator';
+    typing.innerHTML = '<span></span><span></span><span></span>';
+    chat.appendChild(typing);
+    requestAnimationFrame(function() { chat.scrollTop = chat.scrollHeight; });
+    try {
+      const user = localStorage.getItem('shasta_user');
+      var cc = buildBlathersClientContext();
+      if (finSnap) cc += '\n\nFinances snapshot (from Finances screen):\n' + finSnap;
+      const body = {
+        message: '__FIN_GOALS_COPILOT_START__',
+        user: getApiUser(),
+        history: [],
+        nickname: getDisplayName(),
+        dumbMode: !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true'),
+        projectCopilot: true,
+        clientContext: cc
+      };
+      const res = await fetch(AI_URL, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(body),
+        signal: activeController.signal
+      });
+      const text2 = await res.text();
+      let data;
+      try { data = JSON.parse(text2); } catch (_) {
+        throw new Error('Invalid response from server');
+      }
+      typing.remove();
+      const reply = data.reply || friendlyBlathersError(data.error);
+      const structured = parseBlathersStructuredReply(reply);
+      const displayReply = sanitizeBlathersUserVisibleText(structured.display || reply);
+      const turn = addBubble(displayReply, 'hath');
+      conversationHistory.push({ role: 'assistant', content: displayReply });
+      applyBlathersStructuredFollowUp(turn, structured);
+    } catch (err) {
+      typing.remove();
+      if (err.name !== 'AbortError') {
+        addBubble(friendlyBlathersError(err), 'hath');
+        window.projectCopilotActive = false;
+      }
+    }
+    activeController = null;
+    isSending = false;
+    setSendButtonMode('send');
   }
 
   function finEnsureLoaded(force) {
@@ -11180,12 +11349,9 @@
     finPopulatePeriodSelect(false);
 
     var asof = document.getElementById('finAsOf');
-    var syncNote = document.getElementById('finSyncNote');
-    if (asof && _finMeta && _finMeta.asOf) {
-      asof.textContent = 'Figures come from your Finances sheet · snapshot dated ' + _finMeta.asOf + '.';
-    }
-    if (syncNote) {
-      syncNote.textContent = 'Numbers are not live. After you update the sheet in Google Drive, tap refresh to pull the latest export.';
+    if (asof) {
+      var lastTx = finGetLastTransactionDisplayStr();
+      asof.textContent = lastTx ? 'Updated last · ' + lastTx : 'Updated last — no transactions in export yet';
     }
 
     var errEl = document.getElementById('finErrorEl');
@@ -11236,7 +11402,7 @@
 
     if (trendLbl) {
       if (_finViewMode === 'week') trendLbl.textContent = 'Daily spending (selected week)';
-      else if (_finViewMode === 'month') trendLbl.textContent = 'Daily spending (selected month)';
+      else if (_finViewMode === 'month') trendLbl.textContent = 'Weekly spending (selected month)';
       else trendLbl.textContent = 'Monthly spending (selected year)';
     }
 
@@ -11249,7 +11415,11 @@
     }
     if (chartsBlock) chartsBlock.style.display = periodEmpty ? 'none' : '';
 
-    if (periodEmpty) return;
+    if (periodEmpty) {
+      var thEmpty = document.getElementById('finPieTapHint');
+      if (thEmpty) thEmpty.style.display = 'none';
+      return;
+    }
 
     finRenderTrendChart(b, txs);
     finRenderPieChart(txs);
@@ -11263,7 +11433,7 @@
     chart.innerHTML = '';
     finSyncViewModeFromDom();
     var buckets = [];
-    var maxBarPx = 72;
+    var maxBarPx = _finViewMode === 'month' ? 58 : 64;
 
     if (_finViewMode === 'week') {
       for (var i = 0; i < 7; i++) {
@@ -11280,17 +11450,23 @@
         });
       }
     } else if (_finViewMode === 'month') {
-      var cur = new Date(bounds.start);
-      while (cur <= bounds.end) {
-        var ds = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(), 0, 0, 0, 0);
-        var de = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(), 23, 59, 59, 999);
+      var monthStart = new Date(bounds.start);
+      var monthEnd = new Date(bounds.end);
+      var curMon = finMondayOfLocalDate(monthStart);
+      while (curMon <= monthEnd) {
+        var weekEnd = new Date(curMon);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        weekEnd.setHours(23, 59, 59, 999);
+        var segStart = curMon < monthStart ? new Date(monthStart.getTime()) : new Date(curMon.getTime());
+        segStart.setHours(0, 0, 0, 0);
+        var segEnd = weekEnd > monthEnd ? new Date(monthEnd.getTime()) : new Date(weekEnd.getTime());
         buckets.push({
-          sp: finSumSpendInRange(txs, ds, de),
-          inc: finSumIncomeInRange(txs, ds, de),
-          lab: String(cur.getDate()),
-          narrow: true
+          sp: finSumSpendInRange(txs, segStart, segEnd),
+          inc: finSumIncomeInRange(txs, segStart, segEnd),
+          lab: finShortWeekLabel(segStart, segEnd),
+          narrow: false
         });
-        cur.setDate(cur.getDate() + 1);
+        curMon.setDate(curMon.getDate() + 7);
       }
     } else {
       var y = bounds.start.getFullYear();
@@ -11362,8 +11538,11 @@
 
   function finRenderPieChart(txs) {
     var host = document.getElementById('finPieHost');
+    var tapHint = document.getElementById('finPieTapHint');
     if (!host) return;
     host.innerHTML = '';
+    _finPieLastEntries = null;
+    _finPieLastPeriodTitle = finFormatSelectedPeriodTitle();
     var byCat = {};
     var total = 0;
     for (var i = 0; i < txs.length; i++) {
@@ -11374,21 +11553,25 @@
       total += tx.amount;
     }
     if (total <= 0) {
+      if (tapHint) tapHint.style.display = 'none';
       host.innerHTML = '<div class="fin-pie-empty">No spending categories in this period (or only excluded categories).</div>';
       return;
     }
+    if (tapHint) tapHint.style.display = '';
     var entries = Object.keys(byCat).map(function(k) {
       return { name: k, amt: byCat[k], pct: byCat[k] / total * 100 };
     });
     entries.sort(function(a, b) { return b.amt - a.amt; });
+    _finPieLastEntries = entries.slice();
 
     var svgNs = 'http://www.w3.org/2000/svg';
     var wrap = document.createElement('div');
     wrap.className = 'fin-pie-svg-wrap';
     var svg = document.createElementNS(svgNs, 'svg');
     svg.setAttribute('viewBox', '0 0 100 100');
-    svg.setAttribute('width', '160');
-    svg.setAttribute('height', '160');
+    svg.setAttribute('width', '128');
+    svg.setAttribute('height', '128');
+    svg.setAttribute('aria-hidden', 'true');
     var cx = 50;
     var cy = 50;
     var rOut = 38;
@@ -11411,6 +11594,7 @@
     leg.className = 'fin-pie-legend';
     for (var z = 0; z < entries.length; z++) {
       var e = entries[z];
+      if (e.pct < 1) continue;
       var row = document.createElement('div');
       row.className = 'fin-pie-legend-row';
       row.innerHTML = '<span class="fin-pie-dot" style="background:' + FIN_PIE_COLORS[z % FIN_PIE_COLORS.length] + '"></span>' +
@@ -11419,7 +11603,69 @@
       leg.appendChild(row);
     }
     wrap.appendChild(leg);
-    host.appendChild(wrap);
+    var tap = document.createElement('button');
+    tap.type = 'button';
+    tap.className = 'fin-pie-tap-wrap';
+    tap.setAttribute('aria-label', 'Open detailed spending breakdown');
+    tap.appendChild(wrap);
+    tap.onclick = function(ev) {
+      ev.preventDefault();
+      openFinPieDeepDive();
+    };
+    host.appendChild(tap);
+  }
+
+  function openFinPieDeepDive() {
+    var entries = _finPieLastEntries;
+    if (!entries || !entries.length) return;
+    var title = (_finPieLastPeriodTitle || 'Spending') + ' — by category';
+    var total = 0;
+    for (var i = 0; i < entries.length; i++) total += entries[i].amt;
+
+    document.getElementById('fpddTitle').textContent = title;
+
+    var acc = 0;
+    var stops = [];
+    for (var j = 0; j < entries.length; j++) {
+      var e = entries[j];
+      if (e.amt <= 0) continue;
+      var c = FIN_PIE_COLORS[j % FIN_PIE_COLORS.length];
+      var p0 = acc / total * 100;
+      acc += e.amt;
+      var p1 = acc / total * 100;
+      stops.push(c + ' ' + p0 + '% ' + p1 + '%');
+    }
+    var donutEl = document.getElementById('fpddDonut');
+    donutEl.style.background = stops.length ? 'conic-gradient(from 0deg, ' + stops.join(', ') + ')' : '#888';
+
+    document.getElementById('fpddCenterLabel').textContent = finFormatMoney(total) + '\nspent';
+
+    var rowsHtml = entries.map(function(entry, idx) {
+      var pct = total > 0 ? Math.round(entry.amt / total * 100) : 0;
+      return '<div class="fdd-row">' +
+        '<div class="fdd-row-header">' +
+        '<span class="fdd-row-dot" style="background:' + FIN_PIE_COLORS[idx % FIN_PIE_COLORS.length] + '"></span>' +
+        '<span class="fdd-row-label">' + escapeHtml(entry.name) + '</span>' +
+        '<span class="fdd-row-val">' + finFormatMoney(entry.amt) + '</span>' +
+        '<span class="fdd-row-pct">(' + pct + '%)</span>' +
+        '</div></div>';
+    }).join('');
+    document.getElementById('fpddRows').innerHTML = rowsHtml;
+
+    var top = entries[0];
+    var n = entries.length;
+    var insight = n + ' categor' + (n === 1 ? 'y' : 'ies') + ' in this period.';
+    if (top && total > 0) {
+      insight += ' Largest share: ' + top.name + ' at ' + Math.round(top.amt / total * 100) + '%.';
+    }
+    document.getElementById('fpddSummary').textContent = insight;
+
+    document.getElementById('finPieDeepDive').classList.add('open');
+  }
+
+  function closeFinPieDeepDive(ev) {
+    if (ev && ev.target !== document.getElementById('finPieDeepDive')) return;
+    document.getElementById('finPieDeepDive').classList.remove('open');
   }
 
   function finRenderCategories(txs) {
@@ -21592,6 +21838,24 @@
     <div class="gj-winner-actions" id="gjRandomizerActions" style="display:none; margin-top:20px">
       <button type="button" class="gj-winner-btn-primary" id="gjRandomizerCook">Let's Cook</button>
       <button type="button" class="gj-winner-btn-secondary" onclick="randomizerGoAgain()">Go Again</button>
+    </div>
+  </div>
+</div>
+
+<div class="funding-deepdive-overlay" id="finPieDeepDive" aria-modal="true" role="dialog" onclick="closeFinPieDeepDive(event)">
+  <div class="funding-deepdive-card" id="finPieDeepDiveCard" onclick="event.stopPropagation()">
+    <button type="button" class="funding-deepdive-close" onclick="closeFinPieDeepDive()" aria-label="Close">✕</button>
+    <div class="funding-deepdive-name" id="fpddTitle">Spending breakdown</div>
+    <div class="funding-deepdive-donut-wrap">
+      <div class="funding-deepdive-donut" id="fpddDonut">
+        <div class="funding-deepdive-donut-hole">
+          <div class="funding-deepdive-donut-center-label" id="fpddCenterLabel"></div>
+        </div>
+      </div>
+    </div>
+    <div class="funding-deepdive-rows" id="fpddRows"></div>
+    <div class="funding-deepdive-summary" id="fpddSummaryWrap">
+      <div class="funding-deepdive-summary-text" id="fpddSummary"></div>
     </div>
   </div>
 </div>
