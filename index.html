@@ -1970,33 +1970,20 @@
       position: relative;
       z-index: 1;
     }
-    .fin-equity-strip {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: baseline;
-      gap: 6px 10px;
-      margin: 8px 0 12px;
-      padding: 8px 12px;
-      border-radius: 10px;
-      font-size: 12px;
-      line-height: 1.4;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(124,196,127,0.2);
+    .fin-equity-line {
+      margin: 6px 0 10px;
+      padding: 0;
+      font-size: 11px;
+      line-height: 1.35;
       color: var(--text2);
       position: relative;
       z-index: 1;
+      font-variant-numeric: tabular-nums;
     }
-    html.dark-mode .fin-equity-strip {
-      background: rgba(0,0,0,0.12);
-    }
-    .fin-equity-strip-label { color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; font-size: 10px; }
-    .fin-equity-strip-vest strong { color: var(--fin-accent); font-weight: 600; font-variant-numeric: tabular-nums; }
-    .fin-equity-strip-dot { color: var(--muted); user-select: none; }
-    .fin-equity-strip-win { font-weight: 600; }
-    .fin-equity-win-open { color: #1a8f4a; }
-    .fin-equity-win-blackout { color: #b04040; }
-    html.dark-mode .fin-equity-win-open { color: #4ecf7a; }
-    html.dark-mode .fin-equity-win-blackout { color: #e07070; }
+    .fin-equity-line.fin-equity-line--open { color: #1a8f4a; }
+    .fin-equity-line.fin-equity-line--blackout { color: #b04040; }
+    html.dark-mode .fin-equity-line.fin-equity-line--open { color: #4ecf7a; }
+    html.dark-mode .fin-equity-line.fin-equity-line--blackout { color: #e07070; }
     .fin-pie-panel {
       flex: 0 1 42%;
       max-width: 200px;
@@ -2084,10 +2071,17 @@
     }
     .fin-month-chart-inner {
       display: flex;
-      align-items: flex-end;
+      align-items: flex-start;
       gap: 6px;
       min-height: 100px;
       padding-bottom: 4px;
+    }
+    .fin-month-chart-inner--weeks .fin-month-col {
+      width: 48px;
+    }
+    .fin-month-chart-inner--weeks .fin-month-label {
+      font-size: 9px;
+      line-height: 1.2;
     }
     .fin-month-col {
       flex: 0 0 auto;
@@ -3014,6 +3008,24 @@
     #fpddRows .fdd-row:not(.fpdd-row--clickable):not(.fpdd-row--desc) .fdd-row-header { cursor: default; user-select: text; }
     .fpdd-merchant-hint { font-size: 12px; color: var(--muted); margin: 0 0 10px; line-height: 1.4; }
     .fpdd-merchant-chart-wrap { margin-bottom: 4px; }
+    #fpddRows .fpdd-desc-body {
+      display: none;
+      padding: 0 0 4px 0;
+      margin: 0;
+      max-height: none;
+      overflow: visible;
+      font-size: inherit;
+    }
+    #fpddRows .fpdd-row--desc.fpdd-row--expanded .fpdd-desc-body {
+      display: block;
+    }
+    #fpddRows .fpdd-desc-body .fpdd-inline-merchant-summary {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      margin: 8px 0 0;
+      font-variant-numeric: tabular-nums;
+    }
     #finPieDeepDiveCard {
       --fin-accent: #7cc47f;
     }
@@ -8412,11 +8424,7 @@
               </button>
               <div class="fin-card net" id="finCardNet"><label>Net</label><span class="fin-card-val" id="finSumNet">$0</span></div>
             </div>
-            <div class="fin-equity-strip" id="finEquityStrip">
-              <span class="fin-equity-strip-vest"><span class="fin-equity-strip-label">RIVN · Next vest</span> <strong id="finEquityNextVest">—</strong></span>
-              <span class="fin-equity-strip-dot" aria-hidden="true">·</span>
-              <span class="fin-equity-strip-win" id="finEquityWindow">—</span>
-            </div>
+            <div class="fin-equity-line" id="finEquityStrip">RIVN · Next vest — · —</div>
             <div id="finPeriodEmpty" class="fin-empty-quip" style="display:none"></div>
             <div id="finChartsBlock">
               <div class="fin-section-label" id="finTrendSectionLabel">Spending trend</div>
@@ -9226,7 +9234,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.44.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.45.0';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -10967,10 +10975,12 @@
   var _finPieLastPeriodTitle = '';
   /** Transactions in the selected period (for pie → category → description drill-down). */
   var _finPieLastPeriodTxs = null;
-  /** Pie modal: categories | descriptions | merchant (bar chart). */
+  /** Pie modal: categories | descriptions (optional inline merchant chart on a row). */
   var _finPieDrillState = 'categories';
   var _finPieDrillCategory = null;
   var _finPieDrillCatColorIdx = 0;
+  /** Description row expanded to show merchant bar chart (merchant grouping key). */
+  var _finPieExpandedMerchantKey = null;
 
   function getNextRivnVestDate() {
     var today = new Date();
@@ -11006,16 +11016,14 @@
   }
 
   function updateFinEquityStrip() {
-    var nvEl = document.getElementById('finEquityNextVest');
-    var wEl = document.getElementById('finEquityWindow');
+    var strip = document.getElementById('finEquityStrip');
     var nextV = getNextRivnVestDate();
-    if (nvEl && nextV) {
-      nvEl.textContent = nextV.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    }
-    if (wEl) {
-      var st = getRivnWindowStatus();
-      wEl.className = 'fin-equity-strip-win ' + (st === 'blackout' ? 'fin-equity-win-blackout' : 'fin-equity-win-open');
-      wEl.textContent = st === 'blackout' ? '🔒 Blackout' : '🟢 Window likely open';
+    var st = getRivnWindowStatus();
+    var vestStr = nextV ? nextV.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+    var winStr = st === 'blackout' ? '🔒 Trading window blackout' : '🟢 Trading window likely open';
+    if (strip) {
+      strip.textContent = 'RIVN · Next vest ' + vestStr + ' · ' + winStr;
+      strip.className = 'fin-equity-line ' + (st === 'blackout' ? 'fin-equity-line--blackout' : 'fin-equity-line--open');
     }
   }
 
@@ -11030,6 +11038,7 @@
     if (fpdd && fpdd.classList.contains('open')) {
       fpdd.classList.remove('open');
       _finPieDrillState = 'categories';
+      _finPieExpandedMerchantKey = null;
       fpddShowPieMainBlock_(true);
       fpddSetBackButton_('categories');
     }
@@ -11150,7 +11159,7 @@
       return a.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
     if (a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear()) {
-      return a.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + '–' + b.getDate();
+      return (a.getMonth() + 1) + '/' + a.getDate() + '–' + b.getDate();
     }
     return a.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + '–' +
       b.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -11659,6 +11668,9 @@
   function finRenderTrendChartIntoElement(chartEl, bounds, txs, opts) {
     opts = opts || {};
     if (!chartEl) return;
+    var keepInline = chartEl.classList && chartEl.classList.contains('fpdd-inline-chart');
+    chartEl.className = 'fin-month-chart-inner' + (keepInline ? ' fpdd-inline-chart' : '') +
+      (_finViewMode === 'month' ? ' fin-month-chart-inner--weeks' : '');
     chartEl.innerHTML = '';
     var buckets = finBuildFinTrendBuckets(bounds, txs);
     var maxBarPx = _finViewMode === 'month' ? 58 : 64;
@@ -11871,19 +11883,23 @@
 
   function fpddShowPieMainBlock_(showMain) {
     var mainB = document.getElementById('fpddMainBlock');
-    var merB = document.getElementById('fpddMerchantBlock');
     if (mainB) mainB.style.display = showMain ? '' : 'none';
-    if (merB) merB.style.display = showMain ? 'none' : '';
+  }
+
+  function fpddCollapseMerchantExpand_() {
+    _finPieExpandedMerchantKey = null;
+    var rows = document.querySelectorAll('#fpddRows .fpdd-row--desc.fpdd-row--expanded');
+    for (var i = 0; i < rows.length; i++) {
+      rows[i].classList.remove('fpdd-row--expanded');
+      var inner = rows[i].querySelector('.fpdd-inline-chart');
+      if (inner) inner.innerHTML = '';
+    }
   }
 
   function fpddSetBackButton_(mode) {
     var btn = document.getElementById('fpddBackBtn');
     if (!btn) return;
-    if (mode === 'merchant') {
-      btn.style.display = '';
-      btn.textContent = '← Descriptions';
-      btn.setAttribute('aria-label', 'Back to descriptions');
-    } else if (mode === 'descriptions') {
+    if (mode === 'descriptions') {
       btn.style.display = '';
       btn.textContent = '← Categories';
       btn.setAttribute('aria-label', 'Back to all categories');
@@ -11904,26 +11920,45 @@
       mTxs.push(tx);
     }
     if (!mTxs.length) return;
-    _finPieDrillState = 'merchant';
-    _finPieDrillCategory = categoryName;
-    _finPieDrillCatColorIdx = catColorIdx;
-    fpddShowPieMainBlock_(false);
-    fpddSetBackButton_('merchant');
-    finSyncViewModeFromDom();
-    document.getElementById('fpddTitle').textContent = displayLabel + ' · ' + categoryName;
-    var hintEl = document.getElementById('fpddMerchantHint');
+    var rowsEl = document.getElementById('fpddRows');
+    if (!rowsEl) return;
+    if (_finPieExpandedMerchantKey === merchantKey) {
+      fpddCollapseMerchantExpand_();
+      return;
+    }
+    fpddCollapseMerchantExpand_();
+    _finPieExpandedMerchantKey = merchantKey;
+    _finPieDrillState = 'descriptions';
+    fpddShowPieMainBlock_(true);
+    fpddSetBackButton_('descriptions');
+    var targetRow = null;
+    var descRows = rowsEl.querySelectorAll('.fpdd-row--desc');
+    for (var r = 0; r < descRows.length; r++) {
+      if (descRows[r].getAttribute('data-fpdd-merchant-key') === merchantKey) {
+        targetRow = descRows[r];
+        break;
+      }
+    }
+    if (!targetRow) return;
+    targetRow.classList.add('fpdd-row--expanded');
+    var hintEl = targetRow.querySelector('.fpdd-desc-hint');
     if (hintEl) {
       if (_finViewMode === 'week') hintEl.textContent = 'Spending by day — matches Finances Week view for this period';
       else if (_finViewMode === 'month') hintEl.textContent = 'Spending by week — matches Finances Month view for this period';
       else hintEl.textContent = 'Spending by month — matches Finances Year view for this period';
     }
+    var chartHost = targetRow.querySelector('.fpdd-inline-chart');
+    var summEl = targetRow.querySelector('.fpdd-inline-merchant-summary');
+    finSyncViewModeFromDom();
     var bounds = finGetSelectedBounds();
-    finRenderTrendChartIntoElement(document.getElementById('fpddMerchantChart'), bounds, mTxs, { showBucketAmounts: true });
+    finRenderTrendChartIntoElement(chartHost, bounds, mTxs, { showBucketAmounts: true });
     var totalM = 0;
     for (var j = 0; j < mTxs.length; j++) totalM += mTxs[j].amount;
-    document.getElementById('fpddSummary').textContent =
-      finFormatMoney(totalM) + ' this period · ' + mTxs.length + ' charge' + (mTxs.length === 1 ? '' : 's');
-    document.getElementById('finPieDeepDive').classList.add('open');
+    if (summEl) {
+      summEl.textContent =
+        finFormatMoney(totalM) + ' this period · ' + mTxs.length + ' charge' + (mTxs.length === 1 ? '' : 's');
+    }
+    targetRow.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
 
   function finSetFpddDonutAndCenter(parts, overallTotal, centerLine2) {
@@ -11954,6 +11989,7 @@
     if (!entries || !entries.length) {
       var emptyTitle = (_finPieLastPeriodTitle || 'Spending') + ' — by category';
       _finPieDrillState = 'categories';
+      _finPieExpandedMerchantKey = null;
       fpddShowPieMainBlock_(true);
       fpddSetBackButton_('categories');
       document.getElementById('fpddTitle').textContent = emptyTitle;
@@ -11973,6 +12009,7 @@
     for (var i = 0; i < entries.length; i++) total += entries[i].amt;
 
     _finPieDrillState = 'categories';
+    _finPieExpandedMerchantKey = null;
     fpddShowPieMainBlock_(true);
     fpddSetBackButton_('categories');
 
@@ -12019,7 +12056,7 @@
     if (top && total > 0) {
       insight += ' Largest share: ' + top.name + ' at ' + Math.round(top.amt / total * 100) + '%.';
     }
-    insight += ' Tap a category for combined descriptions; tap a description for a spending chart.';
+    insight += ' Tap a category for descriptions; tap a description to expand its spending chart.';
     document.getElementById('fpddSummary').textContent = insight;
 
     document.getElementById('finPieDeepDive').classList.add('open');
@@ -12043,6 +12080,7 @@
     _finPieDrillState = 'descriptions';
     _finPieDrillCategory = categoryName;
     _finPieDrillCatColorIdx = catColorIdx;
+    _finPieExpandedMerchantKey = null;
     fpddShowPieMainBlock_(true);
     fpddSetBackButton_('descriptions');
 
@@ -12066,6 +12104,7 @@
         var pctCat = catTotal > 0 ? Math.round(g.total / catTotal * 100) : 0;
         var row = document.createElement('div');
         row.className = 'fdd-row fpdd-row--desc';
+        row.setAttribute('data-fpdd-merchant-key', g.merchantKey);
         var head = document.createElement('div');
         head.className = 'fdd-row-header';
         head.setAttribute('role', 'button');
@@ -12088,7 +12127,24 @@
             openFinPieMerchantDrill(categoryName, catColorIdx, g.merchantKey, g.display);
           }
         };
+        var body = document.createElement('div');
+        body.className = 'fdd-row-body fpdd-desc-body';
+        var hint = document.createElement('p');
+        hint.className = 'fpdd-merchant-hint fpdd-desc-hint';
+        hint.textContent = '';
+        var wrap = document.createElement('div');
+        wrap.className = 'fin-month-chart-wrap h-scroll-faded fpdd-merchant-chart-wrap';
+        var inner = document.createElement('div');
+        inner.className = 'fin-month-chart-inner fpdd-inline-chart';
+        wrap.appendChild(inner);
+        var summLine = document.createElement('div');
+        summLine.className = 'fpdd-inline-merchant-summary';
+        summLine.textContent = '';
+        body.appendChild(hint);
+        body.appendChild(wrap);
+        body.appendChild(summLine);
         row.appendChild(head);
+        row.appendChild(body);
         rowsEl.appendChild(row);
       })(groups[r], r);
     }
@@ -12098,15 +12154,15 @@
     if (topG && catTotal > 0) {
       summ += ' Largest: ' + topG.display + ' (' + Math.round(topG.total / catTotal * 100) + '% of this category).';
     }
-    summ += ' Tap a line for spending by day / week / month (matches Finances filter).';
+    summ += ' Tap a description to expand its chart (same scale as Finances). Tap again to collapse.';
     document.getElementById('fpddSummary').textContent = summ;
 
     document.getElementById('finPieDeepDive').classList.add('open');
   }
 
   function finPieDeepDiveBack() {
-    if (_finPieDrillState === 'merchant' && _finPieDrillCategory != null) {
-      openFinPieCategoryDrill(_finPieDrillCategory, _finPieDrillCatColorIdx);
+    if (_finPieDrillState === 'descriptions' && _finPieExpandedMerchantKey != null) {
+      fpddCollapseMerchantExpand_();
       return;
     }
     openFinPieDeepDive();
@@ -12116,6 +12172,7 @@
     if (ev && ev.target !== document.getElementById('finPieDeepDive')) return;
     document.getElementById('finPieDeepDive').classList.remove('open');
     _finPieDrillState = 'categories';
+    _finPieExpandedMerchantKey = null;
     fpddShowPieMainBlock_(true);
     fpddSetBackButton_('categories');
   }
@@ -22362,12 +22419,6 @@
         </div>
       </div>
       <div class="funding-deepdive-rows" id="fpddRows"></div>
-    </div>
-    <div id="fpddMerchantBlock" style="display:none">
-      <p class="fpdd-merchant-hint" id="fpddMerchantHint"></p>
-      <div class="fin-month-chart-wrap h-scroll-faded fpdd-merchant-chart-wrap">
-        <div class="fin-month-chart-inner" id="fpddMerchantChart"></div>
-      </div>
     </div>
     <div class="funding-deepdive-summary" id="fpddSummaryWrap">
       <div class="funding-deepdive-summary-text" id="fpddSummary"></div>
