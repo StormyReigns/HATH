@@ -8751,10 +8751,10 @@
               <span class="projects-view-title-icon" id="programViewTitleIcon" aria-hidden="true"></span>
               <span class="projects-view-title-text" id="programViewTitle"></span>
             </h2>
-            <div class="program-view-badge" id="programViewBadge">Rhythm</div>
+            <div class="program-view-badge" id="programViewBadge">Habit Tracker</div>
           </div>
           <button type="button" class="projects-favorite-header-btn" id="programViewFavoriteBtn" onclick="programToggleFavoriteFromView(event)" aria-label="Favorite" title="Favorite">☆</button>
-          <button type="button" class="projects-edit-btn" onclick="openProgramEditor()" aria-label="Edit" title="Edit rhythm">Edit</button>
+          <button type="button" class="projects-edit-btn" onclick="openProgramEditor()" aria-label="Edit" title="Edit habit">Edit</button>
           <button type="button" class="projects-edit-btn program-wrap-btn" id="programWrapUpBtn" onclick="programWrapUpRhythm()" style="display:none" title="Move to completed">Wrap up</button>
         </div>
         <div class="program-view-body" id="programViewBody">
@@ -8769,7 +8769,7 @@
           <div class="program-today-block">
             <h3 class="program-section-label">Log today</h3>
             <p class="program-today-date" id="programTodayDate"></p>
-            <p class="program-log-hint" id="programLogHint">Tap a button when you have earned it — it logs for today and adds to your rhythm total.</p>
+            <p class="program-log-hint" id="programLogHint">Tap when you have earned it. Each tap logs for today and counts toward your habit goal.</p>
             <div class="program-activity-buttons" id="programActivityButtons"></div>
           </div>
           <div class="program-log-block">
@@ -9025,7 +9025,7 @@
           <img class="pjw-icon" src="https://stormyreigns.github.io/HATH/Triforce.webp" alt="" width="40" height="40" loading="lazy">
         </div>
         <div class="pjw-top">
-          <h2 class="pjw-heading" id="pewHeading">New rhythm</h2>
+          <h2 class="pjw-heading" id="pewHeading">New habit</h2>
           <p class="pjw-lead" id="pewLead"></p>
         </div>
         <div class="pjw-center-wrap">
@@ -9275,7 +9275,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.46.3';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.46.4';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -10691,6 +10691,8 @@
     if (screenId === 'projectsScreen') {
       document.getElementById('projectsLanding').style.display = 'flex';
       document.getElementById('projectsView').style.display = 'none';
+      const pvOpen = document.getElementById('programView');
+      if (pvOpen) pvOpen.style.display = 'none';
       document.querySelector('.app').classList.remove('in-project-view');
       projectsViewing = null;
       renderProjectsLanding();
@@ -11478,15 +11480,16 @@
   }
 
   /** Shown immediately while the copilot request runs; not added to conversationHistory (API still gets history: []). */
-  var PROJECT_COPILOT_PREAMBLE_TEXT = '[HAPPY] So you want to start a project in Projects!\n\n'
+  var PROJECT_COPILOT_PREAMBLE_TEXT = '[HAPPY] So you want to start something in Projects!\n\n'
     + 'Here are some of the things to consider:\n\n'
     + '• A name or phrase that feels right to call it\n'
-    + '• Whether you imagine a phased journey or more of a steady rhythm\n'
+    + '• Whether you want a phased Project Tracker (map and phases) or a logging Habit Tracker (steady check-ins you name yourself)\n'
     + '• Rough timing—weeks, months, or a softer horizon\n'
     + '• What "done" or good progress would feel like to you';
 
-  var FIN_GOALS_COPILOT_PREAMBLE_TEXT = '[HAPPY] So you want to start a Finances project!\n\n'
+  var FIN_GOALS_COPILOT_PREAMBLE_TEXT = '[HAPPY] So you want to shape a financial goal!\n\n'
     + 'Here are some of the things to consider:\n\n'
+    + '• Whether this fits better as a Project Tracker (phased steps) or a Habit Tracker (ongoing logging)\n'
     + '• What you are aiming for—save more, spend less in a spot, track a bill, or something else\n'
     + '• A timeframe that feels kind, not punishing\n'
     + '• What would actually count as progress—numbers, categories, or a gut check\n'
@@ -12614,6 +12617,20 @@
       d0.setFullYear(d0.getFullYear() + 1);
       end = ymdFromDate(d0);
     }
+    if (!programContinuous && end && !existing) {
+      const yToday = todayYMD();
+      if (end < start) {
+        const dFix = parseYMD(start);
+        dFix.setFullYear(dFix.getFullYear() + 1);
+        end = ymdFromDate(dFix);
+      }
+      if (end < yToday) {
+        const anchor = start > yToday ? start : yToday;
+        const dFix2 = parseYMD(anchor);
+        dFix2.setFullYear(dFix2.getFullYear() + 1);
+        end = ymdFromDate(dFix2);
+      }
+    }
     let activities = [];
     if (Array.isArray(draft.activities)) {
       activities = draft.activities.map(function(a, i) {
@@ -12662,7 +12679,7 @@
     const o = {
       kind: 'program',
       id: id,
-      title: String(draft.title != null ? draft.title : (existing && existing.title) || 'Rhythm').slice(0, 240),
+      title: String(draft.title != null ? draft.title : (existing && existing.title) || 'Habit').slice(0, 240),
       description: draft.description !== undefined
         ? String(draft.description || '').slice(0, 2000)
         : (existing ? String(existing.description || '') : ''),
@@ -12896,12 +12913,12 @@
     const totalSteps = 4;
     if (pewStep === 0) {
       if (prog) prog.textContent = '1 of ' + totalSteps;
-      if (h) h.textContent = 'Name this rhythm';
+      if (h) h.textContent = 'Name this habit';
       if (lead) lead.textContent = 'Whatever you want to keep showing up for—work, home, creative, or care.';
       body.innerHTML =
         '<input type="text" class="pjw-input pjw-input-hero" id="pewTitle" autocomplete="off" placeholder="Reading year, craft season, weekend resets…" value="' + escapeHtml(pewDraft.title || '') + '">' +
         '<label class="project-field-hint" for="pewDesc" style="margin-top:16px">Notes (optional)</label>' +
-        '<textarea class="pjw-input" id="pewDesc" rows="2" placeholder="A line or two if it helps you remember why this rhythm exists." style="min-height:72px;resize:vertical">' + escapeHtml(pewDraft.description || '') + '</textarea>';
+        '<textarea class="pjw-input" id="pewDesc" rows="2" placeholder="A line or two if it helps you remember why this habit matters." style="min-height:72px;resize:vertical">' + escapeHtml(pewDraft.description || '') + '</textarea>';
       if (back) back.textContent = 'Exit';
       if (next) next.textContent = 'Continue';
     } else if (pewStep === 1) {
@@ -13076,7 +13093,7 @@
 
   function programWrapUpRhythm() {
     if (!projectsViewing || !projectIsProgram(projectsViewing)) return;
-    if (!confirm('Wrap up this rhythm? It moves to your completed list. You can delete it later from there.')) return;
+    if (!confirm('Wrap up this habit? It moves to your completed list. You can delete it later from there.')) return;
     const all = getProjects();
     const p = all.find(function(x) { return x.id === projectsViewing.id; });
     if (!p || !projectIsProgram(p)) return;
@@ -13121,7 +13138,7 @@
     const tit = document.getElementById('programViewTitle');
     const ic = document.getElementById('programViewTitleIcon');
     if (ic) ic.textContent = getProjectIcon(fresh);
-    if (tit) tit.textContent = fresh.title || 'Rhythm';
+    if (tit) tit.textContent = fresh.title || 'Habit';
     const fav = document.getElementById('programViewFavoriteBtn');
     if (fav) {
       fav.textContent = fresh.favorite ? '★' : '☆';
@@ -13145,7 +13162,7 @@
     if (per) {
       if (fresh.programContinuous || !(fresh.period && fresh.period.end)) {
         const s = fresh.period && fresh.period.start ? parseYMD(fresh.period.start).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
-        per.textContent = s ? 'Ongoing · started ' + s : 'Ongoing rhythm';
+        per.textContent = s ? 'Ongoing · started ' + s : 'Ongoing habit';
       } else {
         const a = fresh.period.start ? parseYMD(fresh.period.start).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
         const b = fresh.period.end ? parseYMD(fresh.period.end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
@@ -13574,7 +13591,7 @@
       }
       return {
         prog,
-        phaseLabel: 'Rhythm',
+        phaseLabel: 'Habit Tracker',
         currentPhaseName: tot + '/' + tgt + ' ' + programGoalUnitLabel(p),
         desc,
         finishStr,
@@ -13732,7 +13749,7 @@
         <div class="projects-list-card-main">
           <div class="projects-list-card-header">
             <span class="projects-list-card-icon">${getProjectIcon(p)}</span>
-            <span class="projects-list-kind">${projectIsProgram(p) ? 'Rhythm' : 'Journey'}</span>
+            <span class="projects-list-kind">${projectIsProgram(p) ? 'Habit Tracker' : 'Project Tracker'}</span>
             <h3 class="projects-list-card-title">${escapeHtml(p.title)}</h3>
             <button type="button" class="${favClass.trim()}" onclick="event.stopPropagation();projectsToggleFavorite('${p.id}', event)" aria-label="${p.favorite ? 'Remove favorite' : 'Favorite'}" title="Favorite">${favChar}</button>
             <button type="button" class="projects-list-delete-btn" onclick="event.stopPropagation();projectsConfirmDelete('${p.id}')" aria-label="Delete" title="Delete project">🗑</button>
@@ -14927,7 +14944,7 @@
       return;
     }
     projectsEditing = _pe || null;
-    document.getElementById('projectModalTitle').textContent = 'Shape this journey';
+    document.getElementById('projectModalTitle').textContent = 'Shape your Project Tracker';
     const subEl = document.getElementById('projectModalSub');
     if (subEl) {
       subEl.textContent = 'Change the details whenever you like—this is your map, not a deadline.';
@@ -19929,7 +19946,7 @@
       const done = isProjectCompleted(p);
       const pct = Math.round(getProjectProgress(p));
       const det = getProjectLandingDetails(p);
-      const kindTag = projectIsProgram(p) ? '[Rhythm] ' : '[Journey] ';
+      const kindTag = projectIsProgram(p) ? '[Habit Tracker] ' : '[Project Tracker] ';
       let line = '- id ' + p.id + ' — ' + kindTag + (p.title || 'Untitled');
       line += done ? ' (completed)' : ' (' + pct + '% complete)';
       if (!done && det.currentPhaseName) line += ', now: ' + det.currentPhaseName;
@@ -20005,8 +20022,8 @@
       parts.push('Current screen: ' + getBlathersVisibleScreenLabel() + '.');
       if (projectsViewing && projectsViewing.id) {
         const t = projectsViewing.title ? String(projectsViewing.title).slice(0, 100) : 'Untitled';
-        const k = projectIsProgram(projectsViewing) ? 'rhythm' : 'journey';
-        parts.push('Open project detail (' + k + '): id ' + projectsViewing.id + ' — "' + t + '".');
+        const k = projectIsProgram(projectsViewing) ? 'Habit Tracker' : 'Project Tracker';
+        parts.push('Open detail (' + k + '): id ' + projectsViewing.id + ' — "' + t + '".');
       }
       parts.push('Projects saved on this device:\n' + summarizeProjectsForBlathersBlock());
       const sched = summarizeScheduleForBlathers();
