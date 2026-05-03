@@ -9275,7 +9275,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.46.5';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.46.6';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -11250,6 +11250,51 @@
     if (_finViewMode === 'month' && _finPeriodValue) return finFormatMonthLabel(_finPeriodValue);
     if (_finViewMode === 'year' && _finPeriodValue) return 'Year ' + _finPeriodValue;
     return 'Selected period';
+  }
+
+  /** Multi-year digest from all transactions cached in the app (after Finances has loaded). */
+  function buildFinancesDatasetSummaryForBlathers() {
+    try {
+      var norm = _finNormalized;
+      if (!norm || !norm.length) return '';
+      var minT = norm[0].parsed.getTime();
+      var maxT = minT;
+      var byYear = {};
+      var catSpend = {};
+      for (var i = 0; i < norm.length; i++) {
+        var tx = norm[i];
+        var t = tx.parsed.getTime();
+        if (t < minT) minT = t;
+        if (t > maxT) maxT = t;
+        var y = tx.parsed.getFullYear();
+        if (!byYear[y]) byYear[y] = { inc: 0, exp: 0 };
+        if (tx.isIncome) byYear[y].inc += tx.amount;
+        else if (tx.isExpense && !tx.excludeFromSpending) byYear[y].exp += tx.amount;
+        if (tx.isExpense && !tx.excludeFromSpending) {
+          var c = tx.category || 'Uncategorized';
+          catSpend[c] = (catSpend[c] || 0) + tx.amount;
+        }
+      }
+      var lines = [];
+      lines.push('Rows: ' + norm.length + ', date span ' + new Date(minT).toLocaleDateString('en-US') + ' – ' + new Date(maxT).toLocaleDateString('en-US') + '.');
+      var years = Object.keys(byYear).map(Number).sort();
+      for (var yi = 0; yi < years.length; yi++) {
+        var yr = years[yi];
+        var o = byYear[yr];
+        lines.push(yr + ': income ' + finFormatMoney(o.inc) + ', spending ' + finFormatMoney(o.exp) + ', net ' + finFormatMoney(o.inc - o.exp));
+      }
+      var ent = Object.keys(catSpend).map(function(k) { return { name: k, amt: catSpend[k] }; });
+      ent.sort(function(a, b) { return b.amt - a.amt; });
+      lines.push('Top spending categories (all cached history):');
+      for (var z = 0; z < Math.min(12, ent.length); z++) {
+        lines.push('- ' + ent[z].name + ': ' + finFormatMoney(ent[z].amt));
+      }
+      var s = lines.join('\n');
+      if (s.length > 3200) s = s.slice(0, 3197) + '\u2026';
+      return s;
+    } catch (_) {
+      return '';
+    }
   }
 
   function buildFinGoalsSnapshotForBlathers() {
@@ -20095,7 +20140,11 @@
       try {
         const finSnap = buildFinGoalsSnapshotForBlathers();
         if (finSnap) {
-          parts.push('Finances summary (same data as the Finances screen / spreadsheet Finances tab; period follows the selector in Finances if they have opened it, otherwise current month):\n' + finSnap);
+          parts.push('Finances — selected period in the app UI only (not the full history):\n' + finSnap);
+        }
+        const finWide = buildFinancesDatasetSummaryForBlathers();
+        if (finWide) {
+          parts.push('Finances — all transactions currently cached in the app (same source as spreadsheet Finances tab after load):\n' + finWide);
         }
       } catch (_) {}
       const sched = summarizeScheduleForBlathers();
@@ -20112,7 +20161,7 @@
       }
     } catch (_) {}
     let out = parts.join('\n\n');
-    const max = 4500;
+    const max = 7200;
     if (out.length > max) out = out.slice(0, max - 1) + '\u2026';
     return out;
   }
