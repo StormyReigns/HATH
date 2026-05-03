@@ -1731,6 +1731,15 @@
       overflow: hidden;
     }
     html.dark-mode .fin-worm-layer { opacity: 0.055; }
+    /* Flex chain: sub-screen → .fin-root → .fin-scroll-wrap must get a bounded height or overflow-y:auto never activates */
+    #financesScreen .fin-root {
+      flex: 1 1 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+    }
     .fin-worm-svg {
       width: 140%;
       height: 100%;
@@ -1741,12 +1750,17 @@
       50% { transform: translate(-8%, -2%); }
       100% { transform: translate(-18%, 6%); }
     }
+    #financesScreen .fin-header,
+    #financesScreen .fin-period-chips {
+      flex-shrink: 0;
+    }
     #financesScreen .fin-scroll-wrap {
       position: relative;
       z-index: 1;
-      flex: 1;
+      flex: 1 1 0;
       min-height: 0;
       overflow-y: auto;
+      overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
       padding: 8px 18px 88px;
       box-sizing: border-box;
@@ -8979,7 +8993,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.41.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.41.1';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
