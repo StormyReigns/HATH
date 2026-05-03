@@ -9269,7 +9269,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.45.3';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.46.0';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -11469,6 +11469,29 @@
     document.getElementById('finGoalsPromptOverlay').classList.remove('open');
   }
 
+  /** Shown immediately while the copilot request runs; not added to conversationHistory (API still gets history: []). */
+  var PROJECT_COPILOT_PREAMBLE_TEXT = '[HAPPY] So you want to shape something new in Projects—that is lovely.\n\n'
+    + 'What usually helps is having a working title in mind, a sense of how long you might like to give it, '
+    + 'and a loose picture of what would feel like progress—not as homework, just as something you may already be carrying.\n\n'
+    + 'I am gathering my thoughts and will be right with you.';
+
+  var FIN_GOALS_COPILOT_PREAMBLE_TEXT = '[HAPPY] Starting from Finances is a thoughtful way to frame a goal.\n\n'
+    + 'Often it helps to reflect on what you are aiming toward, what kind of timeline feels kind rather than punishing, '
+    + 'and what would actually count as progress for you—numbers if you have them, or instincts if you do not yet.\n\n'
+    + 'Hold tight; I am putting something together for you.';
+
+  function appendProjectCopilotPreambleThenTyping(preambleTaggedText) {
+    var chat = document.getElementById('chatArea');
+    if (!chat) return;
+    addBubble(preambleTaggedText, 'hath');
+    var typing = document.createElement('div');
+    typing.className = 'typing';
+    typing.id = 'typingIndicator';
+    typing.innerHTML = '<span></span><span></span><span></span>';
+    chat.appendChild(typing);
+    requestAnimationFrame(function() { chat.scrollTop = chat.scrollHeight; });
+  }
+
   async function beginFinGoalsCopilotFromFinances() {
     if (isSending || !getApiUser()) return;
     document.getElementById('finGoalsPromptOverlay').classList.remove('open');
@@ -11483,12 +11506,7 @@
     chat.innerHTML = '';
     setBlathers('startled');
     setTimeout(function() { setBlathers('thinking'); }, 600);
-    const typing = document.createElement('div');
-    typing.className = 'typing';
-    typing.id = 'typingIndicator';
-    typing.innerHTML = '<span></span><span></span><span></span>';
-    chat.appendChild(typing);
-    requestAnimationFrame(function() { chat.scrollTop = chat.scrollHeight; });
+    appendProjectCopilotPreambleThenTyping(FIN_GOALS_COPILOT_PREAMBLE_TEXT);
     try {
       const user = localStorage.getItem('shasta_user');
       var cc = buildBlathersClientContext();
@@ -11514,7 +11532,8 @@
       try { data = JSON.parse(text2); } catch (_) {
         throw new Error('Invalid response from server');
       }
-      typing.remove();
+      var typingDone = document.getElementById('typingIndicator');
+      if (typingDone) typingDone.remove();
       const reply = data.reply || friendlyBlathersError(data.error);
       const structured = parseBlathersStructuredReply(reply);
       const displayReply = sanitizeBlathersUserVisibleText(structured.display || reply);
@@ -11522,7 +11541,8 @@
       conversationHistory.push({ role: 'assistant', content: displayReply });
       applyBlathersStructuredFollowUp(turn, structured);
     } catch (err) {
-      typing.remove();
+      var typingErr = document.getElementById('typingIndicator');
+      if (typingErr) typingErr.remove();
       if (err.name !== 'AbortError') {
         addBubble(friendlyBlathersError(err), 'hath');
         window.projectCopilotActive = false;
@@ -14835,12 +14855,7 @@
     chat.innerHTML = '';
     setBlathers('startled');
     setTimeout(function() { setBlathers('thinking'); }, 600);
-    const typing = document.createElement('div');
-    typing.className = 'typing';
-    typing.id = 'typingIndicator';
-    typing.innerHTML = '<span></span><span></span><span></span>';
-    chat.appendChild(typing);
-    requestAnimationFrame(function() { chat.scrollTop = chat.scrollHeight; });
+    appendProjectCopilotPreambleThenTyping(PROJECT_COPILOT_PREAMBLE_TEXT);
     try {
       const user = localStorage.getItem('shasta_user');
       const body = {
@@ -14864,7 +14879,8 @@
       try { data = JSON.parse(text2); } catch (_) {
         throw new Error('Invalid response from server');
       }
-      typing.remove();
+      var typingDone2 = document.getElementById('typingIndicator');
+      if (typingDone2) typingDone2.remove();
       const reply = data.reply || friendlyBlathersError(data.error);
       const structured = parseBlathersStructuredReply(reply);
       const displayReply = sanitizeBlathersUserVisibleText(structured.display || reply);
@@ -14872,7 +14888,8 @@
       conversationHistory.push({ role: 'assistant', content: displayReply });
       applyBlathersStructuredFollowUp(turn, structured);
     } catch (err) {
-      typing.remove();
+      var typingErr2 = document.getElementById('typingIndicator');
+      if (typingErr2) typingErr2.remove();
       if (err.name !== 'AbortError') {
         addBubble(friendlyBlathersError(err), 'hath');
         window.projectCopilotActive = false;
