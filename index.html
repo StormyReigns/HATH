@@ -5458,11 +5458,11 @@
       box-shadow: none;
     }
     .program-act-btn:active { transform: scale(0.985); }
-    .program-act-btn.program-act-celebrate { animation: programActPop 0.55s ease; }
-    @keyframes programActPop {
-      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(192,122,74,0.5); }
-      40% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(192,122,74,0); }
-      100% { transform: scale(1); }
+    .program-act-btn.program-act-celebrate { animation: programActCelebrate 0.72s cubic-bezier(0.34, 1.35, 0.64, 1); }
+    @keyframes programActCelebrate {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(192,122,74,0.5); filter: brightness(1); }
+      38% { transform: scale(1.055); box-shadow: 0 0 0 14px rgba(192,122,74,0); filter: brightness(1.07); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(192,122,74,0); filter: brightness(1); }
     }
     .program-act-title { font-size: 15px; font-weight: 600; color: var(--text); }
     .program-act-pts { font-size: 14px; font-weight: 700; color: var(--accent); letter-spacing: 0.02em; margin-top: 2px; }
@@ -5476,7 +5476,38 @@
     .program-donut-wrap {
       flex-shrink: 0; width: 108px; height: 108px; position: relative;
       overflow: visible; display: flex; align-items: center; justify-content: center;
+      transform-origin: center center;
     }
+    .program-donut-wrap.program-donut-celebrate { animation: programDonutCelebrate 0.68s cubic-bezier(0.34, 1.35, 0.64, 1); }
+    @keyframes programDonutCelebrate {
+      0%, 100% { transform: scale(1); }
+      45% { transform: scale(1.09); }
+    }
+    .program-log-toast {
+      display: none; align-items: center; justify-content: space-between; gap: 14px;
+      position: fixed; left: 12px; right: 12px;
+      bottom: max(14px, calc(env(safe-area-inset-bottom, 0px) + 8px));
+      z-index: 320; max-width: 520px; margin: 0 auto;
+      padding: 12px 14px; border-radius: 14px;
+      background: rgba(32, 28, 24, 0.94); color: #fdf8f1;
+      box-shadow: 0 10px 36px rgba(0,0,0,0.28);
+      border: 1px solid rgba(255,255,255,0.1);
+      animation: programLogToastIn 0.35s ease;
+    }
+    html.dark-mode .program-log-toast {
+      background: rgba(18, 16, 14, 0.96); border-color: rgba(255,255,255,0.08);
+    }
+    @keyframes programLogToastIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .program-log-toast-msg { flex: 1; font-size: 14px; line-height: 1.35; min-width: 0; }
+    .program-log-toast-undo {
+      flex-shrink: 0; font-size: 14px; font-weight: 600; padding: 8px 14px; border-radius: 10px;
+      border: 1px solid rgba(253,248,241,0.35); background: rgba(253,248,241,0.12); color: #fdf8f1;
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+    }
+    .program-log-toast-undo:active { transform: scale(0.97); }
     .program-donut-svg { width: 100%; height: 100%; max-width: 100px; max-height: 100px; transform: rotate(-90deg); overflow: visible; }
     .program-donut-track { fill: none; stroke: rgba(0,0,0,0.08); stroke-width: 5; }
     html.dark-mode .program-donut-track { stroke: rgba(255,255,255,0.08); }
@@ -8809,13 +8840,17 @@
           <div class="program-today-block">
             <h3 class="program-section-label">Log today</h3>
             <p class="program-today-date" id="programTodayDate"></p>
-            <p class="program-log-hint" id="programLogHint">Tap when you have earned it. Each tap logs for today and counts toward your habit goal.</p>
+            <p class="program-log-hint" id="programLogHint">Tap when you have earned it. Each tap logs for today and counts toward your habit goal. If you tap by mistake, use Undo on the confirmation bar.</p>
             <div class="program-activity-buttons" id="programActivityButtons"></div>
           </div>
           <div class="program-log-block">
             <h3 class="program-section-label">Recent</h3>
             <div class="program-log-list" id="programLogList"></div>
           </div>
+        </div>
+        <div id="programLogToast" class="program-log-toast" style="display:none" role="status" aria-live="polite">
+          <span class="program-log-toast-msg" id="programLogToastMsg"></span>
+          <button type="button" class="program-log-toast-undo" onclick="programUndoLastLogTap()">Undo</button>
         </div>
       </div>
     </div>
@@ -9315,7 +9350,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.46.8';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.47.0';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -12908,7 +12943,8 @@
         activityRows: rows.length ? rows : [{ id: genId(), label: '', pts: 5 }],
         goalTarget: p.goal && p.goal.target ? p.goal.target : 400,
         goalUnitLabel: programGoalUnitLabel(p),
-        icon: p.icon || ''
+        icon: p.icon || '',
+        streakRulesRaw: formatStreakRulesForEditor(p.rules)
       };
     } else {
       pewDraft = {
@@ -12920,7 +12956,8 @@
         activityRows: [{ id: genId(), label: '', pts: 5 }, { id: genId(), label: '', pts: 5 }],
         goalTarget: 400,
         goalUnitLabel: 'points',
-        icon: ''
+        icon: '',
+        streakRulesRaw: ''
       };
     }
     const o = document.getElementById('programEasyWizardOverlay');
@@ -13057,13 +13094,17 @@
       if (h) h.textContent = 'Goal and icon';
       if (lead) lead.textContent = 'How much you are aiming for in total, what to call that amount, and an emoji badge if you like.';
       const u = escapeHtml(pewDraft.goalUnitLabel || 'points');
+      const streakRaw = escapeHtml(pewDraft.streakRulesRaw != null ? String(pewDraft.streakRulesRaw) : '');
       body.innerHTML =
         '<label class="project-field-hint" for="pewGoal">Goal total</label>' +
         '<input type="number" class="pjw-input" id="pewGoal" min="50" step="10" value="' + (pewDraft.goalTarget || 400) + '">' +
         '<label class="project-field-hint" for="pewGoalUnit" style="margin-top:16px">Call this unit (e.g. points, dollars, miles)</label>' +
         '<input type="text" class="pjw-input" id="pewGoalUnit" maxlength="24" autocomplete="off" placeholder="points" value="' + u + '">' +
         '<label class="project-field-hint" style="margin-top:16px">Icon (optional)</label>' +
-        '<div class="project-icon-picker pjw-project-icon-picker" id="pewIconHost" role="group"></div>';
+        '<div class="project-icon-picker pjw-project-icon-picker" id="pewIconHost" role="group"></div>' +
+        '<label class="project-field-hint" for="pewStreakRules" style="margin-top:18px">Streak bonuses (optional)</label>' +
+        '<p class="project-field-hint" style="margin:6px 0 8px;font-size:12px;line-height:1.45">One line per rule: activity name (same spelling as above) | days in a row | bonus points | max per week. Example: <span style="white-space:nowrap">Walk | 7 | 25 | 1</span>. Lines starting with # are ignored.</p>' +
+        '<textarea class="pjw-input" id="pewStreakRules" rows="4" maxlength="4000" autocomplete="off" placeholder="Walk | 7 | 25 | 1">' + streakRaw + '</textarea>';
       renderProjectIconPickerInto('pewIconHost', pewDraft.icon || '', 'pewIconPick');
       if (back) back.textContent = 'Back';
       if (next) next.textContent = pewEditingProgramId ? 'Save changes' : 'Save';
@@ -13078,12 +13119,14 @@
     if (pewStep === 3 && pewDraft) {
       const gEl = document.getElementById('pewGoal');
       const guEl = document.getElementById('pewGoalUnit');
+      const stEl = document.getElementById('pewStreakRules');
       if (gEl) pewDraft.goalTarget = Math.max(50, parseInt(gEl.value, 10) || 400);
       if (guEl) {
         let u = String(guEl.value || '').trim();
         pewDraft.goalUnitLabel = (u ? u : 'points').slice(0, 24);
       }
       pewDraft.icon = readPewWizardIcon();
+      if (stEl) pewDraft.streakRulesRaw = String(stEl.value || '');
     }
     pewStep--;
     if (pewStep === 2 && pewDraft && pewDraft.activities && pewDraft.activities.length) {
@@ -13152,6 +13195,18 @@
     if (!unitStr) unitStr = 'points';
     pewDraft.goalUnitLabel = unitStr.slice(0, 24);
     pewDraft.icon = readPewWizardIcon();
+    const streakEl = document.getElementById('pewStreakRules');
+    if (streakEl) pewDraft.streakRulesRaw = String(streakEl.value || '');
+    let rulesBlock = normalizeProgramRules({ streakBonuses: [] });
+    const streakTrim = String(pewDraft.streakRulesRaw || '').trim();
+    if (streakTrim) {
+      const pr = parseStreakRulesInput(pewDraft.streakRulesRaw);
+      if (pr === null) {
+        alert('Streak bonuses could not be parsed. Use one line per rule: Activity name | days in a row | bonus points | max per week. Or paste valid JSON. Lines starting with # are ignored.');
+        return;
+      }
+      rulesBlock = pr;
+    }
     const existingPre = pewEditingProgramId ? getProjects().find(function(x) { return x.id === pewEditingProgramId; }) : null;
     const periodStart = existingPre && existingPre.period && existingPre.period.start
       ? String(existingPre.period.start).slice(0, 10)
@@ -13168,7 +13223,7 @@
       period: { start: periodStart, end: endY },
       goal: { type: 'points', target: pewDraft.goalTarget, unitLabel: pewDraft.goalUnitLabel || 'points' },
       activities: pewDraft.activities,
-      rules: { streakBonuses: [] }
+      rules: rulesBlock
     };
     const merged = normalizeProgramDraft(draft, existing && projectIsProgram(existing) ? existing : null);
     if (existing && projectIsProgram(existing)) merged.log = existing.log || [];
@@ -13278,7 +13333,7 @@
 
     const logHint = document.getElementById('programLogHint');
     if (logHint) {
-      logHint.textContent = 'Tap when you have earned it. Each tap logs for today and adds to your total in ' + unit + '.';
+      logHint.textContent = 'Tap when you have earned it. Each tap logs for today and adds to your total in ' + unit + '. If you tap by mistake, use Undo on the bar that appears.';
     }
 
     const tdy = todayYMD();
@@ -13321,6 +13376,54 @@
     }
   }
 
+  let programLogUndoTimer = 0;
+  let programLogUndoPayload = null;
+
+  function hideProgramLogToast() {
+    const t = document.getElementById('programLogToast');
+    if (t) t.style.display = 'none';
+    if (programLogUndoTimer) {
+      clearTimeout(programLogUndoTimer);
+      programLogUndoTimer = 0;
+    }
+  }
+
+  function showProgramLogToast(htmlMsg) {
+    const t = document.getElementById('programLogToast');
+    const m = document.getElementById('programLogToastMsg');
+    if (m) m.innerHTML = htmlMsg;
+    if (t) t.style.display = 'flex';
+    if (programLogUndoTimer) clearTimeout(programLogUndoTimer);
+    programLogUndoTimer = setTimeout(function() {
+      programLogUndoTimer = 0;
+      programLogUndoPayload = null;
+      hideProgramLogToast();
+    }, 9000);
+  }
+
+  function programUndoLastLogTap() {
+    if (!programLogUndoPayload) return;
+    const payload = programLogUndoPayload;
+    const projectId = payload.projectId;
+    const ids = payload.ids;
+    hideProgramLogToast();
+    programLogUndoPayload = null;
+    const all = getProjects();
+    const p = all.find(function(x) { return x.id === projectId; });
+    if (!p || !projectIsProgram(p) || !Array.isArray(p.log)) return;
+    const idSet = {};
+    ids.forEach(function(id) { idSet[id] = true; });
+    const beforeLen = p.log.length;
+    p.log = p.log.filter(function(e) { return !idSet[e.id]; });
+    if (p.log.length === beforeLen) return;
+    p.modifiedAt = Date.now();
+    saveProjects(all);
+    if (projectsViewing && projectsViewing.id === projectId) projectsViewing = p;
+    renderProgramView();
+    renderProjectsLanding();
+    renderHomeProjectsScroller();
+  }
+
   function programLogTap(projectId, activityId, btnEl) {
     const all = getProjects();
     const p = all.find(function(x) { return x.id === projectId; });
@@ -13330,8 +13433,11 @@
     const today = todayYMD();
     if (!Array.isArray(p.log)) p.log = [];
     const basePts = act.points || 0;
+    const addedIds = [];
+    const baseEntryId = genId();
+    addedIds.push(baseEntryId);
     p.log.push({
-      id: genId(),
+      id: baseEntryId,
       date: today,
       activityId: activityId,
       pointsAwarded: basePts,
@@ -13351,8 +13457,10 @@
       if (streakBonusesThisWeek(p, rule.id) >= (rule.maxPerWeek || 1)) return;
       const bonus = Math.max(0, parseInt(rule.bonusPoints, 10) || 0);
       if (bonus <= 0) return;
+      const bonusEntryId = genId();
+      addedIds.push(bonusEntryId);
       p.log.push({
-        id: genId(),
+        id: bonusEntryId,
         date: today,
         activityId: aid,
         pointsAwarded: 0,
@@ -13367,11 +13475,38 @@
     renderProgramView();
     renderProjectsLanding();
     renderHomeProjectsScroller();
-    try { if (navigator.vibrate) navigator.vibrate(12); } catch (_) {}
-    if (btnEl && btnEl.classList) {
-      btnEl.classList.remove('program-act-celebrate');
-      void btnEl.offsetWidth;
-      btnEl.classList.add('program-act-celebrate');
+    const unit = programGoalUnitLabel(p);
+    let toastHtml = '<strong>+' + basePts + ' ' + escapeHtml(unit) + '</strong> for ' + escapeHtml(act.label || 'this habit') + '.';
+    if (addedIds.length > 1) toastHtml += ' <span style="opacity:0.88">Streak bonus included.</span>';
+    programLogUndoPayload = { projectId: p.id, ids: addedIds };
+    showProgramLogToast(toastHtml);
+    try {
+      if (navigator.vibrate) navigator.vibrate([14, 42, 18]);
+    } catch (_) {}
+    let pulseBtn = btnEl;
+    const actWrap = document.getElementById('programActivityButtons');
+    if (actWrap) {
+      const nodes = actWrap.querySelectorAll('button.program-act-btn');
+      for (var bi = 0; bi < nodes.length; bi++) {
+        if (nodes[bi].getAttribute('data-act-id') === activityId) {
+          pulseBtn = nodes[bi];
+          break;
+        }
+      }
+    }
+    if (pulseBtn && pulseBtn.classList) {
+      pulseBtn.classList.remove('program-act-celebrate');
+      void pulseBtn.offsetWidth;
+      pulseBtn.classList.add('program-act-celebrate');
+    }
+    const dw = document.getElementById('programDonutWrap');
+    if (dw) {
+      dw.classList.remove('program-donut-celebrate');
+      void dw.offsetWidth;
+      dw.classList.add('program-donut-celebrate');
+      setTimeout(function() {
+        dw.classList.remove('program-donut-celebrate');
+      }, 720);
     }
   }
 
@@ -14026,6 +14161,8 @@
   }
 
   function projectsBackToLanding() {
+    programLogUndoPayload = null;
+    hideProgramLogToast();
     projectsViewing = null;
     document.getElementById('projectsLanding').style.display = 'flex';
     document.getElementById('projectsView').style.display = 'none';
