@@ -564,7 +564,8 @@
     #settingsScreen.visible ~ .input-zone,
     #scheduleScreen.visible ~ .input-zone,
     #projectsScreen.visible ~ .input-zone,
-    #recipesScreen.visible ~ .input-zone { display: none !important; }
+    #recipesScreen.visible ~ .input-zone,
+    #financesScreen.visible ~ .input-zone { display: none !important; }
 
     /* Blathers overlaps the input bar, positioned just above submit area */
     .blathers-wrap {
@@ -1712,6 +1713,322 @@
 
     /* Overscroll prevention on scrollable areas */
     .body, .chat-area { overscroll-behavior: none; }
+
+    /* ── FINANCES (Marcus the Worm) ── */
+    #financesScreen {
+      --fin-accent: #7cc47f;
+      position: relative;
+      overflow: hidden;
+      background: var(--bg);
+    }
+    html.dark-mode #financesScreen { --fin-accent: #5da060; }
+    .fin-worm-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.07;
+      overflow: hidden;
+    }
+    html.dark-mode .fin-worm-layer { opacity: 0.055; }
+    .fin-worm-svg {
+      width: 140%;
+      height: 100%;
+      animation: finWormDrift 48s linear infinite;
+    }
+    @keyframes finWormDrift {
+      0% { transform: translate(-18%, 6%); }
+      50% { transform: translate(-8%, -2%); }
+      100% { transform: translate(-18%, 6%); }
+    }
+    #financesScreen .fin-scroll-wrap {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 8px 18px 88px;
+      box-sizing: border-box;
+    }
+    .fin-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .fin-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 600;
+      margin: 0;
+      line-height: 1.15;
+      color: var(--text);
+    }
+    .fin-header-mid { flex: 1; min-width: 0; }
+    .fin-asof { display: block; font-size: 12px; color: var(--muted); font-style: italic; margin-top: 2px; }
+    .fin-refresh-btn {
+      flex-shrink: 0;
+      width: 40px; height: 40px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(124, 196, 127, 0.12);
+      color: var(--fin-accent);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    html.dark-mode .fin-refresh-btn { background: rgba(93, 160, 96, 0.14); }
+    .fin-refresh-btn svg { width: 20px; height: 20px; }
+    .fin-refresh-btn.fin-loading svg { animation: finSpin 0.85s linear infinite; opacity: 0.85; }
+    @keyframes finSpin { to { transform: rotate(360deg); } }
+    .fin-period-chips {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 8px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 6px;
+      margin-bottom: 12px;
+      scrollbar-width: none;
+      position: relative;
+      z-index: 1;
+    }
+    .fin-period-chips::-webkit-scrollbar { display: none; }
+    .fin-chip {
+      flex-shrink: 0;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(124, 196, 127, 0.35);
+      background: transparent;
+      color: var(--text2);
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    html.dark-mode .fin-chip { border-color: rgba(93, 160, 96, 0.35); }
+    .fin-chip.selected {
+      background: rgba(124, 196, 127, 0.22);
+      color: var(--text);
+      border-color: var(--fin-accent);
+    }
+    html.dark-mode .fin-chip.selected { background: rgba(93, 160, 96, 0.2); }
+    .fin-summary-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .fin-card {
+      flex: 1;
+      min-width: 0;
+      border-radius: 12px;
+      padding: 10px 10px 12px;
+      box-sizing: border-box;
+    }
+    .fin-card label {
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .fin-card .fin-card-val { font-size: 17px; font-weight: 600; color: var(--text); }
+    .fin-card.income { background: rgba(124, 196, 127, 0.14); }
+    .fin-card.spent { background: rgba(200, 90, 70, 0.11); }
+    html.dark-mode .fin-card.income { background: rgba(93, 160, 96, 0.12); }
+    html.dark-mode .fin-card.spent { background: rgba(180, 80, 65, 0.11); }
+    .fin-card.net.positive .fin-card-val { color: #3d8f45; }
+    .fin-card.net.negative .fin-card-val { color: #c44a4a; }
+    html.dark-mode .fin-card.net.positive .fin-card-val { color: #6bcf74; }
+    html.dark-mode .fin-card.net.negative .fin-card-val { color: #e07070; }
+    .fin-section-label {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      margin: 14px 0 8px;
+      color: var(--text);
+      position: relative;
+      z-index: 1;
+    }
+    .fin-month-chart-wrap {
+      position: relative;
+      z-index: 1;
+      margin-bottom: 8px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .fin-month-chart-inner {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      min-height: 120px;
+      padding-bottom: 4px;
+    }
+    .fin-month-col {
+      flex: 0 0 auto;
+      width: 44px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .fin-month-bar-stack {
+      height: 88px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 2px;
+    }
+    .fin-month-bar-spend {
+      width: 70%;
+      min-height: 2px;
+      border-radius: 4px 4px 2px 2px;
+      background: var(--fin-accent);
+      opacity: 0.92;
+      transition: opacity 0.15s, box-shadow 0.15s;
+    }
+    .fin-month-col.fin-month-sel .fin-month-bar-spend {
+      box-shadow: 0 0 0 2px var(--text2);
+      opacity: 1;
+    }
+    .fin-month-income-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(61, 143, 69, 0.85);
+      margin-bottom: 2px;
+    }
+    html.dark-mode .fin-month-income-dot { background: rgba(107, 207, 116, 0.9); }
+    .fin-month-label {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 4px;
+      text-align: center;
+    }
+    .fin-category-list, .fin-merchant-list { position: relative; z-index: 1; }
+    .fin-cat-row {
+      margin-bottom: 8px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.03);
+      overflow: hidden;
+    }
+    html.dark-mode .fin-cat-row { background: rgba(255,255,255,0.04); }
+    .fin-cat-row.uncat {
+      color: var(--muted);
+      font-style: italic;
+    }
+    .fin-cat-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .fin-cat-name { font-size: 14px; flex: 1; min-width: 0; }
+    .fin-cat-amt { font-size: 14px; font-weight: 600; flex-shrink: 0; }
+    .fin-cat-bar-track {
+      height: 6px;
+      background: rgba(124, 196, 127, 0.12);
+      margin: 0 12px 10px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    html.dark-mode .fin-cat-bar-track { background: rgba(93, 160, 96, 0.12); }
+    .fin-cat-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: var(--fin-accent);
+      opacity: 0.85;
+      width: 0%;
+      transition: width 0.25s ease;
+    }
+    .fin-cat-detail {
+      padding: 0 12px 10px;
+      font-size: 13px;
+      color: var(--text2);
+      border-top: 1px solid rgba(0,0,0,0.06);
+    }
+    html.dark-mode .fin-cat-detail { border-top-color: rgba(255,255,255,0.06); }
+    .fin-tx-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px dashed rgba(0,0,0,0.06);
+    }
+    html.dark-mode .fin-tx-line { border-bottom-color: rgba(255,255,255,0.06); }
+    .fin-tx-line:last-child { border-bottom: none; }
+    .fin-tx-desc { flex: 1; min-width: 0; }
+    .fin-tx-meta { font-size: 11px; color: var(--muted); }
+    .fin-merchant-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 4px;
+      font-size: 14px;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    html.dark-mode .fin-merchant-row { border-bottom-color: rgba(255,255,255,0.06); }
+    .fin-blathers-row { margin-top: 20px; margin-bottom: 12px; position: relative; z-index: 1; }
+    .fin-goal-btn {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: none;
+      font-size: 15px;
+      font-family: inherit;
+      cursor: pointer;
+      background: linear-gradient(135deg, rgba(124, 196, 127, 0.35), rgba(124, 196, 127, 0.2));
+      color: var(--text);
+      box-shadow: 0 2px 12px rgba(80, 140, 85, 0.15);
+    }
+    html.dark-mode .fin-goal-btn {
+      background: linear-gradient(135deg, rgba(93, 160, 96, 0.35), rgba(93, 160, 96, 0.18));
+      box-shadow: none;
+    }
+    .fin-goal-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .fin-error-box {
+      padding: 14px;
+      border-radius: 10px;
+      background: rgba(200, 80, 70, 0.1);
+      color: var(--text);
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    .fin-empty-quip {
+      font-style: italic;
+      color: var(--text2);
+      padding: 16px 8px;
+      line-height: 1.45;
+      font-size: 14px;
+    }
+    .fin-guest-msg {
+      padding: 24px 16px;
+      text-align: center;
+      color: var(--text2);
+      font-size: 15px;
+    }
+    #finGoalModal .paste-modal { max-width: 340px; }
+    #finGoalModal .fin-goal-summary {
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--text2);
+      margin-bottom: 12px;
+    }
+    #finGoalModal textarea.paste-textarea {
+      min-height: 88px;
+      margin-bottom: 12px;
+    }
 
     /* ── DOCUMENTS SCREEN ── */
     .sub-screen {
@@ -7810,6 +8127,62 @@
       </div>
     </div>
 
+    <!-- Finances screen (Marcus the Worm) -->
+    <div class="sub-screen" id="financesScreen">
+      <div class="fin-worm-layer" aria-hidden="true">
+        <svg class="fin-worm-svg" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+          <path fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+            d="M20 120 Q60 40 120 100 T220 90 T320 110 Q360 130 380 80"
+            style="color: var(--fin-accent)" />
+          <circle cx="30" cy="118" r="7" fill="currentColor" style="color: var(--fin-accent)" opacity="0.6"/>
+          <circle cx="200" cy="95" r="5" fill="currentColor" style="color: var(--fin-accent)" opacity="0.45"/>
+          <circle cx="350" cy="100" r="6" fill="currentColor" style="color: var(--fin-accent)" opacity="0.5"/>
+        </svg>
+      </div>
+      <div id="financesGuestMsg" class="fin-guest-msg" style="display:none">Please sign in to view finances.</div>
+      <div id="financesRoot" class="fin-root" style="display:none">
+        <div class="fin-header">
+          <div class="fin-header-mid">
+            <h2 class="fin-title">Finances</h2>
+            <span class="fin-asof" id="finAsOf">Data as of …</span>
+          </div>
+          <button type="button" class="fin-refresh-btn" id="finRefreshBtn" onclick="financesRefresh()" title="Refresh" aria-label="Refresh data">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          </button>
+        </div>
+        <div class="fin-period-chips" id="finPeriodChips" role="tablist">
+          <button type="button" class="fin-chip" data-fin-period="week" role="tab">This Week</button>
+          <button type="button" class="fin-chip selected" data-fin-period="month" role="tab">This Month</button>
+          <button type="button" class="fin-chip" data-fin-period="last3" role="tab">Last 3 Mo</button>
+          <button type="button" class="fin-chip" data-fin-period="year" role="tab">This Year</button>
+          <button type="button" class="fin-chip" data-fin-period="all" role="tab">All Time</button>
+        </div>
+        <div class="fin-scroll-wrap" id="finScrollWrap">
+          <div id="finErrorEl"></div>
+          <div id="finLoadingEl" class="screen-loading" style="display:none">Loading…</div>
+          <div id="finMainContent" style="display:none">
+            <div class="fin-summary-row">
+              <div class="fin-card income"><label>Income</label><span class="fin-card-val" id="finSumIncome">$0</span></div>
+              <div class="fin-card spent"><label>Spent</label><span class="fin-card-val" id="finSumSpent">$0</span></div>
+              <div class="fin-card net" id="finCardNet"><label>Net</label><span class="fin-card-val" id="finSumNet">$0</span></div>
+            </div>
+            <div id="finPeriodEmpty" class="fin-empty-quip" style="display:none"></div>
+            <div id="finChartsBlock">
+              <div class="fin-section-label">Spending by Month</div>
+              <div class="fin-month-chart-wrap"><div class="fin-month-chart-inner" id="finMonthChart"></div></div>
+              <div class="fin-section-label">By Category</div>
+              <div class="fin-category-list" id="finCategoryList"></div>
+              <div class="fin-section-label">Top Merchants</div>
+              <div class="fin-merchant-list" id="finMerchantList"></div>
+            </div>
+            <div class="fin-blathers-row">
+              <button type="button" class="fin-goal-btn" id="finGoalBtn" onclick="openFinGoalModal()">Set a Financial Goal with Blathers 🦉</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Takeout manage modal -->
     <div class="paste-modal-overlay" id="takeoutManageModal" onclick="closeTakeoutManage(event)">
       <div class="paste-modal takeout-manage-modal" id="takeoutManageModalContent" onclick="event.stopPropagation()">
@@ -8284,7 +8657,7 @@
       <img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/FFXIVIcon.png" alt="" loading="lazy">
       Documents
     </div>
-    <div class="drawer-item" data-guest-lock onclick="drawerNavTap(this)">
+    <div class="drawer-item" data-guest-lock onclick="drawerNavTap(this, ()=>{ closeDrawer(); showFinancesScreen(); })">
       <svg class="drawer-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
       Finances
     </div>
@@ -8321,6 +8694,18 @@
 </div>
 
 <!-- New project: project vs habit vs Blathers -->
+<div class="paste-modal-overlay" id="finGoalModal" onclick="closeFinGoalModal(event)">
+  <div class="paste-modal" onclick="event.stopPropagation()">
+    <h3>Financial goal</h3>
+    <p class="fin-goal-summary" id="finGoalSummary"></p>
+    <textarea class="paste-textarea" id="finGoalTextarea" placeholder="Ask Blathers…"></textarea>
+    <div class="paste-modal-actions">
+      <button type="button" class="paste-cancel-btn" onclick="closeFinGoalModal()">Cancel</button>
+      <button type="button" class="paste-submit-btn" id="finGoalAskBtn" onclick="submitFinGoalAsk()">Ask Blathers</button>
+    </div>
+  </div>
+</div>
+
 <div class="paste-modal-overlay" id="projectCreateChoiceOverlay" onclick="closeProjectCreateChoice(event)">
   <div class="paste-modal project-create-choice-modal" onclick="event.stopPropagation()">
     <h3>Start something new</h3>
@@ -8594,7 +8979,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.40.4';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.41.0';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -9660,6 +10045,7 @@
     if (document.getElementById('scheduleScreen').classList.contains('visible')) return 'schedule';
     if (document.getElementById('civicsScreen').classList.contains('visible')) return 'civics';
     if (document.getElementById('recipesScreen').classList.contains('visible')) return 'recipes';
+    if (document.getElementById('financesScreen').classList.contains('visible')) return 'finances';
     return 'home';
   }
 
@@ -9670,7 +10056,7 @@
     if (key === 'recipes') return showRecipesScreen();
     if (key === 'schedule') return showScheduleScreen();
     if (key === 'civics') return showCivicsScreen();
-    if (key === 'finances') return;
+    if (key === 'finances') return showFinancesScreen();
   }
 
   /** Center X in #bottomDock scroll content coords (offsetLeft breaks when a fixed ancestor is offsetParent). */
@@ -9950,6 +10336,7 @@
     document.getElementById('scheduleScreen').classList.remove('visible');
     document.getElementById('civicsScreen').classList.remove('visible');
     document.getElementById('recipesScreen').classList.remove('visible');
+    document.getElementById('financesScreen').classList.remove('visible');
     document.getElementById('settingsScreen').classList.remove('visible');
     document.getElementById('recipeDetail').classList.remove('open');
     const topbar = document.querySelector('.topbar');
@@ -9983,6 +10370,7 @@
     document.getElementById('civicsScreen').classList.remove('visible');
     document.getElementById('settingsScreen').classList.remove('visible');
     document.getElementById('recipesScreen').classList.remove('visible');
+    document.getElementById('financesScreen').classList.remove('visible');
     document.getElementById(screenId).classList.add('visible');
     const topbar = document.querySelector('.topbar');
     if (topbar) topbar.classList.add('collapsed');
@@ -10313,6 +10701,673 @@
     renderDocsBreadcrumb();
     loadFolderContents(DOCS_FOLDER_ID);
     syncBottomDockState();
+  }
+
+  // ── FINANCES (Marcus the Worm) ────────────────────────────────
+  var _finTransactions = null;
+  var _finMeta = null;
+  var _finNormalized = null;
+  var _finLoading = false;
+  var _finFetchError = null;
+  var _finPeriodKey = 'month';
+  var _finSelectedMonthYm = null;
+  var _finExpandedCat = null;
+  var _finGoalSending = false;
+
+  var FIN_ACCOUNT_LABELS = { '6618': 'Primary', '8406': 'Matt', '8414': 'Jess' };
+  var FIN_EXCLUDE_SPENDING = { 'Income': 1, 'Internal Transfers': 1, 'Credit Card Payment': 1, 'Cash & Checks': 1 };
+
+  function hideFinancesScreen() {
+    document.getElementById('financesScreen').classList.remove('visible');
+    syncBottomDockState();
+    updateScreenAddFabs();
+  }
+
+  function finParseTransactionDate(s) {
+    if (s == null || s === '') return null;
+    var str = String(s).trim();
+    var mdy = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (mdy) {
+      var dt = new Date(parseInt(mdy[3], 10), parseInt(mdy[1], 10) - 1, parseInt(mdy[2], 10));
+      return isNaN(dt.getTime()) ? null : dt;
+    }
+    var d = new Date(str);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function finNormalizeTransactions(rows) {
+    var out = [];
+    for (var i = 0; i < rows.length; i++) {
+      var t = rows[i];
+      var amt = Number(t.amount);
+      if (isNaN(amt)) amt = 0;
+      var cat = String(t.category != null ? t.category : '').trim();
+      var isUncat = !cat || /^uncategorized$/i.test(cat);
+      var excl = !!FIN_EXCLUDE_SPENDING[cat];
+      var parsed = finParseTransactionDate(t.date);
+      if (!parsed) continue;
+      out.push({
+        dateStr: t.date,
+        account: String(t.account != null ? t.account : '').trim(),
+        accountLabel: FIN_ACCOUNT_LABELS[t.account] || String(t.account || ''),
+        amount: Math.abs(amt),
+        rawAmount: amt,
+        isIncome: amt < 0,
+        isExpense: amt > 0,
+        category: cat || 'Uncategorized',
+        description: String(t.description != null ? t.description : ''),
+        isUncat: isUncat,
+        excludeFromSpending: excl,
+        parsed: parsed
+      });
+    }
+    return out;
+  }
+
+  function finWeekBoundsMonSun(now) {
+    var d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var day = d.getDay();
+    var diff = day === 0 ? -6 : 1 - day;
+    var mon = new Date(d);
+    mon.setDate(d.getDate() + diff);
+    mon.setHours(0, 0, 0, 0);
+    var sun = new Date(mon);
+    sun.setDate(mon.getDate() + 6);
+    sun.setHours(23, 59, 59, 999);
+    return { start: mon, end: sun };
+  }
+
+  function finThisMonthBounds(now) {
+    var start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+    var end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    return { start: start, end: end };
+  }
+
+  function finLast3FullMonthsBounds(now) {
+    var y = now.getFullYear();
+    var m = now.getMonth();
+    var end = new Date(y, m, 0, 23, 59, 59, 999);
+    var start = new Date(y, m - 3, 1, 0, 0, 0, 0);
+    return { start: start, end: end };
+  }
+
+  function finYearToDateBounds(now) {
+    var start = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0);
+    var end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    return { start: start, end: end };
+  }
+
+  function finAllTimeBounds() {
+    return { start: new Date(1970, 0, 1), end: new Date(2100, 11, 31, 23, 59, 59, 999) };
+  }
+
+  function finGetPeriodBounds(key, now) {
+    if (key === 'week') return finWeekBoundsMonSun(now);
+    if (key === 'month') return finThisMonthBounds(now);
+    if (key === 'last3') return finLast3FullMonthsBounds(now);
+    if (key === 'year') return finYearToDateBounds(now);
+    return finAllTimeBounds();
+  }
+
+  function finPeriodLabel(key) {
+    if (key === 'week') return 'This week';
+    if (key === 'month') return 'This month';
+    if (key === 'last3') return 'Last 3 full months';
+    if (key === 'year') return 'Year to date';
+    return 'All time';
+  }
+
+  function finPad2(n) {
+    return n < 10 ? '0' + n : String(n);
+  }
+
+  function finYm(d) {
+    return d.getFullYear() + '-' + finPad2(d.getMonth() + 1);
+  }
+
+  function finTxInRange(tx, start, end) {
+    var d = tx.parsed;
+    return d >= start && d <= end;
+  }
+
+  function finFilterTxsForMonth(txs, ym) {
+    if (!ym) return txs;
+    return txs.filter(function(tx) {
+      return finYm(tx.parsed) === ym;
+    });
+  }
+
+  function finFormatMoney(n) {
+    var x = Number(n);
+    if (isNaN(x)) x = 0;
+    var neg = x < 0;
+    x = Math.abs(x);
+    var s = x.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    return (neg ? '-$' : '$') + s;
+  }
+
+  function finSyncPeriodFromDom() {
+    var sel = document.querySelector('#finPeriodChips .fin-chip.selected');
+    _finPeriodKey = sel && sel.getAttribute('data-fin-period') ? sel.getAttribute('data-fin-period') : 'month';
+  }
+
+  function showFinancesScreen() {
+    showSubScreen('financesScreen');
+    var user = localStorage.getItem('shasta_user');
+    var guestEl = document.getElementById('financesGuestMsg');
+    var rootEl = document.getElementById('financesRoot');
+    if (!user) {
+      if (guestEl) guestEl.style.display = '';
+      if (rootEl) rootEl.style.display = 'none';
+      syncBottomDockState();
+      return;
+    }
+    if (guestEl) guestEl.style.display = 'none';
+    if (rootEl) rootEl.style.display = '';
+    finInitPeriodChips();
+    finEnsureLoaded(false);
+  }
+
+  function finInitPeriodChips() {
+    var wrap = document.getElementById('finPeriodChips');
+    if (!wrap || wrap.dataset.bound === '1') return;
+    wrap.dataset.bound = '1';
+    wrap.querySelectorAll('.fin-chip').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        wrap.querySelectorAll('.fin-chip').forEach(function(b) { b.classList.toggle('selected', b === btn); });
+        _finPeriodKey = btn.getAttribute('data-fin-period') || 'month';
+        _finSelectedMonthYm = null;
+        _finExpandedCat = null;
+        renderFinancesUI();
+      });
+    });
+  }
+
+  function finEnsureLoaded(force) {
+    if (_finLoading) return;
+    if (_finTransactions != null && !force) {
+      renderFinancesUI();
+      return;
+    }
+    financesLoad(force);
+  }
+
+  async function financesLoad(force) {
+    var refreshBtn = document.getElementById('finRefreshBtn');
+    _finLoading = true;
+    _finFetchError = null;
+    var loadEl = document.getElementById('finLoadingEl');
+    var mainEl = document.getElementById('finMainContent');
+    if (loadEl) loadEl.style.display = '';
+    if (mainEl) mainEl.style.display = 'none';
+    if (refreshBtn) refreshBtn.classList.add('fin-loading');
+    try {
+      var url = apiUrlWithUser(API_URL, '&action=getFinances');
+      var res = await fetch(url, { redirect: 'follow' });
+      var raw = await res.text();
+      var data;
+      try { data = JSON.parse(raw); } catch (_) { throw new Error('Could not read finances data'); }
+      if (data.error) throw new Error(String(data.error));
+      _finTransactions = data.transactions || [];
+      _finMeta = data.meta || {};
+      _finNormalized = finNormalizeTransactions(_finTransactions);
+    } catch (err) {
+      _finFetchError = err.message || String(err);
+      _finTransactions = null;
+      _finNormalized = null;
+    }
+    _finLoading = false;
+    if (refreshBtn) refreshBtn.classList.remove('fin-loading');
+    if (loadEl) loadEl.style.display = 'none';
+    if (mainEl) mainEl.style.display = '';
+    renderFinancesUI();
+    syncBottomDockState();
+  }
+
+  async function financesRefresh() {
+    _finTransactions = null;
+    _finMeta = null;
+    _finNormalized = null;
+    await financesLoad(true);
+  }
+
+  function renderFinancesUI() {
+    finSyncPeriodFromDom();
+    var asof = document.getElementById('finAsOf');
+    if (asof && _finMeta && _finMeta.asOf) asof.textContent = 'Data as of ' + _finMeta.asOf;
+
+    var errEl = document.getElementById('finErrorEl');
+    var mainEl = document.getElementById('finMainContent');
+    var chartsBlock = document.getElementById('finChartsBlock');
+    var emptyEl = document.getElementById('finPeriodEmpty');
+    var goalBtn = document.getElementById('finGoalBtn');
+
+    if (_finFetchError) {
+      if (errEl) {
+        errEl.innerHTML = '<div class="fin-error-box">' + escapeHtml(_finFetchError) +
+          ' <button type="button" class="fin-chip" onclick="financesRefresh()">Retry</button></div>';
+      }
+      if (mainEl) mainEl.style.display = '';
+      return;
+    }
+    if (errEl) errEl.innerHTML = '';
+
+    if (!_finNormalized) {
+      if (mainEl) mainEl.style.display = 'none';
+      return;
+    }
+
+    var now = new Date();
+    var b = finGetPeriodBounds(_finPeriodKey, now);
+    var txs = _finNormalized.filter(function(tx) { return finTxInRange(tx, b.start, b.end); });
+
+    if (_finSelectedMonthYm) {
+      txs = finFilterTxsForMonth(txs, _finSelectedMonthYm);
+    }
+
+    var incomeTotal = 0;
+    var spentTotal = 0;
+    for (var i = 0; i < txs.length; i++) {
+      var tx = txs[i];
+      if (tx.isIncome) incomeTotal += tx.amount;
+      else if (tx.isExpense && !tx.excludeFromSpending) spentTotal += tx.amount;
+    }
+    var net = incomeTotal - spentTotal;
+
+    var incEl = document.getElementById('finSumIncome');
+    var spEl = document.getElementById('finSumSpent');
+    var netEl = document.getElementById('finSumNet');
+    var netCard = document.getElementById('finCardNet');
+    if (incEl) incEl.textContent = finFormatMoney(incomeTotal);
+    if (spEl) spEl.textContent = finFormatMoney(spentTotal);
+    if (netEl) netEl.textContent = (net >= 0 ? '+' : '') + finFormatMoney(net);
+    if (netCard) {
+      netCard.classList.toggle('positive', net >= 0);
+      netCard.classList.toggle('negative', net < 0);
+    }
+
+    var periodEmpty = txs.length === 0;
+    if (emptyEl) {
+      emptyEl.style.display = periodEmpty ? '' : 'none';
+      emptyEl.textContent = 'Ah — no transactions to speak of in this period. How refreshing. Or perhaps the data simply hasn\'t arrived yet.';
+    }
+    if (chartsBlock) chartsBlock.style.display = periodEmpty ? 'none' : '';
+
+    if (goalBtn) goalBtn.disabled = !getApiUser();
+
+    if (periodEmpty) return;
+
+    finRenderMonthChart(_finNormalized, b);
+    finRenderCategories(txs);
+    finRenderMerchants(txs);
+
+    setTimeout(function() {
+      try {
+        var list = document.getElementById('finCategoryList');
+        if (list && _finSelectedMonthYm) list.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      } catch (_) {}
+    }, 80);
+  }
+
+  function finRenderMonthChart(allNorm, periodBounds) {
+    var chart = document.getElementById('finMonthChart');
+    if (!chart) return;
+    chart.innerHTML = '';
+
+    var months = [];
+    var cur = new Date(periodBounds.start.getFullYear(), periodBounds.start.getMonth(), 1);
+    var endM = new Date(periodBounds.end.getFullYear(), periodBounds.end.getMonth(), 1);
+    while (cur <= endM) {
+      months.push(new Date(cur));
+      cur.setMonth(cur.getMonth() + 1);
+    }
+    if (months.length === 0) months.push(new Date(periodBounds.start.getFullYear(), periodBounds.start.getMonth(), 1));
+
+    var spendByYm = {};
+    var incomeByYm = {};
+    for (var i = 0; i < allNorm.length; i++) {
+      var tx = allNorm[i];
+      if (!finTxInRange(tx, periodBounds.start, periodBounds.end)) continue;
+      var ym = finYm(tx.parsed);
+      if (tx.isIncome) {
+        incomeByYm[ym] = (incomeByYm[ym] || 0) + tx.amount;
+      } else if (tx.isExpense && !tx.excludeFromSpending) {
+        spendByYm[ym] = (spendByYm[ym] || 0) + tx.amount;
+      }
+    }
+
+    var maxSpend = 0;
+    var maxInc = 0;
+    months.forEach(function(m) {
+      var ym = finYm(m);
+      var sp = spendByYm[ym] || 0;
+      var inc = incomeByYm[ym] || 0;
+      if (sp > maxSpend) maxSpend = sp;
+      if (inc > maxInc) maxInc = inc;
+    });
+    if (maxSpend <= 0) maxSpend = 1;
+    if (maxInc <= 0) maxInc = 1;
+
+    var maxBarPx = 72;
+
+    months.forEach(function(m) {
+      var ym = finYm(m);
+      var sp = spendByYm[ym] || 0;
+      var inc = incomeByYm[ym] || 0;
+      var hSpend = Math.round((sp / maxSpend) * maxBarPx);
+      var hIncDot = Math.min(22, Math.round((inc / maxInc) * 18));
+
+      var col = document.createElement('div');
+      col.className = 'fin-month-col' + (_finSelectedMonthYm === ym ? ' fin-month-sel' : '');
+      col.dataset.monthYm = ym;
+      col.onclick = function() {
+        if (_finSelectedMonthYm === ym) _finSelectedMonthYm = null;
+        else _finSelectedMonthYm = ym;
+        _finExpandedCat = null;
+        renderFinancesUI();
+      };
+
+      var stack = document.createElement('div');
+      stack.className = 'fin-month-bar-stack';
+
+      var incDot = document.createElement('div');
+      incDot.className = 'fin-month-income-dot';
+      incDot.style.height = hIncDot + 'px';
+      incDot.style.width = Math.max(4, Math.min(10, 4 + Math.round(hIncDot / 3))) + 'px';
+      incDot.style.borderRadius = '4px';
+      if (inc <= 0) incDot.style.visibility = 'hidden';
+
+      var bar = document.createElement('div');
+      bar.className = 'fin-month-bar-spend';
+      bar.style.height = Math.max(2, hSpend) + 'px';
+
+      stack.appendChild(incDot);
+      stack.appendChild(bar);
+
+      var lab = document.createElement('div');
+      lab.className = 'fin-month-label';
+      lab.textContent = m.toLocaleString('en-US', { month: 'short' });
+
+      col.appendChild(stack);
+      col.appendChild(lab);
+      chart.appendChild(col);
+    });
+  }
+
+  function finRenderCategories(txs) {
+    var list = document.getElementById('finCategoryList');
+    if (!list) return;
+    list.innerHTML = '';
+
+    var byCat = {};
+    for (var i = 0; i < txs.length; i++) {
+      var tx = txs[i];
+      if (!tx.isExpense || tx.excludeFromSpending) continue;
+      var k = tx.category || 'Uncategorized';
+      if (!byCat[k]) byCat[k] = { total: 0, txs: [], uncat: !!tx.isUncat };
+      byCat[k].total += tx.amount;
+      byCat[k].txs.push(tx);
+      byCat[k].uncat = byCat[k].uncat || !!tx.isUncat;
+    }
+    var entries = Object.keys(byCat).map(function(k) {
+      return { name: k, total: byCat[k].total, txs: byCat[k].txs, uncat: byCat[k].uncat };
+    });
+    entries.sort(function(a, b) { return b.total - a.total; });
+
+    var maxTot = entries.length ? entries[0].total : 1;
+
+    entries.forEach(function(ent) {
+      var row = document.createElement('div');
+      row.className = 'fin-cat-row' + (ent.uncat ? ' uncat' : '');
+
+      var head = document.createElement('div');
+      head.className = 'fin-cat-head';
+      head.onclick = function() {
+        _finExpandedCat = _finExpandedCat === ent.name ? null : ent.name;
+        finRenderCategories(txs);
+      };
+
+      var nm = document.createElement('div');
+      nm.className = 'fin-cat-name';
+      nm.textContent = ent.name;
+
+      var am = document.createElement('div');
+      am.className = 'fin-cat-amt';
+      am.textContent = finFormatMoney(ent.total);
+
+      head.appendChild(nm);
+      head.appendChild(am);
+
+      var track = document.createElement('div');
+      track.className = 'fin-cat-bar-track';
+      var fill = document.createElement('div');
+      fill.className = 'fin-cat-bar-fill';
+      fill.style.width = Math.min(100, Math.round(ent.total / maxTot * 100)) + '%';
+      track.appendChild(fill);
+
+      row.appendChild(head);
+      row.appendChild(track);
+
+      if (_finExpandedCat === ent.name) {
+        ent.txs.sort(function(a, b) { return b.parsed - a.parsed; });
+        var det = document.createElement('div');
+        det.className = 'fin-cat-detail';
+        ent.txs.forEach(function(tx) {
+          var line = document.createElement('div');
+          line.className = 'fin-tx-line';
+          var left = document.createElement('div');
+          left.className = 'fin-tx-desc';
+          left.textContent = tx.description || '(no description)';
+          var right = document.createElement('div');
+          right.innerHTML = '<div>' + finFormatMoney(tx.amount) + '</div><div class="fin-tx-meta">' +
+            escapeHtml(tx.dateStr) + ' · ' + escapeHtml(tx.accountLabel || tx.account) + '</div>';
+          line.appendChild(left);
+          line.appendChild(right);
+          det.appendChild(line);
+        });
+        row.appendChild(det);
+      }
+
+      list.appendChild(row);
+    });
+  }
+
+  function finRenderMerchants(txs) {
+    var list = document.getElementById('finMerchantList');
+    if (!list) return;
+    list.innerHTML = '';
+
+    var byKey = {};
+    for (var i = 0; i < txs.length; i++) {
+      var tx = txs[i];
+      if (!tx.isExpense || tx.excludeFromSpending) continue;
+      var raw = String(tx.description || '').trim();
+      var key = raw.toLowerCase();
+      if (!key) key = '(blank)';
+      if (!byKey[key]) byKey[key] = { total: 0, display: raw || '(blank)' };
+      else if (raw && byKey[key].display.length < raw.length) byKey[key].display = raw;
+      byKey[key].total += tx.amount;
+    }
+    var arr = Object.keys(byKey).map(function(k) {
+      return { display: byKey[k].display, total: byKey[k].total };
+    });
+    arr.sort(function(a, b) { return b.total - a.total; });
+    arr.slice(0, 8).forEach(function(m) {
+      var row = document.createElement('div');
+      row.className = 'fin-merchant-row';
+      row.innerHTML = '<span>' + escapeHtml(m.display) + '</span><span>' + escapeHtml(finFormatMoney(m.total)) + '</span>';
+      list.appendChild(row);
+    });
+  }
+
+  function finBuildGoalSummaryJson() {
+    finSyncPeriodFromDom();
+    var now = new Date();
+    var b = finGetPeriodBounds(_finPeriodKey, now);
+    var txs = (_finNormalized || []).filter(function(tx) { return finTxInRange(tx, b.start, b.end); });
+    if (_finSelectedMonthYm) txs = finFilterTxsForMonth(txs, _finSelectedMonthYm);
+
+    var incomeTotal = 0;
+    var spentTotal = 0;
+    var catTotals = {};
+    for (var i = 0; i < txs.length; i++) {
+      var tx = txs[i];
+      if (tx.isIncome) incomeTotal += tx.amount;
+      else if (tx.isExpense && !tx.excludeFromSpending) {
+        spentTotal += tx.amount;
+        var ck = tx.category || 'Uncategorized';
+        catTotals[ck] = (catTotals[ck] || 0) + tx.amount;
+      }
+    }
+
+    var periodNote = finPeriodLabel(_finPeriodKey);
+    if (_finSelectedMonthYm) periodNote += ' (' + _finSelectedMonthYm + ')';
+
+    return {
+      periodLabel: periodNote,
+      incomeUsd: Math.round(incomeTotal * 100) / 100,
+      spentUsd: Math.round(spentTotal * 100) / 100,
+      netUsd: Math.round((incomeTotal - spentTotal) * 100) / 100,
+      categoryTotalsUsd: catTotals,
+      dataAsOf: _finMeta && _finMeta.asOf ? _finMeta.asOf : ''
+    };
+  }
+
+  function openFinGoalModal() {
+    if (!getApiUser()) return;
+    var sumEl = document.getElementById('finGoalSummary');
+    var ta = document.getElementById('finGoalTextarea');
+    var meta = finBuildGoalSummaryJson();
+    var topCats = Object.keys(meta.categoryTotalsUsd).sort(function(a, b) {
+      return meta.categoryTotalsUsd[b] - meta.categoryTotalsUsd[a];
+    }).slice(0, 5);
+
+    var s1 = 'For ' + meta.periodLabel.toLowerCase() + ', tracked spending is about $' +
+      Math.round(meta.spentUsd).toLocaleString('en-US') + ' and income about $' +
+      Math.round(meta.incomeUsd).toLocaleString('en-US') + ', for a net of about $' +
+      Math.round(meta.netUsd).toLocaleString('en-US') + '.';
+    var s2 = topCats.length
+      ? 'The largest expense categories are ' + topCats.map(function(c) {
+          return c + ' (~$' + Math.round(meta.categoryTotalsUsd[c]).toLocaleString('en-US') + ')';
+        }).join(', ') + '.'
+      : 'Category detail is thin for this slice — Blathers can still help you shape a goal.';
+
+    if (sumEl) sumEl.textContent = s1 + ' ' + s2;
+    if (ta) ta.value = 'Based on my spending, help me set a financial goal for next month.';
+    document.getElementById('finGoalModal').classList.add('open');
+  }
+
+  function closeFinGoalModal(ev) {
+    if (ev && ev.target !== document.getElementById('finGoalModal')) return;
+    document.getElementById('finGoalModal').classList.remove('open');
+  }
+
+  function exitFinancesToHomeChat() {
+    closeDrawer();
+    stopScheduleFloatingRotation();
+    stopDocsBgCarousel();
+    document.getElementById('documentsScreen').classList.remove('visible');
+    document.getElementById('projectsScreen').classList.remove('visible');
+    document.getElementById('scheduleScreen').classList.remove('visible');
+    document.getElementById('civicsScreen').classList.remove('visible');
+    document.getElementById('settingsScreen').classList.remove('visible');
+    document.getElementById('recipesScreen').classList.remove('visible');
+    document.getElementById('financesScreen').classList.remove('visible');
+    document.getElementById('recipeDetail').classList.remove('open');
+    var pl = document.getElementById('projectsLanding');
+    var pv = document.getElementById('projectsView');
+    if (pl) pl.style.display = 'flex';
+    if (pv) pv.style.display = 'none';
+    var pvCopilot = document.getElementById('programView');
+    if (pvCopilot) pvCopilot.style.display = 'none';
+    document.querySelector('.app').classList.remove('in-project-view');
+    projectsViewing = null;
+    var topbar = document.querySelector('.topbar');
+    if (topbar) topbar.classList.remove('collapsed');
+    document.getElementById('hintArea').style.display = 'none';
+    document.getElementById('chatArea').style.display = 'flex';
+    document.getElementById('chatArea').style.flexDirection = 'column';
+    document.querySelector('.body').classList.add('chat-mode');
+    document.getElementById('inputZone').style.display = 'flex';
+    var wb = document.getElementById('wellbeing');
+    if (wb) wb.style.display = getApiUser() ? '' : 'none';
+    updateScreenAddFabs();
+    updateBottomBarHome();
+    updateBlatherBookVisibility();
+    syncBottomDockState();
+  }
+
+  async function submitFinGoalAsk() {
+    if (_finGoalSending || isSending) return;
+    var ta = document.getElementById('finGoalTextarea');
+    var prompt = ta && ta.value ? ta.value.trim() : '';
+    if (!prompt) return;
+
+    _finGoalSending = true;
+    isSending = true;
+    var askBtn = document.getElementById('finGoalAskBtn');
+    if (askBtn) askBtn.disabled = true;
+
+    var summary = finBuildGoalSummaryJson();
+    var ctx = '[SHASTAPP_FINANCES_CONTEXT]\n```json\n' + JSON.stringify(summary) + '\n```\n\n';
+    var fullMessage = ctx + prompt;
+
+    closeFinGoalModal();
+    exitFinancesToHomeChat();
+
+    setBlathers('startled');
+    setTimeout(function() { setBlathers('thinking'); }, 600);
+
+    addBubble(prompt, 'user');
+    conversationHistory.push({ role: 'user', content: prompt });
+
+    var typing = document.createElement('div');
+    typing.className = 'typing';
+    typing.id = 'typingIndicator';
+    typing.innerHTML = '<span></span><span></span><span></span>';
+    document.getElementById('chatArea').appendChild(typing);
+    requestAnimationFrame(function() {
+      var chat = document.getElementById('chatArea');
+      if (chat) chat.scrollTop = chat.scrollHeight;
+    });
+
+    try {
+      var user = localStorage.getItem('shasta_user');
+      var history = conversationHistory.slice(-20);
+      var body = {
+        message: fullMessage,
+        user: getApiUser(),
+        history: history,
+        nickname: getDisplayName(),
+        dumbMode: !!(user && localStorage.getItem('shasta_dumb_' + user) === 'true'),
+        clientContext: buildBlathersClientContext()
+      };
+      var res = await fetch(AI_URL, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(body)
+      });
+      var text2 = await res.text();
+      var data;
+      try { data = JSON.parse(text2); } catch (_) { throw new Error('Invalid response from server'); }
+      typing.remove();
+      var reply = data.reply || friendlyBlathersError(data.error);
+      var structured = parseBlathersStructuredReply(reply);
+      var displayReply = sanitizeBlathersUserVisibleText(structured.display || reply);
+      var turn = addBubble(displayReply, 'hath');
+      conversationHistory.push({ role: 'assistant', content: displayReply });
+      applyBlathersStructuredFollowUp(turn, structured);
+    } catch (err) {
+      typing.remove();
+      var errTxt = friendlyBlathersError(err);
+      addBubble(errTxt, 'hath');
+      conversationHistory.push({ role: 'assistant', content: errTxt });
+    }
+
+    if (askBtn) askBtn.disabled = false;
+    _finGoalSending = false;
+    isSending = false;
   }
 
   // ── PROJECTS ─────────────────────────────────────────────────
@@ -12202,6 +13257,7 @@
     document.getElementById('civicsScreen').classList.remove('visible');
     document.getElementById('settingsScreen').classList.remove('visible');
     document.getElementById('recipesScreen').classList.remove('visible');
+    document.getElementById('financesScreen').classList.remove('visible');
     document.getElementById('recipeDetail').classList.remove('open');
     document.getElementById('projectsLanding').style.display = 'flex';
     document.getElementById('projectsView').style.display = 'none';
@@ -12351,6 +13407,10 @@
       }
       if (n === 'civics') {
         showCivicsScreen();
+        return;
+      }
+      if (n === 'finances') {
+        showFinancesScreen();
         return;
       }
       if (n === 'settings') {
