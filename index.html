@@ -5466,6 +5466,20 @@
       animation: programActCelebrate 0.78s cubic-bezier(0.32, 1.55, 0.45, 1);
       transition: none;
     }
+    .program-act-btn.program-act-flash {
+      animation: programActFlash 0.34s ease-out;
+    }
+    @keyframes programActFlash {
+      0% { box-shadow: 0 0 0 0 rgba(192,122,74,0.5), 0 0 0 0 rgba(124,184,148,0.28); border-color: rgba(192,122,74,0.55); }
+      100% { box-shadow: 0 0 0 18px rgba(192,122,74,0), 0 0 0 26px rgba(124,184,148,0); border-color: rgba(192,122,74,0.32); }
+    }
+    html.dark-mode .program-act-btn.program-act-flash {
+      animation: programActFlashDark 0.34s ease-out;
+    }
+    @keyframes programActFlashDark {
+      0% { box-shadow: 0 0 0 0 rgba(232,184,150,0.35), 0 0 0 0 rgba(124,184,148,0.22); border-color: rgba(200,170,140,0.45); }
+      100% { box-shadow: 0 0 0 18px rgba(232,184,150,0), 0 0 0 26px rgba(124,184,148,0); border-color: rgba(200,170,140,0.22); }
+    }
     @keyframes programActCelebrate {
       0% { transform: scale(1) rotate(0deg); box-shadow: 0 0 0 0 rgba(192,122,74,0.55); filter: brightness(1); }
       32% { transform: scale(1.09) rotate(-1.2deg); box-shadow: 0 0 0 16px rgba(192,122,74,0); filter: brightness(1.1); }
@@ -8960,7 +8974,7 @@
           <div class="program-streak-strip" id="programStreakStrip" aria-label="Streak bonuses"></div>
           <div class="program-undo-ribbon" id="programUndoRibbon" style="display:none" role="region" aria-label="Undo last log">
             <span class="program-undo-ribbon-text" id="programUndoRibbonText">Mistake on the last tap? You can undo it.</span>
-            <button type="button" class="program-undo-ribbon-btn" onclick="programUndoLastLogTap()">Undo</button>
+            <button type="button" class="program-undo-ribbon-btn" onclick="programTryUndoLastLogTap()">Undo</button>
           </div>
           <div class="program-today-block">
             <h3 class="program-section-label">Log today</h3>
@@ -9478,7 +9492,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.48.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.48.3';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -13525,6 +13539,10 @@
   let programLogUndoPayload = null;
   let programLogHintFlashTimer = 0;
 
+  function projectIdEq(a, b) {
+    return String(a || '') === String(b || '');
+  }
+
   function programStreakNextInfo(streak, need) {
     const N = Math.max(2, parseInt(need, 10) || 2);
     const S = Math.max(0, parseInt(streak, 10) || 0);
@@ -13640,20 +13658,37 @@
     const ribbon = document.getElementById('programUndoRibbon');
     if (!ribbon) return;
     const pv = projectsViewing;
-    const show = pv && projectIsProgram(pv) && programLogUndoPayload && programLogUndoPayload.projectId === pv.id;
+    const show = pv && projectIsProgram(pv) && programLogUndoPayload && projectIdEq(programLogUndoPayload.projectId, pv.id);
     ribbon.style.display = show ? 'flex' : 'none';
   }
 
-  function programActBtnTouchStart(ev) {
+  function programActBtnPressIn(ev) {
     const t = ev.target;
     const b = t && t.closest ? t.closest('.program-act-btn') : null;
-    if (b) b.classList.add('program-act-press');
+    if (!b) return;
+    b.classList.add('program-act-press');
+    b.classList.remove('program-act-flash');
+    void b.offsetWidth;
+    b.classList.add('program-act-flash');
   }
 
-  function programActBtnTouchEnd() {
+  function programActBtnPressOut() {
     document.querySelectorAll('.program-act-btn.program-act-press').forEach(function(el) {
       el.classList.remove('program-act-press');
     });
+    setTimeout(function() {
+      document.querySelectorAll('.program-act-btn.program-act-flash').forEach(function(el) {
+        el.classList.remove('program-act-flash');
+      });
+    }, 280);
+  }
+
+  function programActBtnTouchStart(ev) {
+    programActBtnPressIn(ev);
+  }
+
+  function programActBtnTouchEnd() {
+    programActBtnPressOut();
   }
 
   function programBurstDonutConfetti() {
@@ -13698,11 +13733,11 @@
   function renderProgramView() {
     const p = projectsViewing;
     if (!p || !projectIsProgram(p)) return;
-    const fresh = getProjects().find(function(x) { return x.id === p.id; }) || p;
+    const fresh = getProjects().find(function(x) { return projectIdEq(x.id, p.id); }) || p;
     projectsViewing = fresh;
     if (normalizeProgramLogField(fresh)) {
       const allFix = getProjects();
-      const ixFix = allFix.findIndex(function(x) { return x.id === fresh.id; });
+      const ixFix = allFix.findIndex(function(x) { return projectIdEq(x.id, fresh.id); });
       if (ixFix >= 0) {
         allFix[ixFix] = fresh;
         saveProjects(allFix);
@@ -13753,8 +13788,8 @@
     const btnWrap = document.getElementById('programActivityButtons');
     if (btnWrap) {
       btnWrap.innerHTML = (fresh.activities || []).map(function(a) {
-        const safeId = fresh.id.replace(/'/g, "\\'");
-        const safeAid = a.id.replace(/'/g, "\\'");
+        const safeId = String(fresh.id).replace(/'/g, "\\'");
+        const safeAid = String(a.id).replace(/'/g, "\\'");
         return '<button type="button" class="program-act-btn" data-act-id="' + escapeHtml(a.id) + '" onclick="programLogTap(\'' + safeId + '\',\'' + safeAid + '\', this)">' +
           '<span class="program-act-title">I did: ' + escapeHtml(a.label) + '</span>' +
           '<span class="program-act-pts">+' + (a.points || 0) + ' ' + escapeHtml(unit) + '</span></button>';
@@ -13762,9 +13797,15 @@
       const pvb = document.getElementById('programViewBody');
       if (pvb && !pvb.dataset.programActTouch) {
         pvb.dataset.programActTouch = '1';
-        pvb.addEventListener('touchstart', programActBtnTouchStart, { passive: true });
-        pvb.addEventListener('touchend', programActBtnTouchEnd, { passive: true });
-        pvb.addEventListener('touchcancel', programActBtnTouchEnd, { passive: true });
+        if (window.PointerEvent) {
+          pvb.addEventListener('pointerdown', programActBtnTouchStart, { passive: true });
+          pvb.addEventListener('pointerup', programActBtnTouchEnd, { passive: true });
+          pvb.addEventListener('pointercancel', programActBtnTouchEnd, { passive: true });
+        } else {
+          pvb.addEventListener('touchstart', programActBtnTouchStart, { passive: true });
+          pvb.addEventListener('touchend', programActBtnTouchEnd, { passive: true });
+          pvb.addEventListener('touchcancel', programActBtnTouchEnd, { passive: true });
+        }
       }
     }
 
@@ -13803,7 +13844,9 @@
 
     programRenderStreakStrip(fresh, unit);
 
-    const logArr = Array.isArray(fresh.log) ? fresh.log : [];
+    const logSnap = getProjects().find(function(x) { return projectIdEq(x.id, fresh.id); }) || fresh;
+    normalizeProgramLogField(logSnap);
+    const logArr = Array.isArray(logSnap.log) ? logSnap.log : [];
     const logEl = document.getElementById('programLogList');
     if (logEl) {
       const lines = logArr.slice(-14).reverse();
@@ -13822,8 +13865,8 @@
     const u = document.getElementById('programInlineUndoBtn');
     const r = document.getElementById('programInlineRemoveBtn');
     const pv = projectsViewing;
-    const live = pv && projectIsProgram(pv) ? getProjects().find(function(x) { return x.id === pv.id; }) : null;
-    const okUndo = !!(live && programLogUndoPayload && programLogUndoPayload.projectId === live.id);
+    const live = pv && projectIsProgram(pv) ? getProjects().find(function(x) { return projectIdEq(x.id, pv.id); }) : null;
+    const okUndo = !!(live && programLogUndoPayload && projectIdEq(programLogUndoPayload.projectId, live.id));
     let logN = 0;
     if (live && Array.isArray(live.log)) logN = live.log.length;
     if (u) {
@@ -13864,8 +13907,8 @@
 
   function programTryUndoLastLogTap() {
     const live = projectsViewing && projectIsProgram(projectsViewing)
-      ? getProjects().find(function(x) { return x.id === projectsViewing.id; }) : null;
-    if (programLogUndoPayload && live && programLogUndoPayload.projectId === live.id) {
+      ? getProjects().find(function(x) { return projectIdEq(x.id, projectsViewing.id); }) : null;
+    if (programLogUndoPayload && live && projectIdEq(programLogUndoPayload.projectId, live.id)) {
       programUndoLastLogTap();
       return;
     }
@@ -13886,28 +13929,63 @@
     if (!programLogUndoPayload) return;
     const payload = programLogUndoPayload;
     const projectId = payload.projectId;
-    const ids = payload.ids;
+    const ids = (payload.ids || []).map(function(id) { return String(id); });
     const all = getProjects();
-    const p = all.find(function(x) { return x.id === projectId; });
+    const p = all.find(function(x) { return projectIdEq(x.id, projectId); });
     if (!p || !projectIsProgram(p) || !Array.isArray(p.log)) return;
     const idSet = {};
-    ids.forEach(function(id) { idSet[String(id)] = true; });
+    ids.forEach(function(id) { idSet[id] = true; });
     const beforeLen = p.log.length;
     p.log = p.log.filter(function(e) { return !idSet[String(e.id)]; });
-    if (p.log.length === beforeLen) return;
+    if (p.log.length === beforeLen && ids.length > 0) {
+      const n = ids.length;
+      const tail = p.log.slice(-n);
+      let tailOk = tail.length === n;
+      if (tailOk) {
+        for (let ti = 0; ti < n; ti++) {
+          if (String((tail[ti] && tail[ti].id) || '') !== ids[ti]) {
+            tailOk = false;
+            break;
+          }
+        }
+      }
+      if (tailOk) p.log.splice(p.log.length - n, n);
+    }
+    if (p.log.length === beforeLen) {
+      programLogUndoPayload = null;
+      hideProgramLogToast();
+      syncProgramAfterLogButtons();
+      const sub = document.getElementById('programLogSub');
+      if (sub) {
+        sub.style.display = 'block';
+        sub.textContent = 'Could not undo that save automatically. Use Remove last line to drop the newest row.';
+      }
+      return;
+    }
     programLogUndoPayload = null;
     hideProgramLogToast();
     p.modifiedAt = Date.now();
     saveProjects(all);
-    if (projectsViewing && projectsViewing.id === projectId) projectsViewing = p;
+    if (projectsViewing && projectIdEq(projectsViewing.id, projectId)) projectsViewing = p;
     renderProgramView();
     renderProjectsLanding();
     renderHomeProjectsScroller();
   }
 
   function programLogTap(projectId, activityId, btnEl) {
+    if (btnEl && btnEl.classList) {
+      btnEl.classList.remove('program-act-flash');
+      void btnEl.offsetWidth;
+      btnEl.classList.add('program-act-press', 'program-act-flash');
+      setTimeout(function() {
+        if (btnEl.classList) btnEl.classList.remove('program-act-press');
+      }, 140);
+      setTimeout(function() {
+        if (btnEl.classList) btnEl.classList.remove('program-act-flash');
+      }, 320);
+    }
     const all = getProjects();
-    const p = all.find(function(x) { return x.id === projectId; });
+    const p = all.find(function(x) { return projectIdEq(x.id, projectId); });
     if (!p || !projectIsProgram(p)) return;
     normalizeProgramLogField(p);
     const act = (p.activities || []).find(function(a) { return String(a.id) === String(activityId); });
@@ -13962,7 +14040,7 @@
     const unit = programGoalUnitLabel(p);
     let toastHtml = '<strong>+' + basePts + ' ' + escapeHtml(unit) + '</strong> for ' + escapeHtml(act.label || 'this habit') + '.';
     if (addedIds.length > 1) toastHtml += ' <span style="opacity:0.88">Streak bonus included.</span>';
-    programLogUndoPayload = { projectId: p.id, ids: addedIds };
+    programLogUndoPayload = { projectId: String(p.id), ids: addedIds.map(function(x) { return String(x); }) };
     showProgramLogToast(toastHtml);
     try {
       if (navigator.vibrate) navigator.vibrate([14, 42, 18]);
@@ -13979,9 +14057,12 @@
       }
     }
     if (pulseBtn && pulseBtn.classList) {
-      pulseBtn.classList.remove('program-act-celebrate');
+      pulseBtn.classList.remove('program-act-celebrate', 'program-act-flash');
       void pulseBtn.offsetWidth;
-      pulseBtn.classList.add('program-act-celebrate');
+      pulseBtn.classList.add('program-act-celebrate', 'program-act-flash');
+      setTimeout(function() {
+        if (pulseBtn.classList) pulseBtn.classList.remove('program-act-flash');
+      }, 360);
     }
     const dw = document.getElementById('programDonutWrap');
     if (dw) {
@@ -13999,7 +14080,7 @@
     if (!projectsViewing || !projectIsProgram(projectsViewing)) return;
     if (!confirm('Remove the most recent line from your habit log? Use this if Undo is no longer available.')) return;
     const all = getProjects();
-    const p = all.find(function(x) { return x.id === projectsViewing.id; });
+    const p = all.find(function(x) { return projectIdEq(x.id, projectsViewing.id); });
     if (!p || !projectIsProgram(p)) return;
     const repaired = normalizeProgramLogField(p);
     if (!Array.isArray(p.log) || p.log.length === 0) {
@@ -14251,7 +14332,7 @@
       ev.preventDefault();
     }
     const all = getProjects();
-    const p = all.find(function(x) { return x.id === projectId; });
+    const p = all.find(function(x) { return projectIdEq(x.id, projectId); });
     if (!p) return;
     if (p.favorite) delete p.favorite;
     else p.favorite = true;
@@ -14259,8 +14340,8 @@
     saveProjects(all);
     renderProjectsLanding();
     renderHomeProjectsScroller();
-    if (projectsViewing && projectsViewing.id === projectId) {
-      projectsViewing = all.find(function(x) { return x.id === projectId; }) || projectsViewing;
+    if (projectsViewing && projectIdEq(projectsViewing.id, projectId)) {
+      projectsViewing = all.find(function(x) { return projectIdEq(x.id, projectId); }) || projectsViewing;
       if (projectIsProgram(projectsViewing)) renderProgramView();
       else renderProjectsView();
     }
@@ -14644,12 +14725,12 @@
   }
 
   function projectsSelectProject(id) {
-    if (programLogUndoPayload && programLogUndoPayload.projectId !== id) {
+    if (programLogUndoPayload && !projectIdEq(programLogUndoPayload.projectId, id)) {
       programLogUndoPayload = null;
       hideProgramLogToast();
     }
     const all = getProjects();
-    const p = all.find(x => x.id === id);
+    const p = all.find(function(x) { return projectIdEq(x.id, id); });
     if (!p) return;
     if (projectIsProgram(p)) {
       projectsViewing = p;
