@@ -10113,7 +10113,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.51.4';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.51.5';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   var _confettiCtx = null;
@@ -14398,95 +14398,77 @@
   function programRenderStreakStrip(p, unit) {
     const strip = document.getElementById('programStreakStrip');
     if (!strip) return;
-    const rules = normalizeProgramRules(p.rules || {}).streakBonuses;
     const section = document.getElementById('programStreakSection');
-    if (!rules.length) {
+
+    // Show streak pips for every tap-type activity — no bonus rule required
+    const tapActs = (p.activities || []).filter(function(a) {
+      return !a.inputType || a.inputType === 'tap';
+    });
+
+    if (!tapActs.length) {
       if (section) section.style.display = 'none';
+      strip.innerHTML = '';
       return;
     }
-    if (section) {
-      section.style.display = 'block';
-      section.style.visibility = 'visible';
-    }
-    strip.style.display = 'block';
-    strip.style.visibility = 'visible';
+    if (section) { section.style.display = 'block'; section.style.visibility = 'visible'; }
+    strip.style.display = 'block'; strip.style.visibility = 'visible';
 
     const today = todayYMD();
     const yesterday = (function() {
-      const d = parseYMD(today);
-      d.setDate(d.getDate() - 1);
-      return ymdFromDate(d);
+      const d = parseYMD(today); d.setDate(d.getDate() - 1); return ymdFromDate(d);
     })();
+    const rules = normalizeProgramRules(p.rules || {}).streakBonuses;
 
     let html = '<div class="streak-lights-wrap">';
 
-    rules.forEach(function(rule) {
-      const need = Math.max(2, rule.consecutiveDays || 2);
-      const bonus = Math.max(0, parseInt(rule.bonusPoints, 10) || 0);
-      const aid = programResolveRuleActivityId(p, rule);
-      const act = aid ? (p.activities || []).find(function(a) { return a.id === aid; }) : null;
-      const name = act ? act.label : (String(rule.activityLabel || '').trim() || 'Activity');
+    tapActs.forEach(function(act) {
+      const aid = String(act.id);
 
-      if (!aid || !act) {
-        html += '<div class="streak-lights-row">' +
-          '<div class="streak-lights-label">' + escapeHtml(name) + '</div>' +
-          '<div class="streak-lights-unlinked">Rule not linked — tap Edit to fix.</div>' +
-          '</div>';
-        return;
-      }
-
-      const streak = countStreakEndingOn(p, String(aid), today);
-      const loggedYesterday = (function() {
-        if (!Array.isArray(p.log)) return false;
-        return p.log.some(function(e) {
-          return !e.isStreakBonus &&
-            String(e.activityId || '') === String(aid) &&
-            String(e.date || '').slice(0, 10) === yesterday;
-        });
-      })();
-      const loggedToday = (function() {
-        if (!Array.isArray(p.log)) return false;
-        return p.log.some(function(e) {
-          return !e.isStreakBonus &&
-            String(e.activityId || '') === String(aid) &&
-            String(e.date || '').slice(0, 10) === today;
-        });
-      })();
-
-      const hasAnyLog = Array.isArray(p.log) && p.log.some(function(e) {
-        return !e.isStreakBonus && String(e.activityId || '') === String(aid);
+      // Find a bonus rule targeting this activity (for pip count + bonus label)
+      const matchRule = rules.find(function(rule) {
+        const rAid = programResolveRuleActivityId(p, rule);
+        return rAid && String(rAid) === aid;
       });
+      const need = matchRule ? Math.max(2, matchRule.consecutiveDays || 7) : 7;
+      const bonus = matchRule ? Math.max(0, parseInt(matchRule.bonusPoints, 10) || 0) : 0;
 
+      const streak = countStreakEndingOn(p, aid, today);
+
+      const loggedToday = Array.isArray(p.log) && p.log.some(function(e) {
+        return !e.isStreakBonus && String(e.activityId || '') === aid &&
+          String(e.date || '').slice(0, 10) === today;
+      });
+      const loggedYesterday = Array.isArray(p.log) && p.log.some(function(e) {
+        return !e.isStreakBonus && String(e.activityId || '') === aid &&
+          String(e.date || '').slice(0, 10) === yesterday;
+      });
+      const hasAnyLog = Array.isArray(p.log) && p.log.some(function(e) {
+        return !e.isStreakBonus && String(e.activityId || '') === aid;
+      });
       const broke = hasAnyLog && streak === 0 && !loggedYesterday;
+
+      // Pip position within the current cycle (e.g. day 8 of a 7-day target = 1st pip lit again)
+      const cyclePos = streak <= 0 ? 0 : (streak % need === 0 ? need : streak % need);
 
       let pips = '';
       for (var i = 0; i < need; i++) {
-        var filled = i < streak;
-        var isNext = i === streak && !loggedToday;
-        var cls = 'streak-pip' +
-          (filled ? ' streak-pip-on' : '') +
-          (isNext ? ' streak-pip-next' : '');
+        var filled = i < cyclePos;
+        var isNext = i === cyclePos && !loggedToday;
+        var cls = 'streak-pip' + (filled ? ' streak-pip-on' : '') + (isNext ? ' streak-pip-next' : '');
         pips += '<span class="' + cls + '" aria-hidden="true"></span>';
       }
 
       var streakLabel = streak > 0
-        ? '<span class="streak-lights-count">' + streak + ' day' + (streak === 1 ? '' : 's') + '</span>'
-        : '';
-
+        ? '<span class="streak-lights-count">' + streak + ' day' + (streak === 1 ? '' : 's') + '</span>' : '';
       var bonusLabel = bonus > 0
-        ? '<span class="streak-lights-bonus">+' + bonus + ' ' + escapeHtml(unit) + ' at ' + need + '</span>'
-        : '';
-
-      var resetNote = broke
-        ? '<div class="streak-lights-reset">Chain reset — yesterday was missed</div>'
-        : '';
+        ? '<span class="streak-lights-bonus">+' + bonus + ' ' + escapeHtml(unit) + ' at ' + need + '</span>' : '';
+      var resetNote = broke ? '<div class="streak-lights-reset">Chain reset — yesterday was missed</div>' : '';
 
       html +=
         '<div class="streak-lights-row">' +
           '<div class="streak-lights-header">' +
-            '<span class="streak-lights-label">' + escapeHtml(name) + '</span>' +
-            streakLabel +
-            bonusLabel +
+            '<span class="streak-lights-label">' + escapeHtml(act.label || 'Activity') + '</span>' +
+            streakLabel + bonusLabel +
           '</div>' +
           '<div class="streak-lights-pips">' + pips + '</div>' +
           resetNote +
@@ -14595,6 +14577,35 @@
       }
       if (programLogUndoPayload && projectIdEq(programLogUndoPayload.projectId, projectId)) {
         programUndoLastLogTap();
+      } else {
+        // Payload expired — directly remove today's log entries for this activity
+        const _allDU = getProjects();
+        const _pDU = _allDU.find(function(x) { return projectIdEq(x.id, projectId); });
+        if (_pDU && Array.isArray(_pDU.log)) {
+          const _todayDU = todayYMD();
+          const _toRemove = _pDU.log.filter(function(e) {
+            return String(e.activityId || '') === String(activityId) &&
+                   String(e.date || '').slice(0, 10) === _todayDU;
+          });
+          if (_toRemove.length > 0) {
+            const _removeIds = {};
+            _toRemove.forEach(function(e) {
+              _removeIds[String(e.id)] = true;
+              if (e.isStreakBonus) {
+                _pDU.totalPoints = Math.max(0, (_pDU.totalPoints || 0) - (e.bonusPoints || 0));
+              } else {
+                _pDU.totalPoints = Math.max(0, (_pDU.totalPoints || 0) - (e.pointsAwarded || 0));
+              }
+            });
+            _pDU.log = _pDU.log.filter(function(e) { return !_removeIds[String(e.id)]; });
+            _pDU.modifiedAt = Date.now();
+            saveProjects(_allDU);
+            if (projectsViewing && projectIdEq(projectsViewing.id, projectId)) projectsViewing = _pDU;
+            renderProgramView();
+            renderProjectsLanding();
+            renderHomeProjectsScroller();
+          }
+        }
       }
     }
   }
@@ -14728,6 +14739,22 @@
           '<div class="program-act-stepper-pts">' + ptsNote + ' · full credit at ' + targetVal + ' ' + unitLabel + '</div>' +
         '</div>';
       }).join('');
+      // Restore today's logged state so navigating away and back keeps buttons accurate
+      const _todayStr = todayYMD();
+      const _loggedTodaySet = {};
+      if (Array.isArray(fresh.log)) {
+        fresh.log.forEach(function(e) {
+          if (!e.isStreakBonus && String(e.date || '').slice(0, 10) === _todayStr) {
+            _loggedTodaySet[String(e.activityId || '')] = true;
+          }
+        });
+      }
+      btnWrap.querySelectorAll('button.program-act-btn').forEach(function(btn) {
+        if (_loggedTodaySet[btn.getAttribute('data-act-id') || '']) {
+          btn.dataset.logged = '1';
+          btn.classList.add('program-act-logged');
+        }
+      });
       programSyncActBtnUndoStateFromPayload(btnWrap, fresh);
       const pvb = document.getElementById('programViewBody');
       if (pvb && !pvb.dataset.programActTouch) {
@@ -14777,10 +14804,12 @@
         row('This year', yrPts, yT);
     }
 
-    // Pre-show streak section if rules exist so it's never stuck hidden
-    const _rules = normalizeProgramRules(fresh.rules || {}).streakBonuses;
+    // Pre-show streak section whenever there are tap activities (rules no longer required)
+    const _tapActCount = (fresh.activities || []).filter(function(a) {
+      return !a.inputType || a.inputType === 'tap';
+    }).length;
     const _sec = document.getElementById('programStreakSection');
-    if (_sec) _sec.style.display = _rules.length ? 'block' : 'none';
+    if (_sec) _sec.style.display = _tapActCount ? 'block' : 'none';
 
     programRenderStreakStrip(fresh, unit);
 
