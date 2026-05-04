@@ -5550,7 +5550,6 @@
     }
     .home-widget-act.hw-logged .hw-act-fill { width: 100%; }
 
-    .hw-act-icon { font-size: 18px; flex-shrink: 0; }
     .hw-act-label {
       flex: 1;
       font-size: 13px;
@@ -5577,6 +5576,122 @@
       padding: 6px 0 0;
       -webkit-tap-highlight-color: transparent;
     }
+    .hw-ring-wrap {
+      width: 30px; height: 30px;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .hw-ring-svg {
+      width: 30px; height: 30px;
+      transform: rotate(-90deg);
+    }
+    .hw-ring-track { fill: none; stroke: rgba(0,0,0,0.07); stroke-width: 3; }
+    html.dark-mode .hw-ring-track { stroke: rgba(255,255,255,0.1); }
+    .hw-ring-fill {
+      fill: none;
+      stroke: #4a9a6a;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-dasharray: 69.1;
+      stroke-dashoffset: 69.1;
+      transition: stroke-dashoffset 0.45s cubic-bezier(0.34,1.3,0.64,1);
+    }
+    .home-widget-act.hw-logged .hw-ring-fill { stroke-dashoffset: 0; }
+    .hw-ring-icon {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      transition: transform 0.3s cubic-bezier(0.34,1.4,0.64,1);
+    }
+    .home-widget-act.hw-logged .hw-ring-icon { transform: scale(1.15); }
+
+    .projects-list-quicknote-btn {
+      background: none;
+      border: none;
+      font-size: 15px;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 8px;
+      opacity: 0.55;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 0.15s, background 0.15s;
+    }
+    .projects-list-quicknote-btn:active { opacity: 1; background: rgba(192,122,74,0.1); }
+
+    .quick-note-overlay {
+      position: fixed; inset: 0;
+      background: rgba(30,20,10,0.45);
+      backdrop-filter: blur(4px);
+      z-index: 9800;
+      display: flex; align-items: flex-end; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .quick-note-overlay.show { opacity: 1; pointer-events: all; }
+    .quick-note-sheet {
+      width: 100%; max-width: 440px;
+      background: var(--bg, #fdf8f1);
+      border-radius: 22px 22px 0 0;
+      padding: 20px 20px 40px;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.34,1.1,0.64,1);
+      box-shadow: 0 -8px 32px rgba(0,0,0,0.18);
+    }
+    html.dark-mode .quick-note-sheet { background: #261f1a; }
+    .quick-note-overlay.show .quick-note-sheet { transform: translateY(0); }
+    .quick-note-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .quick-note-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px; font-weight: 500;
+      color: var(--text);
+    }
+    .quick-note-close {
+      background: none; border: none;
+      font-size: 16px; color: var(--muted);
+      cursor: pointer; padding: 4px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .quick-note-phase-label {
+      font-size: 11px; color: var(--muted);
+      margin-bottom: 12px;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .quick-note-input {
+      width: 100%;
+      background: rgba(255,255,255,0.65);
+      border: 1.5px solid rgba(192,122,74,0.18);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-family: 'Playfair Display', serif;
+      font-size: 14px; font-style: italic;
+      color: var(--text);
+      resize: none; outline: none;
+      -webkit-appearance: none;
+      margin-bottom: 14px;
+      line-height: 1.55;
+    }
+    html.dark-mode .quick-note-input {
+      background: rgba(40,34,28,0.85);
+      border-color: rgba(192,122,74,0.22);
+      color: var(--text);
+    }
+    .quick-note-input:focus { border-color: rgba(192,122,74,0.45); }
+    .quick-note-save {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--accent), #d4956a);
+      color: white;
+      border: none; border-radius: 14px;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+      letter-spacing: 0.02em;
+      box-shadow: 0 4px 16px rgba(192,122,74,0.3);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .quick-note-save:active { opacity: 0.88; }
     .projects-list-card-desc {
       font-size: 13px; color: var(--text2);
       line-height: 1.45;
@@ -5697,6 +5812,82 @@
     }
     .program-act-btn.program-act-logged .program-act-title { color: #4a9a6a; }
     .program-act-btn.program-act-logged .program-act-pts { color: #4a9a6a; }
+    .program-act-stepper-card {
+      background: linear-gradient(165deg, rgba(255,255,255,0.9), rgba(255,248,240,0.75));
+      border: 1px solid rgba(192,122,74,0.32);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 0;
+    }
+    html.dark-mode .program-act-stepper-card {
+      background: linear-gradient(165deg, rgba(52,46,40,0.95), rgba(40,36,32,0.75));
+    }
+    .program-act-stepper-label {
+      font-size: 15px; font-weight: 600;
+      color: var(--text); margin-bottom: 10px;
+    }
+    .program-act-stepper-row {
+      display: flex; align-items: center; gap: 0;
+      background: rgba(0,0,0,0.05);
+      border-radius: 12px; overflow: hidden;
+      margin-bottom: 8px;
+    }
+    html.dark-mode .program-act-stepper-row { background: rgba(255,255,255,0.06); }
+    .program-act-step-btn {
+      width: 44px; height: 44px;
+      background: none; border: none;
+      font-size: 22px; font-weight: 300;
+      color: var(--accent); cursor: pointer;
+      font-family: inherit;
+      display: flex; align-items: center; justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+      flex-shrink: 0;
+    }
+    .program-act-step-btn:active { background: rgba(192,122,74,0.1); }
+    .program-act-step-val {
+      flex: 1; text-align: center;
+      font-size: 20px; font-weight: 600;
+      font-family: 'Playfair Display', serif;
+      color: var(--text);
+    }
+    .program-act-step-unit {
+      font-size: 11px; color: var(--muted);
+      margin-right: 8px; flex-shrink: 0;
+    }
+    .program-act-log-btn {
+      height: 44px; padding: 0 18px;
+      background: linear-gradient(135deg, var(--accent), #d4956a);
+      color: white; border: none;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+      letter-spacing: 0.02em;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .program-act-log-btn:active { opacity: 0.85; }
+    .program-act-stepper-pts {
+      font-size: 11px; color: var(--muted);
+    }
+
+    .pew-act-type-sel {
+      width: 100%; margin-top: 6px;
+      padding: 8px 10px;
+      border: 1px solid rgba(192,122,74,0.2);
+      border-radius: 10px;
+      background: rgba(255,255,255,0.7);
+      font-family: inherit; font-size: 13px;
+      color: var(--text);
+      appearance: none; -webkit-appearance: none;
+      cursor: pointer;
+    }
+    html.dark-mode .pew-act-type-sel { background: rgba(40,36,32,0.8); color: var(--text); }
+    .pew-act-target-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 6px;
+    }
+    .pew-act-target-lbl { font-size: 12px; color: var(--text2); flex-shrink: 0; }
+    .pew-act-target { width: 80px; }
+    .pew-act-target-unit { font-size: 12px; color: var(--muted); }
     .program-act-btn.program-act-flash {
       animation: programActFlash 0.34s ease-out;
     }
@@ -6292,17 +6483,72 @@
     .phase-checklist {
       margin-bottom: 12px;
     }
-    .phase-checklist-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 8px 0;
-      font-size: 14px; color: var(--text);
-      transition: opacity 0.2s ease;
-    }
-    .phase-checklist-item input[type="checkbox"] {
-      accent-color: var(--accent);
+    .phase-cl-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 0;
       cursor: pointer;
-      width: 20px; height: 20px;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 0.2s;
+      position: relative;
+    }
+    .phase-cl-item.cl-done { opacity: 0.72; }
+    .phase-cl-item.cl-blocked { opacity: 0.65; }
+
+    .cl-ring-wrap {
+      width: 28px; height: 28px;
       flex-shrink: 0;
+      position: relative;
+    }
+    .cl-ring-svg {
+      width: 28px; height: 28px;
+      transform: rotate(-90deg);
+    }
+    .cl-ring-track { fill: none; stroke: rgba(0,0,0,0.1); stroke-width: 2.5; }
+    html.dark-mode .cl-ring-track { stroke: rgba(255,255,255,0.12); }
+    .cl-ring-fill {
+      fill: none;
+      stroke: #4a9a6a;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-dasharray: 69.1;
+      stroke-dashoffset: 69.1;
+      transition: stroke-dashoffset 0.45s cubic-bezier(0.34,1.3,0.64,1);
+    }
+    .phase-cl-item.cl-blocked .cl-ring-fill { stroke: var(--accent); }
+    .cl-ring-check {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600;
+      color: #4a9a6a;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: opacity 0.2s 0.15s, transform 0.2s 0.15s cubic-bezier(0.34,1.5,0.64,1);
+    }
+    .phase-cl-item.cl-done .cl-ring-check,
+    .phase-cl-item.cl-blocked .cl-ring-check {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .phase-cl-item.cl-blocked .cl-ring-check { color: var(--accent); }
+
+    .cl-item-text {
+      flex: 1;
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.4;
+      transition: color 0.25s, text-decoration 0.25s;
+    }
+    .phase-cl-item.cl-done .cl-item-text {
+      color: var(--muted);
+      text-decoration: line-through;
+      text-decoration-color: #4a9a6a;
+    }
+    .phase-cl-item.cl-blocked .cl-item-text {
+      color: var(--accent);
+      font-style: italic;
     }
     .phase-complete-btn {
       padding: 14px 24px;
@@ -8645,6 +8891,7 @@
 <!-- ── APP ── -->
 <div class="app-screen" id="appScreen">
 <div class="app">
+  <canvas id="shastConfettiCanvas" style="position:fixed;inset:0;pointer-events:none;z-index:9998;width:100%;height:100%;" aria-hidden="true"></canvas>
   <div class="topbar">
     <div class="topbar-left"></div>
     <div class="topbar-brand" onclick="goHome()" style="cursor:pointer">
@@ -9739,6 +9986,18 @@
   </div>
 </div>
 
+<div class="quick-note-overlay" id="quickNoteOverlay" onclick="closeQuickNote()">
+  <div class="quick-note-sheet" onclick="event.stopPropagation()">
+    <div class="quick-note-header">
+      <span class="quick-note-title" id="quickNoteTitle">Quick note</span>
+      <button type="button" class="quick-note-close" onclick="closeQuickNote()">✕</button>
+    </div>
+    <div class="quick-note-phase-label" id="quickNotePhaseLabel"></div>
+    <textarea class="quick-note-input" id="quickNoteInput" placeholder="What's on your mind about this?" rows="4"></textarea>
+    <button type="button" class="quick-note-save" onclick="saveQuickNote()">Save note</button>
+  </div>
+</div>
+
 <!-- Offline screen -->
 <div class="offline-screen" id="offlineScreen">
   <img class="offline-blathers" src="https://stormyreigns.github.io/HATH/IMG_7937.png" alt="Blathers">
@@ -9748,7 +10007,117 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.49.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.50.0';  // Bump this when you deploy changes.
+
+  // ── CONFETTI ENGINE ──
+  var _confettiCtx = null;
+  var _confettiParticles = [];
+  var _confettiRaf = 0;
+  var _confettiColors = ['#c07a4a','#e09a6a','#c8993a','#f0c060','#4a9a6a','#7acd9a','#2a6fb5','#7bc4ef','#fdf8f1','#e8c878'];
+
+  function _getConfettiCtx() {
+    if (_confettiCtx) return _confettiCtx;
+    var c = document.getElementById('shastConfettiCanvas');
+    if (!c) return null;
+    c.width = window.innerWidth;
+    c.height = window.innerHeight;
+    window.addEventListener('resize', function() {
+      c.width = window.innerWidth;
+      c.height = window.innerHeight;
+    });
+    _confettiCtx = c.getContext('2d');
+    return _confettiCtx;
+  }
+
+  function launchConfetti(count, originEl, size) {
+    var ctx = _getConfettiCtx();
+    if (!ctx) return;
+    var cx = window.innerWidth / 2;
+    var cy = window.innerHeight * 0.4;
+    if (originEl) {
+      var r = originEl.getBoundingClientRect();
+      cx = r.left + r.width / 2;
+      cy = r.top + r.height / 2;
+    }
+    var isFull = size === 'full';
+    for (var i = 0; i < count; i++) {
+      var angle = Math.random() * Math.PI * 2;
+      var speed = isFull ? (4 + Math.random() * 8) : (2 + Math.random() * 5);
+      _confettiParticles.push({
+        x: cx + (Math.random() - 0.5) * 30,
+        y: cy,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - (isFull ? 6 : 3),
+        rot: Math.random() * 360,
+        rotV: (Math.random() - 0.5) * 9,
+        w: isFull ? (7 + Math.random() * 5) : (4 + Math.random() * 4),
+        h: isFull ? (3 + Math.random() * 3) : (2 + Math.random() * 2),
+        color: _confettiColors[Math.floor(Math.random() * _confettiColors.length)],
+        life: 1,
+        decay: 0.011 + Math.random() * 0.009,
+        round: Math.random() > 0.5
+      });
+    }
+    if (!_confettiRaf) _confettiLoop();
+  }
+
+  function _confettiLoop() {
+    var ctx = _getConfettiCtx();
+    if (!ctx) { _confettiRaf = 0; return; }
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    _confettiParticles = _confettiParticles.filter(function(p) { return p.life > 0; });
+    _confettiParticles.forEach(function(p) {
+      p.x += p.vx; p.y += p.vy;
+      p.vy += 0.28; p.vx *= 0.99;
+      p.rot += p.rotV; p.life -= p.decay;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, p.life);
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      if (p.round) {
+        ctx.beginPath();
+        ctx.arc(0, 0, p.w / 2, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      }
+      ctx.restore();
+    });
+    if (_confettiParticles.length > 0) {
+      _confettiRaf = requestAnimationFrame(_confettiLoop);
+    } else {
+      _confettiRaf = 0;
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    }
+  }
+
+  function floatPoints(text, originEl, color) {
+    var x = window.innerWidth / 2;
+    var y = window.innerHeight / 2;
+    if (originEl) {
+      var r = originEl.getBoundingClientRect();
+      x = r.left + r.width / 2;
+      y = r.top + r.height / 3;
+    }
+    var el = document.createElement('div');
+    el.textContent = text;
+    el.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;' +
+      'font-family:\"Playfair Display\",serif;font-size:17px;font-weight:700;' +
+      'color:' + (color || '#c8993a') + ';pointer-events:none;z-index:9999;' +
+      'text-shadow:0 2px 6px rgba(0,0,0,0.15);white-space:nowrap;';
+    document.body.appendChild(el);
+    var start = null;
+    function tick(ts) {
+      if (!start) start = ts;
+      var p = (ts - start) / 900;
+      if (p >= 1) { el.remove(); return; }
+      el.style.top = (y - p * 65) + 'px';
+      el.style.opacity = p < 0.55 ? '1' : String(1 - (p - 0.55) / 0.45);
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -13164,16 +13533,20 @@
     let activities = [];
     if (Array.isArray(draft.activities)) {
       activities = draft.activities.map(function(a, i) {
+        const inputType = a.inputType === 'count' ? 'count' : a.inputType === 'duration' ? 'duration' : 'tap';
+        const target = (inputType === 'count' || inputType === 'duration') && a.target > 0 ? Math.round(a.target) : null;
         return {
           id: a.id && String(a.id).trim() ? String(a.id).trim() : genId(),
           label: String(a.label != null ? a.label : a.title || 'Activity ' + (i + 1)).slice(0, 120),
           points: Math.max(0, Math.min(500, parseInt(a.points, 10) || 0)),
-          category: a.category ? String(a.category).slice(0, 40) : undefined
+          category: a.category ? String(a.category).slice(0, 40) : undefined,
+          inputType: inputType,
+          target: target
         };
       }).filter(function(a) { return a.label; });
     }
     if (activities.length === 0) {
-      activities = [{ id: genId(), label: 'Starter activity', points: 5 }];
+      activities = [{ id: genId(), label: 'Starter activity', points: 5, inputType: 'tap', target: null }];
     }
     const goal = draft.goal && typeof draft.goal === 'object' ? {
       type: draft.goal.type === 'display_cash' ? 'display_cash' : 'points',
@@ -13334,7 +13707,13 @@
       }
       const dur = inferProgramWizardDuration(p);
       const rows = (p.activities || []).map(function(a) {
-        return { id: a.id, label: a.label || '', pts: a.points != null ? a.points : 3 };
+        return {
+          id: a.id,
+          label: a.label || '',
+          pts: a.points != null ? a.points : 3,
+          inputType: a.inputType || 'tap',
+          target: a.target != null && a.target > 0 ? a.target : null
+        };
       });
       pewDraft = {
         title: p.title || '',
@@ -13396,13 +13775,18 @@
     rowEls.forEach(function(row, i) {
       const lab = row.querySelector('.pew-act-label');
       const pt = row.querySelector('.pew-act-pts');
+      const typeEl = row.querySelector('.pew-act-type-sel');
+      const targetEl = row.querySelector('.pew-act-target');
       const label = lab ? String(lab.value || '') : '';
       const ptsRaw = pt ? parseInt(pt.value, 10) : NaN;
+      const inputType = typeEl ? typeEl.value : 'tap';
+      const targetRaw = targetEl && targetEl.value ? parseInt(targetEl.value, 10) : NaN;
+      const target = (!isNaN(targetRaw) && targetRaw > 0) ? targetRaw : null;
       const prev = pewDraft.activityRows && pewDraft.activityRows[i];
       const rid = prev && prev.id ? prev.id : genId();
       const fallbackPts = prev && prev.pts != null ? prev.pts : 3;
       const ptsN = Math.max(0, Math.min(500, isNaN(ptsRaw) ? fallbackPts : ptsRaw));
-      nextRows.push({ id: rid, label: label, pts: ptsN });
+      nextRows.push({ id: rid, label: label, pts: ptsN, inputType: inputType, target: target });
     });
     pewDraft.activityRows = nextRows;
   }
@@ -13410,7 +13794,7 @@
   function pewAddActivityRow() {
     if (!pewDraft || !Array.isArray(pewDraft.activityRows)) return;
     pewSyncActivityRowsFromDom();
-    pewDraft.activityRows.push({ id: genId(), label: '', pts: 3 });
+    pewDraft.activityRows.push({ id: genId(), label: '', pts: 3, inputType: 'tap', target: null });
     programEasyWizardRender();
   }
 
@@ -13591,15 +13975,35 @@
         const removeCell = nAct > 1
           ? '<button type="button" class="pew-act-remove" onclick="pewRemoveActivityRow(' + i + ')" aria-label="Remove activity">×</button>'
           : '<span class="pew-act-remove-spacer" aria-hidden="true"></span>';
+        const iType = row.inputType || 'tap';
+        const target = row.target != null ? row.target : '';
+        const typeOpts = ['tap', 'count', 'duration'].map(function(t) {
+          return '<option value="' + t + '"' + (iType === t ? ' selected' : '') + '>' +
+            (t === 'tap' ? '✓ Done' : t === 'count' ? '# Count' : '⏱ Duration') + '</option>';
+        }).join('');
+        const targetRow = iType !== 'tap'
+          ? '<div class="pew-act-target-row"><label class="pew-act-target-lbl">Full credit at</label>' +
+            '<input type="number" class="pjw-input pew-act-target" min="1" max="9999" placeholder="' +
+            (iType === 'count' ? 'e.g. 8' : 'e.g. 30') + '" value="' + escapeHtml(String(target)) + '">' +
+            '<span class="pew-act-target-unit">' + (iType === 'count' ? 'times' : 'min') + '</span></div>'
+          : '';
         rowsHtml +=
           '<div class="pew-activity-row">' +
           '<input type="text" class="pjw-input pew-act-label" placeholder="What you did" value="' + escapeHtml(row.label || '') + '">' +
           '<input type="number" class="pew-activity-pts pew-act-pts" min="0" max="500" value="' + escapeHtml(String(row.pts != null ? row.pts : 3)) + '">' +
+          '<select class="pew-act-type-sel">' + typeOpts + '</select>' +
+          targetRow +
           removeCell +
           '</div>';
       });
       rowsHtml += '</div><div class="pew-act-add-wrap"><button type="button" class="pew-act-add" onclick="pewAddActivityRow()">Add another activity</button></div>';
       body.innerHTML = rowsHtml;
+      body.querySelectorAll('.pew-act-type-sel').forEach(function(sel) {
+        sel.addEventListener('change', function() {
+          pewSyncActivityRowsFromDom();
+          programEasyWizardRender();
+        });
+      });
       if (back) back.textContent = 'Back';
       if (next) next.textContent = 'Continue';
     } else if (pewStep === 3) {
@@ -13646,7 +14050,13 @@
     pewStep--;
     if (pewStep === 2 && pewDraft && pewDraft.activities && pewDraft.activities.length) {
       pewDraft.activityRows = pewDraft.activities.map(function(a) {
-        return { id: a.id, label: a.label || '', pts: a.points != null ? a.points : 0 };
+        return {
+          id: a.id,
+          label: a.label || '',
+          pts: a.points != null ? a.points : 0,
+          inputType: a.inputType || 'tap',
+          target: a.target != null && a.target > 0 ? a.target : null
+        };
       });
     }
     programEasyWizardRender();
@@ -13685,13 +14095,26 @@
       rowEls.forEach(function(row, i) {
         const lab = row.querySelector('.pew-act-label');
         const pt = row.querySelector('.pew-act-pts');
+        const typeEl = row.querySelector('.pew-act-type-sel');
+        const targetEl = row.querySelector('.pew-act-target');
         const label = lab ? String(lab.value || '').trim() : '';
         const pts = pt ? parseInt(pt.value, 10) : NaN;
+        const inputType = typeEl ? typeEl.value : 'tap';
+        const targetRaw = targetEl && targetEl.value ? parseInt(targetEl.value, 10) : NaN;
+        const target = (!isNaN(targetRaw) && targetRaw > 0) ? targetRaw : null;
         const prev = pewDraft.activityRows && pewDraft.activityRows[i];
         const rid = prev && prev.id ? prev.id : genId();
         const ptsN = Math.max(0, Math.min(500, isNaN(pts) ? 3 : pts));
-        nextRows.push({ id: rid, label: label, pts: ptsN });
-        if (label) activities.push({ id: rid, label: label.slice(0, 120), points: ptsN });
+        nextRows.push({ id: rid, label: label, pts: ptsN, inputType: inputType, target: target });
+        if (label) {
+          activities.push({
+            id: rid,
+            label: label.slice(0, 120),
+            points: ptsN,
+            inputType: inputType,
+            target: target
+          });
+        }
       });
       if (activities.length === 0) {
         alert('Add at least one activity with a name.');
@@ -14002,43 +14425,51 @@
     }
   }
 
-  function programBurstDonutConfetti() {
-    const wrap = document.getElementById('programDonutWrap');
-    if (!wrap) return;
-    const r = wrap.getBoundingClientRect();
-    if (r.width < 8 || r.height < 8) return;
-    const cx = r.left + r.width / 2;
-    const cy = r.top + r.height / 2;
-    const layer = document.createElement('div');
-    layer.className = 'program-confetti-burst-root';
-    layer.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(layer);
-    const colors = ['#c07a4a', '#e8b86a', '#7cb894', '#8bb8e8', '#d4a574', '#f0e0c8', '#c49a6c', '#a8c4a0'];
-    const n = 26;
-    for (let i = 0; i < n; i++) {
-      const bit = document.createElement('span');
-      bit.className = 'program-confetti-fleck';
-      bit.style.left = cx + 'px';
-      bit.style.top = cy + 'px';
-      bit.style.background = colors[i % colors.length];
-      const ang = (Math.PI * 2 * i) / n + (Math.random() - 0.5) * 0.35;
-      const dist = 38 + Math.random() * 62;
-      const x2 = Math.cos(ang) * dist;
-      const y2 = Math.sin(ang) * dist - 18;
-      const rot = (Math.random() * 420 - 210) + 'deg';
-      layer.appendChild(bit);
-      (function(b, tx, ty, tr) {
-        requestAnimationFrame(function() {
-          requestAnimationFrame(function() {
-            b.style.transform = 'translate(' + tx + 'px,' + ty + 'px) rotate(' + tr + ') scale(0.15)';
-            b.style.opacity = '0';
-          });
-        });
-      })(bit, x2, y2, rot);
+  var programActStepValues = {};
+
+  function programActStep(activityId, delta) {
+    const aid = String(activityId);
+    programActStepValues[aid] = Math.max(0, (programActStepValues[aid] || 0) + delta);
+    const card = document.querySelector('.program-act-stepper-card[data-act-id="' + CSS.escape(aid) + '"]');
+    const el = card ? card.querySelector('.program-act-step-val') : null;
+    if (el) el.textContent = programActStepValues[aid];
+  }
+
+  function programActStepLog(projectId, activityId, ptsPerUnit, target) {
+    const aid = String(activityId);
+    const val = programActStepValues[aid] || 0;
+    if (val <= 0) return;
+    const t = Math.max(1, parseInt(target, 10) || 1);
+    const rawPts = (val / t) * ptsPerUnit;
+    const pts = Math.max(1, Math.round(rawPts));
+    const all = getProjects();
+    const p = all.find(function(x) { return projectIdEq(x.id, projectId); });
+    if (!p) return;
+    const act = (p.activities || []).find(function(a) { return String(a.id) === aid; });
+    if (!act) return;
+    const origPts = act.points;
+    act.points = pts;
+    saveProjects(all);
+    const card = document.querySelector('.program-act-stepper-card[data-act-id="' + CSS.escape(aid) + '"]');
+    const btnEl = card ? card.querySelector('.program-act-log-btn') : null;
+    programLogTap(projectId, activityId, btnEl);
+    const all2 = getProjects();
+    const ix = all2.findIndex(function(x) { return projectIdEq(x.id, projectId); });
+    if (ix >= 0) {
+      const p2 = all2[ix];
+      const a2 = (p2.activities || []).find(function(a) { return String(a.id) === aid; });
+      if (a2) a2.points = origPts;
+      saveProjects(all2);
     }
-    setTimeout(function() {
-      try { layer.remove(); } catch (_) {}
-    }, 900);
+    programActStepValues[aid] = 0;
+    const card2 = document.querySelector('.program-act-stepper-card[data-act-id="' + CSS.escape(aid) + '"]');
+    const el = card2 ? card2.querySelector('.program-act-step-val') : null;
+    if (el) el.textContent = '0';
+  }
+
+  function programBurstDonutConfetti() {
+    var wrap = document.getElementById('programDonutWrap');
+    launchConfetti(28, wrap || null, 'small');
   }
 
   function renderProgramView() {
@@ -14101,12 +14532,31 @@
       btnWrap.innerHTML = (fresh.activities || []).map(function(a) {
         const safeId = String(fresh.id).replace(/'/g, "\\'");
         const safeAid = String(a.id).replace(/'/g, "\\'");
-        return '<button type="button" class="program-act-btn" ' +
-          'data-act-id="' + escapeHtml(a.id) + '" ' +
-          'data-locked="0" data-logged="0" ' +
-          'onclick="programActToggle(\'' + safeId + '\',\'' + safeAid + '\', this)">' +
-          '<span class="program-act-title">I did: ' + escapeHtml(a.label) + '</span>' +
-          '<span class="program-act-pts">+' + (a.points || 0) + ' ' + escapeHtml(unit) + '</span></button>';
+        const iType = a.inputType || 'tap';
+        if (iType === 'tap') {
+          return '<button type="button" class="program-act-btn" ' +
+            'data-act-id="' + escapeHtml(a.id) + '" ' +
+            'data-locked="0" data-logged="0" ' +
+            'onclick="programActToggle(\'' + safeId + '\',\'' + safeAid + '\', this)">' +
+            '<span class="program-act-title">I did: ' + escapeHtml(a.label) + '</span>' +
+            '<span class="program-act-pts">+' + (a.points || 0) + ' ' + escapeHtml(unit) + '</span></button>';
+        }
+        const targetVal = a.target || (iType === 'count' ? 8 : 30);
+        const unitLabel = iType === 'count' ? 'times' : 'min';
+        const ptsNote = iType === 'count'
+          ? '+' + (a.points || 0) + ' ' + escapeHtml(unit) + ' per ' + unitLabel
+          : '+' + (a.points || 0) + ' ' + escapeHtml(unit) + '/' + unitLabel;
+        return '<div class="program-act-stepper-card" data-act-id="' + escapeHtml(a.id) + '">' +
+          '<div class="program-act-stepper-label">' + escapeHtml(a.label) + '</div>' +
+          '<div class="program-act-stepper-row">' +
+            '<button type="button" class="program-act-step-btn" onclick="programActStep(\'' + safeAid + '\',-1)">−</button>' +
+            '<div class="program-act-step-val" id="pasv-' + escapeHtml(String(a.id)) + '">0</div>' +
+            '<span class="program-act-step-unit">' + unitLabel + '</span>' +
+            '<button type="button" class="program-act-step-btn" onclick="programActStep(\'' + safeAid + '\',1)">+</button>' +
+            '<button type="button" class="program-act-log-btn" onclick="programActStepLog(\'' + safeId + '\',\'' + safeAid + '\', ' + (a.points || 0) + ', ' + targetVal + ')">Log</button>' +
+          '</div>' +
+          '<div class="program-act-stepper-pts">' + ptsNote + ' · full credit at ' + targetVal + ' ' + unitLabel + '</div>' +
+        '</div>';
       }).join('');
       programSyncActBtnUndoStateFromPayload(btnWrap, fresh);
       const pvb = document.getElementById('programViewBody');
@@ -14370,6 +14820,11 @@
           break;
         }
       }
+      var stepCard = actWrap.querySelector('.program-act-stepper-card[data-act-id="' + CSS.escape(String(activityId)) + '"]');
+      if (stepCard) {
+        var logB = stepCard.querySelector('.program-act-log-btn');
+        if (logB) pulseBtn = logB;
+      }
     }
     if (pulseBtn && pulseBtn.classList) {
       pulseBtn.classList.remove('program-act-celebrate', 'program-act-flash');
@@ -14389,6 +14844,7 @@
       }, 720);
     }
     programBurstDonutConfetti();
+    floatPoints('+' + basePts + ' ' + unit, pulseBtn && pulseBtn.parentNode ? pulseBtn : btnEl);
   }
 
   function programRemoveLatestLogEntry() {
@@ -14831,6 +15287,8 @@
 
   // ── HOME WIDGET ──
 
+  const ACT_DEFAULT_ICONS = ['⚡', '🎯', '💧', '🌿', '📖', '🏃', '✍️', '🧘'];
+
   let homeWidgetActiveTab = 'projects';
   const homeWidgetActLocked = {};
 
@@ -14884,14 +15342,21 @@
     const p = habits[0];
     const unit = programGoalUnitLabel(p);
     const acts = (p.activities || []).slice(0, 4);
-    el.innerHTML = acts.map(function(a) {
+    el.innerHTML = acts.map(function(a, i) {
       const safeId = String(p.id).replace(/'/g, "\\'");
       const safeAid = String(a.id).replace(/'/g, "\\'");
       const aidEsc = escapeHtml(String(a.id));
+      const actIcon = ACT_DEFAULT_ICONS[i % ACT_DEFAULT_ICONS.length];
       return '<div class="home-widget-act" data-hwa-act="' + aidEsc + '" id="hwa-' + aidEsc + '" ' +
         'onclick="homeWidgetActTap(\'' + safeId + '\',\'' + safeAid + '\',this)">' +
         '<div class="hw-act-fill"></div>' +
-        '<span class="hw-act-icon">' + escapeHtml(getProjectIcon(p)) + '</span>' +
+        '<div class="hw-ring-wrap">' +
+          '<svg class="hw-ring-svg" viewBox="0 0 30 30">' +
+            '<circle class="hw-ring-track" cx="15" cy="15" r="11"/>' +
+            '<circle class="hw-ring-fill" id="hwr-' + aidEsc + '" cx="15" cy="15" r="11"/>' +
+          '</svg>' +
+          '<div class="hw-ring-icon">' + actIcon + '</div>' +
+        '</div>' +
         '<span class="hw-act-label">' + escapeHtml(a.label) + '</span>' +
         '<span class="hw-act-pts" id="hwp-' + aidEsc + '">+' + (a.points || 0) + ' ' + escapeHtml(unit) + '</span>' +
       '</div>';
@@ -14929,6 +15394,8 @@
       homeWidgetActLocked[activityId] = true;
       const ptsEl = cardEl.querySelector('.hw-act-pts');
       if (ptsEl) ptsEl.textContent = '✓';
+      var ringLog = cardEl.querySelector('.hw-ring-fill');
+      if (ringLog) ringLog.style.strokeDashoffset = '0';
       programLogTap(projectId, activityId, cardEl);
       setTimeout(function() {
         homeWidgetActLocked[activityId] = false;
@@ -14936,6 +15403,8 @@
       }, 2000);
     } else {
       cardEl.classList.remove('hw-logged');
+      var ringUn = cardEl.querySelector('.hw-ring-fill');
+      if (ringUn) ringUn.style.strokeDashoffset = '69.1';
       const ptsEl2 = cardEl.querySelector('.hw-act-pts');
       const all = getProjects();
       const p = all.find(function(x) { return projectIdEq(x.id, projectId); });
@@ -14983,6 +15452,59 @@
     syncBottomDockState();
   }
 
+  let quickNoteProjectId = null;
+  let quickNotePhaseIdx = null;
+
+  function openQuickNote(projectId) {
+    const all = getProjects();
+    const p = all.find(function(x) { return projectIdEq(x.id, projectId); });
+    if (!p) return;
+    quickNoteProjectId = projectId;
+    const phases = p.phases || [];
+    let targetIdx = phases.findIndex(function(ph) {
+      if (ph.checklist && ph.checklist.length > 0) return !ph.checklist.every(function(c) { return c.done; });
+      return !ph.completed;
+    });
+    if (targetIdx < 0) targetIdx = phases.length - 1;
+    if (targetIdx < 0) targetIdx = 0;
+    quickNotePhaseIdx = targetIdx;
+    const phase = phases[targetIdx];
+    const titleEl = document.getElementById('quickNoteTitle');
+    const phaseEl = document.getElementById('quickNotePhaseLabel');
+    const input = document.getElementById('quickNoteInput');
+    if (titleEl) titleEl.textContent = p.title || 'Quick note';
+    if (phaseEl) phaseEl.textContent = phase ? ('Phase ' + (targetIdx + 1) + (phase.title ? ' — ' + phase.title : '')) : '';
+    if (input) input.value = '';
+    const overlay = document.getElementById('quickNoteOverlay');
+    if (overlay) {
+      overlay.classList.add('show');
+      setTimeout(function() { if (input) input.focus(); }, 320);
+    }
+  }
+
+  function closeQuickNote() {
+    const overlay = document.getElementById('quickNoteOverlay');
+    if (overlay) overlay.classList.remove('show');
+    quickNoteProjectId = null;
+    quickNotePhaseIdx = null;
+  }
+
+  function saveQuickNote() {
+    const input = document.getElementById('quickNoteInput');
+    const text = input ? input.value.trim() : '';
+    if (!text || quickNoteProjectId == null || quickNotePhaseIdx == null) { closeQuickNote(); return; }
+    const all = getProjects();
+    const p = all.find(function(x) { return projectIdEq(x.id, quickNoteProjectId); });
+    if (!p || !Array.isArray(p.phases) || !p.phases[quickNotePhaseIdx]) { closeQuickNote(); return; }
+    const ph = p.phases[quickNotePhaseIdx];
+    const existing = ph.notes ? ph.notes.trim() : '';
+    const timestamp = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    ph.notes = existing ? (existing + '\n\n' + timestamp + ': ' + text) : (timestamp + ': ' + text);
+    p.modifiedAt = Date.now();
+    saveProjects(all);
+    closeQuickNote();
+  }
+
   function renderProjectsLanding(newlyCompletedId) {
     const all = getProjects();
     const completed = all.filter(isProjectCompleted).sort((a,b) => (b.completedAt || 0) - (a.completedAt || 0));
@@ -15024,6 +15546,7 @@
               <h3 class="projects-list-card-title">${escapeHtml(p.title)}</h3>
             </div>
             <div class="projects-list-card-actions">
+              <button type="button" class="projects-list-quicknote-btn" onclick="event.stopPropagation();openQuickNote('${p.id}')" aria-label="Quick note" title="Add a quick note">✏️</button>
               <button type="button" class="${favClass.trim()}" onclick="event.stopPropagation();projectsToggleFavorite('${p.id}', event)" aria-label="${p.favorite ? 'Remove favorite' : 'Favorite'}" title="Favorite">${favChar}</button>
               <button type="button" class="projects-list-delete-btn" onclick="event.stopPropagation();projectsConfirmDelete('${p.id}')" aria-label="Delete" title="Delete project">🗑</button>
             </div>
@@ -15289,12 +15812,25 @@
     const phaseComplete = isPhaseComplete(ph);
     let checklistHtml = '';
     if (ph.checklist && ph.checklist.length > 0) {
-      checklistHtml = ph.checklist.map((c, i) =>
-        `<label class="phase-checklist-item">
-          <input type="checkbox" ${c.done ? 'checked' : ''} onchange="projectsToggleCheck(${idx}, ${i})">
-          <span style="text-decoration:${c.done ? 'line-through' : 'none'};color:${c.done ? 'var(--muted)' : 'var(--text)'}">${escapeHtml(c.text)}</span>
-        </label>`
-      ).join('');
+      checklistHtml = ph.checklist.map((c, i) => {
+        const doneClass = c.done ? ' cl-done' : '';
+        const blockedClass = c.blocked ? ' cl-blocked' : '';
+        const dashOffset = c.done ? '0' : '69.1';
+        return `<div class="phase-cl-item${doneClass}${blockedClass}"
+    onclick="projectsToggleCheck(${idx}, ${i})"
+    oncontextmenu="event.preventDefault();projectsToggleBlocked(${idx}, ${i})"
+    data-long-press-start=""
+  >
+    <div class="cl-ring-wrap">
+      <svg class="cl-ring-svg" viewBox="0 0 28 28">
+        <circle class="cl-ring-track" cx="14" cy="14" r="11"/>
+        <circle class="cl-ring-fill" cx="14" cy="14" r="11" style="stroke-dashoffset:${dashOffset}"/>
+      </svg>
+      <div class="cl-ring-check" aria-hidden="true">${c.blocked ? '🔒' : (c.done ? '✓' : '')}</div>
+    </div>
+    <span class="cl-item-text">${escapeHtml(c.text)}</span>
+  </div>`;
+      }).join('');
     }
     const checklistBlock = (ph.checklist && ph.checklist.length > 0)
       ? `<div class="phase-checklist">${checklistHtml}</div>` : '';
@@ -15427,6 +15963,8 @@
       const target = cardsEl.querySelector('.projects-phase-card[data-phase-idx="' + projectsCurrentPhaseIndex + '"]');
       if (target) target.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' });
     }, 0);
+
+    initChecklistLongPress();
   }
 
   let projectCelebrationCompletedId = null;
@@ -15446,6 +15984,7 @@
       projectNameEl.style.display = p.title ? '' : 'none';
     } else if (projectNameEl) projectNameEl.style.display = 'none';
     if (overlay) overlay.classList.add('show');
+    launchConfetti(55, null, 'small');
     setTimeout(() => {
       if (overlay) overlay.classList.remove('show');
       const cardsEl = document.getElementById('projectsPhaseCards');
@@ -15467,6 +16006,7 @@
       quoteEl.style.display = q ? 'block' : 'none';
     }
     if (overlay) overlay.classList.add('show');
+    launchConfetti(120, null, 'full');
   }
 
   function dismissProjectCelebration() {
@@ -15482,6 +16022,49 @@
       if (pvC) pvC.style.display = 'none';
       renderProjectsLanding(id);
     }
+  }
+
+  var clLongPressTimer = 0;
+  var clLongPressTarget = null;
+
+  function initChecklistLongPress() {
+    var cards = document.getElementById('projectsPhaseCards');
+    if (!cards || cards.dataset.clLpInit) return;
+    cards.dataset.clLpInit = '1';
+    cards.addEventListener('touchstart', function(e) {
+      var item = e.target.closest('.phase-cl-item');
+      if (!item) return;
+      clearTimeout(clLongPressTimer);
+      clLongPressTarget = item;
+      clLongPressTimer = setTimeout(function() {
+        var card = item.closest('.projects-phase-card');
+        var idx = card ? parseInt(card.getAttribute('data-phase-idx'), 10) : NaN;
+        var parent = item.closest('.phase-checklist');
+        var items = parent ? Array.from(parent.querySelectorAll('.phase-cl-item')) : [];
+        var i = items.indexOf(item);
+        if (!isNaN(idx) && i >= 0) projectsToggleBlocked(idx, i);
+      }, 520);
+    }, { passive: true });
+    cards.addEventListener('touchend', function() {
+      clearTimeout(clLongPressTimer);
+    }, { passive: true });
+    cards.addEventListener('touchcancel', function() {
+      clearTimeout(clLongPressTimer);
+    }, { passive: true });
+  }
+
+  function projectsToggleBlocked(phaseIdx, itemIdx) {
+    var all = getProjects();
+    var p = all.find(function(x) { return projectIdEq(x.id, projectsViewing.id); });
+    if (!p || !p.phases[phaseIdx] || !p.phases[phaseIdx].checklist) return;
+    var item = p.phases[phaseIdx].checklist[itemIdx];
+    if (!item) return;
+    item.blocked = !item.blocked;
+    if (item.blocked) item.done = false;
+    p.modifiedAt = Date.now();
+    saveProjects(all);
+    projectsViewing = p;
+    renderProjectsView();
   }
 
   function projectsToggleCheck(phaseIdx, itemIdx) {
@@ -15502,6 +16085,7 @@
       showProjectCelebrationThenLand(p.id);
     } else if (phaseComplete) {
       hapticLight();
+      launchConfetti(45, null, 'small');
       projectsCurrentPhaseIndex = phaseIdx + 1;
       renderProjectsView();
       showPhaseCelebrationThenScroll();
