@@ -436,6 +436,8 @@
     html.dark-mode .home-project-chip-fill {
       background: linear-gradient(90deg, var(--accent) 0%, #e09868 100%);
     }
+    html.dark-mode .home-widget-primary-bar { background: rgba(255,255,255,0.08); }
+    html.dark-mode .home-widget-act { background: rgba(255,255,255,0.04); border-color: rgba(192,122,74,0.18); }
     html.dark-mode .recent-uploads-label, html.dark-mode .recent-upload-item,
     html.dark-mode .upcoming-events-label, html.dark-mode .event-item,
     html.dark-mode .event-date, html.dark-mode .event-title,
@@ -5356,6 +5358,225 @@
       flex-shrink: 0;
       line-height: 1;
     }
+    /* ── HOME WIDGET ── */
+    .home-widget {
+      width: 100%;
+      max-width: 340px;
+      margin-top: 12px;
+      background: rgba(255,255,255,0.72);
+      border: 1.5px solid rgba(192,122,74,0.16);
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(58,46,40,0.08);
+      overflow: hidden;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .home-widget.has-projects { opacity: 1; }
+    html.dark-mode .home-widget {
+      background: rgba(38,32,28,0.88);
+      border-color: rgba(192,122,74,0.2);
+    }
+
+    .home-widget-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px 8px;
+      border-bottom: 1px solid rgba(192,122,74,0.12);
+    }
+    html.dark-mode .home-widget-header {
+      border-bottom-color: rgba(255,255,255,0.07);
+    }
+
+    .home-widget-tabs {
+      display: flex;
+      background: rgba(0,0,0,0.05);
+      border-radius: 9px;
+      padding: 3px;
+      gap: 2px;
+    }
+    html.dark-mode .home-widget-tabs { background: rgba(255,255,255,0.07); }
+
+    .home-widget-tab {
+      padding: 4px 12px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: inherit;
+      transition: all 0.18s ease;
+      letter-spacing: 0.02em;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .home-widget-tab.active {
+      background: rgba(255,255,255,0.85);
+      color: var(--accent);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.09);
+    }
+    html.dark-mode .home-widget-tab.active {
+      background: rgba(58,50,44,0.9);
+      color: var(--accent);
+    }
+
+    .home-widget-all-btn {
+      background: none;
+      border: none;
+      font-size: 12px;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: inherit;
+      padding: 4px 2px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .home-widget-all-btn:active { opacity: 0.7; }
+
+    /* Primary project row */
+    .home-widget-primary {
+      padding: 12px 14px 8px;
+    }
+    .home-widget-primary:empty { display: none; }
+
+    .home-widget-primary-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+    .home-widget-primary-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: rgba(192,122,74,0.1);
+      border: 1px solid rgba(192,122,74,0.18);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .home-widget-primary-info { flex: 1; min-width: 0; }
+    .home-widget-primary-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .home-widget-primary-phase {
+      font-size: 11px;
+      color: var(--text2);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .home-widget-primary-pct {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .home-widget-primary-bar {
+      height: 5px;
+      background: rgba(0,0,0,0.07);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+    html.dark-mode .home-widget-primary-bar { background: rgba(255,255,255,0.08); }
+    .home-widget-primary-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #2a6fb5, #4a9ad4, #7bc4ef, #4a9ad4, #2a6fb5);
+      background-size: 200% 100%;
+      animation: progress-shine-blue 3s ease-in-out infinite;
+      transition: width 0.8s cubic-bezier(0.34,1.2,0.64,1);
+    }
+    .home-widget-primary-phase-label {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* Habits panel */
+    .home-widget-habits-inner {
+      padding: 12px 14px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .home-widget-no-habit {
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      padding: 12px 0 4px;
+      font-style: italic;
+      font-family: 'Playfair Display', serif;
+    }
+
+    /* Inline habit act rows in widget */
+    .home-widget-act {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.5);
+      border: 1.5px solid rgba(192,122,74,0.14);
+      border-radius: 14px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: border-color 0.25s, background 0.25s;
+      position: relative;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    html.dark-mode .home-widget-act { background: rgba(255,255,255,0.04); }
+    .home-widget-act.hw-logged {
+      border-color: rgba(74,154,106,0.4);
+      background: rgba(74,154,106,0.07);
+    }
+    .home-widget-act.hw-locked { pointer-events: none; }
+
+    .hw-act-fill {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(74,154,106,0.13), rgba(74,154,106,0.05));
+      transition: width 0.5s cubic-bezier(0.34,1.1,0.64,1);
+      pointer-events: none;
+    }
+    .home-widget-act.hw-logged .hw-act-fill { width: 100%; }
+
+    .hw-act-icon { font-size: 18px; flex-shrink: 0; }
+    .hw-act-label {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      transition: color 0.25s;
+    }
+    .home-widget-act.hw-logged .hw-act-label { color: #4a9a6a; }
+    .hw-act-pts {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      transition: color 0.25s;
+      flex-shrink: 0;
+    }
+    .home-widget-act.hw-logged .hw-act-pts { color: #4a9a6a; }
+
+    .hw-act-view-btn {
+      margin-top: 2px;
+      font-size: 11px;
+      color: var(--accent);
+      text-align: center;
+      cursor: pointer;
+      padding: 6px 0 0;
+      -webkit-tap-highlight-color: transparent;
+    }
     .projects-list-card-desc {
       font-size: 13px; color: var(--text2);
       line-height: 1.45;
@@ -5466,6 +5687,16 @@
       animation: programActCelebrate 0.78s cubic-bezier(0.32, 1.55, 0.45, 1);
       transition: none;
     }
+    .program-act-btn.program-act-logged {
+      background: linear-gradient(165deg, rgba(74,154,106,0.12), rgba(74,154,106,0.06));
+      border-color: rgba(74,154,106,0.38);
+    }
+    html.dark-mode .program-act-btn.program-act-logged {
+      background: linear-gradient(165deg, rgba(74,154,106,0.15), rgba(74,154,106,0.08));
+      border-color: rgba(74,154,106,0.35);
+    }
+    .program-act-btn.program-act-logged .program-act-title { color: #4a9a6a; }
+    .program-act-btn.program-act-logged .program-act-pts { color: #4a9a6a; }
     .program-act-btn.program-act-flash {
       animation: programActFlash 0.34s ease-out;
     }
@@ -8442,13 +8673,38 @@
     <div class="hint-area" id="hintArea">
       <div class="hint-greeting" id="greetingText"></div>
 
-      <div class="home-projects-scroller" id="homeProjectsScroller">
-        <button type="button" class="home-projects-heading" onclick="closeDrawer(); showProjectsScreen()" aria-label="View all projects">
-          Projects
-        </button>
-        <div class="home-projects-scroll-wrap" id="homeProjectsScrollWrap">
-          <div class="home-projects-scroll" id="homeProjectsScroll"></div>
+      <div class="home-widget" id="homeProjectsScroller">
+
+        <!-- Tab header -->
+        <div class="home-widget-header">
+          <div class="home-widget-tabs">
+            <button type="button" class="home-widget-tab active" id="homeWidgetTabProjects"
+              onclick="homeWidgetSwitchTab('projects')">Projects</button>
+            <button type="button" class="home-widget-tab" id="homeWidgetTabHabits"
+              onclick="homeWidgetSwitchTab('habits')">Habits</button>
+          </div>
+          <button type="button" class="home-widget-all-btn"
+            onclick="closeDrawer(); showProjectsScreen()" aria-label="View all">All ›</button>
         </div>
+
+        <!-- Projects panel -->
+        <div id="homeWidgetProjectsPanel">
+
+          <!-- Primary project row — written by renderHomeWidgetPrimary() -->
+          <div class="home-widget-primary" id="homeWidgetPrimary"></div>
+
+          <!-- Secondary chips — written by renderHomeProjectsScroller() as before -->
+          <div class="home-projects-scroll-wrap" id="homeProjectsScrollWrap">
+            <div class="home-projects-scroll h-scroll-faded" id="homeProjectsScroll"></div>
+          </div>
+
+        </div>
+
+        <!-- Habits panel (hidden by default) -->
+        <div id="homeWidgetHabitsPanel" style="display:none">
+          <div class="home-widget-habits-inner" id="homeWidgetHabitsInner"></div>
+        </div>
+
       </div>
 
       <div class="upcoming-events" id="upcomingEvents" onclick="closeDrawer(); showScheduleScreen()" role="button" tabindex="0" aria-label="View schedule">
@@ -9492,7 +9748,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.48.3';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.49.0';  // Bump this when you deploy changes.
 
   function renderGjKnife() {
     const canvas = document.getElementById('gjKnifeCanvas');
@@ -13691,6 +13947,61 @@
     programActBtnPressOut();
   }
 
+  /** Activity id for the base log row referenced by programLogUndoPayload.ids[0], if undo applies to this project. */
+  function programUndoPrimaryActivityIdFromProject(p) {
+    if (!programLogUndoPayload || !programLogUndoPayload.ids || !programLogUndoPayload.ids.length || !p || !Array.isArray(p.log)) return null;
+    if (!projectIdEq(programLogUndoPayload.projectId, p.id)) return null;
+    const id0 = String(programLogUndoPayload.ids[0]);
+    const entry = p.log.find(function(e) { return String(e.id) === id0; });
+    return entry && entry.activityId ? String(entry.activityId) : null;
+  }
+
+  function programSyncActBtnUndoStateFromPayload(btnWrap, freshProject) {
+    if (!btnWrap || !freshProject) return;
+    const aid = programUndoPrimaryActivityIdFromProject(freshProject);
+    if (!aid) return;
+    const nodes = btnWrap.querySelectorAll('button.program-act-btn');
+    for (let i = 0; i < nodes.length; i++) {
+      const b = nodes[i];
+      if (String(b.getAttribute('data-act-id') || '') !== aid) continue;
+      b.dataset.logged = '1';
+      b.dataset.locked = '1';
+      b.classList.add('program-act-logged');
+      (function(bb) {
+        setTimeout(function() {
+          if (bb && bb.parentNode) bb.dataset.locked = '0';
+        }, 2000);
+      })(b);
+      break;
+    }
+  }
+
+  function programActToggle(projectId, activityId, btnEl) {
+    if (btnEl && btnEl.dataset.locked === '1') return;
+
+    const isLogged = btnEl && btnEl.dataset.logged === '1';
+
+    if (!isLogged) {
+      if (btnEl) {
+        btnEl.dataset.locked = '1';
+        btnEl.dataset.logged = '1';
+        btnEl.classList.add('program-act-logged');
+      }
+      programLogTap(projectId, activityId, btnEl);
+      setTimeout(function() {
+        if (btnEl && btnEl.parentNode) btnEl.dataset.locked = '0';
+      }, 2000);
+    } else {
+      if (btnEl) {
+        btnEl.dataset.logged = '0';
+        btnEl.classList.remove('program-act-logged');
+      }
+      if (programLogUndoPayload && projectIdEq(programLogUndoPayload.projectId, projectId)) {
+        programUndoLastLogTap();
+      }
+    }
+  }
+
   function programBurstDonutConfetti() {
     const wrap = document.getElementById('programDonutWrap');
     if (!wrap) return;
@@ -13790,10 +14101,14 @@
       btnWrap.innerHTML = (fresh.activities || []).map(function(a) {
         const safeId = String(fresh.id).replace(/'/g, "\\'");
         const safeAid = String(a.id).replace(/'/g, "\\'");
-        return '<button type="button" class="program-act-btn" data-act-id="' + escapeHtml(a.id) + '" onclick="programLogTap(\'' + safeId + '\',\'' + safeAid + '\', this)">' +
+        return '<button type="button" class="program-act-btn" ' +
+          'data-act-id="' + escapeHtml(a.id) + '" ' +
+          'data-locked="0" data-logged="0" ' +
+          'onclick="programActToggle(\'' + safeId + '\',\'' + safeAid + '\', this)">' +
           '<span class="program-act-title">I did: ' + escapeHtml(a.label) + '</span>' +
           '<span class="program-act-pts">+' + (a.points || 0) + ' ' + escapeHtml(unit) + '</span></button>';
       }).join('');
+      programSyncActBtnUndoStateFromPayload(btnWrap, fresh);
       const pvb = document.getElementById('programViewBody');
       if (pvb && !pvb.dataset.programActTouch) {
         pvb.dataset.programActTouch = '1';
@@ -14514,17 +14829,137 @@
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 
+  // ── HOME WIDGET ──
+
+  let homeWidgetActiveTab = 'projects';
+  const homeWidgetActLocked = {};
+
+  function homeWidgetSwitchTab(tab) {
+    homeWidgetActiveTab = tab;
+    const tabProj = document.getElementById('homeWidgetTabProjects');
+    const tabHab = document.getElementById('homeWidgetTabHabits');
+    const panelProj = document.getElementById('homeWidgetProjectsPanel');
+    const panelHab = document.getElementById('homeWidgetHabitsPanel');
+    if (tabProj) tabProj.classList.toggle('active', tab === 'projects');
+    if (tabHab) tabHab.classList.toggle('active', tab === 'habits');
+    if (panelProj) panelProj.style.display = tab === 'projects' ? '' : 'none';
+    if (panelHab) panelHab.style.display = tab === 'habits' ? '' : 'none';
+    if (tab === 'habits') renderHomeWidgetHabits();
+  }
+
+  function renderHomeWidgetPrimary() {
+    const el = document.getElementById('homeWidgetPrimary');
+    if (!el) return;
+    const inProgress = sortProjectsByFavoriteThenRecent(
+      getProjects().filter(function(p) { return !isProjectCompleted(p); })
+    );
+    if (!inProgress.length) { el.innerHTML = ''; return; }
+    const p = inProgress[0];
+    const d = getProjectLandingDetails(p);
+    const progPct = Math.round(d.prog);
+    const phaseInfo = d.currentPhaseName ? escapeHtml(d.currentPhaseName) : (d.phaseLabel || '');
+    el.innerHTML =
+      '<div class="home-widget-primary-row" onclick="closeDrawer();showProjectsScreen();projectsSelectProject(\'' + p.id + '\')">' +
+        '<div class="home-widget-primary-icon">' + escapeHtml(getProjectIcon(p)) + '</div>' +
+        '<div class="home-widget-primary-info">' +
+          '<div class="home-widget-primary-title">' + escapeHtml(p.title) + '</div>' +
+          (phaseInfo ? '<div class="home-widget-primary-phase">' + phaseInfo + '</div>' : '') +
+        '</div>' +
+        '<div class="home-widget-primary-pct">' + progPct + '%</div>' +
+      '</div>' +
+      '<div class="home-widget-primary-bar"><div class="home-widget-primary-bar-fill" style="width:' + progPct + '%"></div></div>' +
+      (d.phaseLabel ? '<div class="home-widget-primary-phase-label">' + escapeHtml(d.phaseLabel) + '</div>' : '');
+  }
+
+  function renderHomeWidgetHabits() {
+    const el = document.getElementById('homeWidgetHabitsInner');
+    if (!el) return;
+    const habits = sortProjectsByFavoriteThenRecent(
+      getProjects().filter(function(p) { return !isProjectCompleted(p) && projectIsProgram(p); })
+    );
+    if (!habits.length) {
+      el.innerHTML = '<div class="home-widget-no-habit">No active habits yet.</div>';
+      return;
+    }
+    const p = habits[0];
+    const unit = programGoalUnitLabel(p);
+    const acts = (p.activities || []).slice(0, 4);
+    el.innerHTML = acts.map(function(a) {
+      const safeId = String(p.id).replace(/'/g, "\\'");
+      const safeAid = String(a.id).replace(/'/g, "\\'");
+      const aidEsc = escapeHtml(String(a.id));
+      return '<div class="home-widget-act" data-hwa-act="' + aidEsc + '" id="hwa-' + aidEsc + '" ' +
+        'onclick="homeWidgetActTap(\'' + safeId + '\',\'' + safeAid + '\',this)">' +
+        '<div class="hw-act-fill"></div>' +
+        '<span class="hw-act-icon">' + escapeHtml(getProjectIcon(p)) + '</span>' +
+        '<span class="hw-act-label">' + escapeHtml(a.label) + '</span>' +
+        '<span class="hw-act-pts" id="hwp-' + aidEsc + '">+' + (a.points || 0) + ' ' + escapeHtml(unit) + '</span>' +
+      '</div>';
+    }).join('') +
+      '<div class="hw-act-view-btn" onclick="closeDrawer();showProjectsScreen();projectsSelectProject(\'' + String(p.id).replace(/'/g, "\\'") + '\')">Open full habit →</div>';
+
+    const syncAid = programUndoPrimaryActivityIdFromProject(p);
+    if (syncAid) {
+      const rows = el.querySelectorAll('.home-widget-act');
+      for (let i = 0; i < rows.length; i++) {
+        const r = rows[i];
+        if (String(r.getAttribute('data-hwa-act') || '') !== syncAid) continue;
+        r.classList.add('hw-logged', 'hw-locked');
+        homeWidgetActLocked[syncAid] = true;
+        const ptsEl = r.querySelector('.hw-act-pts');
+        if (ptsEl) ptsEl.textContent = '✓';
+        (function(aidKey, cardEl) {
+          setTimeout(function() {
+            homeWidgetActLocked[aidKey] = false;
+            if (cardEl && cardEl.parentNode) cardEl.classList.remove('hw-locked');
+          }, 2000);
+        })(syncAid, r);
+        break;
+      }
+    }
+  }
+
+  function homeWidgetActTap(projectId, activityId, cardEl) {
+    if (homeWidgetActLocked[activityId]) return;
+
+    const isLogged = cardEl.classList.contains('hw-logged');
+
+    if (!isLogged) {
+      cardEl.classList.add('hw-logged', 'hw-locked');
+      homeWidgetActLocked[activityId] = true;
+      const ptsEl = cardEl.querySelector('.hw-act-pts');
+      if (ptsEl) ptsEl.textContent = '✓';
+      programLogTap(projectId, activityId, cardEl);
+      setTimeout(function() {
+        homeWidgetActLocked[activityId] = false;
+        if (cardEl && cardEl.parentNode) cardEl.classList.remove('hw-locked');
+      }, 2000);
+    } else {
+      cardEl.classList.remove('hw-logged');
+      const ptsEl2 = cardEl.querySelector('.hw-act-pts');
+      const all = getProjects();
+      const p = all.find(function(x) { return projectIdEq(x.id, projectId); });
+      const act = p ? (p.activities || []).find(function(a) { return String(a.id) === String(activityId); }) : null;
+      const unit = p ? programGoalUnitLabel(p) : 'pts';
+      if (ptsEl2 && act) ptsEl2.textContent = '+' + (act.points || 0) + ' ' + unit;
+      if (programLogUndoPayload && projectIdEq(programLogUndoPayload.projectId, projectId)) {
+        programUndoLastLogTap();
+      }
+    }
+  }
+
   function renderHomeProjectsScroller() {
     const wrap = document.getElementById('homeProjectsScroller');
     const scrollEl = document.getElementById('homeProjectsScroll');
     if (!wrap || !scrollEl) return;
+    renderHomeWidgetPrimary();
+    if (homeWidgetActiveTab === 'habits') renderHomeWidgetHabits();
     const inProgress = sortProjectsByFavoriteThenRecent(getProjects().filter(p => !isProjectCompleted(p)));
     if (inProgress.length === 0) {
       wrap.classList.remove('has-projects');
-      wrap.style.display = 'none';
+      scrollEl.innerHTML = '';
       return;
     }
-    wrap.style.display = '';
     wrap.classList.add('has-projects');
     scrollEl.innerHTML = inProgress.map(p => {
       const d = getProjectLandingDetails(p);
