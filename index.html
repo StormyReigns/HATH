@@ -5692,6 +5692,24 @@
       -webkit-tap-highlight-color: transparent;
     }
     .quick-note-save:active { opacity: 0.88; }
+    .quick-note-blathers {
+      width: 100%;
+      margin-top: 8px;
+      padding: 12px;
+      background: none;
+      border: 1.5px solid rgba(192,122,74,0.3);
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--accent);
+      cursor: pointer;
+      font-family: inherit;
+      letter-spacing: 0.01em;
+      transition: background 0.15s, border-color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .quick-note-blathers:active { background: rgba(192,122,74,0.07); border-color: rgba(192,122,74,0.5); }
+    .quick-note-blathers:disabled { opacity: 0.5; pointer-events: none; }
     .projects-list-card-desc {
       font-size: 13px; color: var(--text2);
       line-height: 1.45;
@@ -5788,6 +5806,7 @@
       cursor: pointer; text-align: left; -webkit-tap-highlight-color: transparent;
       box-shadow: 0 1px 0 rgba(255,255,255,0.8) inset;
       transition: transform 0.22s cubic-bezier(0.34, 1.45, 0.64, 1), box-shadow 0.2s ease, border-color 0.2s ease, filter 0.2s ease;
+      position: relative; overflow: hidden;
     }
     html.dark-mode .program-act-btn {
       background: linear-gradient(165deg, rgba(52,46,40,0.95), rgba(40,36,32,0.75));
@@ -5821,6 +5840,21 @@
       color: #3a8a5a;
     }
     html.dark-mode .program-act-btn.program-act-logged .program-act-pts { color: #7acd9a; }
+    .program-act-fill {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 0%;
+      background: linear-gradient(180deg,
+        rgba(74,154,106,0.10) 0%,
+        rgba(74,154,106,0.20) 100%);
+      transition: height 0.55s cubic-bezier(0.34,1.05,0.64,1);
+      pointer-events: none;
+      border-radius: 0 0 13px 13px;
+    }
+    .program-act-btn.program-act-logged .program-act-fill {
+      height: 100%;
+      border-radius: 13px;
+    }
     .program-act-stepper-card {
       background: linear-gradient(165deg, rgba(255,255,255,0.9), rgba(255,248,240,0.75));
       border: 1px solid rgba(192,122,74,0.32);
@@ -6000,19 +6034,87 @@
     }
     .program-streak-block { margin-bottom: 14px; }
     .program-streak-block:last-child { margin-bottom: 0; }
-    .program-streak-dots {
-      display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin-top: 10px;
+    /* ── STREAK LIGHTS ── */
+    .streak-lights-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
-    .program-streak-dot {
-      width: 9px; height: 14px; border-radius: 4px;
-      background: rgba(0,0,0,0.08); border: 1px solid rgba(192,122,74,0.15);
-      transition: background 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+    .streak-lights-row {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
-    html.dark-mode .program-streak-dot { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.1); }
-    .program-streak-dot.is-on {
-      background: linear-gradient(165deg, rgba(192,122,74,0.85), rgba(212,149,106,0.95));
-      border-color: rgba(192,122,74,0.45);
-      transform: scaleY(1.05);
+    .streak-lights-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .streak-lights-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      flex: 1;
+      min-width: 0;
+    }
+    .streak-lights-count {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      background: rgba(192,122,74,0.1);
+      border-radius: 6px;
+      padding: 2px 7px;
+      white-space: nowrap;
+    }
+    .streak-lights-bonus {
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .streak-lights-pips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .streak-pip {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.06);
+      border: 1.5px solid rgba(192,122,74,0.15);
+      display: inline-block;
+      transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s cubic-bezier(0.34,1.4,0.64,1);
+    }
+    html.dark-mode .streak-pip {
+      background: rgba(255,255,255,0.07);
+      border-color: rgba(255,255,255,0.1);
+    }
+    .streak-pip.streak-pip-on {
+      background: linear-gradient(135deg, #c07a4a, #e09a6a);
+      border-color: rgba(192,122,74,0.5);
+      box-shadow: 0 0 8px rgba(192,122,74,0.45), 0 0 2px rgba(192,122,74,0.3) inset;
+      transform: scale(1.08);
+    }
+    .streak-pip.streak-pip-next {
+      border-color: rgba(192,122,74,0.4);
+      background: rgba(192,122,74,0.08);
+      animation: pip-pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes pip-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(192,122,74,0.25); transform: scale(1); }
+      50% { box-shadow: 0 0 0 5px rgba(192,122,74,0.0); transform: scale(1.1); }
+    }
+    .streak-lights-reset {
+      font-size: 11px;
+      color: var(--muted);
+      font-style: italic;
+      font-family: 'Playfair Display', serif;
+      padding-top: 2px;
+    }
+    .streak-lights-unlinked {
+      font-size: 12px;
+      color: var(--muted);
     }
     .program-afterlog-btn {
       flex: 1; min-width: 120px; padding: 11px 14px; border-radius: 12px; font-size: 14px; font-weight: 600;
@@ -9484,26 +9586,11 @@
           </div>
           <div class="program-rhythm-ladder" id="programRhythmLadder" aria-label="Progress by time window"></div>
           <div class="program-streak-strip" id="programStreakStrip" aria-label="Streak bonuses"></div>
-          <div class="program-undo-ribbon" id="programUndoRibbon" style="display:none" role="region" aria-label="Undo last log">
-            <span class="program-undo-ribbon-text" id="programUndoRibbonText">Mistake on the last tap? You can undo it.</span>
-            <button type="button" class="program-undo-ribbon-btn" onclick="programTryUndoLastLogTap()">Undo</button>
-          </div>
           <div class="program-today-block">
             <h3 class="program-section-label">Log today</h3>
             <p class="program-today-date" id="programTodayDate"></p>
             <p class="program-log-hint" id="programLogHint">Tap when you have earned it. Each tap logs for today and counts toward your habit goal.</p>
             <div class="program-activity-buttons" id="programActivityButtons"></div>
-            <div class="program-after-log-actions" id="programAfterLogActions">
-              <button type="button" class="program-afterlog-btn program-afterlog-primary" id="programInlineUndoBtn" onclick="programTryUndoLastLogTap()">Undo last tap</button>
-              <button type="button" class="program-afterlog-btn program-afterlog-secondary" id="programInlineRemoveBtn" onclick="programRemoveLatestLogEntry()">Remove last line</button>
-            </div>
-            <p class="program-afterlog-hint">Undo only works for a short time right after <strong>I did</strong>. Remove last line drops the newest saved row anytime (see Activity log below).</p>
-          </div>
-          <div class="program-log-block">
-            <h3 class="program-section-label program-log-head-title">Activity log</h3>
-            <p class="program-log-purpose">Each row is one save from an <strong>I did</strong> tap (newest first). Streaks read from these dates.</p>
-            <p class="program-log-sub" id="programLogSub" style="display:none;font-size:12px;color:var(--muted);margin:4px 0 10px;line-height:1.35"></p>
-            <div class="program-log-list" id="programLogList"></div>
           </div>
         </div>
       </div>
@@ -10004,6 +10091,7 @@
     <div class="quick-note-phase-label" id="quickNotePhaseLabel"></div>
     <textarea class="quick-note-input" id="quickNoteInput" placeholder="What's on your mind about this?" rows="4"></textarea>
     <button type="button" class="quick-note-save" onclick="saveQuickNote()">Save note</button>
+    <button type="button" class="quick-note-blathers" id="quickNoteBlathersBtn" onclick="quickNoteAskBlathers()">🦉 Ask Blathers to sort this</button>
   </div>
 </div>
 
@@ -10016,7 +10104,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.50.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.51.0';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   var _confettiCtx = null;
@@ -14302,44 +14390,93 @@
     const strip = document.getElementById('programStreakStrip');
     if (!strip) return;
     const rules = normalizeProgramRules(p.rules || {}).streakBonuses;
-    strip.style.display = 'block';
-    if (!rules.length) {
-      strip.innerHTML = '<div class="program-streak-strip-title">Streak bonuses</div>' +
-        '<div class="program-streak-line">No streak bonuses yet. Tap <strong>Edit</strong>, go to the last step, and add one to earn a little extra on consecutive days.</div>';
-      return;
-    }
+    strip.style.display = rules.length ? 'block' : 'none';
+    if (!rules.length) return;
+
     const today = todayYMD();
-    const lines = [];
+    const yesterday = (function() {
+      const d = parseYMD(today);
+      d.setDate(d.getDate() - 1);
+      return ymdFromDate(d);
+    })();
+
+    let html = '<div class="streak-lights-wrap">';
+
     rules.forEach(function(rule) {
       const need = Math.max(2, rule.consecutiveDays || 2);
       const bonus = Math.max(0, parseInt(rule.bonusPoints, 10) || 0);
       const aid = programResolveRuleActivityId(p, rule);
       const act = aid ? (p.activities || []).find(function(a) { return a.id === aid; }) : null;
-      const labelHint = String(rule.activityLabel || '').trim();
-      const name = act ? act.label : (labelHint || 'Activity');
+      const name = act ? act.label : (String(rule.activityLabel || '').trim() || 'Activity');
+
       if (!aid || !act) {
-        lines.push('<div class="program-streak-line">Bonus rule for <strong>' + escapeHtml(name) + '</strong> is not linked to a current activity. Tap <strong>Edit</strong> and re-save streak bonuses so the activity matches.</div>');
+        html += '<div class="streak-lights-row">' +
+          '<div class="streak-lights-label">' + escapeHtml(name) + '</div>' +
+          '<div class="streak-lights-unlinked">Rule not linked — tap Edit to fix.</div>' +
+          '</div>';
         return;
       }
+
       const streak = countStreakEndingOn(p, String(aid), today);
-      const info = programStreakNextInfo(streak, need);
-      const inCycle = streak <= 0 ? 0 : (streak % need === 0 ? need : streak % need);
-      let dots = '<div class="program-streak-dots" title="' + inCycle + ' of ' + need + ' days in this stretch">';
-      for (let di = 0; di < need; di++) {
-        dots += '<span class="program-streak-dot' + (di < inCycle ? ' is-on' : '') + '" aria-hidden="true"></span>';
+      const loggedYesterday = (function() {
+        if (!Array.isArray(p.log)) return false;
+        return p.log.some(function(e) {
+          return !e.isStreakBonus &&
+            String(e.activityId || '') === String(aid) &&
+            String(e.date || '').slice(0, 10) === yesterday;
+        });
+      })();
+      const loggedToday = (function() {
+        if (!Array.isArray(p.log)) return false;
+        return p.log.some(function(e) {
+          return !e.isStreakBonus &&
+            String(e.activityId || '') === String(aid) &&
+            String(e.date || '').slice(0, 10) === today;
+        });
+      })();
+
+      const hasAnyLog = Array.isArray(p.log) && p.log.some(function(e) {
+        return !e.isStreakBonus && String(e.activityId || '') === String(aid);
+      });
+
+      const broke = hasAnyLog && streak === 0 && !loggedYesterday;
+
+      let pips = '';
+      for (var i = 0; i < need; i++) {
+        var filled = i < streak;
+        var isNext = i === streak && !loggedToday;
+        var cls = 'streak-pip' +
+          (filled ? ' streak-pip-on' : '') +
+          (isNext ? ' streak-pip-next' : '');
+        pips += '<span class="' + cls + '" aria-hidden="true"></span>';
       }
-      dots += '</div>';
-      let line = '';
-      if (streak < 1) {
-        line = '<strong>' + escapeHtml(name) + '</strong> · each day you log fills one dot toward a <strong>' + need + '</strong>-day streak (+' + bonus + ' ' + escapeHtml(unit) + ' when all fill).';
-      } else if (info.atMilestone) {
-        line = '<strong>' + escapeHtml(name) + '</strong> · <strong>' + streak + '-day</strong> streak — row is full; next bonus after <strong>' + info.daysLeft + '</strong> more consecutive logged day' + (info.daysLeft === 1 ? '' : 's') + '.';
-      } else {
-        line = '<strong>' + escapeHtml(name) + '</strong> · <strong>' + streak + '-day</strong> streak — <strong>' + info.daysLeft + '</strong> more day' + (info.daysLeft === 1 ? '' : 's') + ' until the next +' + bonus + ' ' + escapeHtml(unit) + ' bonus.';
-      }
-      lines.push('<div class="program-streak-block"><div class="program-streak-line">' + line + '</div>' + dots + '</div>');
+
+      var streakLabel = streak > 0
+        ? '<span class="streak-lights-count">' + streak + ' day' + (streak === 1 ? '' : 's') + '</span>'
+        : '';
+
+      var bonusLabel = bonus > 0
+        ? '<span class="streak-lights-bonus">+' + bonus + ' ' + escapeHtml(unit) + ' at ' + need + '</span>'
+        : '';
+
+      var resetNote = broke
+        ? '<div class="streak-lights-reset">Chain reset — yesterday was missed</div>'
+        : '';
+
+      html +=
+        '<div class="streak-lights-row">' +
+          '<div class="streak-lights-header">' +
+            '<span class="streak-lights-label">' + escapeHtml(name) + '</span>' +
+            streakLabel +
+            bonusLabel +
+          '</div>' +
+          '<div class="streak-lights-pips">' + pips + '</div>' +
+          resetNote +
+        '</div>';
     });
-    strip.innerHTML = '<div class="program-streak-strip-title">Streak bonuses</div>' + lines.join('');
+
+    html += '</div>';
+    strip.innerHTML = html;
   }
 
   function syncProgramUndoRibbon() {
@@ -14447,6 +14584,12 @@
               }
             }
           });
+
+          // Re-render streak lights after log so the newly filled pip animates in
+          setTimeout(function() {
+            var fresh = getProjects().find(function(x) { return projectIdEq(x.id, projectId); });
+            if (fresh) programRenderStreakStrip(fresh, programGoalUnitLabel(fresh));
+          }, 100);
         }, 50);
       });
 
@@ -14536,11 +14679,6 @@
         saveProjects(allFix);
       }
     }
-    const logSubEl = document.getElementById('programLogSub');
-    if (logSubEl && !programLogHintFlashTimer) {
-      logSubEl.style.display = 'none';
-      logSubEl.textContent = '';
-    }
     const tit = document.getElementById('programViewTitle');
     const ic = document.getElementById('programViewTitleIcon');
     if (ic) ic.textContent = getProjectIcon(fresh);
@@ -14589,6 +14727,7 @@
             'data-act-id="' + escapeHtml(a.id) + '" ' +
             'data-locked="0" data-logged="0" ' +
             'onclick="programActToggle(\'' + safeId + '\',\'' + safeAid + '\', this)">' +
+            '<div class="program-act-fill" aria-hidden="true"></div>' +
             '<span class="program-act-title">I did: ' + escapeHtml(a.label) + '</span>' +
             '<span class="program-act-pts">+' + (a.points || 0) + ' ' + escapeHtml(unit) + '</span></button>';
         }
@@ -14660,39 +14799,10 @@
 
     programRenderStreakStrip(fresh, unit);
 
-    const logSnap = getProjects().find(function(x) { return projectIdEq(x.id, fresh.id); }) || fresh;
-    normalizeProgramLogField(logSnap);
-    const logArr = Array.isArray(logSnap.log) ? logSnap.log : [];
-    const logEl = document.getElementById('programLogList');
-    if (logEl) {
-      const lines = logArr.slice(-14).reverse();
-      logEl.innerHTML = lines.length ? lines.map(function(e) {
-        const lbl = (fresh.activities || []).find(function(x) { return String(x.id) === String(e.activityId); });
-        const name = lbl ? lbl.label : 'Activity';
-        const bonus = e.bonusPoints ? ' +' + e.bonusPoints + ' bonus ' + escapeHtml(unit) : '';
-        return '<div class="program-log-line">' + escapeHtml(String(e.date || '')) + ' — ' + escapeHtml(name) + ' +' + (e.pointsAwarded || 0) + ' ' + escapeHtml(unit) + bonus + '</div>';
-      }).join('') : '<div class="program-log-line">Nothing logged yet. Use the buttons above when you earn it.</div>';
-    }
-    syncProgramUndoRibbon();
-    syncProgramAfterLogButtons();
   }
 
   function syncProgramAfterLogButtons() {
-    const u = document.getElementById('programInlineUndoBtn');
-    const r = document.getElementById('programInlineRemoveBtn');
-    const pv = projectsViewing;
-    const live = pv && projectIsProgram(pv) ? getProjects().find(function(x) { return projectIdEq(x.id, pv.id); }) : null;
-    const okUndo = !!(live && programLogUndoPayload && projectIdEq(programLogUndoPayload.projectId, live.id));
-    let logN = 0;
-    if (live && Array.isArray(live.log)) logN = live.log.length;
-    if (u) {
-      u.classList.toggle('program-afterlog-muted', !okUndo);
-      u.setAttribute('aria-label', okUndo ? 'Undo the tap you just saved' : 'After you tap I did, Undo is available here for a few seconds');
-    }
-    if (r) {
-      r.classList.toggle('program-afterlog-muted', logN < 1);
-      r.setAttribute('aria-label', logN < 1 ? 'Nothing in the log yet' : 'Remove the newest line from your activity log');
-    }
+    // Inline undo/remove buttons removed from DOM; retained as no-op for call-site compatibility
   }
 
   function hideProgramLogToast() {
@@ -14728,17 +14838,6 @@
       programUndoLastLogTap();
       return;
     }
-    const sub = document.getElementById('programLogSub');
-    if (sub) {
-      if (programLogHintFlashTimer) clearTimeout(programLogHintFlashTimer);
-      sub.style.display = 'block';
-      sub.textContent = 'Undo only works for a few seconds right after you tap "I did:". Use Remove latest for the newest line in your log anytime.';
-      programLogHintFlashTimer = setTimeout(function() {
-        programLogHintFlashTimer = 0;
-        sub.style.display = 'none';
-        sub.textContent = '';
-      }, 5200);
-    }
   }
 
   function programUndoLastLogTap() {
@@ -14770,12 +14869,6 @@
     if (p.log.length === beforeLen) {
       programLogUndoPayload = null;
       hideProgramLogToast();
-      syncProgramAfterLogButtons();
-      const sub = document.getElementById('programLogSub');
-      if (sub) {
-        sub.style.display = 'block';
-        sub.textContent = 'Could not undo that save automatically. Use Remove last line to drop the newest row.';
-      }
       return;
     }
     programLogUndoPayload = null;
@@ -15554,6 +15647,90 @@
     p.modifiedAt = Date.now();
     saveProjects(all);
     closeQuickNote();
+  }
+
+  async function quickNoteAskBlathers() {
+    const input = document.getElementById('quickNoteInput');
+    const text = input ? input.value.trim() : '';
+    if (!text) return;
+
+    const btn = document.getElementById('quickNoteBlathersBtn');
+    const saveBtn = document.querySelector('.quick-note-save');
+    if (btn) { btn.disabled = true; btn.textContent = '🦉 Thinking\u2026'; }
+    if (saveBtn) saveBtn.disabled = true;
+
+    const all = getProjects();
+    const p = quickNoteProjectId ? all.find(function(x) { return projectIdEq(x.id, quickNoteProjectId); }) : null;
+    const phase = p && p.phases && p.phases[quickNotePhaseIdx] ? p.phases[quickNotePhaseIdx] : null;
+
+    const systemPrompt = 'You are Blathers from Animal Crossing — warm, slightly formal, knowledgeable, occasionally tangential. ' +
+      'The user has typed a casual note about a project. ' +
+      'Decide what kind of note it is and respond with ONLY a JSON object (no markdown, no preamble) in this shape: ' +
+      '{"type": "note" | "checklist_item" | "phase_update", "content": "string", "blathers_comment": "one short sentence in Blathers voice acknowledging the note"}. ' +
+      'type "note" = general observation or thought. ' +
+      'type "checklist_item" = a specific task to be done. ' +
+      'type "phase_update" = a status update on progress. ' +
+      'content = the cleaned, saved version of what they typed. ' +
+      'blathers_comment = warm, brief, in character.';
+
+    const userPrompt = 'Project: "' + (p ? p.title : 'Unknown') + '". ' +
+      'Phase: "' + (phase && phase.title ? phase.title : 'Current phase') + '". ' +
+      'Note: "' + text + '"';
+
+    try {
+      const res = await fetch(AI_URL, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          message: userPrompt,
+          systemOverride: systemPrompt,
+          history: [],
+          user: getApiUser(),
+          nickname: getDisplayName(),
+          directPrompt: true
+        })
+      });
+      const raw = await res.text();
+      let data;
+      try { data = JSON.parse(raw); } catch (_) { data = {}; }
+      const reply = data.reply || raw || '';
+
+      var result;
+      try {
+        var clean = String(reply).replace(/```json|```/g, '').trim();
+        result = JSON.parse(clean);
+      } catch (_) {
+        result = { type: 'note', content: text, blathers_comment: 'Ah — noted! I have saved this for you.' };
+      }
+
+      const allNow = getProjects();
+      const pNow = quickNoteProjectId ? allNow.find(function(x) { return projectIdEq(x.id, quickNoteProjectId); }) : null;
+      if (pNow && Array.isArray(pNow.phases) && pNow.phases[quickNotePhaseIdx]) {
+        const ph = pNow.phases[quickNotePhaseIdx];
+        const timestamp = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+        if (result.type === 'checklist_item') {
+          if (!Array.isArray(ph.checklist)) ph.checklist = [];
+          ph.checklist.push({ id: genId(), text: result.content, done: false, blocked: false });
+        } else {
+          const existing = ph.notes ? ph.notes.trim() : '';
+          ph.notes = existing
+            ? (existing + '\n\n' + timestamp + ': ' + result.content)
+            : (timestamp + ': ' + result.content);
+        }
+        pNow.modifiedAt = Date.now();
+        saveProjects(allNow);
+      }
+
+      if (input) input.value = '🦉 ' + (result.blathers_comment || 'Noted!');
+      if (btn) { btn.disabled = true; btn.textContent = '✓ Saved'; }
+      setTimeout(function() { closeQuickNote(); }, 1400);
+    } catch (_) {
+      if (input) input.value = text;
+      if (btn) { btn.disabled = false; btn.textContent = '🦉 Ask Blathers to sort this'; }
+      if (saveBtn) saveBtn.disabled = false;
+    }
   }
 
   function renderProjectsLanding(newlyCompletedId) {
