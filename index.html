@@ -10016,7 +10016,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.50.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.50.2';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   var _confettiCtx = null;
@@ -14858,7 +14858,6 @@
     if (addedIds.length > 1) toastHtml += ' <span style="opacity:0.88">Streak bonus included.</span>';
     programLogUndoPayload = { projectId: String(p.id), ids: addedIds.map(function(x) { return String(x); }) };
     showProgramLogToast(toastHtml);
-    floatPoints('+' + basePts + ' ' + unit, btnEl);
     try {
       if (navigator.vibrate) navigator.vibrate([14, 42, 18]);
     } catch (_) {}
