@@ -10113,7 +10113,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.51.3';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.51.4';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   var _confettiCtx = null;
@@ -14404,8 +14404,12 @@
       if (section) section.style.display = 'none';
       return;
     }
-    if (section) section.style.display = 'block';
+    if (section) {
+      section.style.display = 'block';
+      section.style.visibility = 'visible';
+    }
     strip.style.display = 'block';
+    strip.style.visibility = 'visible';
 
     const today = todayYMD();
     const yesterday = (function() {
@@ -14573,7 +14577,12 @@
 
       programLogTap(projectId, activityId, btnEl);
 
-      // Re-render streak lights after log so the newly filled pip animates in
+      // Release lockout after 2s so a second tap can un-log
+      setTimeout(function() {
+        if (btnEl) btnEl.dataset.locked = '0';
+      }, 2000);
+
+      // Re-render streak lights after log
       setTimeout(function() {
         var fresh = getProjects().find(function(x) { return projectIdEq(x.id, projectId); });
         if (fresh) programRenderStreakStrip(fresh, programGoalUnitLabel(fresh));
@@ -14767,6 +14776,11 @@
         row('This month', moPts, mT) +
         row('This year', yrPts, yT);
     }
+
+    // Pre-show streak section if rules exist so it's never stuck hidden
+    const _rules = normalizeProgramRules(fresh.rules || {}).streakBonuses;
+    const _sec = document.getElementById('programStreakSection');
+    if (_sec) _sec.style.display = _rules.length ? 'block' : 'none';
 
     programRenderStreakStrip(fresh, unit);
 
