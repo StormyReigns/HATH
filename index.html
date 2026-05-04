@@ -5970,8 +5970,14 @@
       0%, 100% { transform: scale(1); }
       45% { transform: scale(1.09); }
     }
+    .program-streak-section {
+      margin-bottom: 16px;
+    }
+    .program-streak-section .program-section-label {
+      margin-bottom: 10px;
+    }
     .program-streak-strip {
-      margin: -6px 0 18px; padding: 12px 14px; border-radius: 14px;
+      margin: 0; padding: 12px 14px; border-radius: 14px;
       background: rgba(255,255,255,0.52); border: 1px solid rgba(192,122,74,0.22);
       font-size: 13px; line-height: 1.45; color: var(--text2);
     }
@@ -9584,8 +9590,11 @@
               <div class="program-hero-period" id="programHeroPeriod"></div>
             </div>
           </div>
+          <div class="program-streak-section" id="programStreakSection" style="display:none">
+            <h3 class="program-section-label">Streak</h3>
+            <div class="program-streak-strip" id="programStreakStrip" aria-label="Streak bonuses"></div>
+          </div>
           <div class="program-rhythm-ladder" id="programRhythmLadder" aria-label="Progress by time window"></div>
-          <div class="program-streak-strip" id="programStreakStrip" aria-label="Streak bonuses"></div>
           <div class="program-today-block">
             <h3 class="program-section-label">Log today</h3>
             <p class="program-today-date" id="programTodayDate"></p>
@@ -10104,7 +10113,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.51.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.51.3';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   var _confettiCtx = null;
@@ -14390,8 +14399,13 @@
     const strip = document.getElementById('programStreakStrip');
     if (!strip) return;
     const rules = normalizeProgramRules(p.rules || {}).streakBonuses;
-    strip.style.display = rules.length ? 'block' : 'none';
-    if (!rules.length) return;
+    const section = document.getElementById('programStreakSection');
+    if (!rules.length) {
+      if (section) section.style.display = 'none';
+      return;
+    }
+    if (section) section.style.display = 'block';
+    strip.style.display = 'block';
 
     const today = todayYMD();
     const yesterday = (function() {
@@ -14551,50 +14565,21 @@
     const isLogged = btnEl && btnEl.dataset.logged === '1';
 
     if (!isLogged) {
-      // 1. Apply visual immediately so user sees it
       if (btnEl) {
         btnEl.dataset.locked = '1';
         btnEl.dataset.logged = '1';
         btnEl.classList.add('program-act-logged');
       }
 
-      // 2. Delay the data save + re-render by one animation frame + 50ms
-      //    so the green state is visible before the DOM is rebuilt
-      requestAnimationFrame(function() {
-        setTimeout(function() {
-          programLogTap(projectId, activityId, btnEl);
+      programLogTap(projectId, activityId, btnEl);
 
-          // 3. After renderProgramView() rebuilds the DOM, re-apply logged state
-          //    to the new button element so it persists visually
-          requestAnimationFrame(function() {
-            const btnWrap = document.getElementById('programActivityButtons');
-            if (!btnWrap) return;
-            const nodes = btnWrap.querySelectorAll('button.program-act-btn');
-            for (var i = 0; i < nodes.length; i++) {
-              if (String(nodes[i].getAttribute('data-act-id') || '') === String(activityId)) {
-                nodes[i].dataset.logged = '1';
-                nodes[i].dataset.locked = '1';
-                nodes[i].classList.add('program-act-logged');
-                (function(b) {
-                  setTimeout(function() {
-                    if (b && b.parentNode) b.dataset.locked = '0';
-                  }, 2000);
-                })(nodes[i]);
-                break;
-              }
-            }
-          });
-
-          // Re-render streak lights after log so the newly filled pip animates in
-          setTimeout(function() {
-            var fresh = getProjects().find(function(x) { return projectIdEq(x.id, projectId); });
-            if (fresh) programRenderStreakStrip(fresh, programGoalUnitLabel(fresh));
-          }, 100);
-        }, 50);
-      });
+      // Re-render streak lights after log so the newly filled pip animates in
+      setTimeout(function() {
+        var fresh = getProjects().find(function(x) { return projectIdEq(x.id, projectId); });
+        if (fresh) programRenderStreakStrip(fresh, programGoalUnitLabel(fresh));
+      }, 120);
 
     } else {
-      // Un-log: revert visual immediately, then undo data
       if (btnEl) {
         btnEl.dataset.logged = '0';
         btnEl.classList.remove('program-act-logged');
@@ -14602,20 +14587,6 @@
       if (programLogUndoPayload && projectIdEq(programLogUndoPayload.projectId, projectId)) {
         programUndoLastLogTap();
       }
-      // After undo re-render, ensure the new button is in unlogged state
-      requestAnimationFrame(function() {
-        const btnWrap = document.getElementById('programActivityButtons');
-        if (!btnWrap) return;
-        const nodes = btnWrap.querySelectorAll('button.program-act-btn');
-        for (var i = 0; i < nodes.length; i++) {
-          if (String(nodes[i].getAttribute('data-act-id') || '') === String(activityId)) {
-            nodes[i].dataset.logged = '0';
-            nodes[i].dataset.locked = '0';
-            nodes[i].classList.remove('program-act-logged');
-            break;
-          }
-        }
-      });
     }
   }
 
@@ -14666,7 +14637,7 @@
     launchConfetti(28, wrap || null, 'small');
   }
 
-  function renderProgramView() {
+  function renderProgramView(skipButtons) {
     const p = projectsViewing;
     if (!p || !projectIsProgram(p)) return;
     const fresh = getProjects().find(function(x) { return projectIdEq(x.id, p.id); }) || p;
@@ -14717,7 +14688,7 @@
     const td = document.getElementById('programTodayDate');
     if (td) td.textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
     const btnWrap = document.getElementById('programActivityButtons');
-    if (btnWrap) {
+    if (btnWrap && !skipButtons) {
       btnWrap.innerHTML = (fresh.activities || []).map(function(a) {
         const safeId = String(fresh.id).replace(/'/g, "\\'");
         const safeAid = String(a.id).replace(/'/g, "\\'");
@@ -14943,7 +14914,7 @@
     p.modifiedAt = Date.now();
     saveProjects(all);
     projectsViewing = p;
-    renderProgramView();
+    renderProgramView(true);
     renderProjectsLanding();
     renderHomeProjectsScroller();
     const unit = programGoalUnitLabel(p);
@@ -15574,7 +15545,8 @@
       return;
     }
     wrap.classList.add('has-projects');
-    scrollEl.innerHTML = inProgress.map(p => {
+    const chipProjects = inProgress.length > 1 ? inProgress.slice(1) : inProgress;
+    scrollEl.innerHTML = chipProjects.map(p => {
       const d = getProjectLandingDetails(p);
       const progPct = Math.round(d.prog);
       const phaseInfo = d.currentPhaseName ? escapeHtml(d.currentPhaseName) : (d.phaseLabel || '');
