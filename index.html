@@ -5803,15 +5803,24 @@
       transition: none;
     }
     .program-act-btn.program-act-logged {
-      background: linear-gradient(165deg, rgba(74,154,106,0.12), rgba(74,154,106,0.06));
-      border-color: rgba(74,154,106,0.38);
+      background: linear-gradient(165deg, rgba(74,154,106,0.18), rgba(74,154,106,0.10));
+      border-color: rgba(74,154,106,0.5);
+      box-shadow: 0 0 0 3px rgba(74,154,106,0.12), 0 1px 0 rgba(255,255,255,0.6) inset;
     }
     html.dark-mode .program-act-btn.program-act-logged {
-      background: linear-gradient(165deg, rgba(74,154,106,0.15), rgba(74,154,106,0.08));
-      border-color: rgba(74,154,106,0.35);
+      background: linear-gradient(165deg, rgba(74,154,106,0.22), rgba(74,154,106,0.12));
+      border-color: rgba(74,154,106,0.45);
+      box-shadow: 0 0 0 3px rgba(74,154,106,0.15);
     }
-    .program-act-btn.program-act-logged .program-act-title { color: #4a9a6a; }
-    .program-act-btn.program-act-logged .program-act-pts { color: #4a9a6a; }
+    .program-act-btn.program-act-logged .program-act-title {
+      color: #3a8a5a;
+      font-weight: 600;
+    }
+    html.dark-mode .program-act-btn.program-act-logged .program-act-title { color: #7acd9a; }
+    .program-act-btn.program-act-logged .program-act-pts {
+      color: #3a8a5a;
+    }
+    html.dark-mode .program-act-btn.program-act-logged .program-act-pts { color: #7acd9a; }
     .program-act-stepper-card {
       background: linear-gradient(165deg, rgba(255,255,255,0.9), rgba(255,248,240,0.75));
       border: 1px solid rgba(192,122,74,0.32);
@@ -10007,7 +10016,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.50.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.50.1';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   var _confettiCtx = null;
@@ -14405,16 +14414,44 @@
     const isLogged = btnEl && btnEl.dataset.logged === '1';
 
     if (!isLogged) {
+      // 1. Apply visual immediately so user sees it
       if (btnEl) {
         btnEl.dataset.locked = '1';
         btnEl.dataset.logged = '1';
         btnEl.classList.add('program-act-logged');
       }
-      programLogTap(projectId, activityId, btnEl);
-      setTimeout(function() {
-        if (btnEl && btnEl.parentNode) btnEl.dataset.locked = '0';
-      }, 2000);
+
+      // 2. Delay the data save + re-render by one animation frame + 50ms
+      //    so the green state is visible before the DOM is rebuilt
+      requestAnimationFrame(function() {
+        setTimeout(function() {
+          programLogTap(projectId, activityId, btnEl);
+
+          // 3. After renderProgramView() rebuilds the DOM, re-apply logged state
+          //    to the new button element so it persists visually
+          requestAnimationFrame(function() {
+            const btnWrap = document.getElementById('programActivityButtons');
+            if (!btnWrap) return;
+            const nodes = btnWrap.querySelectorAll('button.program-act-btn');
+            for (var i = 0; i < nodes.length; i++) {
+              if (String(nodes[i].getAttribute('data-act-id') || '') === String(activityId)) {
+                nodes[i].dataset.logged = '1';
+                nodes[i].dataset.locked = '1';
+                nodes[i].classList.add('program-act-logged');
+                (function(b) {
+                  setTimeout(function() {
+                    if (b && b.parentNode) b.dataset.locked = '0';
+                  }, 2000);
+                })(nodes[i]);
+                break;
+              }
+            }
+          });
+        }, 50);
+      });
+
     } else {
+      // Un-log: revert visual immediately, then undo data
       if (btnEl) {
         btnEl.dataset.logged = '0';
         btnEl.classList.remove('program-act-logged');
@@ -14422,6 +14459,20 @@
       if (programLogUndoPayload && projectIdEq(programLogUndoPayload.projectId, projectId)) {
         programUndoLastLogTap();
       }
+      // After undo re-render, ensure the new button is in unlogged state
+      requestAnimationFrame(function() {
+        const btnWrap = document.getElementById('programActivityButtons');
+        if (!btnWrap) return;
+        const nodes = btnWrap.querySelectorAll('button.program-act-btn');
+        for (var i = 0; i < nodes.length; i++) {
+          if (String(nodes[i].getAttribute('data-act-id') || '') === String(activityId)) {
+            nodes[i].dataset.logged = '0';
+            nodes[i].dataset.locked = '0';
+            nodes[i].classList.remove('program-act-logged');
+            break;
+          }
+        }
+      });
     }
   }
 
@@ -14807,6 +14858,7 @@
     if (addedIds.length > 1) toastHtml += ' <span style="opacity:0.88">Streak bonus included.</span>';
     programLogUndoPayload = { projectId: String(p.id), ids: addedIds.map(function(x) { return String(x); }) };
     showProgramLogToast(toastHtml);
+    floatPoints('+' + basePts + ' ' + unit, btnEl);
     try {
       if (navigator.vibrate) navigator.vibrate([14, 42, 18]);
     } catch (_) {}
@@ -16067,31 +16119,73 @@
     renderProjectsView();
   }
 
+  function _patchChecklistItemDOM(phaseIdx, itemIdx, isDone, isBlocked) {
+    const card = document.querySelector('.projects-phase-card[data-phase-idx="' + phaseIdx + '"]');
+    if (!card) return;
+    const items = card.querySelectorAll('.phase-cl-item');
+    const el = items[itemIdx];
+    if (!el) return;
+
+    el.classList.toggle('cl-done', isDone);
+    el.classList.toggle('cl-blocked', isBlocked);
+
+    const ringFill = el.querySelector('.cl-ring-fill');
+    if (ringFill) {
+      ringFill.style.strokeDashoffset = isDone ? '0' : '69.1';
+    }
+
+    const check = el.querySelector('.cl-ring-check');
+    if (check) {
+      check.textContent = isBlocked ? '🔒' : (isDone ? '✓' : '');
+    }
+
+    const textEl = el.querySelector('.cl-item-text');
+    if (textEl) {
+      // CSS classes handle color/strikethrough via cl-done / cl-blocked
+    }
+  }
+
   function projectsToggleCheck(phaseIdx, itemIdx) {
     const all = getProjects();
     const p = all.find(x => x.id === projectsViewing.id);
     if (!p || !p.phases[phaseIdx] || !p.phases[phaseIdx].checklist) return;
+
     const wasProjectComplete = isProjectCompleted(p);
-    p.phases[phaseIdx].checklist[itemIdx].done = !p.phases[phaseIdx].checklist[itemIdx].done;
+    const item = p.phases[phaseIdx].checklist[itemIdx];
+    item.done = !item.done;
+    if (item.blocked) item.blocked = false;
     p.modifiedAt = Date.now();
     if (isProjectCompleted(p)) p.completedAt = Date.now();
     saveProjects(all);
     projectsViewing = p;
+
     const nowProjectComplete = isProjectCompleted(p);
     const phaseComplete = p.phases[phaseIdx].checklist.every(c => c.done);
+
     if (nowProjectComplete && !wasProjectComplete) {
       hapticDoublePulse();
       renderProjectsView();
       showProjectCelebrationThenLand(p.id);
-    } else if (phaseComplete) {
+      return;
+    }
+
+    if (phaseComplete) {
+      _patchChecklistItemDOM(phaseIdx, itemIdx, true, false);
       hapticLight();
       launchConfetti(45, null, 'small');
       projectsCurrentPhaseIndex = phaseIdx + 1;
-      renderProjectsView();
-      showPhaseCelebrationThenScroll();
-    } else {
-      renderProjectsView();
+      setTimeout(function() {
+        renderProjectsView();
+        showPhaseCelebrationThenScroll();
+      }, 500);
+      return;
     }
+
+    // Normal toggle — patch DOM in-place, re-render after transition
+    _patchChecklistItemDOM(phaseIdx, itemIdx, item.done, item.blocked || false);
+    setTimeout(function() {
+      renderProjectsView();
+    }, 520);
   }
 
   function projectsCompletePhase(phaseIdx) {
