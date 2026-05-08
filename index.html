@@ -5845,15 +5845,33 @@
       bottom: 0; left: 0; right: 0;
       height: 0%;
       background: linear-gradient(180deg,
-        rgba(74,154,106,0.10) 0%,
-        rgba(74,154,106,0.20) 100%);
-      transition: height 0.55s cubic-bezier(0.34,1.05,0.64,1);
+        rgba(74,154,106,0.18) 0%,
+        rgba(74,154,106,0.32) 100%);
+      transition: height 0.85s cubic-bezier(0.32, 0.85, 0.45, 1);
       pointer-events: none;
       border-radius: 0 0 13px 13px;
     }
     .program-act-btn.program-act-logged .program-act-fill {
       height: 100%;
       border-radius: 13px;
+    }
+    /* Soft check that appears once the button has filled — feels like a quiet "done". */
+    .program-act-btn::after {
+      content: "✓";
+      position: absolute;
+      top: 12px; right: 14px;
+      font-size: 18px;
+      font-weight: 600;
+      color: rgba(74,154,106,0.9);
+      opacity: 0;
+      transform: scale(0.4) rotate(-12deg);
+      transition: opacity 0.25s ease 0.55s, transform 0.45s cubic-bezier(0.32,1.6,0.45,1) 0.55s;
+      pointer-events: none;
+    }
+    html.dark-mode .program-act-btn::after { color: rgba(122,205,154,0.95); }
+    .program-act-btn.program-act-logged::after {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
     }
     .program-act-stepper-card {
       background: linear-gradient(165deg, rgba(255,255,255,0.9), rgba(255,248,240,0.75));
@@ -5885,13 +5903,58 @@
       display: flex; align-items: center; justify-content: center;
       -webkit-tap-highlight-color: transparent;
       flex-shrink: 0;
+      transition: transform 0.16s cubic-bezier(0.32,1.4,0.5,1), background 0.18s ease;
     }
-    .program-act-step-btn:active { background: rgba(192,122,74,0.1); }
+    .program-act-step-btn:active { background: rgba(192,122,74,0.1); transform: scale(0.86); }
+    .program-act-step-btn.program-act-step-bump {
+      animation: programStepBump 0.24s cubic-bezier(0.32,1.6,0.5,1);
+    }
+    @keyframes programStepBump {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.22); background: rgba(192,122,74,0.18); }
+      100% { transform: scale(1); }
+    }
+    .program-act-step-btn.program-act-step-shake {
+      animation: programStepShake 0.38s ease-out;
+    }
+    @keyframes programStepShake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-4px); }
+      40% { transform: translateX(4px); }
+      60% { transform: translateX(-3px); }
+      80% { transform: translateX(2px); }
+    }
     .program-act-step-val {
       flex: 1; text-align: center;
       font-size: 20px; font-weight: 600;
       font-family: 'Playfair Display', serif;
       color: var(--text);
+      transition: color 0.25s ease;
+    }
+    .program-act-step-val.program-act-step-val-up {
+      animation: programStepValUp 0.36s cubic-bezier(0.32,1.6,0.5,1);
+      color: var(--accent);
+    }
+    .program-act-step-val.program-act-step-val-down {
+      animation: programStepValDown 0.32s cubic-bezier(0.32,1.4,0.5,1);
+    }
+    .program-act-step-val.program-act-step-val-empty-flash {
+      animation: programStepValEmptyFlash 0.6s ease-out;
+    }
+    @keyframes programStepValUp {
+      0% { transform: scale(1) translateY(0); }
+      55% { transform: scale(1.18) translateY(-2px); }
+      100% { transform: scale(1) translateY(0); }
+    }
+    @keyframes programStepValDown {
+      0% { transform: scale(1) translateY(0); }
+      55% { transform: scale(0.92) translateY(2px); }
+      100% { transform: scale(1) translateY(0); }
+    }
+    @keyframes programStepValEmptyFlash {
+      0%, 100% { color: var(--text); transform: scale(1); }
+      30% { color: var(--accent); transform: scale(1.08); }
+      60% { color: var(--text); transform: scale(1); }
     }
     .program-act-step-unit {
       font-size: 11px; color: var(--muted);
@@ -5906,8 +5969,19 @@
       letter-spacing: 0.02em;
       flex-shrink: 0;
       -webkit-tap-highlight-color: transparent;
+      opacity: 0.62;
+      transition: opacity 0.25s ease, box-shadow 0.25s ease, transform 0.18s cubic-bezier(0.32,1.4,0.5,1);
     }
-    .program-act-log-btn:active { opacity: 0.85; }
+    .program-act-log-btn:active { opacity: 0.85; transform: scale(0.96); }
+    .program-act-log-btn.program-act-log-btn-ready {
+      opacity: 1;
+      box-shadow: 0 0 0 0 rgba(192,122,74,0.45);
+      animation: programLogReadyGlow 1.8s ease-in-out infinite;
+    }
+    @keyframes programLogReadyGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(192,122,74,0.30); }
+      50% { box-shadow: 0 0 0 6px rgba(192,122,74,0); }
+    }
     .program-act-stepper-pts {
       font-size: 11px; color: var(--muted);
     }
@@ -6040,86 +6114,150 @@
     }
     .program-streak-block { margin-bottom: 14px; }
     .program-streak-block:last-child { margin-bottom: 0; }
-    /* ── STREAK LIGHTS ── */
-    .streak-lights-wrap {
+    /* ── STREAK ROWS (warm, rewarding chain tracker) ── */
+    .streak-rows {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
     }
-    .streak-lights-row {
+    .streak-row {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 9px;
+      padding: 12px 12px 11px;
+      border-radius: 12px;
+      background: linear-gradient(160deg, rgba(255,255,255,0.55), rgba(253,240,222,0.40));
+      border: 1px solid rgba(192,122,74,0.18);
+      transition: transform 0.45s cubic-bezier(0.32,1.4,0.5,1), box-shadow 0.45s ease, border-color 0.45s ease;
     }
-    .streak-lights-header {
+    html.dark-mode .streak-row {
+      background: linear-gradient(160deg, rgba(52,46,40,0.58), rgba(40,36,32,0.42));
+      border-color: rgba(200,170,140,0.16);
+    }
+    .streak-row.streak-row-pop {
+      animation: streakRowPop 0.72s cubic-bezier(0.32,1.6,0.45,1);
+      box-shadow: 0 0 0 3px rgba(192,122,74,0.20), 0 6px 22px rgba(192,122,74,0.18);
+      border-color: rgba(192,122,74,0.45);
+    }
+    @keyframes streakRowPop {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.025); }
+      100% { transform: scale(1); }
+    }
+    .streak-row-head {
       display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
     }
-    .streak-lights-label {
+    .streak-row-label {
       font-size: 13px;
       font-weight: 600;
       color: var(--text);
+      letter-spacing: 0.01em;
       flex: 1;
       min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
-    .streak-lights-count {
-      font-size: 11px;
+    .streak-row-big {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+    .streak-row-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
       font-weight: 600;
       color: var(--accent);
-      background: rgba(192,122,74,0.1);
-      border-radius: 6px;
-      padding: 2px 7px;
-      white-space: nowrap;
+      line-height: 1;
     }
-    .streak-lights-bonus {
+    .streak-row-num-label {
       font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
       color: var(--muted);
-      white-space: nowrap;
+      font-weight: 600;
     }
-    .streak-lights-pips {
+    .streak-row-flame {
+      font-size: 14px;
+      line-height: 1;
+      filter: drop-shadow(0 1px 2px rgba(192,80,30,0.35));
+    }
+    .streak-row-big-empty .streak-row-num-label {
+      font-size: 12px;
+      letter-spacing: 0.02em;
+      text-transform: none;
+      font-style: italic;
+      font-family: 'Playfair Display', serif;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .streak-row-pips {
       display: flex;
       gap: 6px;
       flex-wrap: wrap;
     }
     .streak-pip {
-      width: 22px;
-      height: 22px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
-      background: rgba(0,0,0,0.06);
-      border: 1.5px solid rgba(192,122,74,0.15);
+      background: rgba(0,0,0,0.05);
+      border: 1.5px solid rgba(192,122,74,0.18);
       display: inline-block;
       transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s cubic-bezier(0.34,1.4,0.64,1);
     }
     html.dark-mode .streak-pip {
-      background: rgba(255,255,255,0.07);
+      background: rgba(255,255,255,0.06);
       border-color: rgba(255,255,255,0.1);
     }
     .streak-pip.streak-pip-on {
       background: linear-gradient(135deg, #c07a4a, #e09a6a);
-      border-color: rgba(192,122,74,0.5);
+      border-color: rgba(192,122,74,0.55);
       box-shadow: 0 0 8px rgba(192,122,74,0.45), 0 0 2px rgba(192,122,74,0.3) inset;
-      transform: scale(1.08);
+      transform: scale(1.06);
     }
     .streak-pip.streak-pip-next {
-      border-color: rgba(192,122,74,0.4);
+      border-color: rgba(192,122,74,0.45);
       background: rgba(192,122,74,0.08);
       animation: pip-pulse 1.6s ease-in-out infinite;
+    }
+    .streak-pip.streak-pip-just-lit {
+      animation: pipJustLit 0.85s cubic-bezier(0.32,1.6,0.45,1);
     }
     @keyframes pip-pulse {
       0%, 100% { box-shadow: 0 0 0 0 rgba(192,122,74,0.25); transform: scale(1); }
       50% { box-shadow: 0 0 0 5px rgba(192,122,74,0.0); transform: scale(1.1); }
     }
-    .streak-lights-reset {
+    @keyframes pipJustLit {
+      0% { transform: scale(0.4); box-shadow: 0 0 0 0 rgba(192,122,74,0.6); }
+      55% { transform: scale(1.32); box-shadow: 0 0 0 14px rgba(192,122,74,0); }
+      100% { transform: scale(1.06); box-shadow: 0 0 8px rgba(192,122,74,0.45), 0 0 2px rgba(192,122,74,0.3) inset; }
+    }
+    .streak-row-foot {
       font-size: 11px;
+      color: var(--muted);
+      line-height: 1.4;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .streak-row-foot-sep { opacity: 0.45; }
+    .streak-row-today {
+      color: #3a8a5a;
+      font-weight: 600;
+    }
+    html.dark-mode .streak-row-today { color: #7acd9a; }
+    .streak-row-keep { color: var(--accent); font-weight: 500; }
+    .streak-row-broken {
       color: var(--muted);
       font-style: italic;
       font-family: 'Playfair Display', serif;
-      padding-top: 2px;
     }
-    .streak-lights-unlinked {
-      font-size: 12px;
+    .streak-row-bonus {
       color: var(--muted);
     }
     .program-afterlog-btn {
@@ -8972,6 +9110,12 @@
 </head>
 <body>
 
+<!-- Confetti / celebration canvas: must live OUTSIDE .app because .app uses
+     transform + overflow:hidden, which would otherwise clip position:fixed
+     descendants to the 420px app shell. -->
+<canvas id="shastConfettiCanvas" aria-hidden="true"
+        style="position:fixed;inset:0;pointer-events:none;z-index:14000;width:100vw;height:100vh;"></canvas>
+
 <div class="bg">
   <div class="bg-base"></div>
   <div class="swirl"></div>
@@ -9008,7 +9152,6 @@
 <!-- ── APP ── -->
 <div class="app-screen" id="appScreen">
 <div class="app">
-  <canvas id="shastConfettiCanvas" style="position:fixed;inset:0;pointer-events:none;z-index:9998;width:100%;height:100%;" aria-hidden="true"></canvas>
   <div class="topbar">
     <div class="topbar-left"></div>
     <div class="topbar-brand" onclick="goHome()" style="cursor:pointer">
@@ -10113,51 +10256,79 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.51.5';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.52.0';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
+  // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
+  // inside .app (which uses transform + overflow:hidden and would clip it).
   var _confettiCtx = null;
+  var _confettiCanvas = null;
   var _confettiParticles = [];
   var _confettiRaf = 0;
   var _confettiColors = ['#c07a4a','#e09a6a','#c8993a','#f0c060','#4a9a6a','#7acd9a','#2a6fb5','#7bc4ef','#fdf8f1','#e8c878'];
 
+  function _resizeConfettiCanvas() {
+    if (!_confettiCanvas) return;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+    _confettiCanvas.width = Math.round(w * dpr);
+    _confettiCanvas.height = Math.round(h * dpr);
+    _confettiCanvas.style.width = w + 'px';
+    _confettiCanvas.style.height = h + 'px';
+    if (_confettiCtx) _confettiCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
   function _getConfettiCtx() {
-    if (_confettiCtx) return _confettiCtx;
+    if (_confettiCtx && _confettiCanvas && _confettiCanvas.isConnected) return _confettiCtx;
     var c = document.getElementById('shastConfettiCanvas');
     if (!c) return null;
-    c.width = window.innerWidth;
-    c.height = window.innerHeight;
-    window.addEventListener('resize', function() {
-      c.width = window.innerWidth;
-      c.height = window.innerHeight;
-    });
+    // Defensive: if a prior version put the canvas inside .app, lift it to body
+    // so transformed/overflow-hidden ancestors can't clip celebration effects.
+    if (c.parentNode && c.parentNode !== document.body) {
+      document.body.appendChild(c);
+    }
+    _confettiCanvas = c;
     _confettiCtx = c.getContext('2d');
+    _resizeConfettiCanvas();
+    if (!window._confettiResizeBound) {
+      window._confettiResizeBound = true;
+      window.addEventListener('resize', _resizeConfettiCanvas);
+      window.addEventListener('orientationchange', _resizeConfettiCanvas);
+    }
     return _confettiCtx;
   }
 
   function launchConfetti(count, originEl, size) {
     var ctx = _getConfettiCtx();
     if (!ctx) return;
+    // Always reflect current viewport in case of rotation / keyboard dismiss.
+    if (_confettiCanvas && (_confettiCanvas.width === 0 || _confettiCanvas.height === 0)) {
+      _resizeConfettiCanvas();
+    }
     var cx = window.innerWidth / 2;
     var cy = window.innerHeight * 0.4;
     if (originEl) {
       var r = originEl.getBoundingClientRect();
-      cx = r.left + r.width / 2;
-      cy = r.top + r.height / 2;
+      if (r && r.width > 0 && r.height > 0) {
+        cx = r.left + r.width / 2;
+        cy = r.top + r.height / 2;
+      }
     }
     var isFull = size === 'full';
+    var isBig = size === 'big' || isFull;
     for (var i = 0; i < count; i++) {
       var angle = Math.random() * Math.PI * 2;
-      var speed = isFull ? (4 + Math.random() * 8) : (2 + Math.random() * 5);
+      var speed = isFull ? (4 + Math.random() * 8) : isBig ? (3 + Math.random() * 6) : (2 + Math.random() * 5);
       _confettiParticles.push({
         x: cx + (Math.random() - 0.5) * 30,
         y: cy,
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - (isFull ? 6 : 3),
+        vy: Math.sin(angle) * speed - (isFull ? 6 : isBig ? 5 : 3),
         rot: Math.random() * 360,
         rotV: (Math.random() - 0.5) * 9,
-        w: isFull ? (7 + Math.random() * 5) : (4 + Math.random() * 4),
-        h: isFull ? (3 + Math.random() * 3) : (2 + Math.random() * 2),
+        w: isFull ? (7 + Math.random() * 5) : isBig ? (6 + Math.random() * 4) : (4 + Math.random() * 4),
+        h: isFull ? (3 + Math.random() * 3) : isBig ? (3 + Math.random() * 2) : (2 + Math.random() * 2),
         color: _confettiColors[Math.floor(Math.random() * _confettiColors.length)],
         life: 1,
         decay: 0.011 + Math.random() * 0.009,
@@ -10170,7 +10341,9 @@
   function _confettiLoop() {
     var ctx = _getConfettiCtx();
     if (!ctx) { _confettiRaf = 0; return; }
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+    ctx.clearRect(0, 0, w, h);
     _confettiParticles = _confettiParticles.filter(function(p) { return p.life > 0; });
     _confettiParticles.forEach(function(p) {
       p.x += p.vx; p.y += p.vy;
@@ -10194,7 +10367,7 @@
       _confettiRaf = requestAnimationFrame(_confettiLoop);
     } else {
       _confettiRaf = 0;
-      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.clearRect(0, 0, w, h);
     }
   }
 
@@ -14400,12 +14573,12 @@
     if (!strip) return;
     const section = document.getElementById('programStreakSection');
 
-    // Show streak pips for every tap-type activity — no bonus rule required
-    const tapActs = (p.activities || []).filter(function(a) {
-      return !a.inputType || a.inputType === 'tap';
-    });
+    // Track streaks for EVERY activity, not just tap-type. Counter / timer
+    // habits (e.g. "minutes practiced") still earn a daily chain whenever
+    // they log any amount.
+    const acts = (p.activities || []).filter(function(a) { return a && a.label; });
 
-    if (!tapActs.length) {
+    if (!acts.length) {
       if (section) section.style.display = 'none';
       strip.innerHTML = '';
       return;
@@ -14419,9 +14592,10 @@
     })();
     const rules = normalizeProgramRules(p.rules || {}).streakBonuses;
 
-    let html = '<div class="streak-lights-wrap">';
+    let html = '';
+    let renderedRows = 0;
 
-    tapActs.forEach(function(act) {
+    acts.forEach(function(act) {
       const aid = String(act.id);
 
       // Find a bonus rule targeting this activity (for pip count + bonus label)
@@ -14458,25 +14632,63 @@
         pips += '<span class="' + cls + '" aria-hidden="true"></span>';
       }
 
-      var streakLabel = streak > 0
-        ? '<span class="streak-lights-count">' + streak + ' day' + (streak === 1 ? '' : 's') + '</span>' : '';
+      // Big number gets a flame at 3+ days, doubled at 7+, sparkle at 14+
+      var flame = streak >= 14 ? '✨' : streak >= 7 ? '🔥🔥' : streak >= 3 ? '🔥' : '';
+      var bigNum = streak > 0
+        ? '<span class="streak-row-big"><span class="streak-row-num">' + streak + '</span><span class="streak-row-num-label">day' + (streak === 1 ? '' : 's') + '</span>' + (flame ? ' <span class="streak-row-flame" aria-hidden="true">' + flame + '</span>' : '') + '</span>'
+        : '<span class="streak-row-big streak-row-big-empty"><span class="streak-row-num-label">Start your chain today</span></span>';
+
       var bonusLabel = bonus > 0
-        ? '<span class="streak-lights-bonus">+' + bonus + ' ' + escapeHtml(unit) + ' at ' + need + '</span>' : '';
-      var resetNote = broke ? '<div class="streak-lights-reset">Chain reset — yesterday was missed</div>' : '';
+        ? '<span class="streak-row-bonus">+' + bonus + ' ' + escapeHtml(unit) + ' at ' + need + ' in a row</span>' : '';
+      var statusLabel = loggedToday
+        ? '<span class="streak-row-today">✓ Logged today</span>'
+        : (broke ? '<span class="streak-row-broken">Chain reset — yesterday was missed</span>'
+                 : (streak > 0 ? '<span class="streak-row-keep">Tap today to keep the chain going</span>'
+                              : ''));
 
       html +=
-        '<div class="streak-lights-row">' +
-          '<div class="streak-lights-header">' +
-            '<span class="streak-lights-label">' + escapeHtml(act.label || 'Activity') + '</span>' +
-            streakLabel + bonusLabel +
+        '<div class="streak-row" data-act-id="' + escapeHtml(aid) + '">' +
+          '<div class="streak-row-head">' +
+            '<span class="streak-row-label">' + escapeHtml(act.label || 'Activity') + '</span>' +
+            bigNum +
           '</div>' +
-          '<div class="streak-lights-pips">' + pips + '</div>' +
-          resetNote +
+          '<div class="streak-row-pips">' + pips + '</div>' +
+          (statusLabel || bonusLabel
+            ? '<div class="streak-row-foot">' + statusLabel + (bonusLabel ? ' <span class="streak-row-foot-sep" aria-hidden="true">·</span> ' + bonusLabel : '') + '</div>'
+            : '') +
         '</div>';
+      renderedRows++;
     });
 
-    html += '</div>';
-    strip.innerHTML = html;
+    if (!renderedRows) {
+      if (section) section.style.display = 'none';
+      strip.innerHTML = '';
+      return;
+    }
+
+    strip.innerHTML = '<div class="streak-rows">' + html + '</div>';
+  }
+
+  // Animate a streak row whenever a fresh log lands — pulses the row, pops
+  // the day-number, and lights the just-completed pip with a gentle glow.
+  function programPulseStreakRow(activityId) {
+    if (!activityId) return;
+    const strip = document.getElementById('programStreakStrip');
+    if (!strip) return;
+    const row = strip.querySelector('.streak-row[data-act-id="' + CSS.escape(String(activityId)) + '"]');
+    if (!row) return;
+    row.classList.remove('streak-row-pop');
+    void row.offsetWidth;
+    row.classList.add('streak-row-pop');
+    setTimeout(function() { row.classList.remove('streak-row-pop'); }, 760);
+    const lastOn = row.querySelectorAll('.streak-pip.streak-pip-on');
+    const target = lastOn.length ? lastOn[lastOn.length - 1] : null;
+    if (target) {
+      target.classList.remove('streak-pip-just-lit');
+      void target.offsetWidth;
+      target.classList.add('streak-pip-just-lit');
+      setTimeout(function() { target.classList.remove('streak-pip-just-lit'); }, 900);
+    }
   }
 
   function syncProgramUndoRibbon() {
@@ -14539,7 +14751,7 @@
       (function(bb) {
         setTimeout(function() {
           if (bb && bb.parentNode) bb.dataset.locked = '0';
-        }, 2000);
+        }, 1000);
       })(b);
       break;
     }
@@ -14559,15 +14771,18 @@
 
       programLogTap(projectId, activityId, btnEl);
 
-      // Release lockout after 2s so a second tap can un-log
+      // Release lockout after the fill animation completes so a second tap can un-log.
       setTimeout(function() {
         if (btnEl) btnEl.dataset.locked = '0';
-      }, 2000);
+      }, 1000);
 
-      // Re-render streak lights after log
+      // Re-render streak strip once the log is committed.
       setTimeout(function() {
         var fresh = getProjects().find(function(x) { return projectIdEq(x.id, projectId); });
-        if (fresh) programRenderStreakStrip(fresh, programGoalUnitLabel(fresh));
+        if (fresh) {
+          programRenderStreakStrip(fresh, programGoalUnitLabel(fresh));
+          programPulseStreakRow(String(activityId));
+        }
       }, 120);
 
     } else {
@@ -14612,18 +14827,75 @@
 
   var programActStepValues = {};
 
-  function programActStep(activityId, delta) {
+  function programActStep(activityId, delta, btnEl) {
     const aid = String(activityId);
-    programActStepValues[aid] = Math.max(0, (programActStepValues[aid] || 0) + delta);
+    const prev = programActStepValues[aid] || 0;
+    const next = Math.max(0, prev + delta);
     const card = document.querySelector('.program-act-stepper-card[data-act-id="' + CSS.escape(aid) + '"]');
     const el = card ? card.querySelector('.program-act-step-val') : null;
-    if (el) el.textContent = programActStepValues[aid];
+
+    if (next === prev) {
+      // Floor hit (minus at 0) — short shake + tiny haptic so it doesn't feel dead.
+      if (btnEl && btnEl.classList) {
+        btnEl.classList.remove('program-act-step-shake');
+        void btnEl.offsetWidth;
+        btnEl.classList.add('program-act-step-shake');
+        setTimeout(function() {
+          if (btnEl.classList) btnEl.classList.remove('program-act-step-shake');
+        }, 380);
+      }
+      try { if (navigator.vibrate) navigator.vibrate(8); } catch (_) {}
+      return;
+    }
+
+    programActStepValues[aid] = next;
+    if (el) {
+      el.textContent = next;
+      el.classList.remove('program-act-step-val-up', 'program-act-step-val-down');
+      void el.offsetWidth;
+      el.classList.add(delta > 0 ? 'program-act-step-val-up' : 'program-act-step-val-down');
+    }
+
+    if (btnEl && btnEl.classList) {
+      btnEl.classList.remove('program-act-step-bump');
+      void btnEl.offsetWidth;
+      btnEl.classList.add('program-act-step-bump');
+      setTimeout(function() {
+        if (btnEl.classList) btnEl.classList.remove('program-act-step-bump');
+      }, 240);
+    }
+
+    try {
+      if (navigator.vibrate) navigator.vibrate(delta > 0 ? 14 : 9);
+    } catch (_) {}
+
+    if (card) {
+      const logB = card.querySelector('.program-act-log-btn');
+      if (logB) {
+        logB.classList.toggle('program-act-log-btn-ready', next > 0);
+        // Tiny floating "+1" / "-1" cue near the value so the change registers.
+        if (el) {
+          floatPoints(delta > 0 ? '+1' : '−1', el, delta > 0 ? '#c8993a' : '#a07a4a');
+        }
+      }
+    }
   }
 
   function programActStepLog(projectId, activityId, ptsPerUnit, target) {
     const aid = String(activityId);
     const val = programActStepValues[aid] || 0;
-    if (val <= 0) return;
+    if (val <= 0) {
+      // Nothing to log — pulse the value so the user knows to add some first.
+      const cardEmpty = document.querySelector('.program-act-stepper-card[data-act-id="' + CSS.escape(aid) + '"]');
+      const valEl = cardEmpty ? cardEmpty.querySelector('.program-act-step-val') : null;
+      if (valEl) {
+        valEl.classList.remove('program-act-step-val-empty-flash');
+        void valEl.offsetWidth;
+        valEl.classList.add('program-act-step-val-empty-flash');
+        setTimeout(function() { valEl.classList.remove('program-act-step-val-empty-flash'); }, 600);
+      }
+      return;
+    }
     const t = Math.max(1, parseInt(target, 10) || 1);
     const rawPts = (val / t) * ptsPerUnit;
     const pts = Math.max(1, Math.round(rawPts));
@@ -14650,11 +14922,33 @@
     const card2 = document.querySelector('.program-act-stepper-card[data-act-id="' + CSS.escape(aid) + '"]');
     const el = card2 ? card2.querySelector('.program-act-step-val') : null;
     if (el) el.textContent = '0';
+    const logBReset = card2 ? card2.querySelector('.program-act-log-btn') : null;
+    if (logBReset) logBReset.classList.remove('program-act-log-btn-ready');
   }
 
-  function programBurstDonutConfetti() {
+  // size: 'tap' (every log), 'milestone' (each 25%), 'goal' (100%).
+  function programBurstDonutConfetti(size) {
     var wrap = document.getElementById('programDonutWrap');
-    launchConfetti(28, wrap || null, 'small');
+    if (size === 'goal') {
+      launchConfetti(140, wrap || null, 'full');
+      // A second, slightly delayed second wave to feel like a real cheer.
+      setTimeout(function() { launchConfetti(70, wrap || null, 'big'); }, 220);
+    } else if (size === 'milestone') {
+      launchConfetti(70, wrap || null, 'big');
+    } else {
+      launchConfetti(22, wrap || null, 'small');
+    }
+  }
+
+  // Returns the highest 25% milestone crossed when going from oldPct → newPct.
+  // 0 means no milestone crossed. 25/50/75/100 indicate which one was hit.
+  function programMilestoneCrossed(oldPct, newPct) {
+    var o = Math.max(0, Math.min(100, oldPct | 0));
+    var n = Math.max(0, Math.min(100, newPct | 0));
+    if (n <= o) return 0;
+    var hit = 0;
+    [25, 50, 75, 100].forEach(function(m) { if (o < m && n >= m) hit = m; });
+    return hit;
   }
 
   function renderProgramView(skipButtons) {
@@ -14730,10 +15024,10 @@
         return '<div class="program-act-stepper-card" data-act-id="' + escapeHtml(a.id) + '">' +
           '<div class="program-act-stepper-label">' + escapeHtml(a.label) + '</div>' +
           '<div class="program-act-stepper-row">' +
-            '<button type="button" class="program-act-step-btn" onclick="programActStep(\'' + safeAid + '\',-1)">−</button>' +
+            '<button type="button" class="program-act-step-btn program-act-step-btn-minus" onclick="programActStep(\'' + safeAid + '\',-1, this)" aria-label="Decrease">−</button>' +
             '<div class="program-act-step-val" id="pasv-' + escapeHtml(String(a.id)) + '">0</div>' +
             '<span class="program-act-step-unit">' + unitLabel + '</span>' +
-            '<button type="button" class="program-act-step-btn" onclick="programActStep(\'' + safeAid + '\',1)">+</button>' +
+            '<button type="button" class="program-act-step-btn program-act-step-btn-plus" onclick="programActStep(\'' + safeAid + '\',1, this)" aria-label="Increase">+</button>' +
             '<button type="button" class="program-act-log-btn" onclick="programActStepLog(\'' + safeId + '\',\'' + safeAid + '\', ' + (a.points || 0) + ', ' + targetVal + ')">Log</button>' +
           '</div>' +
           '<div class="program-act-stepper-pts">' + ptsNote + ' · full credit at ' + targetVal + ' ' + unitLabel + '</div>' +
@@ -14804,12 +15098,11 @@
         row('This year', yrPts, yT);
     }
 
-    // Pre-show streak section whenever there are tap activities (rules no longer required)
-    const _tapActCount = (fresh.activities || []).filter(function(a) {
-      return !a.inputType || a.inputType === 'tap';
-    }).length;
+    // Pre-show streak section whenever there are activities of ANY type.
+    // Counter / timer habits get a streak too — every day with a log counts.
+    const _actCount = (fresh.activities || []).filter(function(a) { return a && a.label; }).length;
     const _sec = document.getElementById('programStreakSection');
-    if (_sec) _sec.style.display = _tapActCount ? 'block' : 'none';
+    if (_sec) _sec.style.display = _actCount ? 'block' : 'none';
 
     programRenderStreakStrip(fresh, unit);
 
@@ -14915,6 +15208,9 @@
     if (!act) return;
     const today = todayYMD();
     if (!Array.isArray(p.log)) p.log = [];
+    // Snapshot donut % BEFORE the new entry lands so we can detect milestone crossings.
+    const _tgtPre = p.goal && p.goal.target ? Math.max(1, p.goal.target) : 500;
+    const _pctPre = Math.min(100, Math.round((getProgramTotalPoints(p) / _tgtPre) * 100));
     const basePts = act.points || 0;
     const addedIds = [];
     const baseEntryId = genId();
@@ -15001,8 +15297,29 @@
         dw.classList.remove('program-donut-celebrate');
       }, 720);
     }
-    programBurstDonutConfetti();
+
+    // Detect milestone crossings (every 25%) on the donut and escalate.
+    const _tgtPost = p.goal && p.goal.target ? Math.max(1, p.goal.target) : 500;
+    const _pctPost = Math.min(100, Math.round((getProgramTotalPoints(p) / _tgtPost) * 100));
+    const _milestone = programMilestoneCrossed(_pctPre, _pctPost);
+    if (_milestone === 100) {
+      programBurstDonutConfetti('goal');
+      floatPoints('🎉 Goal complete!', dw || btnEl, '#c8993a');
+      try { if (navigator.vibrate) navigator.vibrate([20, 60, 30, 60, 40]); } catch (_) {}
+    } else if (_milestone > 0) {
+      programBurstDonutConfetti('milestone');
+      floatPoints(_milestone + '% — keep going!', dw || btnEl, '#c8993a');
+      try { if (navigator.vibrate) navigator.vibrate([18, 50, 22]); } catch (_) {}
+    } else {
+      programBurstDonutConfetti('tap');
+    }
+
     floatPoints('+' + basePts + ' ' + unit, pulseBtn && pulseBtn.parentNode ? pulseBtn : btnEl);
+
+    // Pulse the streak row for this activity now that the strip has re-rendered.
+    setTimeout(function() {
+      programPulseStreakRow(String(activityId));
+    }, 60);
   }
 
   function programRemoveLatestLogEntry() {
