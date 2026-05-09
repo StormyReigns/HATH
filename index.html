@@ -5930,7 +5930,30 @@
       font-family: 'Playfair Display', serif;
       color: var(--text);
       transition: color 0.25s ease;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      padding: 4px 6px;
+      border-radius: 8px;
     }
+    .program-act-step-val:active { background: rgba(192,122,74,0.08); }
+    .program-act-step-val-input {
+      width: 100%;
+      max-width: 80px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: 600;
+      font-family: 'Playfair Display', serif;
+      color: var(--text);
+      background: transparent;
+      border: 1.5px solid var(--accent);
+      border-radius: 8px;
+      padding: 2px 4px;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    html.dark-mode .program-act-step-val-input { color: var(--text); }
     .program-act-step-val.program-act-step-val-up {
       animation: programStepValUp 0.36s cubic-bezier(0.32,1.6,0.5,1);
       color: var(--accent);
@@ -5984,6 +6007,10 @@
     }
     .program-act-stepper-pts {
       font-size: 11px; color: var(--muted);
+    }
+    .program-act-stepper-hint {
+      font-size: 10.5px; color: var(--muted); opacity: 0.78;
+      margin-top: 4px; line-height: 1.4; letter-spacing: 0.01em;
     }
 
     .pew-act-type-sel {
@@ -6314,11 +6341,19 @@
     }
     .program-log-toast-msg { flex: 1; font-size: 14px; line-height: 1.35; min-width: 0; }
     .program-log-toast-undo {
-      flex-shrink: 0; font-size: 14px; font-weight: 600; padding: 8px 14px; border-radius: 10px;
-      border: 1px solid rgba(253,248,241,0.35); background: rgba(253,248,241,0.12); color: #fdf8f1;
+      flex-shrink: 0; font-size: 14px; font-weight: 700; padding: 10px 16px; border-radius: 10px;
+      border: 1.5px solid rgba(253,248,241,0.55); background: rgba(253,248,241,0.18); color: #fdf8f1;
       cursor: pointer; -webkit-tap-highlight-color: transparent;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      box-shadow: 0 0 0 0 rgba(253,248,241,0.2);
+      animation: programLogUndoPulse 2.6s ease-in-out infinite;
+      transition: transform 0.18s ease;
     }
-    .program-log-toast-undo:active { transform: scale(0.97); }
+    .program-log-toast-undo:active { transform: scale(0.96); }
+    @keyframes programLogUndoPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(253,248,241,0.18); }
+      50% { box-shadow: 0 0 0 6px rgba(253,248,241,0); }
+    }
     .program-donut-svg { width: 100%; height: 100%; max-width: 100px; max-height: 100px; transform: rotate(-90deg); overflow: visible; }
     .program-donut-track { fill: none; stroke: rgba(0,0,0,0.08); stroke-width: 5; }
     html.dark-mode .program-donut-track { stroke: rgba(255,255,255,0.08); }
@@ -10256,7 +10291,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.52.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.53.0';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
@@ -14475,7 +14510,7 @@
   function programWindowTargetPoints(p, winStartYmd, winEndYmd) {
     const tgt = p.goal && p.goal.target ? p.goal.target : 500;
     const span = programGoalSpanDays(p);
-    const od = programOverlapDaysWithRange(p, winStartYmd, winEndYmd);
+    const od = programOverlapDaysInRange(p, winStartYmd, winEndYmd);
     if (od <= 0) return 1;
     return Math.max(1, Math.round(tgt * od / span));
   }
@@ -14828,6 +14863,12 @@
   var programActStepValues = {};
 
   function programActStep(activityId, delta, btnEl) {
+    // Swallow the synthesized click after a press-and-hold release so we don't
+    // double-add the value the user just stopped on.
+    if (_programStepSuppressNextClick && Math.abs(delta) === 1) {
+      _programStepSuppressNextClick = false;
+      return;
+    }
     const aid = String(activityId);
     const prev = programActStepValues[aid] || 0;
     const next = Math.max(0, prev + delta);
@@ -14874,11 +14915,114 @@
       if (logB) {
         logB.classList.toggle('program-act-log-btn-ready', next > 0);
         // Tiny floating "+1" / "-1" cue near the value so the change registers.
-        if (el) {
+        // Skip for held auto-repeats (delta of ±1 only — held adds use ±5/10).
+        if (el && Math.abs(delta) === 1 && !_programStepHoldActive) {
           floatPoints(delta > 0 ? '+1' : '−1', el, delta > 0 ? '#c8993a' : '#a07a4a');
         }
       }
     }
+  }
+
+  // ── PRESS-AND-HOLD AUTO-REPEAT for the +/- stepper ──
+  // First hold-tick fires after 380 ms. Then every 90 ms. After 1.5 s of
+  // continuous holding we accelerate to bigger steps so a long press feels
+  // less tedious than tapping 30 times in a row.
+  var _programStepHoldTimer = 0;
+  var _programStepHoldStart = 0;
+  var _programStepHoldActive = false;
+  var _programStepHoldBtn = null;
+
+  function _programStepHoldTick() {
+    if (!_programStepHoldBtn || !_programStepHoldBtn.isConnected) {
+      programStepHoldStop();
+      return;
+    }
+    _programStepHoldActive = true;
+    const aid = _programStepHoldBtn.getAttribute('data-aid');
+    const direction = parseInt(_programStepHoldBtn.getAttribute('data-delta'), 10) || 1;
+    const elapsed = Date.now() - _programStepHoldStart;
+    // 0–1.5 s: ±1 every 90 ms. 1.5–3 s: ±5. After 3 s: ±10. Feels like a dial.
+    const step = elapsed < 1500 ? 1 : elapsed < 3000 ? 5 : 10;
+    const interval = elapsed < 1500 ? 90 : elapsed < 3000 ? 110 : 130;
+    programActStep(aid, direction * step, _programStepHoldBtn);
+    _programStepHoldTimer = setTimeout(_programStepHoldTick, interval);
+  }
+
+  function programStepHoldStart(ev) {
+    const btn = ev.currentTarget || ev.target;
+    if (!btn || !btn.classList || !btn.classList.contains('program-act-step-btn')) return;
+    if (_programStepHoldTimer) clearTimeout(_programStepHoldTimer);
+    _programStepHoldBtn = btn;
+    _programStepHoldStart = Date.now();
+    _programStepHoldActive = false;
+    // 380 ms before the first auto-tick, so quick tap-tap-tap still works normally.
+    _programStepHoldTimer = setTimeout(_programStepHoldTick, 380);
+  }
+
+  function programStepHoldStop() {
+    if (_programStepHoldTimer) {
+      clearTimeout(_programStepHoldTimer);
+      _programStepHoldTimer = 0;
+    }
+    if (_programStepHoldActive) {
+      // Suppress the synthesized click that follows the touchend so we don't
+      // double-add the value the user just released on.
+      _programStepSuppressNextClick = true;
+      setTimeout(function() { _programStepSuppressNextClick = false; }, 250);
+    }
+    _programStepHoldActive = false;
+    _programStepHoldBtn = null;
+  }
+
+  var _programStepSuppressNextClick = false;
+
+  // Tap the value cell to type a number directly. Closes on Enter/blur.
+  function programActStepEdit(activityId, el) {
+    if (!el) return;
+    const aid = String(activityId);
+    if (el.dataset.editing === '1') return;
+    el.dataset.editing = '1';
+    const cur = programActStepValues[aid] || 0;
+    const input = document.createElement('input');
+    input.type = 'tel';
+    input.inputMode = 'numeric';
+    input.pattern = '[0-9]*';
+    input.value = String(cur);
+    input.className = 'program-act-step-val-input';
+    input.maxLength = 5;
+    input.setAttribute('aria-label', 'Set value');
+    el.textContent = '';
+    el.appendChild(input);
+    setTimeout(function() {
+      input.focus();
+      input.select();
+    }, 10);
+
+    function commit() {
+      if (el.dataset.editing !== '1') return;
+      el.dataset.editing = '0';
+      const raw = parseInt(input.value, 10);
+      const next = Math.max(0, Math.min(9999, isNaN(raw) ? 0 : raw));
+      const prev = programActStepValues[aid] || 0;
+      programActStepValues[aid] = next;
+      el.textContent = String(next);
+      const card = el.closest('.program-act-stepper-card');
+      if (card) {
+        const logB = card.querySelector('.program-act-log-btn');
+        if (logB) logB.classList.toggle('program-act-log-btn-ready', next > 0);
+      }
+      if (next !== prev) {
+        el.classList.remove('program-act-step-val-up', 'program-act-step-val-down');
+        void el.offsetWidth;
+        el.classList.add(next > prev ? 'program-act-step-val-up' : 'program-act-step-val-down');
+        try { if (navigator.vibrate) navigator.vibrate(12); } catch (_) {}
+      }
+    }
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+      if (e.key === 'Escape') { input.value = String(cur); input.blur(); }
+    });
+    input.addEventListener('blur', commit);
   }
 
   function programActStepLog(projectId, activityId, ptsPerUnit, target) {
@@ -15024,13 +15168,14 @@
         return '<div class="program-act-stepper-card" data-act-id="' + escapeHtml(a.id) + '">' +
           '<div class="program-act-stepper-label">' + escapeHtml(a.label) + '</div>' +
           '<div class="program-act-stepper-row">' +
-            '<button type="button" class="program-act-step-btn program-act-step-btn-minus" onclick="programActStep(\'' + safeAid + '\',-1, this)" aria-label="Decrease">−</button>' +
-            '<div class="program-act-step-val" id="pasv-' + escapeHtml(String(a.id)) + '">0</div>' +
+            '<button type="button" class="program-act-step-btn program-act-step-btn-minus" data-aid="' + escapeHtml(String(a.id)) + '" data-delta="-1" onclick="programActStep(\'' + safeAid + '\',-1, this)" aria-label="Decrease">−</button>' +
+            '<div class="program-act-step-val" id="pasv-' + escapeHtml(String(a.id)) + '" role="button" tabindex="0" data-aid="' + escapeHtml(String(a.id)) + '" onclick="programActStepEdit(\'' + safeAid + '\', this)" title="Tap to set a number">0</div>' +
             '<span class="program-act-step-unit">' + unitLabel + '</span>' +
-            '<button type="button" class="program-act-step-btn program-act-step-btn-plus" onclick="programActStep(\'' + safeAid + '\',1, this)" aria-label="Increase">+</button>' +
+            '<button type="button" class="program-act-step-btn program-act-step-btn-plus" data-aid="' + escapeHtml(String(a.id)) + '" data-delta="1" onclick="programActStep(\'' + safeAid + '\',1, this)" aria-label="Increase">+</button>' +
             '<button type="button" class="program-act-log-btn" onclick="programActStepLog(\'' + safeId + '\',\'' + safeAid + '\', ' + (a.points || 0) + ', ' + targetVal + ')">Log</button>' +
           '</div>' +
           '<div class="program-act-stepper-pts">' + ptsNote + ' · full credit at ' + targetVal + ' ' + unitLabel + '</div>' +
+          '<div class="program-act-stepper-hint">Hold − or + to add quickly · tap the number to type</div>' +
         '</div>';
       }).join('');
       // Restore today's logged state so navigating away and back keeps buttons accurate
@@ -15062,6 +15207,25 @@
           pvb.addEventListener('touchend', programActBtnTouchEnd, { passive: true });
           pvb.addEventListener('touchcancel', programActBtnTouchEnd, { passive: true });
         }
+        // Press-and-hold for the +/- stepper. Delegated so it survives re-renders.
+        const _holdStart = function(ev) {
+          const t = ev.target && ev.target.closest ? ev.target.closest('.program-act-step-btn') : null;
+          if (!t) return;
+          // Synthesize ev.currentTarget on the hold-start path.
+          programStepHoldStart({ currentTarget: t, target: t });
+        };
+        const _holdStop = function() { programStepHoldStop(); };
+        if (window.PointerEvent) {
+          pvb.addEventListener('pointerdown', _holdStart, { passive: true });
+          pvb.addEventListener('pointerup', _holdStop, { passive: true });
+          pvb.addEventListener('pointercancel', _holdStop, { passive: true });
+          pvb.addEventListener('pointerleave', _holdStop, { passive: true });
+        } else {
+          pvb.addEventListener('touchstart', _holdStart, { passive: true });
+          pvb.addEventListener('touchend', _holdStop, { passive: true });
+          pvb.addEventListener('touchcancel', _holdStop, { passive: true });
+        }
+        pvb.addEventListener('mouseleave', _holdStop, { passive: true });
       }
     }
 
@@ -15070,42 +15234,51 @@
       logHint.textContent = 'Tap when you have earned it. Each tap logs for today and adds to your total in ' + unit + '.';
     }
 
-    const tdy = todayYMD();
-    const wr = getWeekRangeYMD(tdy);
-    const mo = programCalendarMonthRangeYMD();
-    const yr = programCalendarYearRangeYMD();
-    const dayPts = getProgramPointsOnDay(fresh, tdy);
-    const wkPts = getProgramPointsBetween(fresh, wr.start, wr.end);
-    const moPts = getProgramPointsBetween(fresh, mo.start, mo.end);
-    const yrPts = getProgramPointsBetween(fresh, yr.start, yr.end);
-    const dT = programWindowTargetPoints(fresh, tdy, tdy);
-    const wT = programWindowTargetPoints(fresh, wr.start, wr.end);
-    const mT = programWindowTargetPoints(fresh, mo.start, mo.end);
-    const yT = programWindowTargetPoints(fresh, yr.start, yr.end);
-    const ladder = document.getElementById('programRhythmLadder');
-    if (ladder) {
-      function row(label, cur, cap) {
-        const pc = cap <= 0 ? 0 : Math.min(100, Math.round((cur / cap) * 100));
-        return '<div class="program-ladder-row">' +
-          '<span class="program-ladder-name">' + label + '</span>' +
-          '<div class="program-ladder-bar"><div class="program-ladder-fill" style="width:' + pc + '%"></div></div>' +
-          '<span class="program-ladder-val">' + cur + ' / ' + cap + '</span></div>';
+    // Wrap each sub-section in try/catch so a single failure can never again
+    // silently kill the rest of the habit page (this is what masked the
+    // streak + ladder + confetti bugs for so long).
+    try {
+      const tdy = todayYMD();
+      const wr = getWeekRangeYMD(tdy);
+      const mo = programCalendarMonthRangeYMD();
+      const yr = programCalendarYearRangeYMD();
+      const dayPts = getProgramPointsOnDay(fresh, tdy);
+      const wkPts = getProgramPointsBetween(fresh, wr.start, wr.end);
+      const moPts = getProgramPointsBetween(fresh, mo.start, mo.end);
+      const yrPts = getProgramPointsBetween(fresh, yr.start, yr.end);
+      const dT = programWindowTargetPoints(fresh, tdy, tdy);
+      const wT = programWindowTargetPoints(fresh, wr.start, wr.end);
+      const mT = programWindowTargetPoints(fresh, mo.start, mo.end);
+      const yT = programWindowTargetPoints(fresh, yr.start, yr.end);
+      const ladder = document.getElementById('programRhythmLadder');
+      if (ladder) {
+        const rowFn = function(label, cur, cap) {
+          const pc = cap <= 0 ? 0 : Math.min(100, Math.round((cur / cap) * 100));
+          return '<div class="program-ladder-row">' +
+            '<span class="program-ladder-name">' + label + '</span>' +
+            '<div class="program-ladder-bar"><div class="program-ladder-fill" style="width:' + pc + '%"></div></div>' +
+            '<span class="program-ladder-val">' + cur + ' / ' + cap + '</span></div>';
+        };
+        ladder.innerHTML =
+          rowFn('Today', dayPts, dT) +
+          rowFn('This week', wkPts, wT) +
+          rowFn('This month', moPts, mT) +
+          rowFn('This year', yrPts, yT);
       }
-      ladder.innerHTML =
-        row('Today', dayPts, dT) +
-        row('This week', wkPts, wT) +
-        row('This month', moPts, mT) +
-        row('This year', yrPts, yT);
+    } catch (err) {
+      console.warn('renderProgramView: rhythm ladder failed', err);
     }
 
-    // Pre-show streak section whenever there are activities of ANY type.
-    // Counter / timer habits get a streak too — every day with a log counts.
-    const _actCount = (fresh.activities || []).filter(function(a) { return a && a.label; }).length;
-    const _sec = document.getElementById('programStreakSection');
-    if (_sec) _sec.style.display = _actCount ? 'block' : 'none';
-
-    programRenderStreakStrip(fresh, unit);
-
+    try {
+      // Pre-show streak section whenever there are activities of ANY type.
+      // Counter / timer habits get a streak too — every day with a log counts.
+      const _actCount = (fresh.activities || []).filter(function(a) { return a && a.label; }).length;
+      const _sec = document.getElementById('programStreakSection');
+      if (_sec) _sec.style.display = _actCount ? 'block' : 'none';
+      programRenderStreakStrip(fresh, unit);
+    } catch (err) {
+      console.warn('renderProgramView: streak strip failed', err);
+    }
   }
 
   function syncProgramAfterLogButtons() {
@@ -15131,11 +15304,13 @@
     syncProgramUndoRibbon();
     syncProgramAfterLogButtons();
     if (programLogUndoTimer) clearTimeout(programLogUndoTimer);
+    // Generous 14 s window — plenty of time to notice and tap Undo
+    // without the toast camping the screen forever.
     programLogUndoTimer = setTimeout(function() {
       programLogUndoTimer = 0;
       programLogUndoPayload = null;
       hideProgramLogToast();
-    }, 9000);
+    }, 14000);
   }
 
   function programTryUndoLastLogTap() {
