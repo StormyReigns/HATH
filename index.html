@@ -5796,7 +5796,7 @@
       font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 500;
       margin: 0 0 10px; color: var(--text);
     }
-    .program-today-date { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+    .program-today-date { font-size: 13px; color: var(--muted); margin: 0 0 8px; }
     .program-activity-buttons { display: flex; flex-direction: column; gap: 10px; }
     .program-act-btn {
       display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
@@ -6055,7 +6055,7 @@
     .program-act-title { font-size: 15px; font-weight: 600; color: var(--text); }
     .program-act-pts { font-size: 14px; font-weight: 700; color: var(--accent); letter-spacing: 0.02em; margin-top: 2px; }
     .program-hero-card {
-      display: flex; align-items: center; gap: 18px; margin-bottom: 20px;
+      display: flex; align-items: center; gap: 18px; margin-bottom: 12px;
       padding: 16px 14px; border-radius: 16px;
       background: rgba(255,255,255,0.55); border: 1px solid rgba(192,122,74,0.18);
       overflow: visible;
@@ -6072,17 +6072,12 @@
       45% { transform: scale(1.09); }
     }
     .program-streak-section {
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
     .program-streak-section .program-section-label {
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
-    .program-streak-strip {
-      margin: 0; padding: 12px 14px; border-radius: 14px;
-      background: rgba(255,255,255,0.52); border: 1px solid rgba(192,122,74,0.22);
-      font-size: 13px; line-height: 1.45; color: var(--text2);
-    }
-    html.dark-mode .program-streak-strip { background: rgba(40,36,32,0.48); border-color: rgba(200,170,140,0.14); }
+    .program-streak-strip { margin: 0; }
     .program-streak-strip-title {
       font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 500; color: var(--text); margin: 0 0 10px;
     }
@@ -6139,153 +6134,91 @@
     .program-log-purpose {
       font-size: 12px; color: var(--text2); margin: -4px 0 10px; line-height: 1.4;
     }
-    .program-streak-block { margin-bottom: 14px; }
-    .program-streak-block:last-child { margin-bottom: 0; }
-    /* ── STREAK ROWS (warm, rewarding chain tracker) ── */
-    .streak-rows {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
+    /* ── STREAK ROWS ── compact, one row per activity with a bonus rule ── */
+    .streak-rows { display: flex; flex-direction: column; gap: 10px; }
     .streak-row {
-      display: flex;
-      flex-direction: column;
-      gap: 9px;
-      padding: 12px 12px 11px;
+      display: flex; flex-direction: column; gap: 7px;
+      padding: 10px 12px 9px;
       border-radius: 12px;
-      background: linear-gradient(160deg, rgba(255,255,255,0.55), rgba(253,240,222,0.40));
-      border: 1px solid rgba(192,122,74,0.18);
-      transition: transform 0.45s cubic-bezier(0.32,1.4,0.5,1), box-shadow 0.45s ease, border-color 0.45s ease;
+      background: rgba(255,255,255,0.45);
+      border: 1px solid rgba(192,122,74,0.16);
     }
     html.dark-mode .streak-row {
-      background: linear-gradient(160deg, rgba(52,46,40,0.58), rgba(40,36,32,0.42));
-      border-color: rgba(200,170,140,0.16);
+      background: rgba(52,46,40,0.45);
+      border-color: rgba(200,170,140,0.14);
     }
     .streak-row.streak-row-pop {
-      animation: streakRowPop 0.72s cubic-bezier(0.32,1.6,0.45,1);
-      box-shadow: 0 0 0 3px rgba(192,122,74,0.20), 0 6px 22px rgba(192,122,74,0.18);
-      border-color: rgba(192,122,74,0.45);
+      animation: streakRowPop 0.6s cubic-bezier(0.32,1.6,0.45,1);
     }
     @keyframes streakRowPop {
       0% { transform: scale(1); }
-      40% { transform: scale(1.025); }
+      42% { transform: scale(1.022); }
       100% { transform: scale(1); }
     }
-    .streak-row-head {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 12px;
+    .streak-row-top {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
     }
     .streak-row-label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
-      letter-spacing: 0.01em;
-      flex: 1;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      font-size: 13px; font-weight: 600; color: var(--text);
+      flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-    .streak-row-big {
-      display: inline-flex;
-      align-items: baseline;
-      gap: 5px;
-      flex-shrink: 0;
+    /* Compact day badge on the right */
+    .streak-day-badge {
+      font-size: 12px; font-weight: 600; color: var(--accent);
+      background: rgba(192,122,74,0.12); border-radius: 20px;
+      padding: 2px 9px; white-space: nowrap; flex-shrink: 0;
     }
-    .streak-row-num {
-      font-family: 'Playfair Display', serif;
-      font-size: 26px;
-      font-weight: 600;
-      color: var(--accent);
-      line-height: 1;
+    html.dark-mode .streak-day-badge { background: rgba(192,122,74,0.18); }
+    .streak-day-badge-reset {
+      color: var(--muted); background: rgba(0,0,0,0.06);
     }
-    .streak-row-num-label {
-      font-size: 11px;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--muted);
-      font-weight: 600;
-    }
-    .streak-row-flame {
-      font-size: 14px;
-      line-height: 1;
-      filter: drop-shadow(0 1px 2px rgba(192,80,30,0.35));
-    }
-    .streak-row-big-empty .streak-row-num-label {
-      font-size: 12px;
-      letter-spacing: 0.02em;
-      text-transform: none;
-      font-style: italic;
-      font-family: 'Playfair Display', serif;
-      color: var(--muted);
-      font-weight: 500;
-    }
+    html.dark-mode .streak-day-badge-reset { background: rgba(255,255,255,0.07); }
+    /* Pips row — shares line with the bonus note */
     .streak-row-pips {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
     }
     .streak-pip {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: rgba(0,0,0,0.05);
-      border: 1.5px solid rgba(192,122,74,0.18);
-      display: inline-block;
-      transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s cubic-bezier(0.34,1.4,0.64,1);
+      width: 16px; height: 16px; border-radius: 50%;
+      display: inline-block; flex-shrink: 0;
+      /* Empty = faint circle */
+      background: rgba(192,122,74,0.10);
+      border: 1.5px solid rgba(192,122,74,0.22);
+      transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s cubic-bezier(0.34,1.4,0.64,1);
     }
     html.dark-mode .streak-pip {
       background: rgba(255,255,255,0.06);
-      border-color: rgba(255,255,255,0.1);
+      border-color: rgba(200,170,140,0.22);
     }
+    /* Filled pip: solid bright fill — no glow ring, just opaque colour */
     .streak-pip.streak-pip-on {
-      background: linear-gradient(135deg, #c07a4a, #e09a6a);
-      border-color: rgba(192,122,74,0.55);
-      box-shadow: 0 0 8px rgba(192,122,74,0.45), 0 0 2px rgba(192,122,74,0.3) inset;
-      transform: scale(1.06);
+      background: var(--accent);
+      border-color: var(--accent);
+      transform: scale(1.08);
     }
+    html.dark-mode .streak-pip.streak-pip-on {
+      background: #d4956a;
+      border-color: #d4956a;
+    }
+    /* Next pip to fill: gentle border highlight only, no outer ring animation */
     .streak-pip.streak-pip-next {
-      border-color: rgba(192,122,74,0.45);
-      background: rgba(192,122,74,0.08);
-      animation: pip-pulse 1.6s ease-in-out infinite;
+      border-color: var(--accent);
+      background: rgba(192,122,74,0.18);
     }
+    html.dark-mode .streak-pip.streak-pip-next {
+      background: rgba(192,122,74,0.22);
+      border-color: #d4956a;
+    }
+    /* Pop animation when a pip just lit — scale only, no lingering glow */
     .streak-pip.streak-pip-just-lit {
-      animation: pipJustLit 0.85s cubic-bezier(0.32,1.6,0.45,1);
-    }
-    @keyframes pip-pulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(192,122,74,0.25); transform: scale(1); }
-      50% { box-shadow: 0 0 0 5px rgba(192,122,74,0.0); transform: scale(1.1); }
+      animation: pipJustLit 0.55s cubic-bezier(0.32,1.6,0.45,1);
     }
     @keyframes pipJustLit {
-      0% { transform: scale(0.4); box-shadow: 0 0 0 0 rgba(192,122,74,0.6); }
-      55% { transform: scale(1.32); box-shadow: 0 0 0 14px rgba(192,122,74,0); }
-      100% { transform: scale(1.06); box-shadow: 0 0 8px rgba(192,122,74,0.45), 0 0 2px rgba(192,122,74,0.3) inset; }
+      0% { transform: scale(0.5); }
+      55% { transform: scale(1.28); }
+      100% { transform: scale(1.08); }
     }
-    .streak-row-foot {
-      font-size: 11px;
-      color: var(--muted);
-      line-height: 1.4;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-    .streak-row-foot-sep { opacity: 0.45; }
-    .streak-row-today {
-      color: #3a8a5a;
-      font-weight: 600;
-    }
-    html.dark-mode .streak-row-today { color: #7acd9a; }
-    .streak-row-keep { color: var(--accent); font-weight: 500; }
-    .streak-row-broken {
-      color: var(--muted);
-      font-style: italic;
-      font-family: 'Playfair Display', serif;
-    }
-    .streak-row-bonus {
-      color: var(--muted);
+    .streak-bonus-note {
+      font-size: 11px; color: var(--muted); margin-left: 4px; white-space: nowrap;
     }
     .program-afterlog-btn {
       flex: 1; min-width: 120px; padding: 11px 14px; border-radius: 12px; font-size: 14px; font-weight: 600;
@@ -6367,13 +6300,8 @@
     .program-hero-text { flex: 1; min-width: 0; }
     .program-hero-points { font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
     .program-hero-period { font-size: 13px; color: var(--text2); line-height: 1.4; }
-    .program-rhythm-ladder { margin-bottom: 22px; display: flex; flex-direction: column; gap: 10px; }
-    .program-ladder-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
-    .program-ladder-name { width: 72px; flex-shrink: 0; color: var(--muted); font-weight: 600; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; }
-    .program-ladder-bar { flex: 1; height: 8px; background: rgba(0,0,0,0.07); border-radius: 4px; overflow: hidden; }
-    html.dark-mode .program-ladder-bar { background: rgba(255,255,255,0.08); }
-    .program-ladder-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #d4956a); border-radius: 4px; transition: width 0.35s ease; min-width: 0; }
-    .program-ladder-val { width: 88px; flex-shrink: 0; text-align: right; font-variant-numeric: tabular-nums; color: var(--text2); font-size: 12px; }
+    /* rhythm ladder removed — the Today/Week/Month/Year bars were confusing
+       because they all showed the same raw total against a proportional slice */
     .program-log-hint { font-size: 12px; color: var(--muted); margin: -4px 0 12px; line-height: 1.4; }
     .program-wrap-btn { font-size: 13px; }
     .program-log-list { font-size: 13px; color: var(--text2); }
@@ -9772,7 +9700,6 @@
             <h3 class="program-section-label">Streak</h3>
             <div class="program-streak-strip" id="programStreakStrip" aria-label="Streak bonuses"></div>
           </div>
-          <div class="program-rhythm-ladder" id="programRhythmLadder" aria-label="Progress by time window"></div>
           <div class="program-today-block">
             <h3 class="program-section-label">Log today</h3>
             <p class="program-today-date" id="programTodayDate"></p>
@@ -10291,7 +10218,7 @@
 
 <script>
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.53.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.53.1';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
@@ -14608,98 +14535,84 @@
     if (!strip) return;
     const section = document.getElementById('programStreakSection');
 
-    // Track streaks for EVERY activity, not just tap-type. Counter / timer
-    // habits (e.g. "minutes practiced") still earn a daily chain whenever
-    // they log any amount.
-    const acts = (p.activities || []).filter(function(a) { return a && a.label; });
+    const rules = normalizeProgramRules(p.rules || {}).streakBonuses;
 
-    if (!acts.length) {
+    // Only render a row for activities that have an explicit streak bonus rule.
+    const actsWithRules = (p.activities || []).filter(function(a) {
+      if (!a || !a.label) return false;
+      return rules.some(function(rule) {
+        const rAid = programResolveRuleActivityId(p, rule);
+        return rAid && String(rAid) === String(a.id);
+      });
+    });
+
+    if (!actsWithRules.length) {
       if (section) section.style.display = 'none';
       strip.innerHTML = '';
       return;
     }
     if (section) { section.style.display = 'block'; section.style.visibility = 'visible'; }
-    strip.style.display = 'block'; strip.style.visibility = 'visible';
 
     const today = todayYMD();
     const yesterday = (function() {
       const d = parseYMD(today); d.setDate(d.getDate() - 1); return ymdFromDate(d);
     })();
-    const rules = normalizeProgramRules(p.rules || {}).streakBonuses;
 
     let html = '';
-    let renderedRows = 0;
 
-    acts.forEach(function(act) {
+    actsWithRules.forEach(function(act) {
       const aid = String(act.id);
-
-      // Find a bonus rule targeting this activity (for pip count + bonus label)
       const matchRule = rules.find(function(rule) {
         const rAid = programResolveRuleActivityId(p, rule);
         return rAid && String(rAid) === aid;
       });
-      const need = matchRule ? Math.max(2, matchRule.consecutiveDays || 7) : 7;
-      const bonus = matchRule ? Math.max(0, parseInt(matchRule.bonusPoints, 10) || 0) : 0;
+      const need = Math.max(2, matchRule.consecutiveDays || 7);
+      const bonus = Math.max(0, parseInt(matchRule.bonusPoints, 10) || 0);
 
       const streak = countStreakEndingOn(p, aid, today);
-
       const loggedToday = Array.isArray(p.log) && p.log.some(function(e) {
         return !e.isStreakBonus && String(e.activityId || '') === aid &&
           String(e.date || '').slice(0, 10) === today;
+      });
+      const hasAnyLog = Array.isArray(p.log) && p.log.some(function(e) {
+        return !e.isStreakBonus && String(e.activityId || '') === aid;
       });
       const loggedYesterday = Array.isArray(p.log) && p.log.some(function(e) {
         return !e.isStreakBonus && String(e.activityId || '') === aid &&
           String(e.date || '').slice(0, 10) === yesterday;
       });
-      const hasAnyLog = Array.isArray(p.log) && p.log.some(function(e) {
-        return !e.isStreakBonus && String(e.activityId || '') === aid;
-      });
-      const broke = hasAnyLog && streak === 0 && !loggedYesterday;
+      const broke = hasAnyLog && streak === 0 && !loggedYesterday && !loggedToday;
 
-      // Pip position within the current cycle (e.g. day 8 of a 7-day target = 1st pip lit again)
+      // Position within the current cycle
       const cyclePos = streak <= 0 ? 0 : (streak % need === 0 ? need : streak % need);
 
       let pips = '';
       for (var i = 0; i < need; i++) {
         var filled = i < cyclePos;
-        var isNext = i === cyclePos && !loggedToday;
+        var isNext = !loggedToday && i === cyclePos;
         var cls = 'streak-pip' + (filled ? ' streak-pip-on' : '') + (isNext ? ' streak-pip-next' : '');
         pips += '<span class="' + cls + '" aria-hidden="true"></span>';
       }
 
-      // Big number gets a flame at 3+ days, doubled at 7+, sparkle at 14+
-      var flame = streak >= 14 ? '✨' : streak >= 7 ? '🔥🔥' : streak >= 3 ? '🔥' : '';
-      var bigNum = streak > 0
-        ? '<span class="streak-row-big"><span class="streak-row-num">' + streak + '</span><span class="streak-row-num-label">day' + (streak === 1 ? '' : 's') + '</span>' + (flame ? ' <span class="streak-row-flame" aria-hidden="true">' + flame + '</span>' : '') + '</span>'
-        : '<span class="streak-row-big streak-row-big-empty"><span class="streak-row-num-label">Start your chain today</span></span>';
+      // Compact right-side badge: day count + optional flame
+      var flame = streak >= 14 ? ' ✨' : streak >= 7 ? ' 🔥' : '';
+      var dayBadge = streak > 0
+        ? '<span class="streak-day-badge">' + streak + ' day' + (streak === 1 ? '' : 's') + flame + '</span>'
+        : (broke ? '<span class="streak-day-badge streak-day-badge-reset">reset</span>' : '');
 
-      var bonusLabel = bonus > 0
-        ? '<span class="streak-row-bonus">+' + bonus + ' ' + escapeHtml(unit) + ' at ' + need + ' in a row</span>' : '';
-      var statusLabel = loggedToday
-        ? '<span class="streak-row-today">✓ Logged today</span>'
-        : (broke ? '<span class="streak-row-broken">Chain reset — yesterday was missed</span>'
-                 : (streak > 0 ? '<span class="streak-row-keep">Tap today to keep the chain going</span>'
-                              : ''));
+      var bonusNote = bonus > 0
+        ? '<span class="streak-bonus-note">+' + bonus + ' ' + escapeHtml(unit) + ' at ' + need + ' in a row</span>'
+        : '';
 
       html +=
         '<div class="streak-row" data-act-id="' + escapeHtml(aid) + '">' +
-          '<div class="streak-row-head">' +
+          '<div class="streak-row-top">' +
             '<span class="streak-row-label">' + escapeHtml(act.label || 'Activity') + '</span>' +
-            bigNum +
+            dayBadge +
           '</div>' +
-          '<div class="streak-row-pips">' + pips + '</div>' +
-          (statusLabel || bonusLabel
-            ? '<div class="streak-row-foot">' + statusLabel + (bonusLabel ? ' <span class="streak-row-foot-sep" aria-hidden="true">·</span> ' + bonusLabel : '') + '</div>'
-            : '') +
+          '<div class="streak-row-pips">' + pips + (bonusNote ? bonusNote : '') + '</div>' +
         '</div>';
-      renderedRows++;
     });
-
-    if (!renderedRows) {
-      if (section) section.style.display = 'none';
-      strip.innerHTML = '';
-      return;
-    }
 
     strip.innerHTML = '<div class="streak-rows">' + html + '</div>';
   }
@@ -15234,48 +15147,18 @@
       logHint.textContent = 'Tap when you have earned it. Each tap logs for today and adds to your total in ' + unit + '.';
     }
 
-    // Wrap each sub-section in try/catch so a single failure can never again
-    // silently kill the rest of the habit page (this is what masked the
-    // streak + ladder + confetti bugs for so long).
     try {
-      const tdy = todayYMD();
-      const wr = getWeekRangeYMD(tdy);
-      const mo = programCalendarMonthRangeYMD();
-      const yr = programCalendarYearRangeYMD();
-      const dayPts = getProgramPointsOnDay(fresh, tdy);
-      const wkPts = getProgramPointsBetween(fresh, wr.start, wr.end);
-      const moPts = getProgramPointsBetween(fresh, mo.start, mo.end);
-      const yrPts = getProgramPointsBetween(fresh, yr.start, yr.end);
-      const dT = programWindowTargetPoints(fresh, tdy, tdy);
-      const wT = programWindowTargetPoints(fresh, wr.start, wr.end);
-      const mT = programWindowTargetPoints(fresh, mo.start, mo.end);
-      const yT = programWindowTargetPoints(fresh, yr.start, yr.end);
-      const ladder = document.getElementById('programRhythmLadder');
-      if (ladder) {
-        const rowFn = function(label, cur, cap) {
-          const pc = cap <= 0 ? 0 : Math.min(100, Math.round((cur / cap) * 100));
-          return '<div class="program-ladder-row">' +
-            '<span class="program-ladder-name">' + label + '</span>' +
-            '<div class="program-ladder-bar"><div class="program-ladder-fill" style="width:' + pc + '%"></div></div>' +
-            '<span class="program-ladder-val">' + cur + ' / ' + cap + '</span></div>';
-        };
-        ladder.innerHTML =
-          rowFn('Today', dayPts, dT) +
-          rowFn('This week', wkPts, wT) +
-          rowFn('This month', moPts, mT) +
-          rowFn('This year', yrPts, yT);
-      }
-    } catch (err) {
-      console.warn('renderProgramView: rhythm ladder failed', err);
-    }
-
-    try {
-      // Pre-show streak section whenever there are activities of ANY type.
-      // Counter / timer habits get a streak too — every day with a log counts.
-      const _actCount = (fresh.activities || []).filter(function(a) { return a && a.label; }).length;
+      // Only show the streak section when at least one activity has a bonus rule.
+      const _rules = normalizeProgramRules(fresh.rules || {}).streakBonuses;
+      const _hasStreakRule = (fresh.activities || []).some(function(a) {
+        return _rules.some(function(rule) {
+          const rAid = programResolveRuleActivityId(fresh, rule);
+          return rAid && String(rAid) === String(a.id);
+        });
+      });
       const _sec = document.getElementById('programStreakSection');
-      if (_sec) _sec.style.display = _actCount ? 'block' : 'none';
-      programRenderStreakStrip(fresh, unit);
+      if (_sec) _sec.style.display = _hasStreakRule ? 'block' : 'none';
+      if (_hasStreakRule) programRenderStreakStrip(fresh, unit);
     } catch (err) {
       console.warn('renderProgramView: streak strip failed', err);
     }
