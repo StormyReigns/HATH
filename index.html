@@ -69,7 +69,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta id="themeColorMeta" name="theme-color" content="#fdf0e8">
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="https://stormyreigns.github.io/HATH/ShastaApp.png">
+  <link rel="apple-touch-icon" href="https://stormyreigns.github.io/HATH/ShastaApp.PNG">
   <title>ShastApp</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -10217,6 +10217,8 @@
 </div>
 
 <script>
+  window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
+  window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
   const SHASTAPP_VERSION = '2.53.1';  // Bump this when you deploy changes.
 
@@ -12678,6 +12680,7 @@
         body: JSON.stringify(body),
         signal: activeController.signal
       });
+            if (!res.ok) throw new Error('Server error ' + res.status);
       const text2 = await res.text();
       let data;
       try { data = JSON.parse(text2); } catch (_) {
@@ -12685,7 +12688,7 @@
       }
       var typingDone = document.getElementById('typingIndicator');
       if (typingDone) typingDone.remove();
-      const reply = data.reply || friendlyBlathersError(data.error);
+      const reply = (data.reply != null ? data.reply : friendlyBlathersError(data.error));
       const structured = parseBlathersStructuredReply(reply);
       const displayReply = sanitizeBlathersUserVisibleText(structured.display || reply);
       const turn = addBubble(displayReply, 'hath');
@@ -16081,6 +16084,7 @@
           directPrompt: true
         })
       });
+            if (!res.ok) throw new Error('Server error ' + res.status);
       const raw = await res.text();
       let data;
       try { data = JSON.parse(raw); } catch (_) { data = {}; }
@@ -17482,6 +17486,7 @@
         body: JSON.stringify(body),
         signal: activeController.signal
       });
+            if (!res.ok) throw new Error('Server error ' + res.status);
       const text2 = await res.text();
       let data;
       try { data = JSON.parse(text2); } catch (_) {
@@ -17489,7 +17494,7 @@
       }
       var typingDone2 = document.getElementById('typingIndicator');
       if (typingDone2) typingDone2.remove();
-      const reply = data.reply || friendlyBlathersError(data.error);
+      const reply = (data.reply != null ? data.reply : friendlyBlathersError(data.error));
       const structured = parseBlathersStructuredReply(reply);
       const displayReply = sanitizeBlathersUserVisibleText(structured.display || reply);
       const turn = addBubble(displayReply, 'hath');
@@ -20204,11 +20209,12 @@
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(body)
       });
+            if (!res.ok) throw new Error('Server error' + res.status);
       const raw = await res.text();
       let data;
       try { data = JSON.parse(raw); } catch (_) { throw new Error('Invalid response from server'); }
       typing.remove();
-      const reply = data.reply || friendlyBlathersError(data.error);
+      const reply = (data.reply != null ? data.reply : friendlyBlathersError(data.error));
       const b = document.createElement('div');
       b.className = 'bubble hath';
       b.innerHTML = isCivicsResponse(reply) ? renderCivicsResponse(reply) : String(reply)
@@ -20488,7 +20494,8 @@
           history: [],
           fundingInterpretation: true
         })
-      });
+      });   
+         if (!res.ok) throw new Error('Server error ' + res.status);
       var text = await res.text();
       var data;
       try { data = JSON.parse(text); } catch (_) { throw new Error('Invalid response'); }
@@ -20557,7 +20564,8 @@
         redirect: 'follow',
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(body)
-      });
+      });   
+         if (!res.ok) throw new Error('Server error ' + res.status);
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       const reply = data.reply || '';
@@ -22732,7 +22740,8 @@
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(body),
         signal: activeController.signal
-      });
+      }); 
+           if (!res.ok) throw new Error('Server error ' + res.status);
       const text2 = await res.text();
       let data;
       try { data = JSON.parse(text2); } catch (_) {
@@ -22741,7 +22750,7 @@
       typing.remove();
       setSendButtonMode('send');
 
-      const reply = data.reply || friendlyBlathersError(data.error);
+      const reply = (data.reply != null ? data.reply : friendlyBlathersError(data.error));
       const structured = parseBlathersStructuredReply(reply);
       const displayReply = sanitizeBlathersUserVisibleText(structured.display || reply);
       const turn = addBubble(displayReply, 'hath');
@@ -23089,11 +23098,12 @@
         body: JSON.stringify(body),
         signal: blatherbookActiveController.signal
       });
+      if (!res.ok) throw new Error('Server error ' + res.status);      });
       const raw = await res.text();
       let data;
       try { data = JSON.parse(raw); } catch (_) { throw new Error('Invalid response from server'); }
       typing.remove();
-      const reply = data.reply || friendlyBlathersError(data.error);
+      const reply = (data.reply != null ? data.reply : friendlyBlathersError(data.error));
       addBlatherBookBubble(reply, 'hath');
       blatherbookHistory.push({ role: 'assistant', content: reply });
     } catch (err) {
@@ -23151,13 +23161,14 @@
         body: JSON.stringify(body),
         signal: blatherbookActiveController.signal
       });
+            if (!res.ok) throw new Error('Server error ' + res.status);
       const raw = await res.text();
       let data;
       try { data = JSON.parse(raw); } catch (_) {
         throw new Error('Invalid response from server');
       }
       typing.remove();
-      const reply = data.reply || friendlyBlathersError(data.error);
+      const reply = (data.reply != null ? data.reply : friendlyBlathersError(data.error));
       const structured = parseBlathersStructuredReply(reply);
       const displayReply = sanitizeBlathersUserVisibleText(structured.display || reply);
       const turn = addBlatherBookBubble(displayReply, 'hath');
