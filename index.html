@@ -9079,7 +9079,38 @@
       pointer-events: none;
       transition: opacity 0.2s ease;
     }
-  </style>
+  
+  /* ── PREMIUM CHAT UX ── */
+  @keyframes blink { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
+  .stream-cursor {
+    display: inline-block; width: 2px; height: 1.1em;
+    background: currentColor; margin-left: 1px;
+    vertical-align: text-bottom;
+    animation: blink 0.65s step-end infinite;
+  }
+  .user-bubble-wrap { display: flex; flex-direction: column; align-items: flex-end; }
+  .bubble-action-row {
+    display: flex; gap: 4px; margin-top: 3px;
+    opacity: 0; transition: opacity 0.15s; pointer-events: none;
+  }
+  .user-bubble-wrap:hover .bubble-action-row { opacity: 1; pointer-events: auto; }
+  .blathers-turn { display: flex; flex-direction: column; }
+  .hath-turn-actions {
+    display: flex; gap: 4px; margin-top: 3px; padding-left: 38px;
+    opacity: 0; transition: opacity 0.15s; pointer-events: none;
+  }
+  .blathers-turn:hover .hath-turn-actions { opacity: 1; pointer-events: auto; }
+  .bubble-action-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 3px 8px; border-radius: 6px; font-size: 11px;
+    color: var(--text2); display: flex; align-items: center; gap: 3px;
+    transition: background 0.12s, color 0.12s; font-family: inherit;
+  }
+  .bubble-action-btn:hover { background: rgba(0,0,0,0.07); color: var(--text); }
+  html.dark-mode .bubble-action-btn:hover { background: rgba(255,255,255,0.09); }
+  .bubble-action-btn svg { width: 12px; height: 12px; }
+
+</style>
 </head>
 <body>
 
@@ -22758,12 +22789,14 @@
         throw new Error('Invalid response from server');
       }
       typing.remove();
-      setSendButtonMode('send');
+      // Keep stop button active during streaming animation
 
       const reply = (data.reply != null ? data.reply : friendlyBlathersError(data.error));
       const structured = parseBlathersStructuredReply(reply);
       const displayReply = sanitizeBlathersUserVisibleText(structured.display || reply);
-      const turn = addBubble(displayReply, 'hath');
+      const turn = addBubble('', 'hath');
+      await streamBlathersText(turn, displayReply);
+      setSendButtonMode('send');
       conversationHistory.push({ role: 'assistant', content: displayReply });
       applyBlathersStructuredFollowUp(turn, structured);
 
@@ -22811,24 +22844,12 @@
     const chat = document.getElementById('chatArea');
 
     if (who === 'hath') {
-      // Parse emotion tag from response e.g. [HAPPY] or [UNCERTAIN]
       let resolvedEmotion = emotion || 'happy';
       const tagMatch = text.match(/^\[(HAPPY|CLEVER|UNCERTAIN|ANNOUNCE|THINKING)\]\s*/i);
-      if (tagMatch) {
-        resolvedEmotion = tagMatch[1].toLowerCase();
-        text = text.replace(tagMatch[0], '');
-      }
-
-      // Update Blathers avatar
+      if (tagMatch) { resolvedEmotion = tagMatch[1].toLowerCase(); text = text.replace(tagMatch[0], ''); }
       setBlathers(resolvedEmotion);
 
-      // Convert markdown to HTML
-      const html = text
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        .replace(/`(.*?)`/g, '<code>$1</code>')
-        .replace(/\n/g, '<br>');
-
+      const html = renderMarkdownForBubble(text);
       const turn = document.createElement('div');
       turn.className = 'blathers-turn';
 
@@ -22837,28 +22858,136 @@
 
       const avatar = document.createElement('img');
       avatar.src = BLATHERS[resolvedEmotion] || BLATHERS.happy;
-      avatar.className = 'bubble-avatar';
-      avatar.alt = 'Blathers';
+      avatar.className = 'bubble-avatar'; avatar.alt = 'Blathers';
 
       const b = document.createElement('div');
       b.className = 'bubble hath';
       b.innerHTML = html;
 
-      row.appendChild(avatar);
-      row.appendChild(b);
+      row.appendChild(avatar); row.appendChild(b);
       turn.appendChild(row);
-      chat.appendChild(turn);
 
-      requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
+      // Action row: copy + regenerate
+      const actions = document.createElement('div');
+      actions.className = 'hath-turn-actions';
+
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'bubble-action-btn';
+      copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy';
+      copyBtn.onclick = function() {
+        navigator.clipboard.writeText(text).catch(() => {});
+        copyBtn.textContent = 'Copied!';
+        setTimeout(function() { copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy'; }, 1500);
+      };
+
+      const regenBtn = document.createElement('button');
+      regenBtn.className = 'bubble-action-btn';
+      regenBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.1"/></svg> Regenerate';
+      regenBtn.onclick = regenerateLastResponse;
+
+      actions.appendChild(copyBtn); actions.appendChild(regenBtn);
+      turn.appendChild(actions);
+      chat.appendChild(turn);
+      requestAnimationFrame(function() { chat.scrollTop = chat.scrollHeight; });
       return turn;
     }
+
+    // User bubble
+    const historyIdx = conversationHistory.length;
+    const wrap = document.createElement('div');
+    wrap.className = 'user-bubble-wrap';
+    wrap.dataset.histIdx = historyIdx;
 
     const b = document.createElement('div');
     b.className = 'bubble user';
     b.textContent = text;
-    chat.appendChild(b);
-    requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
-    return null;
+    wrap.appendChild(b);
+
+    const actionRow = document.createElement('div');
+    actionRow.className = 'bubble-action-row';
+    const editBtn = document.createElement('button');
+    editBtn.className = 'bubble-action-btn';
+    editBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit';
+    editBtn.onclick = function() { editUserBubble(wrap, text); };
+    actionRow.appendChild(editBtn);
+    wrap.appendChild(actionRow);
+
+    chat.appendChild(wrap);
+    requestAnimationFrame(function() { chat.scrollTop = chat.scrollHeight; });
+    return wrap;
+  }
+
+  function renderMarkdownForBubble(text) {
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1<\/strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1<\/em>')
+      .replace(/`(.*?)`/g, '<code>$1<\/code>')
+      .replace(/\n/g, '<br>');
+  }
+
+  async function streamBlathersText(turn, fullText) {
+    const bubble = turn ? turn.querySelector('.bubble.hath') : null;
+    if (!bubble) return;
+    bubble.innerHTML = '<span class="stream-cursor"></span>';
+    const chat = document.getElementById('chatArea');
+    const tokens = fullText.split(/(\s+)/);
+    let built = '';
+    for (let i = 0; i < tokens.length; i++) {
+      if (!isSending) break;
+      built += tokens[i];
+      bubble.innerHTML = renderMarkdownForBubble(built) + '<span class="stream-cursor"></span>';
+      chat.scrollTop = chat.scrollHeight;
+      await new Promise(function(r) { setTimeout(r, 14 + Math.random() * 18); });
+    }
+    bubble.innerHTML = renderMarkdownForBubble(fullText);
+  }
+
+  function editUserBubble(wrap, text) {
+    const chat = document.getElementById('chatArea');
+    const children = Array.from(chat.children);
+    const wrapIdx = children.indexOf(wrap);
+    if (wrapIdx === -1) return;
+    const histIdx = parseInt(wrap.dataset.histIdx, 10) || 0;
+    children.slice(wrapIdx).forEach(function(el) { el.remove(); });
+    conversationHistory.splice(histIdx);
+    const f = document.getElementById('inputField');
+    f.value = text; f.focus(); autoResize(f);
+    if (chat.children.length === 0) {
+      chat.style.display = 'none';
+      document.querySelector('.body').classList.remove('chat-mode');
+      const hint = document.getElementById('hintArea');
+      if (hint) hint.style.display = '';
+    }
+  }
+
+  async function regenerateLastResponse() {
+    if (isSending) return;
+    const chat = document.getElementById('chatArea');
+    const children = Array.from(chat.children);
+    // Remove last hath turn from DOM
+    for (let i = children.length - 1; i >= 0; i--) {
+      if (children[i].classList.contains('blathers-turn')) {
+        children[i].remove(); break;
+      }
+    }
+    // Remove last assistant entry from history
+    for (let i = conversationHistory.length - 1; i >= 0; i--) {
+      if (conversationHistory[i].role === 'assistant') {
+        conversationHistory.splice(i, 1); break;
+      }
+    }
+    // Re-send last user message
+    if (conversationHistory.length > 0) {
+      const last = conversationHistory[conversationHistory.length - 1];
+      if (last.role === 'user') {
+        conversationHistory.pop();
+        const f = document.getElementById('inputField');
+        const prev = f.value;
+        f.value = last.content;
+        await sendMessage();
+        if (!f.value) f.value = prev;
+      }
+    }
   }
 
   function applyBlathersStructuredFollowUp(turnEl, structured) {
