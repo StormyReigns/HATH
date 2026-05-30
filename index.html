@@ -23098,7 +23098,7 @@
         body: JSON.stringify(body),
         signal: blatherbookActiveController.signal
       });
-      if (!res.ok) throw new Error('Server error ' + res.status);      });
+      if (!res.ok) throw new Error('Server error ' + res.status);
       const raw = await res.text();
       let data;
       try { data = JSON.parse(raw); } catch (_) { throw new Error('Invalid response from server'); }
