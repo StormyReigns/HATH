@@ -9110,6 +9110,15 @@
   html.dark-mode .bubble-action-btn:hover { background: rgba(255,255,255,0.09); }
   .bubble-action-btn svg { width: 12px; height: 12px; }
 
+
+  /* ── THINKING INDICATOR ── */
+  .thinking-indicator { display: flex; align-items: center; gap: 10px; padding: 4px 0; }
+  .thinking-avatar { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; animation: thinkBob 2s ease-in-out infinite; }
+  @keyframes thinkBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .thinking-quip { font-size: 13px; color: var(--text2); font-style: italic; transition: opacity 0.3s ease; line-height: 1.4; }
+  /* Instant bottom-bar hide when keyboard opens — no slide-up flash */
+  html.keyboard-open .app-bottom-bar { transition: none !important; }
+
 </style>
 </head>
 <body>
@@ -11395,6 +11404,17 @@
       requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
     }
   }
+
+  // Scroll latest bubble into view when keyboard opens
+  (function() {
+    var _kbPrev = false;
+    var _kbObs = new MutationObserver(function() {
+      var open = document.documentElement.classList.contains('keyboard-open');
+      if (open && !_kbPrev) { setTimeout(scrollChatForKeyboard, 80); setTimeout(scrollChatForKeyboard, 320); }
+      _kbPrev = open;
+    });
+    _kbObs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  })();
 
   let scrollIntoViewAfterKeyboardTimer = 0;
   function scrollFocusedIntoView() {
@@ -22720,7 +22740,7 @@
       activeController = null;
     }
     const typing = document.getElementById('typingIndicator');
-    if (typing) typing.remove();
+    if (typing) { if (typing._cleanup) typing._cleanup(); typing.remove(); }
     setSendButtonMode('send');
     isSending = false;
   }
@@ -22749,11 +22769,33 @@
     f.value = ''; f.style.height = 'auto';
 
     const typing = document.createElement('div');
-    typing.className = 'typing';
+    typing.className = 'thinking-indicator';
     typing.id = 'typingIndicator';
-    typing.innerHTML = '<span></span><span></span><span></span>';
+    const _thinkAvatar = document.createElement('img');
+    _thinkAvatar.src = BLATHERS.thinking; _thinkAvatar.className = 'thinking-avatar';
+    const _thinkQuip = document.createElement('div');
+    _thinkQuip.className = 'thinking-quip';
+    const _quips = [
+      'Hmm, let me think on that…',
+      'Oh my, quite a lot to consider…',
+      'Allow me to consult my archives…',
+      'Most intriguing question, I must say…',
+      'Ah yes, this reminds me of something…',
+      '*shuffles notes* One moment…',
+      'Ho hum… yes, yes…',
+      'I believe I have something on this…'
+    ];
+    let _qi = 0;
+    _thinkQuip.textContent = _quips[0];
+    typing.appendChild(_thinkAvatar); typing.appendChild(_thinkQuip);
+    const _qt = setInterval(function() {
+      _qi = (_qi + 1) % _quips.length;
+      _thinkQuip.style.opacity = '0';
+      setTimeout(function() { _thinkQuip.textContent = _quips[_qi]; _thinkQuip.style.opacity = '1'; }, 280);
+    }, 2600);
+    typing._cleanup = function() { clearInterval(_qt); };
     chat.appendChild(typing);
-    requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
+    requestAnimationFrame(function() { chat.scrollTop = chat.scrollHeight; });
 
     try {
       if (!window.shastaTabs || !Array.isArray(window.shastaTabs) || window.shastaTabs.length === 0) {
@@ -22794,14 +22836,17 @@
       const reply = (data.reply != null ? data.reply : friendlyBlathersError(data.error));
       const structured = parseBlathersStructuredReply(reply);
       const displayReply = sanitizeBlathersUserVisibleText(structured.display || reply);
-      const turn = addBubble('', 'hath');
-      await streamBlathersText(turn, displayReply);
+      const emotionMatch = displayReply.match(/^\[(HAPPY|CLEVER|UNCERTAIN|ANNOUNCE|THINKING)\]\s*/i);
+      const streamEmotion = emotionMatch ? emotionMatch[1].toLowerCase() : 'happy';
+      const cleanReply = emotionMatch ? displayReply.replace(emotionMatch[0], '') : displayReply;
+      const turn = addBubble('', 'hath', streamEmotion);
+      await streamBlathersText(turn, cleanReply);
       setSendButtonMode('send');
-      conversationHistory.push({ role: 'assistant', content: displayReply });
+      conversationHistory.push({ role: 'assistant', content: cleanReply });
       applyBlathersStructuredFollowUp(turn, structured);
 
     } catch (err) {
-      typing.remove();
+      if (typing && typing._cleanup) typing._cleanup(); typing.remove();
       setSendButtonMode('send');
       if (err.name !== 'AbortError') {
         conversationHistory.pop();
