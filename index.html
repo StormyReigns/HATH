@@ -16,7 +16,7 @@
       var h = (navigator.standalone && sh > 0) ? sh : Math.max(vvh, iwh);
       if (h > 0) document.documentElement.style.setProperty('--vh', (h * 0.01) + 'px');
     }
-    function setVisualViewport() {
+    function setVisualViewport() {h
       var vv = window.visualViewport;
       var sh = (window.screen && window.screen.height) || 0;
       var iwh = window.innerHeight || 0;
@@ -78,6 +78,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async></script>
   <script type="module" src="https://unpkg.com/@dotlottie/player-component@2.3.0/dist/dotlottie-player.mjs"></script>
+  <script>
+    // Apply dark mode before first paint to prevent flash of light mode
+    (function() {
+      var u = localStorage.getItem('shasta_user');
+      if (u && localStorage.getItem('shasta_dark_' + u) === 'true') {
+        document.documentElement.classList.add('dark-mode');
+        document.documentElement.style.colorScheme = 'dark';
+      }
+    })();
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
