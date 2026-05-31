@@ -1127,11 +1127,11 @@
     /* ── HINT AREA ── */
     .hint-area {
       flex: 1; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
+      align-items: center; justify-content: flex-start;
       gap: 18px; opacity: 0;
       width: 100%;
       min-height: fit-content;
-      padding: 10px 0;
+      padding: 16px 0 10px;
       animation: fadeUp 0.7s ease 0.3s forwards;
     }
     @media (prefers-reduced-motion: reduce) {
@@ -9131,7 +9131,8 @@
       border-radius: 10px;
       transition: color 0.12s, background 0.12s;
       padding: 0;
-      flex-shrink: 0;
+      flex-shrink: 0 !important;
+      position: relative; z-index: 2;
       -webkit-tap-highlight-color: transparent;
     }
     .screen-header-back:active { color: var(--accent); background: rgba(192,122,74,0.08); }
@@ -9261,6 +9262,15 @@
     html.dark-mode .civic-imminent-arrow { color: #8ab4f8; }
     html.dark-mode .civic-imminent-title { color: #a8c8fc; }
     html.dark-mode .civic-imminent-dot { background: #5a8fd8; }
+
+    /* Screen header title truncation (v3.0.3) */
+    .schedule-header .schedule-title,
+    .civics-header .civics-title,
+    .recipes-header .recipes-title,
+    .projects-header .projects-title {
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+    }
+    .projects-view-title-wrap { min-width: 0; overflow: hidden; }
 </style>
 </head>
 <body>
@@ -10410,7 +10420,7 @@
   window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
   window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '3.0.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '3.0.3';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
