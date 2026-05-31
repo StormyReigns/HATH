@@ -10281,7 +10281,7 @@
   window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
   window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.54.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.54.3';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
@@ -11462,7 +11462,8 @@
       if (!vv) return;
       var zone = document.getElementById('inputZone');
       var chat = document.querySelector('.chat-area');
-      var kbHeight = Math.max(0, window.innerHeight - vv.height);
+      var kbOpen = document.documentElement.classList.contains('keyboard-open');
+      var kbHeight = kbOpen ? Math.max(0, window.innerHeight - vv.height) : 0;
       var lift = kbHeight > 10 ? kbHeight : 0;
       if (zone) zone.style.bottom = lift + 'px';
       if (chat) chat.style.paddingBottom = lift > 0 ? (lift + 150) + 'px' : '';
