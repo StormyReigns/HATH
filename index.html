@@ -97,10 +97,10 @@
       --muted:  #b8a99e;
       --accent: #c07a4a;
       --vvh: 100vh;
-      --bottom-dock-clearance: 116px;
+      --bottom-dock-clearance: 128px;
       --bottom-dock-offset: 67px;
       --bottom-dock-offset-mid: 77px;
-      --bottom-dock-offset-high: 88px;
+      --bottom-dock-offset-high: 100px;
       --bottom-dock-offset-sheet: 92px;
       --bottom-dock-scroll-clearance: 67px;
       --drawer-bg: linear-gradient(170deg, #fdf8f4 0%, #f6ead8 100%);
@@ -935,6 +935,7 @@
       bottom: 0;
       left: 0;
       right: 0;
+      z-index: 50;
       padding-top: 0;
       /* 10px clears the home-indicator gesture zone (~8px) without noticeable dead space.
          Fixed value means bar height never changes on rotation. No env(), no media query. */
@@ -9263,13 +9264,7 @@
     html.dark-mode .civic-imminent-title { color: #a8c8fc; }
     html.dark-mode .civic-imminent-dot { background: #5a8fd8; }
 
-    /* Screen header title truncation (v3.0.3) */
-    .schedule-header .schedule-title,
-    .civics-header .civics-title,
-    .recipes-header .recipes-title,
-    .projects-header .projects-title {
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
-    }
+    .schedule-header .schedule-title, .civics-header .civics-title, .recipes-header .recipes-title, .projects-header .projects-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
     .projects-view-title-wrap { min-width: 0; overflow: hidden; }
 </style>
 </head>
@@ -10420,7 +10415,7 @@
   window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
   window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '3.0.3';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '3.0.4';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
