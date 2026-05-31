@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
-  <script>
+Fix keyboard layout: remove chat padding override, keep only zone lift (v2.54.4)  <script>
     function setVh() {
       var vvh = (window.visualViewport && window.visualViewport.height) || 0;
       var iwh = window.innerHeight || 0;
@@ -10281,7 +10280,7 @@
   window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
   window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.54.3';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.54.4';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
@@ -11439,7 +11438,6 @@
     function _onInputBlur() {
       document.documentElement.classList.remove('input-focused');
       var _zone = document.getElementById('inputZone'); if (_zone) _zone.style.bottom = '';
-      var _chat = document.querySelector('.chat-area'); if (_chat) _chat.style.paddingBottom = '';
       var inp = document.getElementById('inputField');
       var bb = document.getElementById('blatherbookInput');
       var zone = document.getElementById('inputZone');
@@ -11461,13 +11459,11 @@
       var vv = window.visualViewport;
       if (!vv) return;
       var zone = document.getElementById('inputZone');
-      var chat = document.querySelector('.chat-area');
       var kbOpen = document.documentElement.classList.contains('keyboard-open');
       var kbHeight = kbOpen ? Math.max(0, window.innerHeight - vv.height) : 0;
       var lift = kbHeight > 10 ? kbHeight : 0;
-      if (zone) zone.style.bottom = lift + 'px';
-      if (chat) chat.style.paddingBottom = lift > 0 ? (lift + 150) + 'px' : '';
-      scrollChatForKeyboard();
+      if (zone) zone.style.bottom = lift > 0 ? lift + 'px' : '';
+      if (lift > 0) scrollChatForKeyboard();
     }
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', _syncInputToKeyboard);
