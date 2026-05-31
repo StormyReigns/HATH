@@ -11431,18 +11431,38 @@
     _kbObs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
   })();
 
-  // Instantly hide bottom bar when input is focused (before keyboard fires)
+  // On input focus: instantly hide bottom bar AND switch to chat layout before keyboard rises
   (function() {
-    function _onInputFocus() { document.documentElement.classList.add('input-focused'); }
-    function _onInputBlur() { document.documentElement.classList.remove('input-focused'); }
+    function _enterChatMode() {
+      document.documentElement.classList.add('input-focused');
+      var body = document.querySelector('.body');
+      if (body) body.classList.add('chat-mode');
+      var chat = document.getElementById('chatArea');
+      if (chat) { chat.style.display = 'flex'; chat.style.flexDirection = 'column'; }
+      setTimeout(scrollChatForKeyboard, 80);
+    }
+    function _onInputBlur() {
+      document.documentElement.classList.remove('input-focused');
+      // If no messages sent yet, restore home layout after a tick (guards against send-button tap)
+      setTimeout(function() {
+        var inp = document.getElementById('inputField');
+        var bb = document.getElementById('blatherbookInput');
+        var focused = (document.activeElement === inp || document.activeElement === bb);
+        if (focused) return;
+        var chat = document.getElementById('chatArea');
+        var hasMessages = chat && chat.children.length > 0;
+        if (!hasMessages) {
+          var body = document.querySelector('.body');
+          if (body) body.classList.remove('chat-mode');
+          if (chat) chat.style.display = '';
+        }
+      }, 150);
+    }
     var _inp = document.getElementById('inputField');
-    if (_inp) { _inp.addEventListener('focusin', _onInputFocus); _inp.addEventListener('blur', _onInputBlur); }
-    // Also handle BlatherBook input
+    if (_inp) { _inp.addEventListener('focusin', _enterChatMode); _inp.addEventListener('blur', _onInputBlur); }
     var _bb = document.getElementById('blatherbookInput');
-    if (_bb) { _bb.addEventListener('focusin', _onInputFocus); _bb.addEventListener('blur', _onInputBlur); }
-  })();
-
-  let scrollIntoViewAfterKeyboardTimer = 0;
+    if (_bb) { _bb.addEventListener('focusin', function() { document.documentElement.classList.add('input-focused'); }); _bb.addEventListener('blur', function() { document.documentElement.classList.remove('input-focused'); }); }
+  })();rollIntoViewAfterKeyboardTimer = 0;
   function scrollFocusedIntoView() {
     const el = document.activeElement;
     if (!el || !['INPUT', 'TEXTAREA'].includes(el.tagName)) return;
