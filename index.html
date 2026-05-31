@@ -9375,6 +9375,7 @@
         <img id="docsBgImg2" src="https://stormyreigns.github.io/HATH/FFXIVLogo2.webp" alt="" loading="lazy">
       </div>
       <div class="docs-header">
+        <button type="button" class="screen-header-back" id="docsHomeBtn" onclick="goHome()" aria-label="Back to home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><polyline points="15 18 9 12 15 6"/></svg></button>
         <button type="button" class="docs-back-chevron" id="docsBackBtn" onclick="docsGoBack()" title="Back" aria-label="Back" style="display:none">‹</button>
         <div class="screen-breadcrumb" id="docsBreadcrumb"></div>
         <span class="section-version-label"></span>
@@ -9457,6 +9458,7 @@
         </svg>
       </div>
       <div class="recipes-header">
+        <button type="button" class="screen-header-back" onclick="goHome()" aria-label="Back to home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><polyline points="15 18 9 12 15 6"/></svg></button>
         <span class="hk-icon-circle"><img class="recipes-title-icon" src="https://stormyreigns.github.io/HATH/HK.png" alt="" loading="lazy"></span>
         <span class="recipes-title">Recipes</span>
         <span class="section-version-label"></span>
@@ -9536,7 +9538,8 @@
       <div id="financesGuestMsg" class="fin-guest-msg" style="display:none">Please sign in to view finances.</div>
       <div id="financesRoot" class="fin-root" style="display:none">
         <div class="fin-header">
-          <div class="fin-header-mid">
+          <button type="button" class="screen-header-back" onclick="goHome()" aria-label="Back to home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <div class="fin-header-mid">
             <h2 class="fin-title">Finances</h2>
             <span class="fin-asof" id="finAsOf"></span>
           </div>
@@ -9694,6 +9697,7 @@
     <!-- Civics screen -->
     <div class="sub-screen" id="civicsScreen">
       <div class="civics-header">
+        <button type="button" class="screen-header-back" onclick="goHome()" aria-label="Back to home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><polyline points="15 18 9 12 15 6"/></svg></button>
         <img class="civics-title-icon" src="https://stormyreigns.github.io/HATH/LaytonIcon.png" alt="" loading="lazy">
         <h2 class="civics-title">Civics</h2>
         <span class="section-version-label"></span>
@@ -9746,6 +9750,7 @@
     <div class="sub-screen" id="scheduleScreen">
       <img class="schedule-bg-icon" src="https://stormyreigns.github.io/HATH/STIcon.svg" alt="" loading="lazy" aria-hidden="true">
       <div class="schedule-header">
+        <button type="button" class="screen-header-back" onclick="goHome()" aria-label="Back to home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><polyline points="15 18 9 12 15 6"/></svg></button>
         <div class="schedule-title-wrap">
           <img class="schedule-title-icon" src="https://stormyreigns.github.io/HATH/STIcon2.png" alt="" loading="lazy">
           <h2 class="schedule-title">Schedule</h2>
@@ -9793,7 +9798,8 @@
     <div class="sub-screen" id="projectsScreen">
       <div class="projects-landing" id="projectsLanding">
         <div class="projects-header">
-          <img class="projects-title-icon" src="https://stormyreigns.github.io/HATH/WWChest1.png" alt="" loading="lazy">
+          <button type="button" class="screen-header-back" onclick="goHome()" aria-label="Back to home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <img class="projects-title-icon" src="https://stormyreigns.github.io/HATH/WWChest1.png" alt="" loading="lazy">
           <h2 class="projects-title">Projects</h2>
           <span class="section-version-label"></span>
         </div>
@@ -10404,7 +10410,7 @@
   window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
   window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '3.0.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '3.0.1';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
@@ -10624,11 +10630,13 @@
     var homeSignedInPill = document.getElementById('homeSignedInPill');
     var homeSignedInName = document.getElementById('homeSignedInName');
     if (homeGuestWrap) homeGuestWrap.style.display = hasUser ? 'none' : '';
-    if (homeSignedInPill) homeSignedInPill.style.display = hasUser ? 'inline-flex' : 'none';
+    if (homeSignedInPill) homeSignedInPill.style.display = 'none'; // v3.0: avatar replaces pill
     var homeAvatarInit = document.getElementById('homeAvatarInitials');
     if (homeAvatarInit) {
       if (hasUser) {
-        var _n = (typeof getSettingsUser === 'function' ? getSettingsUser() : '') || '';
+        var _nameEl = document.getElementById('homeSignedInName');
+        var _displayName = (_nameEl && _nameEl.textContent) ? _nameEl.textContent.trim() : '';
+        var _n = _displayName || (typeof getSettingsUser === 'function' ? getSettingsUser() : '') || '';
         var _parts = _n.split(/[\s@]+/).filter(Boolean);
         var _init = _parts.length >= 2 ? (_parts[0][0] + _parts[1][0]).toUpperCase() : (_parts[0] ? _parts[0].substring(0,2).toUpperCase() : '?');
         homeAvatarInit.textContent = _init;
