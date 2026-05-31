@@ -9119,6 +9119,21 @@
   /* Instant bottom-bar hide when keyboard opens — no slide-up flash */
   html.keyboard-open .app-bottom-bar { transition: none !important; }
 
+
+  /* Hide bottom bar instantly on input focus — before keyboard detection fires */
+  html.input-focused .app-bottom-bar {
+    transform: translateY(calc(100% + 16px)) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: none !important;
+  }
+  html.input-focused .input-zone {
+    bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
+    transition: none !important;
+  }
+  /* Smoother, slower quip transitions */
+  .thinking-quip { transition: opacity 0.5s ease !important; }
+
 </style>
 </head>
 <body>
@@ -11414,6 +11429,17 @@
       _kbPrev = open;
     });
     _kbObs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  })();
+
+  // Instantly hide bottom bar when input is focused (before keyboard fires)
+  (function() {
+    function _onInputFocus() { document.documentElement.classList.add('input-focused'); }
+    function _onInputBlur() { document.documentElement.classList.remove('input-focused'); }
+    var _inp = document.getElementById('inputField');
+    if (_inp) { _inp.addEventListener('focusin', _onInputFocus); _inp.addEventListener('blur', _onInputBlur); }
+    // Also handle BlatherBook input
+    var _bb = document.getElementById('blatherbookInput');
+    if (_bb) { _bb.addEventListener('focusin', _onInputFocus); _bb.addEventListener('blur', _onInputBlur); }
   })();
 
   let scrollIntoViewAfterKeyboardTimer = 0;
@@ -22791,8 +22817,8 @@
     const _qt = setInterval(function() {
       _qi = (_qi + 1) % _quips.length;
       _thinkQuip.style.opacity = '0';
-      setTimeout(function() { _thinkQuip.textContent = _quips[_qi]; _thinkQuip.style.opacity = '1'; }, 280);
-    }, 2600);
+      setTimeout(function() { _thinkQuip.textContent = _quips[_qi]; _thinkQuip.style.opacity = '1'; }, 450);
+    }, 5000);
     typing._cleanup = function() { clearInterval(_qt); };
     chat.appendChild(typing);
     requestAnimationFrame(function() { chat.scrollTop = chat.scrollHeight; });
