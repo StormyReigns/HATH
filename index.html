@@ -10281,7 +10281,7 @@
   window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
   window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.54.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.54.2';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
@@ -11438,6 +11438,8 @@
     }
     function _onInputBlur() {
       document.documentElement.classList.remove('input-focused');
+      var _zone = document.getElementById('inputZone'); if (_zone) _zone.style.bottom = '';
+      var _chat = document.querySelector('.chat-area'); if (_chat) _chat.style.paddingBottom = '';
       var inp = document.getElementById('inputField');
       var bb = document.getElementById('blatherbookInput');
       var zone = document.getElementById('inputZone');
@@ -11456,13 +11458,14 @@
     }
     // Real-time keyboard tracking via visualViewport
     function _syncInputToKeyboard() {
-      if (!document.documentElement.classList.contains('input-focused')) return;
       var vv = window.visualViewport;
       if (!vv) return;
       var zone = document.getElementById('inputZone');
-      if (!zone) return;
-      var kbHeight = Math.max(0, window.innerHeight - vv.height - (vv.offsetTop || 0));
-      zone.style.bottom = (kbHeight > 10 ? kbHeight : 0) + 'px';
+      var chat = document.querySelector('.chat-area');
+      var kbHeight = Math.max(0, window.innerHeight - vv.height);
+      var lift = kbHeight > 10 ? kbHeight : 0;
+      if (zone) zone.style.bottom = lift + 'px';
+      if (chat) chat.style.paddingBottom = lift > 0 ? (lift + 150) + 'px' : '';
       scrollChatForKeyboard();
     }
     if (window.visualViewport) {
