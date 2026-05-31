@@ -9127,10 +9127,6 @@
     pointer-events: none !important;
     transition: none !important;
   }
-  html.input-focused .input-zone {
-    bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
-    transition: none !important;
-  }
   /* Smoother, slower quip transitions */
   .thinking-quip { transition: opacity 0.5s ease !important; }
 
@@ -10285,7 +10281,7 @@
   window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
   window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.54.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '2.54.1';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
@@ -11431,15 +11427,52 @@
     _kbObs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
   })();
 
-  // Instantly hide bottom bar when input is focused (before keyboard fires)
+  // Input focus: enter chat layout instantly + track keyboard with visualViewport
   (function() {
-    function _onInputFocus() { document.documentElement.classList.add('input-focused'); }
-    function _onInputBlur() { document.documentElement.classList.remove('input-focused'); }
+    function _enterChatMode() {
+      document.documentElement.classList.add('input-focused');
+      var body = document.querySelector('.body');
+      if (body) body.classList.add('chat-mode');
+      var chat = document.getElementById('chatArea');
+      if (chat) { chat.style.display = 'flex'; chat.style.flexDirection = 'column'; }
+    }
+    function _onInputBlur() {
+      document.documentElement.classList.remove('input-focused');
+      var inp = document.getElementById('inputField');
+      var bb = document.getElementById('blatherbookInput');
+      var zone = document.getElementById('inputZone');
+      if (zone) zone.style.bottom = '';
+      setTimeout(function() {
+        var focused = (document.activeElement === inp || document.activeElement === bb);
+        if (focused) return;
+        var chat = document.getElementById('chatArea');
+        var hasMessages = chat && chat.children.length > 0;
+        if (!hasMessages) {
+          var body = document.querySelector('.body');
+          if (body) body.classList.remove('chat-mode');
+          if (chat) chat.style.display = '';
+        }
+      }, 150);
+    }
+    // Real-time keyboard tracking via visualViewport
+    function _syncInputToKeyboard() {
+      if (!document.documentElement.classList.contains('input-focused')) return;
+      var vv = window.visualViewport;
+      if (!vv) return;
+      var zone = document.getElementById('inputZone');
+      if (!zone) return;
+      var kbHeight = Math.max(0, window.innerHeight - vv.height - (vv.offsetTop || 0));
+      zone.style.bottom = (kbHeight > 10 ? kbHeight : 0) + 'px';
+      scrollChatForKeyboard();
+    }
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', _syncInputToKeyboard);
+      window.visualViewport.addEventListener('scroll', _syncInputToKeyboard);
+    }
     var _inp = document.getElementById('inputField');
-    if (_inp) { _inp.addEventListener('focusin', _onInputFocus); _inp.addEventListener('blur', _onInputBlur); }
-    // Also handle BlatherBook input
+    if (_inp) { _inp.addEventListener('focusin', _enterChatMode); _inp.addEventListener('blur', _onInputBlur); }
     var _bb = document.getElementById('blatherbookInput');
-    if (_bb) { _bb.addEventListener('focusin', _onInputFocus); _bb.addEventListener('blur', _onInputBlur); }
+    if (_bb) { _bb.addEventListener('focusin', function() { document.documentElement.classList.add('input-focused'); }); _bb.addEventListener('blur', function() { document.documentElement.classList.remove('input-focused'); var z = document.getElementById('inputZone'); if(z) z.style.bottom=''; }); }
   })();
 
   let scrollIntoViewAfterKeyboardTimer = 0;
