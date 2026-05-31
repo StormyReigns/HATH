@@ -447,7 +447,7 @@
       background: linear-gradient(90deg, var(--accent) 0%, #e09868 100%);
     }
     html.dark-mode .home-widget-primary-bar { background: rgba(255,255,255,0.08); }
-    html.dark-mode .home-widget-act { background: rgba(255,255,255,0.04); border-color: rgba(192,122,74,0.18); }
+    html.dark-mode .home-widget-act { background: rgba(255,255,255,0.04); }
     html.dark-mode .recent-uploads-label, html.dark-mode .recent-upload-item,
     html.dark-mode .upcoming-events-label, html.dark-mode .event-item,
     html.dark-mode .event-date, html.dark-mode .event-title,
@@ -862,26 +862,13 @@
     }
     /* Sign-in sits below the version line; cog is immediately left of GSI (single nowrap row). */
     .topbar-right.topbar-home-actions {
-      flex: 1 1 auto;
-      min-width: min-content;
+      flex: 0 0 auto;
       display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      justify-content: flex-start;
-      /* Below wordmark + version (see .wordmark / .version-label); tweak if title metrics change */
-      padding-top: calc(1.65rem + 0.7rem + 10px);
-      box-sizing: border-box;
-    }
-    .topbar-home-actions-cluster {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: nowrap;
-      align-items: center;
+      align-items: flex-start;
       justify-content: flex-end;
-      gap: 10px;
-      flex-shrink: 0;
-      width: max-content;
+      padding-top: 4px;
     }
+    /* .topbar-home-actions-cluster removed in v3.0 */
     .topbar.collapsed .topbar-home-actions {
       display: none;
     }
@@ -1196,7 +1183,6 @@
       font-size: 12px;
       color: var(--text2);
       background: rgba(255,255,255,0.68);
-      border: 1px solid rgba(0,0,0,0.06);
       max-width: 250px;
     }
     .home-account-pill-name {
@@ -1279,10 +1265,9 @@
       font-size: 13px;
       color: var(--text);
       background: rgba(255,255,255,0.75);
-      border: 2px solid rgba(192,122,74,0.25);
       border-radius: 12px;
       white-space: nowrap;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      box-shadow: 0 3px 14px rgba(58,46,40,0.1);
       touch-action: pan-x;
       -webkit-user-select: none;
       user-select: none;
@@ -2344,6 +2329,7 @@
       padding: 0;
     }
     .settings-header { display: flex; align-items: center; gap: 10px; padding: 14px 0 12px; flex-shrink: 0; }
+    .settings-header-spacer { flex: 1; }
     .settings-title-icon { width: 22px; height: 22px; flex-shrink: 0; color: var(--text); filter: drop-shadow(0 0 4px rgba(255,255,255,0.6)); }
     .settings-title { font-size: 20px; font-weight: 700; color: var(--text); margin: 0; }
     .docs-refresh-btn:hover, .docs-refresh-btn:active { color: var(--accent); }
@@ -5374,9 +5360,8 @@
       max-width: 340px;
       margin-top: 12px;
       background: rgba(255,255,255,0.72);
-      border: 1.5px solid rgba(192,122,74,0.16);
       border-radius: 20px;
-      box-shadow: 0 4px 20px rgba(58,46,40,0.08);
+      box-shadow: 0 6px 28px rgba(58,46,40,0.1);
       overflow: hidden;
       opacity: 0;
       transition: opacity 0.4s ease;
@@ -5384,7 +5369,6 @@
     .home-widget.has-projects { opacity: 1; }
     html.dark-mode .home-widget {
       background: rgba(38,32,28,0.88);
-      border-color: rgba(192,122,74,0.2);
     }
 
     .home-widget-header {
@@ -5392,7 +5376,7 @@
       align-items: center;
       justify-content: space-between;
       padding: 10px 14px 8px;
-      border-bottom: 1px solid rgba(192,122,74,0.12);
+      
     }
     html.dark-mode .home-widget-header {
       border-bottom-color: rgba(255,255,255,0.07);
@@ -5533,9 +5517,9 @@
       align-items: center;
       gap: 10px;
       background: rgba(255,255,255,0.5);
-      border: 1.5px solid rgba(192,122,74,0.14);
       border-radius: 14px;
       padding: 10px 12px;
+      box-shadow: 0 2px 10px rgba(58,46,40,0.07);
       cursor: pointer;
       transition: border-color 0.25s, background 0.25s;
       position: relative;
@@ -5545,8 +5529,8 @@
     }
     html.dark-mode .home-widget-act { background: rgba(255,255,255,0.04); }
     .home-widget-act.hw-logged {
-      border-color: rgba(74,154,106,0.4);
-      background: rgba(74,154,106,0.07);
+      background: rgba(74,154,106,0.1);
+      box-shadow: 0 2px 10px rgba(74,154,106,0.12);
     }
     .home-widget-act.hw-locked { pointer-events: none; }
 
@@ -9130,6 +9114,153 @@
   /* Smoother, slower quip transitions */
   .thinking-quip { transition: opacity 0.5s ease !important; }
 
+
+    /* ── SHARED SCREEN HEADER (v3.0) ── */
+    .screen-header {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 14px 0 12px;
+      flex-shrink: 0;
+    }
+    .screen-header-back {
+      min-width: 44px; min-height: 44px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; cursor: pointer;
+      color: var(--text2);
+      border-radius: 10px;
+      transition: color 0.12s, background 0.12s;
+      padding: 0;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .screen-header-back:active { color: var(--accent); background: rgba(192,122,74,0.08); }
+    .screen-header-title {
+      flex: 1;
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--text);
+      letter-spacing: -0.1px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .screen-header-action {
+      min-width: 44px; min-height: 44px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; cursor: pointer;
+      color: var(--muted);
+      border-radius: 10px;
+      transition: color 0.12s;
+      padding: 0;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .screen-header-action:active { color: var(--accent); }
+    html.dark-mode .screen-header-back,
+    html.dark-mode .screen-header-action { color: var(--text2); }
+
+    /* ── HOME AVATAR BUTTON (v3.0) ── */
+    .home-avatar-btn {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: rgba(192,122,74,0.15);
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .home-avatar-btn:active { transform: scale(0.93); background: rgba(192,122,74,0.25); }
+    .home-avatar-initials {
+      font-size: 13px; font-weight: 600;
+      color: var(--accent); letter-spacing: 0.02em;
+      line-height: 1; pointer-events: none;
+      font-family: 'Inter', sans-serif;
+    }
+    html.dark-mode .home-avatar-btn { background: rgba(192,122,74,0.18); }
+
+    /* ── HOME SECTION LABELS (v3.0) ── */
+    .home-section-label {
+      display: block; width: 100%;
+      font-size: 10px; font-weight: 500; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted);
+      text-align: left; padding: 0 2px; margin-bottom: 8px;
+      border: none; background: transparent;
+      font-family: inherit; cursor: default;
+    }
+    .home-section-label--link {
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .home-section-label--link:active { color: var(--accent); }
+
+    /* ── HOME HABITS SECTION (v3.0) ── */
+    .home-habits-section {
+      width: 100%; max-width: 340px;
+      opacity: 0; transition: opacity 0.4s ease;
+    }
+    .home-habits-section.loaded { opacity: 1; }
+
+    /* ── HOME PROJECTS SECTION (v3.0) ── */
+    .home-projects-section {
+      width: 100%; max-width: 340px;
+      margin-top: 4px;
+      opacity: 0; transition: opacity 0.4s ease;
+    }
+    .home-projects-section.has-projects { opacity: 1; }
+
+    /* ── CIVIC URGENCY TIERS (v3.0) ── */
+    .event-item--approaching {
+      font-weight: 500;
+    }
+    .event-item--civic.event-item--approaching .event-date { color: var(--accent); }
+    .event-item--civic.event-item--approaching .event-title { color: var(--accent); }
+
+    /* Imminent civic card — shown above habits when election ≤7 days away */
+    .civic-imminent-card {
+      width: 100%; max-width: 340px;
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(42,91,168,0.1);
+      border-radius: 16px;
+      padding: 14px 16px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      animation: civicPulse 3s ease-in-out infinite;
+      margin-bottom: 4px;
+    }
+    .civic-imminent-card:active { opacity: 0.85; }
+    @keyframes civicPulse {
+      0%, 100% { background: rgba(42,91,168,0.1); }
+      50% { background: rgba(42,91,168,0.17); }
+    }
+    .civic-imminent-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #2a5ba8; flex-shrink: 0;
+      animation: dotPulse 3s ease-in-out infinite;
+    }
+    @keyframes dotPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.65; transform: scale(0.8); }
+    }
+    .civic-imminent-body { flex: 1; min-width: 0; }
+    .civic-imminent-label {
+      font-size: 9px; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #2a5ba8; margin-bottom: 2px;
+    }
+    .civic-imminent-title {
+      font-size: 14px; font-weight: 500; color: #1e4a96;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .civic-imminent-date { font-size: 11px; color: #2a5ba8; margin-top: 2px; }
+    .civic-imminent-arrow { font-size: 18px; color: #2a5ba8; flex-shrink: 0; }
+    html.dark-mode .civic-imminent-card { background: rgba(42,91,168,0.22); }
+    html.dark-mode .civic-imminent-label,
+    html.dark-mode .civic-imminent-date,
+    html.dark-mode .civic-imminent-arrow { color: #8ab4f8; }
+    html.dark-mode .civic-imminent-title { color: #a8c8fc; }
+    html.dark-mode .civic-imminent-dot { background: #5a8fd8; }
 </style>
 </head>
 <body>
@@ -9183,16 +9314,12 @@
       <div class="version-label" id="versionLabel"></div>
     </div>
     <div class="topbar-right topbar-home-actions" id="homeActionsRow">
-      <div class="topbar-home-actions-cluster">
-        <button type="button" class="home-settings-btn" onclick="showSettingsScreen()" aria-label="Open settings">⚙️</button>
-        <div class="home-signin-wrap" id="homeGuestSignInWrap">
-          <div id="homeGoogleSignInBtn"></div>
-        </div>
-        <div class="home-account-pill" id="homeSignedInPill" style="display:none">
-          <span class="home-account-pill-name" id="homeSignedInName"></span>
-          <button type="button" class="home-account-signout" onclick="signOut()">Sign out</button>
-        </div>
-      </div>
+      <button type="button" class="home-avatar-btn" id="homeAvatarBtn" onclick="showSettingsScreen()" aria-label="Account &amp; settings">
+        <span class="home-avatar-initials" id="homeAvatarInitials">?</span>
+      </button>
+      <!-- Google Sign-In rendered here when not signed in (hidden visually, kept for auth init) -->
+      <div id="homeGuestSignInWrap" style="display:none"><div id="homeGoogleSignInBtn"></div></div>
+      <div id="homeSignedInPill" style="display:none"><span id="homeSignedInName"></span></div>
     </div>
   </div>
 
@@ -9204,41 +9331,33 @@
     <div class="hint-area" id="hintArea">
       <div class="hint-greeting" id="greetingText"></div>
 
-      <div class="home-widget" id="homeProjectsScroller">
-
-        <!-- Tab header -->
-        <div class="home-widget-header">
-          <div class="home-widget-tabs">
-            <button type="button" class="home-widget-tab active" id="homeWidgetTabProjects"
-              onclick="homeWidgetSwitchTab('projects')">Projects</button>
-            <button type="button" class="home-widget-tab" id="homeWidgetTabHabits"
-              onclick="homeWidgetSwitchTab('habits')">Habits</button>
-          </div>
-          <button type="button" class="home-widget-all-btn"
-            onclick="closeDrawer(); showProjectsScreen()" aria-label="View all">All ›</button>
+      <!-- Civic imminent card — shown when election ≤7 days away -->
+      <div class="civic-imminent-card" id="civicImminentCard" style="display:none" onclick="showCivicsScreen()">
+        <div class="civic-imminent-dot"></div>
+        <div class="civic-imminent-body">
+          <div class="civic-imminent-label">Coming Up</div>
+          <div class="civic-imminent-title" id="civicImminentTitle"></div>
+          <div class="civic-imminent-date" id="civicImminentDate"></div>
         </div>
-
-        <!-- Projects panel -->
-        <div id="homeWidgetProjectsPanel">
-
-          <!-- Primary project row — written by renderHomeWidgetPrimary() -->
-          <div class="home-widget-primary" id="homeWidgetPrimary"></div>
-
-          <!-- Secondary chips — written by renderHomeProjectsScroller() as before -->
-          <div class="home-projects-scroll-wrap" id="homeProjectsScrollWrap">
-            <div class="home-projects-scroll h-scroll-faded" id="homeProjectsScroll"></div>
-          </div>
-
-        </div>
-
-        <!-- Habits panel (hidden by default) -->
-        <div id="homeWidgetHabitsPanel" style="display:none">
-          <div class="home-widget-habits-inner" id="homeWidgetHabitsInner"></div>
-        </div>
-
+        <div class="civic-imminent-arrow">›</div>
       </div>
 
-      <div class="upcoming-events" id="upcomingEvents" onclick="closeDrawer(); showScheduleScreen()" role="button" tabindex="0" aria-label="View schedule">
+      <!-- Habits section — top-level, no card wrapper -->
+      <div class="home-habits-section" id="homeHabitsSection">
+        <div class="home-section-label" id="homeHabitsLabel">Today</div>
+        <div class="home-widget-habits-inner" id="homeWidgetHabitsInner"></div>
+      </div>
+
+      <!-- Projects chip strip -->
+      <div class="home-projects-section" id="homeProjectsSection">
+        <button type="button" class="home-section-label home-section-label--link" onclick="showProjectsScreen()">Projects ›</button>
+        <div class="home-projects-scroll-wrap" id="homeProjectsScrollWrap">
+          <div class="home-projects-scroll" id="homeProjectsScroll"></div>
+        </div>
+      </div>
+
+      <!-- Upcoming events -->
+      <div class="upcoming-events" id="upcomingEvents" onclick="showScheduleScreen()" role="button" tabindex="0" aria-label="View schedule">
         <div class="upcoming-events-label">Upcoming</div>
         <div class="upcoming-events-list" id="upcomingEventsList"></div>
       </div>
@@ -9498,6 +9617,10 @@
         <svg class="settings-title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="12" y1="18" x2="20" y2="18"/><circle cx="6" cy="12" r="2"/><circle cx="10" cy="18" r="2"/></svg>
         <h2 class="settings-title">Settings</h2>
         <span class="section-version-label"></span>
+        <span class="settings-header-spacer"></span>
+        <button type="button" class="screen-header-action" onclick="goHome()" aria-label="Close settings" title="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
       <div class="settings-section">
         <label class="settings-toggle">
@@ -10281,7 +10404,7 @@
   window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
   window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '2.54.6';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '3.0.0';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
@@ -10502,6 +10625,17 @@
     var homeSignedInName = document.getElementById('homeSignedInName');
     if (homeGuestWrap) homeGuestWrap.style.display = hasUser ? 'none' : '';
     if (homeSignedInPill) homeSignedInPill.style.display = hasUser ? 'inline-flex' : 'none';
+    var homeAvatarInit = document.getElementById('homeAvatarInitials');
+    if (homeAvatarInit) {
+      if (hasUser) {
+        var _n = (typeof getSettingsUser === 'function' ? getSettingsUser() : '') || '';
+        var _parts = _n.split(/[\s@]+/).filter(Boolean);
+        var _init = _parts.length >= 2 ? (_parts[0][0] + _parts[1][0]).toUpperCase() : (_parts[0] ? _parts[0].substring(0,2).toUpperCase() : '?');
+        homeAvatarInit.textContent = _init;
+      } else {
+        homeAvatarInit.textContent = '?';
+      }
+    }
     if (homeSignedInName && hasUser) homeSignedInName.textContent = getDisplayName();
     var settingsSignOutBtn = document.getElementById('settingsSignOutBtn');
     if (settingsSignOutBtn) settingsSignOutBtn.style.display = hasUser ? '' : 'none';
@@ -10522,10 +10656,12 @@
       var mn = document.getElementById('mattNote');
       if (mn) { mn.innerHTML = ''; mn.classList.remove('loaded'); }
       renderHomeProjectsScroller();
+      renderHomeWidgetHabits();
     } else {
       var wb2 = document.getElementById('wellbeing');
       if (wb2) wb2.style.display = '';
       renderHomeProjectsScroller();
+      renderHomeWidgetHabits();
       renderRecentUploads();
       loadCalendar();
       maybeRestoreProjectsFromCloud();
@@ -11224,6 +11360,26 @@
       } : null;
       const allEvents = [...calOnly];
       if (civicForList) allEvents.push(civicForList);
+
+      // Civic urgency tier (v3.0)
+      var _civicImminentCard = document.getElementById('civicImminentCard');
+      if (civicSummary && civicSummary.start && _civicImminentCard) {
+        var _civicDate = new Date(civicSummary.start);
+        var _civicToday = new Date(); _civicToday.setHours(0,0,0,0);
+        var _civicDays = Math.round((_civicDate - _civicToday) / 86400000);
+        if (_civicDays >= 0 && _civicDays <= 7) {
+          var _civicTitleEl = document.getElementById('civicImminentTitle');
+          var _civicDateEl = document.getElementById('civicImminentDate');
+          if (_civicTitleEl) _civicTitleEl.textContent = civicSummary.title || 'Civic Event';
+          if (_civicDateEl) _civicDateEl.textContent = _civicDays === 0 ? 'Today!' : _civicDays === 1 ? 'Tomorrow' : 'In ' + _civicDays + ' day' + (_civicDays === 1 ? '' : 's') + (civicSummary.dateRangeLabel ? ' — ' + civicSummary.dateRangeLabel : '');
+          _civicImminentCard.style.display = 'flex';
+        } else {
+          _civicImminentCard.style.display = 'none';
+        }
+      } else if (_civicImminentCard) {
+        _civicImminentCard.style.display = 'none';
+      }
+
       allEvents.sort((a, b) => new Date(a.start) - new Date(b.start));
 
       if (allEvents.length === 0) {
@@ -11234,7 +11390,9 @@
         const isCivic = ev.calendar === 'civic';
         const dateLabel = isCivic ? ev.dateRangeLabel : formatEventDate(ev.start);
         const title = (ev.title || ev.summary || 'Event').trim();
-        const civicAttrs = isCivic ? ' class="event-item event-item--civic" role="button" onclick="event.stopPropagation(); closeDrawer(); showCivicsScreen();"' : ' class="event-item"';
+        var _evDays = isCivic && ev.start ? Math.round((new Date(ev.start) - new Date().setHours(0,0,0,0)) / 86400000) : null;
+        var _approaching = _evDays !== null && _evDays > 7 && _evDays <= 30;
+        const civicAttrs = isCivic ? ' class="event-item event-item--civic' + (_approaching ? ' event-item--approaching' : '') + '" role="button" onclick="event.stopPropagation(); closeDrawer(); showCivicsScreen();"' : ' class="event-item"';
         return `<div${civicAttrs}><span class="event-date">${dateLabel}</span><span class="event-title">${escapeHtml(title)}</span></div>`;
       }).join('');
       wrap.style.display = '';
@@ -16040,6 +16198,9 @@
         break;
       }
     }
+    // Mark habits section visible
+    var _hs = document.getElementById('homeHabitsSection');
+    if (_hs) _hs.classList.add('loaded');
   }
 
   function homeWidgetActTap(projectId, activityId, cardEl) {
@@ -16076,7 +16237,7 @@
   }
 
   function renderHomeProjectsScroller() {
-    const wrap = document.getElementById('homeProjectsScroller');
+    const wrap = document.getElementById('homeProjectsSection');
     const scrollEl = document.getElementById('homeProjectsScroll');
     if (!wrap || !scrollEl) return;
     renderHomeWidgetPrimary();
@@ -16088,7 +16249,7 @@
       return;
     }
     wrap.classList.add('has-projects');
-    const chipProjects = inProgress.length > 1 ? inProgress.slice(1) : inProgress;
+    const chipProjects = inProgress;
     scrollEl.innerHTML = chipProjects.map(p => {
       const d = getProjectLandingDetails(p);
       const progPct = Math.round(d.prog);
