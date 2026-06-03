@@ -583,13 +583,14 @@
       pointer-events: none !important;
       transform: translateY(6px);
     }
-    /* Hide Blathers input when any sub-screen is visible (direct sibling selector) */
-    #documentsScreen.visible ~ .input-zone,
-    #settingsScreen.visible ~ .input-zone,
-    #scheduleScreen.visible ~ .input-zone,
-    #projectsScreen.visible ~ .input-zone,
-    #recipesScreen.visible ~ .input-zone,
-    #financesScreen.visible ~ .input-zone { display: none !important; }
+    /* Hide Blathers input when any sub-screen is visible */
+    .app:has(#documentsScreen.visible) .input-zone,
+    .app:has(#settingsScreen.visible) .input-zone,
+    .app:has(#scheduleScreen.visible) .input-zone,
+    .app:has(#projectsScreen.visible) .input-zone,
+    .app:has(#recipesScreen.visible) .input-zone,
+    .app:has(#civicsScreen.visible) .input-zone,
+    .app:has(#financesScreen.visible) .input-zone { display: none !important; }
 
     /* Blathers overlaps the input bar, positioned just above submit area */
     .blathers-wrap {
@@ -1110,6 +1111,7 @@
     }
     /* Reserve space for fixed input zone (Blathers + chat) when on home — not in chat (chat-mode needs full height) */
     .body:not(:has(.sub-screen.visible)):not(.chat-mode) {
+      justify-content: flex-start;
       padding-bottom: calc(var(--bottom-dock-clearance) + 50px);
     }
     .body.chat-mode .hint-area { display: none !important; }
@@ -10001,6 +10003,8 @@
       </div>
     </div>
 
+
+  </div>
     <!-- Blathers overlaps the input bar, associated with chat -->
     <div class="input-zone" id="inputZone">
       <button type="button" class="home-gj-btn" id="homeGjBtn" onclick="openGordonsJudgement()" aria-label="Gordon's Judgement"><span class="home-gj-label">GJ</span><span class="home-gj-knife"><canvas id="gjKnifeCanvas" style="width:40px;height:auto;display:block;filter:brightness(0) saturate(100%) invert(78%) sepia(40%) saturate(500%) hue-rotate(5deg) brightness(95%)"></canvas></span></button>
@@ -10026,7 +10030,6 @@
         </button>
       </div>
     </div>
-  </div>
 </div><!-- end .app -->
 
   <!-- Bottom bar — outside .app so fixed anchors to viewport, covers safe area -->
@@ -10415,7 +10418,7 @@
   window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
   window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '3.0.4';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '3.0.5';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
