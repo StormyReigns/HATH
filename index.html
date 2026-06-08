@@ -10418,7 +10418,7 @@
   window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
   window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '3.1.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '3.1.1';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
@@ -10958,6 +10958,17 @@
   }
 
   document.addEventListener('DOMContentLoaded', async function() {
+    // A valid session is now required to be considered "signed in". Clear any stale
+    // signed-in state (from before the auth upgrade, or an expired 30-day session)
+    // so the Google sign-in button reappears and a fresh session can be minted.
+    (function () {
+      var _exp = parseInt(localStorage.getItem('shasta_auth_exp') || '0', 10);
+      if (!localStorage.getItem('shasta_session') || !_exp || Date.now() > _exp) {
+        localStorage.removeItem('shasta_user');
+        localStorage.removeItem('shasta_session');
+        localStorage.removeItem('shasta_auth_exp');
+      }
+    })();
     const savedUser = localStorage.getItem('shasta_user');
     const savedExp  = localStorage.getItem('shasta_auth_exp');
     const sessionEmail = (savedUser && savedExp && Date.now() < parseInt(savedExp)) ? savedUser : null;
