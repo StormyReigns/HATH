@@ -10418,7 +10418,7 @@
   window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
   window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '3.0.7';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '3.1.0';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
@@ -10617,6 +10617,7 @@
   function signOut() {
     localStorage.removeItem('shasta_user');
     localStorage.removeItem('shasta_auth_exp');
+    localStorage.removeItem('shasta_session');
     closeDrawer();
     location.reload();
   }
@@ -10698,11 +10699,30 @@
     if (dumbSec) dumbSec.style.display = guest ? 'none' : '';
   }
 
-  function handleCredentialResponse(response) {
+  async function handleCredentialResponse(response) {
     const payload = JSON.parse(atob(response.credential.split('.')[1]));
     const email   = payload.email?.toLowerCase();
 
     if (ALLOWED_USERS.includes(email)) {
+      // Exchange the Google ID token for a backend-signed session before any authed calls
+      try {
+        const _r = await fetch(API_URL, {
+          method: 'POST',
+          redirect: 'follow',
+          body: JSON.stringify({ action: 'login', idToken: response.credential })
+        });
+        const _j = await _r.json();
+        if (_j && _j.session) {
+          localStorage.setItem('shasta_session', _j.session);
+        } else {
+          var _dn = document.getElementById('drawerAuthDenied'); if (_dn) _dn.style.display = 'block';
+          var _ld = document.getElementById('loginDenied'); if (_ld) _ld.style.display = 'block';
+          return;
+        }
+      } catch (e) {
+        // Network error during login exchange — abort sign-in cleanly so we never run unauthenticated
+        return;
+      }
       localStorage.setItem('shasta_user', email);
       localStorage.setItem('shasta_auth_exp', Date.now() + (30 * 24 * 60 * 60 * 1000));
       var denied = document.getElementById('drawerAuthDenied');
@@ -10907,7 +10927,7 @@
         google.accounts.id.initialize({
           client_id:   CLIENT_ID,
           callback:    handleCredentialResponse,
-          auto_select: false
+          auto_select: true
         });
         _gsiInitialized = true;
       }
@@ -11017,11 +11037,64 @@
   const AI_URL  = 'https://script.google.com/macros/s/AKfycbxe-sLbkBGyrdCoT-NuUg1dzYfNIGc4Wq3PuHY7wxg98JAhyPV8sDmI4gVh_Cl7VMS-oA/exec';
 
   function getApiUser() { return localStorage.getItem('shasta_user') || ''; }
+  function getApiSession() { return localStorage.getItem('shasta_session') || ''; }
   function apiUrlWithUser(base, extraParams) {
     const u = getApiUser();
     const sep = base.indexOf('?') >= 0 ? '&' : '?';
     return base + sep + 'user=' + encodeURIComponent(u) + (extraParams || '');
   }
+  // ── Auth interceptor: attach the signed session token to every backend call ──
+  // One choke point so individual call sites don't each need editing.
+  (function installSessionInterceptor() {
+    function withSession(url, init) {
+      var s = getApiSession();
+      if (!s || typeof url !== 'string' || url.indexOf(API_URL) !== 0) return { url: url, init: init };
+      init = init || {};
+      var method = (init.method || 'GET').toUpperCase();
+      if (method === 'GET' || method === 'HEAD' || init.body == null) {
+        url += (url.indexOf('?') >= 0 ? '&' : '?') + 'session=' + encodeURIComponent(s);
+      } else if (typeof init.body === 'string') {
+        try {
+          var o = JSON.parse(init.body);
+          if (o && typeof o === 'object' && o.session == null) {
+            o.session = s;
+            init = Object.assign({}, init, { body: JSON.stringify(o) });
+          }
+        } catch (e) {}
+      }
+      return { url: url, init: init };
+    }
+    var _fetch = window.fetch;
+    if (_fetch && !_fetch.__shastaWrapped) {
+      window.fetch = function(url, init) {
+        var r = withSession(url, init);
+        return _fetch.call(this, r.url, r.init);
+      };
+      window.fetch.__shastaWrapped = true;
+    }
+    if (typeof XMLHttpRequest !== 'undefined' && !XMLHttpRequest.prototype.__shastaWrapped) {
+      var _open = XMLHttpRequest.prototype.open;
+      var _send = XMLHttpRequest.prototype.send;
+      XMLHttpRequest.prototype.open = function(method, url) {
+        this.__shastaUrl = url;
+        return _open.apply(this, arguments);
+      };
+      XMLHttpRequest.prototype.send = function(body) {
+        try {
+          var s = getApiSession();
+          if (s && typeof this.__shastaUrl === 'string' && this.__shastaUrl.indexOf(API_URL) === 0 && typeof body === 'string') {
+            var o = JSON.parse(body);
+            if (o && typeof o === 'object' && o.session == null) {
+              o.session = s;
+              body = JSON.stringify(o);
+            }
+          }
+        } catch (e) {}
+        return _send.call(this, body);
+      };
+      XMLHttpRequest.prototype.__shastaWrapped = true;
+    }
+  })();
   /** Some iOS / PWA builds leave fetch() pending forever; always bound schedule reads. */
   function fetchWithTimeout_(url, init, timeoutMs) {
     var ms = timeoutMs == null ? 18000 : timeoutMs;
