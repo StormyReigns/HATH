@@ -9394,6 +9394,54 @@
     .home-habit-chip-sub { font-size: 11.5px; color: var(--muted); flex-shrink: 0; }
     .home-habits-more { font-size: 12.5px; color: var(--accent); font-weight: 600; padding: 4px 2px 2px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 
+    /* ── Habits rings grid (v3.2.1) ── */
+    .habit-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px 8px; padding: 6px 2px 0; }
+    .habit-tile { position: relative; display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 6px 4px; }
+    .habit-tile-ring { position: relative; width: 92px; height: 92px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    .habit-tile-ring svg { width: 92px; height: 92px; transform: rotate(-90deg); }
+    .habit-tile-ring .ring-track { fill: none; stroke: rgba(150,120,100,0.16); stroke-width: 8; }
+    html.dark-mode .habit-tile-ring .ring-track { stroke: rgba(255,255,255,0.10); }
+    .habit-tile-ring .ring-fill { fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.5s cubic-bezier(0.34,1.05,0.64,1); }
+    .habit-tile.is-done .ring-fill { stroke: #4a9a6a; }
+    .habit-tile-ring.pop { animation: habitRingPop 0.42s cubic-bezier(0.34,1.4,0.64,1); }
+    @keyframes habitRingPop { 0%{transform:scale(1)} 35%{transform:scale(0.88)} 70%{transform:scale(1.1)} 100%{transform:scale(1)} }
+    .habit-tile-ico { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 30px; transition: opacity 0.2s, transform 0.2s; }
+    .habit-tile.is-done .habit-tile-ico { opacity: 0; transform: scale(0.8); }
+    .habit-tile-check { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; transform: scale(0.6); transition: opacity 0.2s, transform 0.28s cubic-bezier(0.34,1.5,0.64,1); }
+    .habit-tile-check svg { width: 34px; height: 34px; transform: none; }
+    .habit-tile.is-done .habit-tile-check { opacity: 1; transform: scale(1); }
+    .habit-tile-label { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px; color: var(--text); text-align: center; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .habit-tile.is-done .habit-tile-label { color: #3f8a5e; }
+    html.dark-mode .habit-tile.is-done .habit-tile-label { color: #6fc394; }
+    .habit-tile-sub { font-size: 12.5px; color: var(--muted); }
+    .habit-tile-sub small { font-weight: 500; }
+    .habit-tile-sub--tap { cursor: pointer; border-bottom: 1px dashed rgba(150,120,100,0.4); padding-bottom: 1px; }
+    .habit-tile-countrow { display: flex; align-items: center; gap: 8px; }
+    .habit-mini-btn { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid rgba(150,120,100,0.3); background: transparent; color: var(--text2); font-size: 17px; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background 0.12s, border-color 0.12s; }
+    .habit-mini-btn:active { background: rgba(192,122,74,0.14); border-color: var(--accent); color: var(--accent); }
+    html.dark-mode .habit-mini-btn { border-color: rgba(255,255,255,0.14); }
+    .habit-tile-edit { position: absolute; top: 0; right: 8px; width: 26px; height: 26px; border: none; background: transparent; color: var(--muted); font-size: 13px; cursor: pointer; opacity: 0.45; -webkit-tap-highlight-color: transparent; z-index: 2; }
+    .habit-tile-edit:active { opacity: 1; }
+
+    /* floating +N */
+    .habit-float { position: absolute; top: 28px; left: 50%; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 15px; color: var(--accent); pointer-events: none; z-index: 5; animation: habitFloatUp 1s ease-out forwards; }
+    .habit-float.big { color: #4a9a6a; font-size: 19px; }
+    @keyframes habitFloatUp { 0%{opacity:0;transform:translate(-50%,8px) scale(0.8)} 25%{opacity:1} 100%{opacity:0;transform:translate(-50%,-34px) scale(1.05)} }
+    .habit-spark { position: fixed; width: 8px; height: 8px; border-radius: 50%; z-index: 9807; pointer-events: none; animation: habitSpark 0.7s ease-out forwards; }
+    @keyframes habitSpark { 0%{transform:translate(0,0) scale(1);opacity:1} 100%{transform:translate(var(--dx),var(--dy)) scale(0.3);opacity:0} }
+    .habit-quip-toast { position: fixed; left: 50%; bottom: 120px; transform: translateX(-50%) translateY(10px); background: var(--accent); color: #fff; padding: 8px 18px; border-radius: 999px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 14px; z-index: 9808; opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s; box-shadow: 0 4px 16px rgba(192,122,74,0.4); }
+    .habit-quip-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* quick-set popover */
+    .habit-quickset-overlay { position: fixed; inset: 0; background: rgba(30,20,10,0.45); backdrop-filter: blur(4px); z-index: 9815; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+    .habit-quickset-overlay.show { opacity: 1; pointer-events: all; }
+    .habit-quickset { background: var(--bg, #fdf8f1); border-radius: 20px; padding: 20px; width: 86%; max-width: 300px; box-shadow: 0 12px 40px rgba(0,0,0,0.25); }
+    html.dark-mode .habit-quickset { background: #261f1a; }
+    .habit-quickset-title { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--text); margin-bottom: 14px; text-align: center; }
+    .habit-quickset .habit-input { text-align: center; font-size: 24px; font-weight: 700; }
+    .habit-quickset-actions { display: flex; gap: 10px; margin-top: 16px; }
+    .habit-step-hint { font-size: 12.5px; color: var(--muted); align-self: center; white-space: nowrap; }
+
     .schedule-header .schedule-title, .civics-header .civics-title, .recipes-header .recipes-title, .projects-header .projects-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
     .projects-view-title-wrap { min-width: 0; overflow: hidden; }
 </style>
@@ -10579,13 +10627,30 @@
     <div class="habit-field" id="habitGoalField" style="display:none">
       <div class="habit-field-label">Daily goal</div>
       <div class="habit-goal-row">
-        <input type="number" class="habit-input" id="habitGoalInput" min="1" max="99" value="8" inputmode="numeric">
-        <input type="text" class="habit-input" id="habitUnitInput" placeholder="unit (e.g. glasses)" maxlength="16" autocomplete="off">
+        <input type="number" class="habit-input" id="habitGoalInput" min="1" max="999" value="8" inputmode="numeric" oninput="habitUpdateStepHint()">
+        <input type="text" class="habit-input" id="habitUnitInput" placeholder="unit (e.g. glasses, min)" maxlength="16" autocomplete="off">
+      </div>
+      <div class="habit-field-label" style="margin-top:14px">Each tap adds</div>
+      <div class="habit-goal-row">
+        <input type="number" class="habit-input" id="habitStepInput" min="1" max="999" value="1" inputmode="numeric" oninput="habitUpdateStepHint()">
+        <span class="habit-step-hint" id="habitStepHint"></span>
       </div>
     </div>
     <div class="habit-sheet-actions">
       <button type="button" class="habit-delete-btn" id="habitDeleteBtn" onclick="deleteHabitFromSheet()" style="display:none">Delete</button>
       <button type="button" class="habit-save-btn" onclick="saveHabitFromSheet()">Save habit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Habit quick-set (type exact value) -->
+<div class="habit-quickset-overlay" id="habitQuicksetOverlay" onclick="closeHabitQuickSet()">
+  <div class="habit-quickset" onclick="event.stopPropagation()">
+    <div class="habit-quickset-title" id="habitQuicksetTitle">Set progress</div>
+    <input type="number" class="habit-input" id="habitQuicksetInput" inputmode="numeric" min="0" onkeydown="if(event.key==='Enter')saveHabitQuickSet()">
+    <div class="habit-quickset-actions">
+      <button type="button" class="habit-delete-btn" style="flex:1;color:var(--text2);border-color:rgba(150,120,100,0.3)" onclick="closeHabitQuickSet()">Cancel</button>
+      <button type="button" class="habit-save-btn" onclick="saveHabitQuickSet()">Set</button>
     </div>
   </div>
 </div>
@@ -10611,7 +10676,7 @@
   window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
   window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '3.2.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '3.2.1';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
@@ -16509,26 +16574,159 @@
     return "Nice start. One at a time, hoo!";
   }
 
-  // ── Mutations ──
-  function habitApplyChange(id, fn) {
+  function habitStepOf(h) { return h.type === 'count' ? Math.max(1, h.step || 1) : 1; }
+
+  // ── Tap-to-fill mutations with per-press reward ──
+  function habitTapRing(id) {
     const arr = getHabits();
-    const before = habitAllDone(arr);
     const h = arr.find(function(x) { return x.id === id; });
     if (!h) return;
-    fn(h);
+    const beforeAll = habitAllDone(arr);
+    const wasDone = habitIsDone(h);
+    let delta;
+    if (h.type === 'count') {
+      const goal = habitGoalOf(h);
+      if ((h.value || 0) >= goal) { habitNudge(id); return; }
+      const nv = Math.min(goal, (h.value || 0) + habitStepOf(h));
+      delta = nv - (h.value || 0); h.value = nv;
+    } else {
+      h.value = wasDone ? 0 : 1; delta = wasDone ? -1 : 1;
+    }
     h.day = habitToday();
     saveHabitsList(arr);
-    const after = habitAllDone(arr);
-    if (!before && after) habitCelebrate();
-    refreshHabitsUI();
+    const justDone = !wasDone && habitIsDone(h);
+    habitTileUpdate(h);
+    renderHabitHeroOnly();
+    renderHomeWidgetHabits();
+    if (delta > 0) habitReward(id, h, delta, justDone);
+    else habitHaptic(8);
+    if (!beforeAll && habitAllDone(arr)) habitCelebrate();
   }
-  function habitToggle(id) { habitApplyChange(id, function(h) { h.value = habitIsDone(h) ? 0 : habitGoalOf(h); }); }
-  function habitInc(id) { habitApplyChange(id, function(h) { h.value = Math.min(habitGoalOf(h), (h.value || 0) + 1); }); }
-  function habitDec(id) { habitApplyChange(id, function(h) { h.value = Math.max(0, (h.value || 0) - 1); }); }
+
+  function habitMinus(id) {
+    const arr = getHabits();
+    const h = arr.find(function(x) { return x.id === id; });
+    if (!h || (h.value || 0) <= 0) return;
+    h.value = Math.max(0, (h.value || 0) - habitStepOf(h));
+    h.day = habitToday();
+    saveHabitsList(arr);
+    habitTileUpdate(h);
+    renderHabitHeroOnly();
+    renderHomeWidgetHabits();
+    habitHaptic(8);
+  }
+
+  // Back-compat wrappers (older onclick references route here)
+  function habitToggle(id) { habitTapRing(id); }
+  function habitInc(id) { habitTapRing(id); }
+  function habitDec(id) { habitMinus(id); }
 
   function refreshHabitsUI() {
     if (document.getElementById('habitsScreen').classList.contains('visible')) renderHabitsScreen();
     renderHomeWidgetHabits();
+  }
+
+  function habitHaptic(pattern) { try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (_) {} }
+
+  // Update a single tile in place (no full re-render) so the press feels instant
+  function habitTileUpdate(h) {
+    const fill = document.getElementById('hr-' + h.id);
+    if (fill) { const c = 2 * Math.PI * 41; fill.setAttribute('stroke-dashoffset', (c * (1 - habitFrac(h))).toFixed(1)); }
+    const valEl = document.getElementById('hv-' + h.id);
+    if (valEl) {
+      if (h.type === 'count') valEl.innerHTML = (h.value || 0) + '<small>/' + habitGoalOf(h) + (h.unit ? ' ' + escapeHtml(h.unit) : '') + '</small>';
+      else valEl.textContent = habitIsDone(h) ? 'Done' : 'Tap';
+    }
+    const tile = document.getElementById('ht-' + h.id);
+    if (tile) tile.classList.toggle('is-done', habitIsDone(h));
+    const minus = document.getElementById('hm-' + h.id);
+    if (minus) minus.style.visibility = (h.value || 0) > 0 ? 'visible' : 'hidden';
+  }
+
+  function habitHeroHTML(done, total) {
+    const frac = total ? done / total : 0;
+    return '<div class="habit-hero-ringwrap">' +
+        '<svg class="habit-hero-ring" viewBox="0 0 92 92">' +
+          '<circle class="ring-track" cx="46" cy="46" r="41"/>' +
+          '<circle class="ring-fill" cx="46" cy="46" r="41" ' + habitRingDashAttrs(41, frac) + '/>' +
+        '</svg>' +
+        '<div class="habit-hero-center"><div class="habit-hero-num">' + done + '</div><div class="habit-hero-den">of ' + total + '</div></div>' +
+      '</div>' +
+      '<div class="habit-hero-body">' +
+        '<div class="habit-hero-row">' +
+          '<img class="habit-hero-mascot" src="' + (frac >= 1 ? BLATHERS.happy : BLATHERS.clever) + '" alt="">' +
+          '<div class="habit-hero-head">' + (frac >= 1 ? 'All caught up' : (total ? done + ' of ' + total + ' done' : 'No habits yet')) + '</div>' +
+        '</div>' +
+        '<div class="habit-hero-line">' + habitShastaLine(done, total) + '</div>' +
+      '</div>';
+  }
+
+  function renderHabitHeroOnly() {
+    const arr = getHabits();
+    const done = arr.filter(habitIsDone).length;
+    const total = arr.length;
+    const hero = document.getElementById('habitHero');
+    if (hero) hero.innerHTML = habitHeroHTML(done, total);
+    const cnt = document.getElementById('habitsCount');
+    if (cnt) cnt.textContent = total ? (done + ' of ' + total + ' complete') : '';
+  }
+
+  // ── Per-press reward feedback ──
+  const HABIT_QUIPS = ['Nice!', 'Hoo-ray!', 'Lovely!', 'Well done!', 'That counts!', 'Keep it up!', 'Cozy.', 'Splendid!'];
+
+  function habitReward(id, h, delta, justDone) {
+    const tile = document.getElementById('ht-' + id);
+    if (tile) {
+      const ring = tile.querySelector('.habit-tile-ring');
+      if (ring) { ring.classList.remove('pop'); void ring.offsetWidth; ring.classList.add('pop'); }
+      const text = h.type === 'count' ? ('+' + delta + (h.unit ? ' ' + h.unit : '')) : '✓';
+      habitFloat(tile, text, justDone);
+      if (justDone) { habitMiniBurstAt(tile); habitQuipToast(); }
+    }
+    habitHaptic(justDone ? [12, 40, 18] : 12);
+  }
+
+  function habitFloat(tile, text, big) {
+    const f = document.createElement('div');
+    f.className = 'habit-float' + (big ? ' big' : '');
+    f.textContent = text;
+    tile.appendChild(f);
+    setTimeout(function() { if (f.parentNode) f.parentNode.removeChild(f); }, 1100);
+  }
+
+  function habitMiniBurstAt(tile) {
+    const rect = tile.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height * 0.38;
+    const colors = ['#c07a4a', '#4a9a6a', '#e0b050', '#d87a5a', '#8ab4f8', '#c98ac9'];
+    for (let i = 0; i < 16; i++) {
+      const p = document.createElement('div');
+      p.className = 'habit-spark';
+      p.style.left = cx + 'px'; p.style.top = cy + 'px';
+      p.style.background = colors[i % colors.length];
+      const ang = (Math.PI * 2 * i) / 16 + Math.random() * 0.5;
+      const dist = 38 + Math.random() * 34;
+      p.style.setProperty('--dx', (Math.cos(ang) * dist).toFixed(0) + 'px');
+      p.style.setProperty('--dy', (Math.sin(ang) * dist).toFixed(0) + 'px');
+      document.body.appendChild(p);
+      (function(node) { setTimeout(function() { if (node.parentNode) node.parentNode.removeChild(node); }, 800); })(p);
+    }
+  }
+
+  let _habitQuipTimer = null;
+  function habitQuipToast() {
+    let t = document.getElementById('habitQuipToast');
+    if (!t) { t = document.createElement('div'); t.id = 'habitQuipToast'; t.className = 'habit-quip-toast'; document.body.appendChild(t); }
+    t.textContent = HABIT_QUIPS[Math.floor(Math.random() * HABIT_QUIPS.length)];
+    t.classList.add('show');
+    if (_habitQuipTimer) clearTimeout(_habitQuipTimer);
+    _habitQuipTimer = setTimeout(function() { t.classList.remove('show'); }, 1400);
+  }
+
+  function habitNudge(id) {
+    const tile = document.getElementById('ht-' + id);
+    if (tile) { const ring = tile.querySelector('.habit-tile-ring'); if (ring) { ring.classList.remove('pop'); void ring.offsetWidth; ring.classList.add('pop'); } }
+    habitHaptic(6);
   }
 
   // ── Screen ──
@@ -16546,24 +16744,7 @@
     const total = arr.length;
 
     const hero = document.getElementById('habitHero');
-    if (hero) {
-      const frac = total ? done / total : 0;
-      hero.innerHTML =
-        '<div class="habit-hero-ringwrap">' +
-          '<svg class="habit-hero-ring" viewBox="0 0 92 92">' +
-            '<circle class="ring-track" cx="46" cy="46" r="41"/>' +
-            '<circle class="ring-fill" cx="46" cy="46" r="41" ' + habitRingDashAttrs(41, frac) + '/>' +
-          '</svg>' +
-          '<div class="habit-hero-center"><div class="habit-hero-num">' + done + '</div><div class="habit-hero-den">of ' + total + '</div></div>' +
-        '</div>' +
-        '<div class="habit-hero-body">' +
-          '<div class="habit-hero-row">' +
-            '<img class="habit-hero-mascot" src="' + (frac >= 1 ? BLATHERS.happy : BLATHERS.clever) + '" alt="">' +
-            '<div class="habit-hero-head">' + (frac >= 1 ? 'All caught up' : (total ? done + ' of ' + total + ' done' : 'No habits yet')) + '</div>' +
-          '</div>' +
-          '<div class="habit-hero-line">' + habitShastaLine(done, total) + '</div>' +
-        '</div>';
-    }
+    if (hero) hero.innerHTML = habitHeroHTML(done, total);
 
     const cnt = document.getElementById('habitsCount');
     if (cnt) cnt.textContent = total ? (done + ' of ' + total + ' complete') : '';
@@ -16579,7 +16760,7 @@
         '</div>';
       return;
     }
-    list.innerHTML = arr.map(function(h) {
+    list.innerHTML = '<div class="habit-grid">' + arr.map(function(h) {
       const idEsc = escapeHtml(h.id);
       const ico = escapeHtml(h.icon || '🎯');
       const isCount = h.type === 'count';
@@ -16587,38 +16768,32 @@
       const val = h.value || 0;
       const doneCls = habitIsDone(h) ? ' is-done' : '';
       const sub = isCount
-        ? (val + ' / ' + goal + (h.unit ? ' ' + escapeHtml(h.unit) : ''))
-        : (habitIsDone(h) ? 'Done for today' : 'Tap to complete');
-      let right = '';
-      if (isCount) {
-        right =
-          '<div class="habit-card-count" onclick="event.stopPropagation()">' +
-            '<button type="button" class="habit-count-btn" onclick="habitDec(\'' + idEsc + '\')" aria-label="Decrease">−</button>' +
-            '<span class="habit-count-val">' + val + '<small>/' + goal + '</small></span>' +
-            '<button type="button" class="habit-count-btn" onclick="habitInc(\'' + idEsc + '\')" aria-label="Increase">+</button>' +
-          '</div>';
-      }
-      const tap = isCount ? 'habitInc(\'' + idEsc + '\')' : 'habitToggle(\'' + idEsc + '\')';
-      return '<div class="habit-card' + doneCls + '" onclick="' + tap + '" oncontextmenu="event.preventDefault();openHabitSheet(\'' + idEsc + '\');return false;">' +
-        '<div class="habit-card-ring">' +
-          '<svg viewBox="0 0 50 50"><circle class="ring-track" cx="25" cy="25" r="21"/><circle class="ring-fill" cx="25" cy="25" r="21" ' + habitRingDashAttrs(21, habitFrac(h)) + '/></svg>' +
-          '<div class="habit-card-ico">' + ico + '</div>' +
-          '<div class="habit-card-check"><svg viewBox="0 0 24 24" fill="none" stroke="#4a9a6a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>' +
-        '</div>' +
-        '<div class="habit-card-body">' +
-          '<div class="habit-card-label">' + escapeHtml(h.label) + '</div>' +
-          '<div class="habit-card-sub">' + sub + '</div>' +
-        '</div>' +
-        right +
-        '<button type="button" class="habit-count-btn" style="border:none;font-size:16px" onclick="event.stopPropagation();openHabitSheet(\'' + idEsc + '\')" aria-label="Edit">✎</button>' +
-      '</div>';
-    }).join('');
+        ? (val + '<small>/' + goal + (h.unit ? ' ' + escapeHtml(h.unit) : '') + '</small>')
+        : (habitIsDone(h) ? 'Done' : 'Tap');
+      const valBlock = isCount
+        ? '<div class="habit-tile-countrow">' +
+            '<button type="button" class="habit-mini-btn" id="hm-' + idEsc + '" onclick="event.stopPropagation();habitMinus(\'' + idEsc + '\')" aria-label="Undo one" style="visibility:' + (val > 0 ? 'visible' : 'hidden') + '">−</button>' +
+            '<span class="habit-tile-sub habit-tile-sub--tap" id="hv-' + idEsc + '" onclick="event.stopPropagation();openHabitQuickSet(\'' + idEsc + '\')">' + sub + '</span>' +
+          '</div>'
+        : '<div class="habit-tile-sub" id="hv-' + idEsc + '">' + sub + '</div>';
+      return '<div class="habit-tile' + doneCls + '" id="ht-' + idEsc + '">' +
+          '<button type="button" class="habit-tile-edit" onclick="event.stopPropagation();openHabitSheet(\'' + idEsc + '\')" aria-label="Edit habit">✎</button>' +
+          '<div class="habit-tile-ring" onclick="habitTapRing(\'' + idEsc + '\')" oncontextmenu="event.preventDefault();openHabitSheet(\'' + idEsc + '\');return false;">' +
+            '<svg viewBox="0 0 92 92"><circle class="ring-track" cx="46" cy="46" r="41"/><circle class="ring-fill" id="hr-' + idEsc + '" cx="46" cy="46" r="41" ' + habitRingDashAttrs(41, habitFrac(h)) + '/></svg>' +
+            '<div class="habit-tile-ico">' + ico + '</div>' +
+            '<div class="habit-tile-check"><svg viewBox="0 0 24 24" fill="none" stroke="#4a9a6a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>' +
+          '</div>' +
+          '<div class="habit-tile-label">' + escapeHtml(h.label) + '</div>' +
+          valBlock +
+        '</div>';
+    }).join('') + '</div>';
   }
 
   // ── Create / edit sheet ──
   let _habitEditingId = null;
   let _habitSheetIcon = HABIT_ICON_CHOICES[0];
   let _habitSheetType = 'check';
+  let _habitQuicksetId = null;
 
   function openHabitSheet(id) {
     _habitEditingId = id || null;
@@ -16629,9 +16804,11 @@
     document.getElementById('habitNameInput').value = existing ? existing.label : '';
     document.getElementById('habitGoalInput').value = existing && existing.goal ? existing.goal : 8;
     document.getElementById('habitUnitInput').value = existing && existing.unit ? existing.unit : '';
+    document.getElementById('habitStepInput').value = existing && existing.step ? existing.step : 1;
     document.getElementById('habitDeleteBtn').style.display = existing ? 'block' : 'none';
     renderHabitIconGrid();
     habitSheetSetType(_habitSheetType);
+    habitUpdateStepHint();
     const ov = document.getElementById('habitSheetOverlay');
     ov.classList.add('show');
     setTimeout(function() { const n = document.getElementById('habitNameInput'); if (n && !existing) n.focus(); }, 320);
@@ -16658,22 +16835,35 @@
     document.getElementById('habitGoalField').style.display = type === 'count' ? 'block' : 'none';
   }
 
+  function habitUpdateStepHint() {
+    const hint = document.getElementById('habitStepHint');
+    if (!hint) return;
+    const goal = Math.max(1, parseInt(document.getElementById('habitGoalInput').value, 10) || 1);
+    const step = Math.max(1, parseInt(document.getElementById('habitStepInput').value, 10) || 1);
+    const taps = Math.ceil(goal / step);
+    hint.textContent = '≈ ' + taps + ' tap' + (taps === 1 ? '' : 's') + ' to reach goal';
+  }
+
   function saveHabitFromSheet() {
     const label = (document.getElementById('habitNameInput').value || '').trim();
     if (!label) { document.getElementById('habitNameInput').focus(); return; }
-    const goal = Math.max(1, Math.min(99, parseInt(document.getElementById('habitGoalInput').value, 10) || 1));
+    const goal = Math.max(1, Math.min(999, parseInt(document.getElementById('habitGoalInput').value, 10) || 1));
+    const step = Math.max(1, Math.min(999, parseInt(document.getElementById('habitStepInput').value, 10) || 1));
     const unit = (document.getElementById('habitUnitInput').value || '').trim();
     const arr = getHabits();
     if (_habitEditingId) {
       const h = arr.find(function(x) { return x.id === _habitEditingId; });
       if (h) {
         h.label = label; h.icon = _habitSheetIcon; h.type = _habitSheetType;
-        h.goal = _habitSheetType === 'count' ? goal : 1; h.unit = _habitSheetType === 'count' ? unit : '';
+        h.goal = _habitSheetType === 'count' ? goal : 1;
+        h.step = _habitSheetType === 'count' ? step : 1;
+        h.unit = _habitSheetType === 'count' ? unit : '';
         if (h.value > habitGoalOf(h)) h.value = habitGoalOf(h);
       }
     } else {
       arr.push({ id: habitGenId(), label: label, icon: _habitSheetIcon, type: _habitSheetType,
-        goal: _habitSheetType === 'count' ? goal : 1, unit: _habitSheetType === 'count' ? unit : '',
+        goal: _habitSheetType === 'count' ? goal : 1, step: _habitSheetType === 'count' ? step : 1,
+        unit: _habitSheetType === 'count' ? unit : '',
         value: 0, day: habitToday(), createdAt: Date.now() });
     }
     saveHabitsList(arr);
@@ -16686,6 +16876,45 @@
     saveHabitsList(getHabits().filter(function(x) { return x.id !== _habitEditingId; }));
     closeHabitSheet();
     refreshHabitsUI();
+  }
+
+  // ── Quick-set: type an exact value (so a 30-min goal isn't 30 taps) ──
+  function openHabitQuickSet(id) {
+    const h = getHabits().find(function(x) { return x.id === id; });
+    if (!h || h.type !== 'count') return;
+    _habitQuicksetId = id;
+    document.getElementById('habitQuicksetTitle').textContent = h.label + (h.unit ? (' — how many ' + h.unit + '?') : ' — how many?');
+    const inp = document.getElementById('habitQuicksetInput');
+    inp.value = h.value || 0; inp.max = habitGoalOf(h);
+    document.getElementById('habitQuicksetOverlay').classList.add('show');
+    setTimeout(function() { inp.focus(); inp.select(); }, 220);
+  }
+  function closeHabitQuickSet() {
+    document.getElementById('habitQuicksetOverlay').classList.remove('show');
+    _habitQuicksetId = null;
+  }
+  function saveHabitQuickSet() {
+    const id = _habitQuicksetId;
+    if (!id) { closeHabitQuickSet(); return; }
+    const arr = getHabits();
+    const h = arr.find(function(x) { return x.id === id; });
+    if (!h) { closeHabitQuickSet(); return; }
+    const beforeAll = habitAllDone(arr);
+    const wasDone = habitIsDone(h);
+    const goal = habitGoalOf(h);
+    let v = parseInt(document.getElementById('habitQuicksetInput').value, 10);
+    if (isNaN(v)) v = 0;
+    v = Math.max(0, Math.min(goal, v));
+    const delta = v - (h.value || 0);
+    h.value = v; h.day = habitToday();
+    saveHabitsList(arr);
+    closeHabitQuickSet();
+    const justDone = !wasDone && habitIsDone(h);
+    habitTileUpdate(h);
+    renderHabitHeroOnly();
+    renderHomeWidgetHabits();
+    if (delta > 0) habitReward(id, h, delta, justDone);
+    if (!beforeAll && habitAllDone(arr)) habitCelebrate();
   }
 
   // ── Celebration ──
