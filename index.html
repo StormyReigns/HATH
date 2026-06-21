@@ -9268,6 +9268,134 @@
 
     .schedule-header .schedule-title, .civics-header .civics-title, .recipes-header .recipes-title, .projects-header .projects-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
     .projects-view-title-wrap { min-width: 0; overflow: hidden; }
+
+    /* ══════════ HABITS SCREEN (v3.2) ══════════ */
+    #habitsScreen.visible { height: 100%; flex-direction: column; padding: 0 4px; min-height: 0; }
+    .habits-landing { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+    .habits-header { display: flex; align-items: center; gap: 4px; padding: 14px 0 10px; flex-shrink: 0; }
+    .habits-title-icon { width: 26px; height: 26px; margin-right: 6px; flex-shrink: 0; }
+    .habits-title { flex: 1; font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 500; color: var(--text); letter-spacing: -0.2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Hero summary */
+    .habit-hero { display: flex; align-items: center; gap: 16px; padding: 6px 6px 2px; flex-shrink: 0; }
+    .habit-hero-ringwrap { position: relative; width: 92px; height: 92px; flex-shrink: 0; }
+    .habit-hero-ring { width: 92px; height: 92px; transform: rotate(-90deg); }
+    .habit-hero-ring .ring-track { fill: none; stroke: rgba(150,120,100,0.16); stroke-width: 9; }
+    html.dark-mode .habit-hero-ring .ring-track { stroke: rgba(255,255,255,0.10); }
+    .habit-hero-ring .ring-fill { fill: none; stroke: var(--accent); stroke-width: 9; stroke-linecap: round; transition: stroke-dashoffset 0.6s cubic-bezier(0.34,1.05,0.64,1); }
+    .habit-hero-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; }
+    .habit-hero-num { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 26px; color: var(--text); }
+    .habit-hero-den { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .habit-hero-body { flex: 1; min-width: 0; }
+    .habit-hero-row { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
+    .habit-hero-mascot { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
+    .habit-hero-head { font-family: 'Playfair Display', serif; font-weight: 600; font-size: 16px; color: var(--text); }
+    .habit-hero-line { font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--text2); line-height: 1.4; }
+
+    .habits-section-label { display: flex; align-items: baseline; justify-content: space-between; margin: 20px 4px 10px; flex-shrink: 0; }
+    .habits-section-label .lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+    .habits-section-label .cnt { font-size: 12px; color: var(--muted); }
+
+    .habits-list { flex: 1; overflow-y: auto; padding: 0 2px 140px; min-height: 0; }
+
+    /* Habit card */
+    .habit-card { display: flex; align-items: center; gap: 14px; padding: 12px 14px; margin-bottom: 10px; border-radius: 18px; background: #fff; border: 1px solid rgba(150,120,100,0.12); box-shadow: 0 1px 3px rgba(60,40,20,0.05); cursor: pointer; transition: transform 0.12s, box-shadow 0.15s; -webkit-tap-highlight-color: transparent; }
+    .habit-card:active { transform: scale(0.985); }
+    html.dark-mode .habit-card { background: #2a2320; border-color: rgba(255,255,255,0.06); box-shadow: none; }
+    .habit-card.is-done { background: linear-gradient(100deg, rgba(74,154,106,0.10), rgba(74,154,106,0.04)); border-color: rgba(74,154,106,0.30); }
+    html.dark-mode .habit-card.is-done { background: rgba(74,154,106,0.12); border-color: rgba(74,154,106,0.30); }
+
+    .habit-card-ring { position: relative; width: 50px; height: 50px; flex-shrink: 0; }
+    .habit-card-ring svg { width: 50px; height: 50px; transform: rotate(-90deg); }
+    .habit-card-ring .ring-track { fill: none; stroke: rgba(150,120,100,0.18); stroke-width: 4.5; }
+    html.dark-mode .habit-card-ring .ring-track { stroke: rgba(255,255,255,0.10); }
+    .habit-card-ring .ring-fill { fill: none; stroke: var(--accent); stroke-width: 4.5; stroke-linecap: round; transition: stroke-dashoffset 0.45s cubic-bezier(0.34,1.05,0.64,1); }
+    .habit-card.is-done .ring-fill { stroke: #4a9a6a; }
+    .habit-card-ico { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: transform 0.2s; }
+    .habit-card.is-done .habit-card-ico { transform: scale(0.92); }
+    .habit-card-check { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
+    .habit-card.is-done .habit-card-check { opacity: 1; }
+    .habit-card.is-done .habit-card-ico { opacity: 0; }
+    .habit-card-check svg { width: 22px; height: 22px; transform: none; }
+
+    .habit-card-body { flex: 1; min-width: 0; }
+    .habit-card-label { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 15px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .habit-card.is-done .habit-card-label { color: #3f8a5e; }
+    html.dark-mode .habit-card.is-done .habit-card-label { color: #6fc394; }
+    .habit-card-sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+
+    .habit-card-count { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .habit-count-btn { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid rgba(150,120,100,0.28); background: transparent; color: var(--text2); font-size: 18px; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background 0.12s, border-color 0.12s; }
+    .habit-count-btn:active { background: rgba(192,122,74,0.12); border-color: var(--accent); color: var(--accent); }
+    html.dark-mode .habit-count-btn { border-color: rgba(255,255,255,0.14); }
+    .habit-count-val { min-width: 42px; text-align: center; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px; color: var(--text); }
+    .habit-count-val small { color: var(--muted); font-weight: 500; }
+
+    .habits-empty { text-align: center; padding: 44px 20px; color: var(--text2); }
+    .habits-empty img { width: 80px; height: 80px; object-fit: contain; opacity: 0.9; }
+    .habits-empty .he-head { font-family: 'Playfair Display', serif; font-weight: 500; font-size: 17px; color: var(--text); margin-top: 8px; }
+    .habits-empty .he-sub { font-size: 13.5px; margin-top: 4px; }
+
+    /* Habit create/edit sheet */
+    .habit-sheet-overlay { position: fixed; inset: 0; background: rgba(30,20,10,0.45); backdrop-filter: blur(4px); z-index: 9810; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+    .habit-sheet-overlay.show { opacity: 1; pointer-events: all; }
+    .habit-sheet { width: 100%; max-width: 440px; max-height: 88vh; overflow-y: auto; background: var(--bg, #fdf8f1); border-radius: 22px 22px 0 0; padding: 18px 20px 36px; transform: translateY(100%); transition: transform 0.32s cubic-bezier(0.34,1.1,0.64,1); box-shadow: 0 -8px 32px rgba(0,0,0,0.18); }
+    html.dark-mode .habit-sheet { background: #261f1a; }
+    .habit-sheet-overlay.show .habit-sheet { transform: translateY(0); }
+    .habit-sheet-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .habit-sheet-title { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 500; color: var(--text); }
+    .habit-sheet-close { background: none; border: none; font-size: 18px; color: var(--muted); cursor: pointer; padding: 4px 8px; -webkit-tap-highlight-color: transparent; }
+    .habit-field { margin-bottom: 16px; }
+    .habit-field-label { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text2); margin-bottom: 7px; }
+    .habit-input { width: 100%; box-sizing: border-box; padding: 12px 14px; border-radius: 12px; border: 1.5px solid rgba(150,120,100,0.22); background: rgba(255,255,255,0.6); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; outline: none; transition: border-color 0.12s; }
+    .habit-input:focus { border-color: var(--accent); }
+    html.dark-mode .habit-input { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.12); }
+    .habit-icon-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
+    .habit-icon-opt { aspect-ratio: 1; border-radius: 10px; border: 1.5px solid transparent; background: rgba(150,120,100,0.08); font-size: 19px; display: flex; align-items: center; justify-content: center; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    html.dark-mode .habit-icon-opt { background: rgba(255,255,255,0.05); }
+    .habit-icon-opt.sel { border-color: var(--accent); background: rgba(192,122,74,0.16); }
+    .habit-type-row { display: flex; gap: 8px; }
+    .habit-type-opt { flex: 1; padding: 11px; border-radius: 12px; border: 1.5px solid rgba(150,120,100,0.22); background: transparent; color: var(--text2); font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    .habit-type-opt.sel { border-color: var(--accent); background: rgba(192,122,74,0.14); color: var(--accent); }
+    html.dark-mode .habit-type-opt { border-color: rgba(255,255,255,0.12); }
+    .habit-goal-row { display: flex; align-items: center; gap: 12px; }
+    .habit-goal-row .habit-input { flex: 1; }
+    .habit-sheet-actions { display: flex; gap: 10px; margin-top: 22px; }
+    .habit-save-btn { flex: 1; padding: 14px; border-radius: 14px; border: none; background: var(--accent); color: #fff; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    .habit-save-btn:active { filter: brightness(0.94); }
+    .habit-delete-btn { padding: 14px 18px; border-radius: 14px; border: 1.5px solid rgba(192,80,80,0.4); background: transparent; color: #c05050; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+
+    /* Celebration */
+    .habit-celebrate { position: fixed; inset: 0; z-index: 9805; display: flex; align-items: center; justify-content: center; pointer-events: none; opacity: 0; transition: opacity 0.3s ease; }
+    .habit-celebrate.show { opacity: 1; pointer-events: all; }
+    .habit-celebrate-card { text-align: center; background: var(--bg, #fdf8f1); border-radius: 22px; padding: 28px 30px; box-shadow: 0 12px 48px rgba(0,0,0,0.28); transform: scale(0.85); transition: transform 0.35s cubic-bezier(0.34,1.4,0.64,1); max-width: 300px; }
+    html.dark-mode .habit-celebrate-card { background: #2a2320; }
+    .habit-celebrate.show .habit-celebrate-card { transform: scale(1); }
+    .habit-celebrate-card img { width: 96px; height: 96px; object-fit: contain; }
+    .habit-celebrate-head { font-family: 'Playfair Display', serif; font-size: 21px; font-weight: 600; color: var(--text); margin-top: 8px; }
+    .habit-celebrate-sub { font-size: 14px; color: var(--text2); margin-top: 6px; line-height: 1.4; }
+    .habit-celebrate-btn { margin-top: 18px; padding: 11px 28px; border-radius: 12px; border: none; background: var(--accent); color: #fff; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; }
+    .habit-confetti-pc { position: fixed; top: -12px; width: 10px; height: 14px; z-index: 9806; pointer-events: none; border-radius: 2px; animation: habitConfettiFall linear forwards; }
+    @keyframes habitConfettiFall { to { transform: translateY(105vh) rotate(720deg); opacity: 0.2; } }
+
+    /* Home widget — new daily-habit chips */
+    .home-habit-chip { display: flex; align-items: center; gap: 10px; padding: 9px 12px; margin-bottom: 7px; border-radius: 14px; background: rgba(255,255,255,0.55); border: 1px solid rgba(150,120,100,0.12); cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.12s; }
+    .home-habit-chip:active { transform: scale(0.98); }
+    html.dark-mode .home-habit-chip { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.06); }
+    .home-habit-chip.is-done { background: rgba(74,154,106,0.10); border-color: rgba(74,154,106,0.26); }
+    .home-habit-chip-ring { position: relative; width: 30px; height: 30px; flex-shrink: 0; }
+    .home-habit-chip-ring svg { width: 30px; height: 30px; transform: rotate(-90deg); }
+    .home-habit-chip-ring .ring-track { fill: none; stroke: rgba(150,120,100,0.18); stroke-width: 3; }
+    .home-habit-chip-ring .ring-fill { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; transition: stroke-dashoffset 0.4s ease; }
+    .home-habit-chip.is-done .ring-fill { stroke: #4a9a6a; }
+    .home-habit-chip-ico { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    .home-habit-chip-label { flex: 1; font-size: 13.5px; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .home-habit-chip.is-done .home-habit-chip-label { color: #4a9a6a; }
+    .home-habit-chip-sub { font-size: 11.5px; color: var(--muted); flex-shrink: 0; }
+    .home-habits-more { font-size: 12.5px; color: var(--accent); font-weight: 600; padding: 4px 2px 2px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+
+    .schedule-header .schedule-title, .civics-header .civics-title, .recipes-header .recipes-title, .projects-header .projects-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+    .projects-view-title-wrap { min-width: 0; overflow: hidden; }
 </style>
 </head>
 <body>
@@ -9373,6 +9501,21 @@
     </div>
 
     <div class="chat-area" id="chatArea"></div>
+
+    <!-- Habits screen -->
+    <div class="sub-screen" id="habitsScreen">
+      <div class="habits-landing">
+        <div class="habits-header">
+          <button type="button" class="screen-header-back" onclick="goBack()" aria-label="Go back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><polyline points="15 18 9 12 15 6"/></svg></button>
+          <h2 class="habits-title">Habits</h2>
+          <span class="section-version-label"></span>
+        </div>
+        <div class="habit-hero" id="habitHero"></div>
+        <div class="habits-section-label"><span class="lbl">Today</span><span class="cnt" id="habitsCount"></span></div>
+        <div class="habits-list" id="habitsList"></div>
+        <button type="button" class="screen-add-fab" id="habitsAddFab" onclick="openHabitSheet()" title="New habit" aria-label="New habit">+</button>
+      </div>
+    </div>
 
     <!-- Documents screen -->
     <div class="sub-screen" id="documentsScreen">
@@ -10076,6 +10219,10 @@
       <img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/WWChest1.png" alt="" loading="lazy">
       Projects
     </div>
+    <div class="drawer-item" onclick="drawerNavTap(this, ()=>{ closeDrawer(); showHabitsScreen(); })">
+      <svg class="drawer-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="8.5 12 11 14.5 15.5 9.5"/></svg>
+      Habits
+    </div>
     <div class="drawer-item" data-screen="recipes" onclick="drawerNavTap(this, ()=>{ closeDrawer(); showRecipesScreen(); })">
       <span class="hk-icon-circle"><img class="drawer-icon-img" src="https://stormyreigns.github.io/HATH/HK.png" alt="" loading="lazy"></span>
       Recipes
@@ -10407,6 +10554,52 @@
   </div>
 </div>
 
+<!-- Habit create/edit sheet -->
+<div class="habit-sheet-overlay" id="habitSheetOverlay" onclick="closeHabitSheet()">
+  <div class="habit-sheet" onclick="event.stopPropagation()">
+    <div class="habit-sheet-head">
+      <div class="habit-sheet-title" id="habitSheetTitle">New habit</div>
+      <button type="button" class="habit-sheet-close" onclick="closeHabitSheet()" aria-label="Close">✕</button>
+    </div>
+    <div class="habit-field">
+      <div class="habit-field-label">Name</div>
+      <input type="text" class="habit-input" id="habitNameInput" placeholder="e.g. Drink water" maxlength="40" autocomplete="off">
+    </div>
+    <div class="habit-field">
+      <div class="habit-field-label">Icon</div>
+      <div class="habit-icon-grid" id="habitIconGrid"></div>
+    </div>
+    <div class="habit-field">
+      <div class="habit-field-label">Type</div>
+      <div class="habit-type-row">
+        <button type="button" class="habit-type-opt" id="habitTypeCheck" onclick="habitSheetSetType('check')">Done / not done</button>
+        <button type="button" class="habit-type-opt" id="habitTypeCount" onclick="habitSheetSetType('count')">Count to goal</button>
+      </div>
+    </div>
+    <div class="habit-field" id="habitGoalField" style="display:none">
+      <div class="habit-field-label">Daily goal</div>
+      <div class="habit-goal-row">
+        <input type="number" class="habit-input" id="habitGoalInput" min="1" max="99" value="8" inputmode="numeric">
+        <input type="text" class="habit-input" id="habitUnitInput" placeholder="unit (e.g. glasses)" maxlength="16" autocomplete="off">
+      </div>
+    </div>
+    <div class="habit-sheet-actions">
+      <button type="button" class="habit-delete-btn" id="habitDeleteBtn" onclick="deleteHabitFromSheet()" style="display:none">Delete</button>
+      <button type="button" class="habit-save-btn" onclick="saveHabitFromSheet()">Save habit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Habit completion celebration -->
+<div class="habit-celebrate" id="habitCelebrate" onclick="dismissHabitCelebrate()">
+  <div class="habit-celebrate-card" onclick="event.stopPropagation()">
+    <img src="https://stormyreigns.github.io/HATH/IMG_7943.png" alt="" loading="lazy">
+    <div class="habit-celebrate-head" id="habitCelebrateHead">All done!</div>
+    <div class="habit-celebrate-sub" id="habitCelebrateSub"></div>
+    <button type="button" class="habit-celebrate-btn" onclick="dismissHabitCelebrate()">Lovely</button>
+  </div>
+</div>
+
 <!-- Offline screen -->
 <div class="offline-screen" id="offlineScreen">
   <img class="offline-blathers" src="https://stormyreigns.github.io/HATH/IMG_7937.png" alt="Blathers">
@@ -10418,7 +10611,7 @@
   window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
   window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '3.1.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '3.2.0';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
@@ -12137,6 +12330,8 @@
     document.getElementById('recipesScreen').classList.remove('visible');
     document.getElementById('financesScreen').classList.remove('visible');
     document.getElementById('settingsScreen').classList.remove('visible');
+    var _habScreenH = document.getElementById('habitsScreen');
+    if (_habScreenH) _habScreenH.classList.remove('visible');
     document.getElementById('recipeDetail').classList.remove('open');
     const topbar = document.querySelector('.topbar');
     if (topbar) topbar.classList.remove('collapsed');
@@ -12170,6 +12365,8 @@
     document.getElementById('settingsScreen').classList.remove('visible');
     document.getElementById('recipesScreen').classList.remove('visible');
     document.getElementById('financesScreen').classList.remove('visible');
+    var _habScreen = document.getElementById('habitsScreen');
+    if (_habScreen) _habScreen.classList.remove('visible');
     document.getElementById(screenId).classList.add('visible');
     const topbar = document.querySelector('.topbar');
     if (topbar) topbar.classList.add('collapsed');
@@ -12203,14 +12400,18 @@
     const onProjects = document.getElementById('projectsScreen').classList.contains('visible');
     const onSchedule = document.getElementById('scheduleScreen').classList.contains('visible');
     const onRecipes  = document.getElementById('recipesScreen').classList.contains('visible');
+    const habScreenEl = document.getElementById('habitsScreen');
+    const onHabits   = habScreenEl && habScreenEl.classList.contains('visible');
     const docsAdd     = document.getElementById('docsAddFab');
     const projectsAdd = document.getElementById('projectsAddFab');
     const scheduleAdd = document.getElementById('scheduleAddFab');
     const recipesAdd  = document.getElementById('recipesAddFab');
+    const habitsAdd   = document.getElementById('habitsAddFab');
     if (docsAdd)     docsAdd.classList.toggle('visible', onDocs);
     if (projectsAdd) projectsAdd.classList.toggle('visible', onProjects);
     if (scheduleAdd) scheduleAdd.classList.toggle('visible', onSchedule);
     if (recipesAdd)  recipesAdd.classList.toggle('visible', onRecipes);
+    if (habitsAdd)   habitsAdd.classList.toggle('visible', onHabits);
     if (typeof updateHomeGjVisibility === 'function') updateHomeGjVisibility();
   }
 
@@ -16257,61 +16458,300 @@
       (d.phaseLabel ? '<div class="home-widget-primary-phase-label">' + escapeHtml(d.phaseLabel) + '</div>' : '');
   }
 
+  // ══════════════════════════════════════════════════════════════
+  // DAILY HABITS (v3.2) — standalone, separate from projects/programs
+  // ══════════════════════════════════════════════════════════════
+  const HABITS_KEY = 'shasta_habits';
+  const HABIT_ICON_CHOICES = ['💧','🏃','🧘','📖','✍️','🌿','💪','🛏️','🥗','☀️','🦷','💊','🎯','🎸','🧹','📵'];
+
+  function habitsStorageKey() { return HABITS_KEY + '_' + (getApiUser() || 'guest'); }
+
+  function habitToday() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function getHabits() {
+    let arr;
+    try { arr = JSON.parse(localStorage.getItem(habitsStorageKey()) || '[]'); } catch (_) { arr = []; }
+    if (!Array.isArray(arr)) arr = [];
+    // Daily rollover: reset value when the stored day is not today
+    const today = habitToday();
+    let changed = false;
+    arr.forEach(function(h) {
+      if (h.day !== today) { h.value = 0; h.day = today; changed = true; }
+      if (typeof h.value !== 'number') { h.value = 0; changed = true; }
+    });
+    if (changed) { try { localStorage.setItem(habitsStorageKey(), JSON.stringify(arr)); } catch (_) {} }
+    return arr;
+  }
+
+  function saveHabitsList(arr) {
+    try { localStorage.setItem(habitsStorageKey(), JSON.stringify(arr)); } catch (_) {}
+  }
+
+  function habitGenId() { return 'h_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7); }
+  function habitGoalOf(h) { return h.type === 'count' ? Math.max(1, h.goal || 1) : 1; }
+  function habitIsDone(h) { return (h.value || 0) >= habitGoalOf(h); }
+  function habitFrac(h) { return Math.min(1, (h.value || 0) / habitGoalOf(h)); }
+  function habitAllDone(arr) { return arr.length > 0 && arr.every(habitIsDone); }
+
+  function habitRingDashAttrs(r, frac) {
+    const c = 2 * Math.PI * r;
+    return 'stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + (c * (1 - frac)).toFixed(1) + '"';
+  }
+
+  function habitShastaLine(done, total) {
+    if (total === 0) return "Add a habit to start your day cozy.";
+    if (done === 0) return "A fresh day — pick one and we'll begin.";
+    if (done === total) return "Every habit done. Wonderful work today!";
+    if (done >= total * 0.6) return "So close now — you've got the rest.";
+    return "Nice start. One at a time, hoo!";
+  }
+
+  // ── Mutations ──
+  function habitApplyChange(id, fn) {
+    const arr = getHabits();
+    const before = habitAllDone(arr);
+    const h = arr.find(function(x) { return x.id === id; });
+    if (!h) return;
+    fn(h);
+    h.day = habitToday();
+    saveHabitsList(arr);
+    const after = habitAllDone(arr);
+    if (!before && after) habitCelebrate();
+    refreshHabitsUI();
+  }
+  function habitToggle(id) { habitApplyChange(id, function(h) { h.value = habitIsDone(h) ? 0 : habitGoalOf(h); }); }
+  function habitInc(id) { habitApplyChange(id, function(h) { h.value = Math.min(habitGoalOf(h), (h.value || 0) + 1); }); }
+  function habitDec(id) { habitApplyChange(id, function(h) { h.value = Math.max(0, (h.value || 0) - 1); }); }
+
+  function refreshHabitsUI() {
+    if (document.getElementById('habitsScreen').classList.contains('visible')) renderHabitsScreen();
+    renderHomeWidgetHabits();
+  }
+
+  // ── Screen ──
+  function showHabitsScreen() {
+    closeDrawer();
+    showSubScreen('habitsScreen');
+    renderHabitsScreen();
+    syncBottomDockState();
+    updateScreenAddFabs();
+  }
+
+  function renderHabitsScreen() {
+    const arr = getHabits();
+    const done = arr.filter(habitIsDone).length;
+    const total = arr.length;
+
+    const hero = document.getElementById('habitHero');
+    if (hero) {
+      const frac = total ? done / total : 0;
+      hero.innerHTML =
+        '<div class="habit-hero-ringwrap">' +
+          '<svg class="habit-hero-ring" viewBox="0 0 92 92">' +
+            '<circle class="ring-track" cx="46" cy="46" r="41"/>' +
+            '<circle class="ring-fill" cx="46" cy="46" r="41" ' + habitRingDashAttrs(41, frac) + '/>' +
+          '</svg>' +
+          '<div class="habit-hero-center"><div class="habit-hero-num">' + done + '</div><div class="habit-hero-den">of ' + total + '</div></div>' +
+        '</div>' +
+        '<div class="habit-hero-body">' +
+          '<div class="habit-hero-row">' +
+            '<img class="habit-hero-mascot" src="' + (frac >= 1 ? BLATHERS.happy : BLATHERS.clever) + '" alt="">' +
+            '<div class="habit-hero-head">' + (frac >= 1 ? 'All caught up' : (total ? done + ' of ' + total + ' done' : 'No habits yet')) + '</div>' +
+          '</div>' +
+          '<div class="habit-hero-line">' + habitShastaLine(done, total) + '</div>' +
+        '</div>';
+    }
+
+    const cnt = document.getElementById('habitsCount');
+    if (cnt) cnt.textContent = total ? (done + ' of ' + total + ' complete') : '';
+
+    const list = document.getElementById('habitsList');
+    if (!list) return;
+    if (total === 0) {
+      list.innerHTML =
+        '<div class="habits-empty">' +
+          '<img src="' + BLATHERS.sleep + '" alt="">' +
+          '<div class="he-head">No habits yet</div>' +
+          '<div class="he-sub">Tap + to add your first cozy habit.</div>' +
+        '</div>';
+      return;
+    }
+    list.innerHTML = arr.map(function(h) {
+      const idEsc = escapeHtml(h.id);
+      const ico = escapeHtml(h.icon || '🎯');
+      const isCount = h.type === 'count';
+      const goal = habitGoalOf(h);
+      const val = h.value || 0;
+      const doneCls = habitIsDone(h) ? ' is-done' : '';
+      const sub = isCount
+        ? (val + ' / ' + goal + (h.unit ? ' ' + escapeHtml(h.unit) : ''))
+        : (habitIsDone(h) ? 'Done for today' : 'Tap to complete');
+      let right = '';
+      if (isCount) {
+        right =
+          '<div class="habit-card-count" onclick="event.stopPropagation()">' +
+            '<button type="button" class="habit-count-btn" onclick="habitDec(\'' + idEsc + '\')" aria-label="Decrease">−</button>' +
+            '<span class="habit-count-val">' + val + '<small>/' + goal + '</small></span>' +
+            '<button type="button" class="habit-count-btn" onclick="habitInc(\'' + idEsc + '\')" aria-label="Increase">+</button>' +
+          '</div>';
+      }
+      const tap = isCount ? 'habitInc(\'' + idEsc + '\')' : 'habitToggle(\'' + idEsc + '\')';
+      return '<div class="habit-card' + doneCls + '" onclick="' + tap + '" oncontextmenu="event.preventDefault();openHabitSheet(\'' + idEsc + '\');return false;">' +
+        '<div class="habit-card-ring">' +
+          '<svg viewBox="0 0 50 50"><circle class="ring-track" cx="25" cy="25" r="21"/><circle class="ring-fill" cx="25" cy="25" r="21" ' + habitRingDashAttrs(21, habitFrac(h)) + '/></svg>' +
+          '<div class="habit-card-ico">' + ico + '</div>' +
+          '<div class="habit-card-check"><svg viewBox="0 0 24 24" fill="none" stroke="#4a9a6a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>' +
+        '</div>' +
+        '<div class="habit-card-body">' +
+          '<div class="habit-card-label">' + escapeHtml(h.label) + '</div>' +
+          '<div class="habit-card-sub">' + sub + '</div>' +
+        '</div>' +
+        right +
+        '<button type="button" class="habit-count-btn" style="border:none;font-size:16px" onclick="event.stopPropagation();openHabitSheet(\'' + idEsc + '\')" aria-label="Edit">✎</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  // ── Create / edit sheet ──
+  let _habitEditingId = null;
+  let _habitSheetIcon = HABIT_ICON_CHOICES[0];
+  let _habitSheetType = 'check';
+
+  function openHabitSheet(id) {
+    _habitEditingId = id || null;
+    const existing = id ? getHabits().find(function(x) { return x.id === id; }) : null;
+    _habitSheetIcon = existing ? (existing.icon || HABIT_ICON_CHOICES[0]) : HABIT_ICON_CHOICES[0];
+    _habitSheetType = existing ? (existing.type || 'check') : 'check';
+    document.getElementById('habitSheetTitle').textContent = existing ? 'Edit habit' : 'New habit';
+    document.getElementById('habitNameInput').value = existing ? existing.label : '';
+    document.getElementById('habitGoalInput').value = existing && existing.goal ? existing.goal : 8;
+    document.getElementById('habitUnitInput').value = existing && existing.unit ? existing.unit : '';
+    document.getElementById('habitDeleteBtn').style.display = existing ? 'block' : 'none';
+    renderHabitIconGrid();
+    habitSheetSetType(_habitSheetType);
+    const ov = document.getElementById('habitSheetOverlay');
+    ov.classList.add('show');
+    setTimeout(function() { const n = document.getElementById('habitNameInput'); if (n && !existing) n.focus(); }, 320);
+  }
+
+  function closeHabitSheet() {
+    document.getElementById('habitSheetOverlay').classList.remove('show');
+    _habitEditingId = null;
+  }
+
+  function renderHabitIconGrid() {
+    const grid = document.getElementById('habitIconGrid');
+    if (!grid) return;
+    grid.innerHTML = HABIT_ICON_CHOICES.map(function(ic) {
+      return '<button type="button" class="habit-icon-opt' + (ic === _habitSheetIcon ? ' sel' : '') + '" onclick="habitSheetPickIcon(\'' + ic + '\')">' + ic + '</button>';
+    }).join('');
+  }
+  function habitSheetPickIcon(ic) { _habitSheetIcon = ic; renderHabitIconGrid(); }
+
+  function habitSheetSetType(type) {
+    _habitSheetType = type;
+    document.getElementById('habitTypeCheck').classList.toggle('sel', type === 'check');
+    document.getElementById('habitTypeCount').classList.toggle('sel', type === 'count');
+    document.getElementById('habitGoalField').style.display = type === 'count' ? 'block' : 'none';
+  }
+
+  function saveHabitFromSheet() {
+    const label = (document.getElementById('habitNameInput').value || '').trim();
+    if (!label) { document.getElementById('habitNameInput').focus(); return; }
+    const goal = Math.max(1, Math.min(99, parseInt(document.getElementById('habitGoalInput').value, 10) || 1));
+    const unit = (document.getElementById('habitUnitInput').value || '').trim();
+    const arr = getHabits();
+    if (_habitEditingId) {
+      const h = arr.find(function(x) { return x.id === _habitEditingId; });
+      if (h) {
+        h.label = label; h.icon = _habitSheetIcon; h.type = _habitSheetType;
+        h.goal = _habitSheetType === 'count' ? goal : 1; h.unit = _habitSheetType === 'count' ? unit : '';
+        if (h.value > habitGoalOf(h)) h.value = habitGoalOf(h);
+      }
+    } else {
+      arr.push({ id: habitGenId(), label: label, icon: _habitSheetIcon, type: _habitSheetType,
+        goal: _habitSheetType === 'count' ? goal : 1, unit: _habitSheetType === 'count' ? unit : '',
+        value: 0, day: habitToday(), createdAt: Date.now() });
+    }
+    saveHabitsList(arr);
+    closeHabitSheet();
+    refreshHabitsUI();
+  }
+
+  function deleteHabitFromSheet() {
+    if (!_habitEditingId) { closeHabitSheet(); return; }
+    saveHabitsList(getHabits().filter(function(x) { return x.id !== _habitEditingId; }));
+    closeHabitSheet();
+    refreshHabitsUI();
+  }
+
+  // ── Celebration ──
+  let _habitCelebTimer = null;
+  function habitCelebrate() {
+    const el = document.getElementById('habitCelebrate');
+    if (!el) return;
+    const sub = document.getElementById('habitCelebrateSub');
+    const total = getHabits().length;
+    if (sub) sub.textContent = 'All ' + total + ' habit' + (total === 1 ? '' : 's') + ' complete. Shasta is proud of you!';
+    el.classList.add('show');
+    habitFireConfetti();
+    if (_habitCelebTimer) clearTimeout(_habitCelebTimer);
+    _habitCelebTimer = setTimeout(dismissHabitCelebrate, 6000);
+  }
+  function dismissHabitCelebrate() {
+    const el = document.getElementById('habitCelebrate');
+    if (el) el.classList.remove('show');
+    if (_habitCelebTimer) { clearTimeout(_habitCelebTimer); _habitCelebTimer = null; }
+  }
+  function habitFireConfetti() {
+    const colors = ['#c07a4a', '#4a9a6a', '#e0b050', '#d87a5a', '#8ab4f8', '#c98ac9'];
+    for (let i = 0; i < 70; i++) {
+      const p = document.createElement('div');
+      p.className = 'habit-confetti-pc';
+      p.style.left = Math.random() * 100 + 'vw';
+      p.style.background = colors[i % colors.length];
+      p.style.animationDuration = (1.6 + Math.random() * 1.4) + 's';
+      p.style.animationDelay = (Math.random() * 0.5) + 's';
+      p.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+      document.body.appendChild(p);
+      (function(node) { setTimeout(function() { if (node.parentNode) node.parentNode.removeChild(node); }, 3600); })(p);
+    }
+  }
+
+  // ── Home widget (daily habits) ──
   function renderHomeWidgetHabits() {
     const el = document.getElementById('homeWidgetHabitsInner');
     if (!el) return;
-    const habits = sortProjectsByFavoriteThenRecent(
-      getProjects().filter(function(p) { return !isProjectCompleted(p) && projectIsProgram(p); })
-    );
-    if (!habits.length) {
-      el.innerHTML = '<div class="home-widget-no-habit">No active habits yet.</div>';
+    const arr = getHabits();
+    const _hs = document.getElementById('homeHabitsSection');
+    if (!arr.length) {
+      el.innerHTML = '<div class="home-widget-no-habit" onclick="showHabitsScreen()" style="cursor:pointer">No habits yet — tap to add one.</div>';
+      if (_hs) _hs.classList.add('loaded');
       return;
     }
-    const p = habits[0];
-    const unit = programGoalUnitLabel(p);
-    const acts = (p.activities || []).slice(0, 4);
-    el.innerHTML = acts.map(function(a, i) {
-      const safeId = String(p.id).replace(/'/g, "\\'");
-      const safeAid = String(a.id).replace(/'/g, "\\'");
-      const aidEsc = escapeHtml(String(a.id));
-      const actIcon = ACT_DEFAULT_ICONS[i % ACT_DEFAULT_ICONS.length];
-      return '<div class="home-widget-act" data-hwa-act="' + aidEsc + '" id="hwa-' + aidEsc + '" ' +
-        'onclick="homeWidgetActTap(\'' + safeId + '\',\'' + safeAid + '\',this)">' +
-        '<div class="hw-act-fill"></div>' +
-        '<div class="hw-ring-wrap">' +
-          '<svg class="hw-ring-svg" viewBox="0 0 30 30">' +
-            '<circle class="hw-ring-track" cx="15" cy="15" r="11"/>' +
-            '<circle class="hw-ring-fill" id="hwr-' + aidEsc + '" cx="15" cy="15" r="11"/>' +
-          '</svg>' +
-          '<div class="hw-ring-icon">' + actIcon + '</div>' +
+    // Show not-done first, then done; cap at 4 chips
+    const ordered = arr.slice().sort(function(a, b) { return (habitIsDone(a) ? 1 : 0) - (habitIsDone(b) ? 1 : 0); });
+    const shown = ordered.slice(0, 4);
+    el.innerHTML = shown.map(function(h) {
+      const idEsc = escapeHtml(h.id);
+      const ico = escapeHtml(h.icon || '🎯');
+      const doneCls = habitIsDone(h) ? ' is-done' : '';
+      const isCount = h.type === 'count';
+      const sub = isCount ? ((h.value || 0) + '/' + habitGoalOf(h)) : (habitIsDone(h) ? '✓' : '');
+      const tap = isCount ? 'habitInc(\'' + idEsc + '\')' : 'habitToggle(\'' + idEsc + '\')';
+      return '<div class="home-habit-chip' + doneCls + '" onclick="event.stopPropagation();' + tap + '">' +
+        '<div class="home-habit-chip-ring">' +
+          '<svg viewBox="0 0 30 30"><circle class="ring-track" cx="15" cy="15" r="13"/><circle class="ring-fill" cx="15" cy="15" r="13" ' + habitRingDashAttrs(13, habitFrac(h)) + '/></svg>' +
+          '<div class="home-habit-chip-ico">' + ico + '</div>' +
         '</div>' +
-        '<span class="hw-act-label">' + escapeHtml(a.label) + '</span>' +
-        '<span class="hw-act-pts" id="hwp-' + aidEsc + '">+' + (a.points || 0) + ' ' + escapeHtml(unit) + '</span>' +
+        '<span class="home-habit-chip-label">' + escapeHtml(h.label) + '</span>' +
+        '<span class="home-habit-chip-sub">' + sub + '</span>' +
       '</div>';
     }).join('') +
-      '<div class="hw-act-view-btn" onclick="closeDrawer();showProjectsScreen();projectsSelectProject(\'' + String(p.id).replace(/'/g, "\\'") + '\')">Open full habit →</div>';
-
-    const syncAid = programUndoPrimaryActivityIdFromProject(p);
-    if (syncAid) {
-      const rows = el.querySelectorAll('.home-widget-act');
-      for (let i = 0; i < rows.length; i++) {
-        const r = rows[i];
-        if (String(r.getAttribute('data-hwa-act') || '') !== syncAid) continue;
-        r.classList.add('hw-logged', 'hw-locked');
-        homeWidgetActLocked[syncAid] = true;
-        const ptsEl = r.querySelector('.hw-act-pts');
-        if (ptsEl) ptsEl.textContent = '✓';
-        (function(aidKey, cardEl) {
-          setTimeout(function() {
-            homeWidgetActLocked[aidKey] = false;
-            if (cardEl && cardEl.parentNode) cardEl.classList.remove('hw-locked');
-          }, 2000);
-        })(syncAid, r);
-        break;
-      }
-    }
-    // Mark habits section visible
-    var _hs = document.getElementById('homeHabitsSection');
+      '<div class="home-habits-more" onclick="showHabitsScreen()">' + (arr.length > 4 ? 'View all ' + arr.length + ' habits →' : 'Open Habits →') + '</div>';
     if (_hs) _hs.classList.add('loaded');
   }
 
