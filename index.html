@@ -160,17 +160,29 @@
       -webkit-touch-callout: none;
     }
 
-    /* ── LOAD SCREEN ── */
+    /* ── LOAD SCREEN (ambient launch splash) ── */
     .load-screen {
       position: fixed;
       inset: 0;
       z-index: 300;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: #fdf8f5;
+      overflow: hidden;
       transition: opacity 0.4s ease;
+      background: #efe6d6;
+      --spl-bg: #efe6d6;
+      --spl-hero2: #f7f0e2;
+      --spl-text: #3a2e28;
+      --spl-text-muted: #8a7a72;
+      --spl-text-faint: #b8a99e;
+      --spl-font-body: -apple-system, system-ui, "Segoe UI", sans-serif;
+      --spl-font-display: 'Playfair Display', Georgia, serif;
+    }
+    html.dark-mode .load-screen {
+      background: #1a1816;
+      --spl-bg: #1a1816;
+      --spl-hero2: #241f1b;
+      --spl-text: #f0e8e2;
+      --spl-text-muted: #b8a99e;
+      --spl-text-faint: #8a7a72;
     }
     .load-screen.hidden {
       opacity: 0;
@@ -178,17 +190,40 @@
       visibility: hidden;
       transition: opacity 0.35s ease, visibility 0s linear 0.35s;
     }
-    .load-screen-lottie {
-      width: 160px;
-      height: 160px;
-      opacity: 0.6;
+    .splash {
+      position: relative; width: 100%; height: 100%; overflow: hidden;
+      font-family: var(--spl-font-body);
+      background: radial-gradient(125% 85% at 50% 30%, var(--spl-hero2) 0%, var(--spl-bg) 62%);
     }
-    .load-screen-label {
-      margin-top: 20px;
-      font-size: 14px;
-      color: var(--muted);
-      letter-spacing: 0.04em;
+    .spl-wash { position: absolute; inset: 0; background: var(--la); opacity: .10; z-index: 0; pointer-events: none; transition: background-color 2600ms ease; }
+    .spl-aura-wrap { position: absolute; left: 50%; top: 47%; width: 82vmin; height: 82vmin; transform: translate(-50%, -50%); z-index: 0; pointer-events: none; }
+    .spl-aura { width: 100%; height: 100%; background: var(--la); border-radius: 50%; filter: blur(36px); transition: background-color 2600ms ease;
+      -webkit-mask: radial-gradient(circle, #000 0%, #000 20%, transparent 66%); mask: radial-gradient(circle, #000 0%, #000 20%, transparent 66%);
+      animation: spl-breathe 7.5s ease-in-out infinite; }
+    .spl-art { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+    .spl-drifter { position: absolute; top: 0; opacity: var(--o, .8); will-change: transform, opacity; animation: spl-drift linear infinite; }
+    .spl-swayer { animation: spl-sway ease-in-out infinite; }
+    .spl-drifter img { width: 100%; height: auto; display: block; filter: drop-shadow(0 12px 20px rgba(110,58,30,.22)); }
+    .spl-loading { position: absolute; left: 0; right: 0; top: 60%; display: flex; flex-direction: column; align-items: center; gap: 16px; z-index: 2; }
+    .spl-dots { display: inline-flex; gap: 7px; }
+    .spl-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--la); display: block; transition: background-color 2600ms ease; animation: spl-blink 1.25s infinite; }
+    .spl-dots i:nth-child(2) { animation-delay: .2s; }
+    .spl-dots i:nth-child(3) { animation-delay: .4s; }
+    .spl-tagline { font-size: 16px; font-weight: 600; color: var(--spl-text-muted); letter-spacing: .2px; white-space: nowrap; text-shadow: 0 0 16px var(--spl-bg), 0 0 16px var(--spl-bg); }
+    .spl-brand { position: absolute; bottom: 46px; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; gap: 5px; z-index: 2; }
+    .spl-brand-name { font-family: var(--spl-font-display); font-weight: 800; font-size: 23px; letter-spacing: 2px; color: var(--spl-text); text-shadow: 0 0 16px var(--spl-bg); }
+    .spl-brand-bar { width: 26px; height: 3px; border-radius: 99px; background: var(--la); transition: background-color 2600ms ease; }
+    .spl-brand-sub { font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--spl-text-faint); margin-top: 2px; }
+    @keyframes spl-drift {
+      0%   { transform: translate3d(0, 88vh, 0) scale(var(--s, 1)); opacity: 0; }
+      9%   { opacity: var(--o, .8); }
+      88%  { opacity: var(--o, .8); }
+      100% { transform: translate3d(var(--dx, 0vw), -98vh, 0) scale(var(--s, 1)); opacity: 0; }
     }
+    @keyframes spl-sway { 0% { transform: translate(-8px, 1px) rotate(-2.6deg); } 33% { transform: translate(6px, -10px) rotate(1.8deg); } 66% { transform: translate(8px, -6px) rotate(2.6deg); } 100% { transform: translate(-8px, 1px) rotate(-2.6deg); } }
+    @keyframes spl-breathe { 0%,100% { transform: scale(1); opacity: .4; } 50% { transform: scale(1.09); opacity: .52; } }
+    @keyframes spl-blink { 0%,80%,100% { opacity: .22; } 40% { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { .splash *, .splash { animation: none !important; } }
 
     /* ── SWIRLING GRADIENT BACKGROUND ── */
     .bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
@@ -9462,15 +9497,46 @@
 
 <!-- ── LOAD SCREEN ── -->
 <div class="load-screen" id="loadScreen">
-  <dotlottie-player
-    class="load-screen-lottie"
-    autoplay
-    loop
-    mode="normal"
-    src="https://stormyreigns.github.io/HATH/Black%20cat%20running.lottie">
-  </dotlottie-player>
-  <div class="load-screen-label">Loading…</div>
+  <div class="splash" id="splashRoot" style="--la:#C97B4A;">
+    <div class="spl-wash"></div>
+    <div class="spl-aura-wrap"><div class="spl-aura"></div></div>
+    <div class="spl-art">
+      <div class="spl-drifter" style="left:38%;width:200px;--o:.24;--dx:3vw;animation-duration:60s;animation-delay:-48s;"><div class="spl-swayer" style="animation-duration:11s;"><img src="https://stormyreigns.github.io/HATH/splash-assets/moon-sigil.png" alt=""></div></div>
+      <div class="spl-drifter" style="left:10%;width:120px;--o:.62;--dx:9vw;animation-duration:40s;animation-delay:-6s;"><div class="spl-swayer" style="animation-duration:7s;"><img src="https://stormyreigns.github.io/HATH/splash-assets/triforce.webp" alt=""></div></div>
+      <div class="spl-drifter" style="left:70%;width:136px;--o:.8;--dx:-8vw;animation-duration:46s;animation-delay:-25s;"><div class="spl-swayer" style="animation-duration:8.5s;"><img src="https://stormyreigns.github.io/HATH/splash-assets/king-of-red-lions.png" alt=""></div></div>
+      <div class="spl-drifter" style="left:84%;width:90px;--o:.82;--dx:-7vw;animation-duration:33s;animation-delay:-12s;"><div class="spl-swayer" style="animation-duration:6s;"><img src="https://stormyreigns.github.io/HATH/splash-assets/aether-crystal.png" alt=""></div></div>
+      <div class="spl-drifter" style="left:26%;width:112px;--o:.8;--dx:7vw;animation-duration:37s;animation-delay:-30s;"><div class="spl-swayer" style="animation-duration:6.5s;"><img src="https://stormyreigns.github.io/HATH/splash-assets/blathers-point.png" alt=""></div></div>
+      <div class="spl-drifter" style="left:49%;width:150px;--o:.6;--dx:4vw;animation-duration:52s;animation-delay:-40s;"><div class="spl-swayer" style="animation-duration:9s;"><img src="https://stormyreigns.github.io/HATH/splash-assets/layton-luke.png" alt=""></div></div>
+      <div class="spl-drifter" style="left:6%;width:96px;--o:.74;--dx:11vw;animation-duration:35s;animation-delay:-18s;"><div class="spl-swayer" style="animation-duration:7s;"><img src="https://stormyreigns.github.io/HATH/splash-assets/vessel.png" alt=""></div></div>
+      <div class="spl-drifter" style="left:60%;width:92px;--o:.5;--dx:-6vw;animation-duration:30s;animation-delay:-9s;"><div class="spl-swayer" style="animation-duration:5.5s;"><img src="https://stormyreigns.github.io/HATH/splash-assets/hk-mark.png" alt=""></div></div>
+      <div class="spl-drifter" style="left:88%;width:92px;--o:.82;--dx:-11vw;animation-duration:38s;animation-delay:-34s;"><div class="spl-swayer" style="animation-duration:7s;"><img src="https://stormyreigns.github.io/HATH/splash-assets/shasta.png" alt="Shasta" style="border-radius:22px;"></div></div>
+    </div>
+    <div class="spl-loading">
+      <span class="spl-dots"><i></i><i></i><i></i></span>
+      <div class="spl-tagline">Gathering your collections</div>
+    </div>
+    <div class="spl-brand">
+      <div class="spl-brand-name">HATH</div>
+      <div class="spl-brand-bar"></div>
+      <div class="spl-brand-sub">with Shasta</div>
+    </div>
+  </div>
 </div>
+<script>
+  (function () {
+    var root = document.getElementById('splashRoot');
+    if (!root) return;
+    var colors = ['#C97B4A', '#3C7D4E', '#C9A24B', '#2E6FB0', '#6B4A2B', '#C56A2C', '#C8202B'];
+    var i = 0;
+    var timer = setInterval(function () {
+      var ls = document.getElementById('loadScreen');
+      if (!ls || ls.classList.contains('hidden')) { clearInterval(timer); return; }
+      var n; do { n = Math.floor(Math.random() * colors.length); } while (n === i);
+      i = n;
+      root.style.setProperty('--la', colors[n]);
+    }, 3400);
+  })();
+</script>
 
 <!-- ── LOGIN SCREEN ── -->
 <div class="login-screen" id="loginScreen">
@@ -10677,7 +10743,7 @@
   window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
   window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '3.3.3';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '3.4.0';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
