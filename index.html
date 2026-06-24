@@ -10677,7 +10677,7 @@
   window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
   window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '3.3.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '3.3.3';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
@@ -26370,6 +26370,9 @@
   --font-theme-display:'Playfair Display',Georgia,serif;
 }
 #projectsAppRoot.pa-show{display:block;}
+/* Full-bleed parchment so Projects fills the whole phone (no floating-card look) */
+#projectsAppRoot.pa-show::before{content:'';position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;background:var(--pa-bg);z-index:0;pointer-events:none;}
+#projectsAppRoot.pa-show > div{z-index:1;}
 #projectsAppRoot *{box-sizing:border-box;}
 
 /* base (light) palette */
