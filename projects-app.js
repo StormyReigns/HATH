@@ -331,7 +331,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
   window.claude.complete = async function (prompt) {
     var res = await fetch(AI_ENDPOINT, {
       method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ message: prompt,
+      body: JSON.stringify({ action: 'projectsAI', message: prompt,
         systemOverride: 'You output exactly what the user asks for. No preamble, no commentary, no markdown code fences unless explicitly requested.',
         history: [], user: _user(), nickname: '', directPrompt: true })
     });
