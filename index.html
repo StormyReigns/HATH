@@ -9501,7 +9501,7 @@
     <div class="spl-wash"></div>
     <div class="spl-aura-wrap"><div class="spl-aura"></div></div>
     <div class="spl-art">
-      <div class="spl-drifter" style="left:38%;width:200px;--o:.24;--dx:3vw;animation-duration:60s;animation-delay:-48s;"><div class="spl-swayer" style="animation-duration:11s;"><img src="https://stormyreigns.github.io/HATH/splash-assets/moon-sigil.png" alt=""></div></div>
+      <div class="spl-drifter" style="left:38%;width:200px;--o:.45;--dx:3vw;animation-duration:30s;animation-delay:-4s;"><div class="spl-swayer" style="animation-duration:11s;"><img src="https://stormyreigns.github.io/HATH/splash-assets/moon-sigil.png" alt=""></div></div>
       <div class="spl-drifter" style="left:10%;width:120px;--o:.62;--dx:9vw;animation-duration:40s;animation-delay:-6s;"><div class="spl-swayer" style="animation-duration:7s;"><img src="https://stormyreigns.github.io/HATH/splash-assets/triforce.webp" alt=""></div></div>
       <div class="spl-drifter" style="left:70%;width:136px;--o:.8;--dx:-8vw;animation-duration:46s;animation-delay:-25s;"><div class="spl-swayer" style="animation-duration:8.5s;"><img src="https://stormyreigns.github.io/HATH/splash-assets/king-of-red-lions.png" alt=""></div></div>
       <div class="spl-drifter" style="left:84%;width:90px;--o:.82;--dx:-7vw;animation-duration:33s;animation-delay:-12s;"><div class="spl-swayer" style="animation-duration:6s;"><img src="https://stormyreigns.github.io/HATH/splash-assets/aether-crystal.png" alt=""></div></div>
@@ -10743,7 +10743,7 @@
   window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
   window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '3.4.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '3.4.1';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
@@ -26435,10 +26435,8 @@
   --font-mono:ui-monospace,"SF Mono",Menlo,monospace;
   --font-theme-display:'Playfair Display',Georgia,serif;
 }
-#projectsAppRoot.pa-show{display:block;}
-/* Full-bleed parchment so Projects fills the whole phone (no floating-card look) */
-#projectsAppRoot.pa-show::before{content:'';position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;background:var(--pa-bg);z-index:0;pointer-events:none;}
-#projectsAppRoot.pa-show > div{z-index:1;}
+/* Projects fills the whole phone, edge to edge (no borders, no floating-card look) */
+#projectsAppRoot.pa-show{display:block;position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100vw;max-width:600px;margin:0;z-index:2;background:var(--pa-bg);}
 #projectsAppRoot *{box-sizing:border-box;}
 
 /* base (light) palette */
@@ -26497,7 +26495,7 @@ html.dark-mode #projectsAppRoot [data-theme="ffxiv"]{
 @keyframes hath-pulse{0%,100%{opacity:.4}50%{opacity:1}}
 
 </style>
-<script id="projects-app-runtime" src="projects-app.js?v=332"></script>
+<script id="projects-app-runtime" src="projects-app.js?v=341"></script>
 <script id="projects-app-runtime-old" type="application/x-parked">
 /**
  * @license React

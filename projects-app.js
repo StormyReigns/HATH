@@ -1980,8 +1980,8 @@ window.Home = Home;
         position: 'relative',
         overflow: 'hidden',
         background: 'linear-gradient(160deg, var(--hero-tint-1), var(--hero-tint-2))',
-        marginTop: -56,
-        padding: '70px var(--gutter) 22px'
+        marginTop: 0,
+        padding: '14px var(--gutter) 22px'
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
@@ -1996,7 +1996,8 @@ window.Home = Home;
         alignItems: 'center',
         gap: 4,
         border: 'none',
-        background: 'rgba(255,255,255,.6)',
+        background: 'var(--surface)',
+        boxShadow: 'var(--shadow-sm)',
         borderRadius: 999,
         padding: '7px 13px 7px 8px',
         cursor: 'pointer',
@@ -2020,7 +2021,8 @@ window.Home = Home;
         color: 'var(--text-muted)',
         background: 'rgba(255,255,255,.55)',
         borderRadius: 999,
-        padding: '5px 11px'
+        padding: '5px 11px',
+        display: 'none'
       }
     }, "since ", project.started), /*#__PURE__*/React.createElement("button", {
       onClick: () => setMenu(m => !m),
@@ -2031,7 +2033,8 @@ window.Home = Home;
         borderRadius: '50%',
         border: 'none',
         cursor: 'pointer',
-        background: 'rgba(255,255,255,.6)',
+        background: 'var(--surface)',
+        boxShadow: 'var(--shadow-sm)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -4766,7 +4769,8 @@ function ProjectsApp() {
       inset: 0,
       overflowY: 'auto',
       WebkitOverflowScrolling: 'touch',
-      paddingTop: 56
+      paddingTop: 'env(safe-area-inset-top, 0px)',
+      paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 86px)'
     }
   }, screen), chest && /*#__PURE__*/React.createElement(_Chest, {
     reason: chest,
