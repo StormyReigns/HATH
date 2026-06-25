@@ -4769,8 +4769,7 @@ function ProjectsApp() {
       inset: 0,
       overflowY: 'auto',
       WebkitOverflowScrolling: 'touch',
-      paddingTop: 'env(safe-area-inset-top, 0px)',
-      paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 86px)'
+      paddingTop: 8
     }
   }, screen), chest && /*#__PURE__*/React.createElement(_Chest, {
     reason: chest,

@@ -10743,7 +10743,7 @@
   window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
   window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '3.4.2';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '3.4.3';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
@@ -26435,9 +26435,10 @@
   --font-mono:ui-monospace,"SF Mono",Menlo,monospace;
   --font-theme-display:'Playfair Display',Georgia,serif;
 }
-/* Projects fills the whole phone, edge to edge. Centered with auto margins (NOT a transform),
-   so the momentum-scroll container has no transformed ancestor — avoids iOS scroll repaint jank. */
-#projectsAppRoot.pa-show{display:block;position:fixed;top:0;right:0;bottom:0;left:0;width:auto;max-width:600px;margin:0 auto;z-index:2;background:var(--pa-bg);}
+/* Projects scrolls in normal flow (like every other screen) so iOS touch-scroll works.
+   A fixed full-screen parchment sits behind it so the phone shows no edge borders. */
+#projectsAppRoot.pa-show{display:block;}
+#projectsAppRoot.pa-show::before{content:'';position:fixed;left:50%;top:0;bottom:0;transform:translateX(-50%);width:100vw;max-width:600px;background:var(--pa-bg);z-index:-1;pointer-events:none;}
 /* keep overscroll bounce inside the list instead of chaining to the app shell */
 #projectsAppRoot.pa-show > div > div{overscroll-behavior:contain;}
 #projectsAppRoot *{box-sizing:border-box;}
@@ -26498,7 +26499,7 @@ html.dark-mode #projectsAppRoot [data-theme="ffxiv"]{
 @keyframes hath-pulse{0%,100%{opacity:.4}50%{opacity:1}}
 
 </style>
-<script id="projects-app-runtime" src="projects-app.js?v=341"></script>
+<script id="projects-app-runtime" src="projects-app.js?v=343"></script>
 <script id="projects-app-runtime-old" type="application/x-parked">
 /**
  * @license React
