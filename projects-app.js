@@ -339,6 +339,89 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     var data; try { data = JSON.parse(raw); } catch (_) { data = {}; }
     return (data && data.reply) || raw || '';
   };
+
+  // ── Cloud backup ──────────────────────────────────────────────
+  // Projects previously saved only to this device's localStorage, so clearing
+  // site data or switching devices lost everything. This mirrors the project
+  // list into the household spreadsheet via the backend's existing
+  // ProjectsBackup endpoints — no backend schema change needed, since it
+  // stores any JSON array, chunked, keyed by the signed-in email.
+  //
+  // The app-wide fetch interceptor in index.html attaches the session token to
+  // any request to this endpoint, so there is no auth handling to do here.
+  var _bkTimer = null;
+  var _bkState = { status: 'idle', at: null, error: null };
+  var _bkListeners = [];
+
+  function _bkGet() { return { status: _bkState.status, at: _bkState.at, error: _bkState.error }; }
+  function _bkSet(status, extra) {
+    _bkState.status = status;
+    if (extra && extra.at !== undefined) _bkState.at = extra.at;
+    _bkState.error = (extra && extra.error) ? extra.error : null;
+    _bkListeners.slice().forEach(function (f) { try { f(_bkGet()); } catch (e) {} });
+  }
+  function _bkSignedIn() {
+    try { return !!localStorage.getItem('shasta_user') && !!localStorage.getItem('shasta_session'); }
+    catch (e) { return false; }
+  }
+  function _bkEmail() {
+    try { return localStorage.getItem('shasta_user') || ''; } catch (e) { return ''; }
+  }
+  /** Only adopt payloads shaped like this app's projects (sections[]), so a
+      legacy backup from the retired phases-based tracker is never restored. */
+  function _bkIsProjectsShape(arr) {
+    return Array.isArray(arr) && arr.length > 0 && arr.every(function (p) {
+      return p && typeof p === 'object' && Array.isArray(p.sections);
+    });
+  }
+  function _bkSaveNow(projects) {
+    if (!_bkSignedIn() || !Array.isArray(projects)) return Promise.resolve(false);
+    _bkSet('saving');
+    return fetch(AI_ENDPOINT, {
+      method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'saveProjectsBackup', user: _bkEmail(), projects: projects })
+    })
+      .then(function (r) { return r.text(); })
+      .then(function (raw) {
+        var d = {}; try { d = JSON.parse(raw); } catch (e) {}
+        if (d && d.error) { _bkSet('error', { error: String(d.error) }); return false; }
+        _bkSet('saved', { at: Date.now() });
+        return true;
+      })
+      .catch(function (e) { _bkSet('error', { error: String((e && e.message) || e) }); return false; });
+  }
+  window.__projBackup = {
+    signedIn: _bkSignedIn,
+    get: _bkGet,
+    subscribe: function (fn) {
+      _bkListeners.push(fn);
+      return function () { _bkListeners = _bkListeners.filter(function (f) { return f !== fn; }); };
+    },
+    schedule: function (projects) {
+      if (!_bkSignedIn()) return;
+      if (_bkTimer) clearTimeout(_bkTimer);
+      _bkSet('pending');
+      _bkTimer = setTimeout(function () { _bkTimer = null; _bkSaveNow(projects); }, 2500);
+    },
+    flush: function (projects) {
+      if (_bkTimer) { clearTimeout(_bkTimer); _bkTimer = null; }
+      return _bkSaveNow(projects);
+    },
+    saveNow: _bkSaveNow,
+    load: function () {
+      if (!_bkSignedIn()) return Promise.resolve(null);
+      var url = AI_ENDPOINT + '?action=getProjectsBackup&user=' + encodeURIComponent(_bkEmail());
+      return fetch(url, { redirect: 'follow' })
+        .then(function (r) { return r.text(); })
+        .then(function (raw) {
+          var d = {}; try { d = JSON.parse(raw); } catch (e) { return null; }
+          if (!d || d.error || !_bkIsProjectsShape(d.projects)) return null;
+          if (d.updatedAt) _bkState.at = Date.parse(d.updatedAt) || null;
+          return d.projects;
+        })
+        .catch(function () { return null; });
+    }
+  };
 })();
 
 
@@ -511,7 +594,8 @@ function sectionProgress(sec) {
   return null; // notes — informational, not scored
 }
 function projectProgress(p) {
-  const ratios = p.sections.map(sectionProgress).filter(Boolean).map(s => s.total ? s.done / s.total : 0);
+  const secs = (p && Array.isArray(p.sections)) ? p.sections : [];
+  const ratios = secs.map(sectionProgress).filter(Boolean).map(s => s.total ? s.done / s.total : 0);
   if (!ratios.length) return 0;
   return ratios.reduce((a, b) => a + b, 0) / ratios.length;
 }
@@ -1216,13 +1300,16 @@ const {
 } = window;
 function summaryLine(p) {
   // pick the most "collection-ish" section for a glanceable line
-  const counter = p.sections.find(s => s.type === 'counter' || s.type === 'collection' || s.type === 'map');
+  const secs = (p && Array.isArray(p.sections)) ? p.sections : [];
+  if (!secs.length) return 'Empty';
+  const counter = secs.find(s => s.type === 'counter' || s.type === 'collection' || s.type === 'map');
   if (counter) {
     const s = _sp(counter);
     return `${s.done}/${s.total} ${counter.noun || ''}`.trim();
   }
-  const s = _sp(p.sections[0]);
-  return s ? `${s.done}/${s.total}` : `${p.sections[0].items.length} notes`;
+  const first = secs[0];
+  const s = _sp(first);
+  return s ? `${s.done}/${s.total}` : `${(first.items || []).length} notes`;
 }
 function ProjectCard({
   project,
@@ -1331,9 +1418,21 @@ function ProjectCard({
 function Home({
   projects,
   onOpen,
-  onNew
+  onNew,
+  backup
 }) {
   const done = projects.filter(p => _pp(p) >= 1).length;
+  const backupLabel = (function () {
+    if (!backup || !window.__projBackup || !window.__projBackup.signedIn()) return null;
+    if (backup.status === 'error') return { text: 'Backup failed \u2014 saved on this device only', bad: true };
+    if (backup.status === 'saving' || backup.status === 'pending') return { text: 'Backing up\u2026' };
+    if (backup.at) {
+      const mins = Math.floor((Date.now() - backup.at) / 60000);
+      const when = mins < 1 ? 'just now' : mins < 60 ? mins + 'm ago' : Math.floor(mins / 60) + 'h ago';
+      return { text: 'Backed up ' + when };
+    }
+    return null;
+  })();
   return /*#__PURE__*/React.createElement("div", {
     style: {
       minHeight: '100%',
@@ -1376,7 +1475,14 @@ function Home({
       color: 'var(--text-muted)',
       margin: '10px 0 0'
     }
-  }, projects.length, " trackers \xB7 ", projects.length - done, " in progress")), /*#__PURE__*/React.createElement("div", {
+  }, projects.length, " trackers \xB7 ", projects.length - done, " in progress"), backupLabel && /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'var(--font-mono)',
+      fontSize: 11.5,
+      color: backupLabel.bad ? 'var(--accent)' : 'var(--text-faint)',
+      margin: '5px 0 0'
+    }
+  }, backupLabel.text)), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       flexDirection: 'column',
@@ -4681,11 +4787,44 @@ function ProjectsApp() {
     } catch (e) {}
     return clone(window.HATH_DATA.projects);
   });
+  // True when this device had no saved projects, so what's on screen is only
+  // the demo seed and can safely be replaced by a cloud backup.
+  const freshDeviceRef = React.useRef(function () {
+    try { return !localStorage.getItem(PROJ_PERSIST_KEY); } catch (e) { return false; }
+  }());
+  const [backup, setBackup] = React.useState(function () {
+    return window.__projBackup ? window.__projBackup.get() : { status: 'idle', at: null, error: null };
+  });
+  const projectsRef = React.useRef(projects);
+  React.useEffect(() => { projectsRef.current = projects; }, [projects]);
+
   React.useEffect(() => {
     try {
       localStorage.setItem(PROJ_PERSIST_KEY, JSON.stringify(projects));
     } catch (e) {}
+    if (window.__projBackup) window.__projBackup.schedule(projects);
   }, [projects]);
+
+  // Mirror backup status into render, and pull a backup on a fresh device.
+  React.useEffect(() => {
+    if (!window.__projBackup) return;
+    const off = window.__projBackup.subscribe(setBackup);
+    window.__projBackup.load().then(function (remote) {
+      if (remote && freshDeviceRef.current) {
+        freshDeviceRef.current = false;
+        setProjects(remote);
+      }
+    });
+    // Don't lose the last few seconds of edits when the app is backgrounded.
+    const onHide = function () {
+      if (document.visibilityState === 'hidden') window.__projBackup.flush(projectsRef.current);
+    };
+    document.addEventListener('visibilitychange', onHide);
+    return function () {
+      off();
+      document.removeEventListener('visibilitychange', onHide);
+    };
+  }, []);
   const [view, setView] = React.useState('home'); // home | build | tracker
   const [sel, setSel] = React.useState(null);
   const [chest, setChest] = React.useState(null); // celebration payload or null
@@ -4749,6 +4888,7 @@ function ProjectsApp() {
   } else {
     screen = /*#__PURE__*/React.createElement(_Home, {
       projects: projects,
+      backup: backup,
       onOpen: id => {
         setSel(id);
         setView('tracker');
