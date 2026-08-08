@@ -6800,6 +6800,7 @@
       color: var(--accent);
       font-style: italic;
     }
+
     .phase-complete-btn {
       padding: 14px 24px;
       font-size: 15px; font-family: inherit;
@@ -9479,6 +9480,259 @@
 
     .schedule-header .schedule-title, .civics-header .civics-title, .recipes-header .recipes-title, .projects-header .projects-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
     .projects-view-title-wrap { min-width: 0; overflow: hidden; }
+
+    /* ── Checklist item vocabulary (v3.5.0) ─────────────────────── */
+    .cl-item-main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .cl-item-main .cl-item-text { flex: none; }
+
+    /* tags */
+    .cl-tag {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 1px 7px 2px;
+      font-size: 10.5px;
+      line-height: 1.5;
+      border-radius: 8px;
+      background: rgba(192,122,74,0.13);
+      color: var(--accent);
+      vertical-align: 1px;
+      white-space: nowrap;
+    }
+    html.dark-mode .cl-tag { background: rgba(224,152,104,0.16); color: #e0a878; }
+
+    /* sub-lines: stage chain & blocked reason */
+    .cl-sub {
+      font-size: 11.5px;
+      line-height: 1.35;
+      color: var(--muted);
+    }
+    .cl-stage-chain .cl-stage-done { color: #4a9a6a; font-weight: 600; }
+    .cl-stage-chain .cl-stage-todo { color: var(--muted); }
+    .cl-stage-sep { margin: 0 4px; opacity: 0.55; }
+    .cl-reason { color: var(--accent); font-style: italic; }
+    .cl-reason::before { content: '🔒 '; font-style: normal; font-size: 10px; }
+    .phase-cl-item.cl-blocked .cl-reason { opacity: 1; }
+
+    /* tally count + minus */
+    .cl-count {
+      flex-shrink: 0;
+      font-size: 13px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+    }
+    .cl-count-sep { opacity: 0.4; font-weight: 400; margin: 0 1px; }
+    .phase-cl-item.cl-done .cl-count { color: #4a9a6a; }
+    .cl-minus {
+      flex-shrink: 0;
+      width: 30px; height: 30px;
+      margin: -3px 0;
+      border: 1.5px solid rgba(0,0,0,0.14);
+      border-radius: 9px;
+      background: rgba(255,255,255,0.5);
+      color: var(--text2);
+      font-size: 17px;
+      line-height: 1;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .cl-minus:active { background: rgba(0,0,0,0.06); }
+    html.dark-mode .cl-minus {
+      border-color: rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.06);
+      color: var(--text2);
+    }
+    .phase-cl-item.cl-t-tally.cl-done .cl-item-text { text-decoration: none; }
+
+    /* fact rows */
+    .phase-cl-item.cl-t-fact {
+      align-items: baseline;
+      gap: 10px;
+    }
+    .cl-fact-glyph {
+      flex-shrink: 0;
+      width: 28px;
+      text-align: center;
+      font-size: 13px;
+      color: rgba(192,122,74,0.55);
+      align-self: center;
+    }
+    html.dark-mode .cl-fact-glyph { color: rgba(224,152,104,0.5); }
+    .cl-fact-value {
+      flex-shrink: 1;
+      min-width: 0;
+      max-width: 55%;
+      text-align: right;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--accent);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      align-self: center;
+    }
+    .phase-cl-item.cl-t-fact:not(.cl-fact-set) .cl-fact-value {
+      font-weight: 400;
+      font-style: italic;
+      color: var(--muted);
+      opacity: 0.75;
+    }
+    html.dark-mode .cl-fact-value { color: #e0a878; }
+
+    /* compact grid layout */
+    .phase-checklist.cl-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      padding-top: 2px;
+    }
+    .cl-grid .phase-cl-item {
+      display: inline-flex;
+      width: auto;
+      padding: 7px 12px;
+      gap: 6px;
+      border: 1.5px solid rgba(0,0,0,0.13);
+      border-radius: 11px;
+      background: rgba(255,255,255,0.5);
+      transition: background 0.25s, border-color 0.25s, opacity 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Partial progress (chart Found but not Collected, tally part-way):
+       the ring is hidden in grid mode, so the chip itself fills instead. */
+    .cl-grid .phase-cl-item.cl-partial::before {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0; left: 0;
+      width: var(--cl-frac, 0%);
+      background: rgba(74,154,106,0.26);
+      border-right: 1.5px solid rgba(74,154,106,0.5);
+      pointer-events: none;
+    }
+    .cl-grid .phase-cl-item.cl-partial { border-color: rgba(74,154,106,0.45); }
+    .cl-grid .phase-cl-item > * { position: relative; z-index: 1; }
+    html.dark-mode .cl-grid .phase-cl-item.cl-partial::before {
+      background: rgba(74,154,106,0.34);
+      border-right-color: rgba(122,196,155,0.6);
+    }
+    .cl-grid .cl-ring-wrap { display: none; }
+    .cl-grid .cl-item-main { flex: none; }
+    .cl-grid .cl-item-text { font-size: 13px; white-space: nowrap; }
+    .cl-grid .cl-sub { display: none; }
+    .cl-grid .cl-tag { display: none; }
+    .cl-grid .phase-cl-item.cl-done {
+      background: #4a9a6a;
+      border-color: #4a9a6a;
+      opacity: 1;
+    }
+    .cl-grid .phase-cl-item.cl-done .cl-item-text {
+      color: #fff;
+      text-decoration: none;
+    }
+    .cl-grid .phase-cl-item.cl-done .cl-count { color: rgba(255,255,255,0.9); }
+    .cl-grid .phase-cl-item.cl-blocked {
+      border-style: dashed;
+      border-color: var(--accent);
+    }
+    .cl-grid .phase-cl-item.cl-blocked .cl-item-text::before { content: '🔒 '; font-size: 10px; }
+    .cl-minus-off { opacity: 0.3; cursor: default; }
+    .cl-grid .cl-count { font-size: 12px; }
+    .cl-grid .cl-minus { width: 24px; height: 24px; font-size: 14px; border-radius: 7px; margin: -2px -4px -2px 0; }
+    .cl-grid .phase-cl-item.cl-t-fact {
+      border-style: dotted;
+      border-color: rgba(192,122,74,0.4);
+    }
+    .cl-grid .phase-cl-item.cl-t-fact .cl-fact-glyph { display: none; }
+    .cl-grid .phase-cl-item.cl-t-fact .cl-fact-value { max-width: 130px; font-size: 12.5px; }
+    html.dark-mode .cl-grid .phase-cl-item {
+      border-color: rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.05);
+    }
+    html.dark-mode .cl-grid .phase-cl-item.cl-done {
+      background: #3d7d57;
+      border-color: #3d7d57;
+    }
+
+    /* milestone ticks + count on the phase progress bar */
+    .phase-progress-bar { position: relative; }
+    .phase-progress-tick {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 2px;
+      margin-left: -1px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 1px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    html.dark-mode .phase-progress-tick { background: rgba(255,255,255,0.32); }
+    .phase-progress-wrap { display: flex; align-items: center; gap: 8px; }
+    .phase-progress-wrap .phase-progress-bar { flex: 1; }
+    .phase-progress-count {
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--muted);
+    }
+
+    /* editor extras */
+    .phase-editor-syntax-hint {
+      margin: 4px 0 0;
+      font-size: 10.5px;
+      line-height: 1.5;
+      color: var(--muted);
+      opacity: 0.85;
+    }
+    .phase-editor-syntax-hint code {
+      font-size: 10px;
+      padding: 0 3px;
+      background: rgba(0,0,0,0.05);
+      border-radius: 4px;
+    }
+    html.dark-mode .phase-editor-syntax-hint code { background: rgba(255,255,255,0.08); }
+    .phase-editor-extra-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 18px;
+      margin-top: 8px;
+    }
+    .phase-editor-flag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      color: var(--text2);
+      cursor: pointer;
+      user-select: none;
+    }
+    .phase-editor-flag input[type="checkbox"] {
+      width: 16px; height: 16px;
+      accent-color: var(--accent);
+    }
+    .phase-editor-milestone {
+      width: 52px;
+      padding: 4px 6px;
+      font-size: 13px;
+      font-family: inherit;
+      text-align: center;
+      border: 1px solid rgba(0,0,0,0.15);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.7);
+      color: var(--text);
+    }
+    html.dark-mode .phase-editor-milestone {
+      border-color: rgba(255,255,255,0.15);
+      background: rgba(40,36,34,0.85);
+    }
+    .project-unordered-row { margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -10458,6 +10712,9 @@
         <label class="project-field-hint" for="projectFinishDateInput">Hope to wrap up by</label>
         <input type="date" id="projectFinishDateInput" class="project-date-input">
       </div>
+      <div class="project-field-group project-unordered-row">
+        <label class="phase-editor-flag"><input type="checkbox" id="projectUnorderedInput"> Parts can be tackled in any order</label>
+      </div>
     </div>
     <div class="project-phases-section">
       <p class="project-phases-lead" id="projectPhasesLead">Break the voyage into legs if it helps—you can rename or reorder later.</p>
@@ -10743,7 +11000,7 @@
   window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
   window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '3.4.3';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '3.5.0';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
@@ -16398,12 +16655,7 @@
       return false;
     }
     if (!p.phases || p.phases.length === 0) return false;
-    return p.phases.every(ph => {
-      if (ph.checklist && ph.checklist.length > 0) {
-        return ph.checklist.every(c => c.done);
-      }
-      return !!ph.completed;
-    });
+    return p.phases.every(ph => isPhaseComplete(ph));
   }
 
   function getProjectProgress(p) {
@@ -16414,15 +16666,25 @@
       return Math.min(100, (tot / tgt) * 100);
     }
     if (!p.phases || p.phases.length === 0) return 0;
-    const done = p.phases.filter(ph => {
-      if (ph.checklist && ph.checklist.length > 0) {
-        const total = ph.checklist.length;
-        const completed = ph.checklist.filter(c => c.done).length;
-        return total > 0 && completed === total;
+    // Weight by countable items when checklists exist, so a 41-item phase
+    // and a 6-item phase move the boat proportionally.
+    let itemsTotal = 0;
+    let itemsDone = 0;
+    p.phases.forEach(ph => {
+      const cs = clChecklistCountables(ph.checklist);
+      if (cs.length > 0) {
+        itemsTotal += cs.length;
+        itemsDone += cs.filter(clItemDone).length;
+      } else if (!(ph.checklist && ph.checklist.length > 0)) {
+        itemsTotal += 1;
+        if (ph.completed) itemsDone += 1;
       }
-      return !!ph.completed;
-    }).length;
-    return p.phases.length > 0 ? (done / p.phases.length) * 100 : 0;
+    });
+    if (itemsTotal === 0) {
+      const done = p.phases.filter(ph => isPhaseComplete(ph)).length;
+      return p.phases.length > 0 ? (done / p.phases.length) * 100 : 0;
+    }
+    return (itemsDone / itemsTotal) * 100;
   }
 
   function getProjectLandingDetails(p) {
@@ -16459,16 +16721,8 @@
     const prog = getProjectProgress(p);
     const phases = p.phases || [];
     const totalPhases = phases.length;
-    const doneCount = phases.filter(ph => {
-      if (ph.checklist && ph.checklist.length > 0) {
-        return ph.checklist.every(c => c.done);
-      }
-      return !!ph.completed;
-    }).length;
-    const nextIdx = phases.findIndex(ph => {
-      if (ph.checklist && ph.checklist.length > 0) return ph.checklist.some(c => !c.done);
-      return !ph.completed;
-    });
+    const doneCount = phases.filter(ph => isPhaseComplete(ph)).length;
+    const nextIdx = phases.findIndex(ph => !isPhaseComplete(ph));
     const currentPhaseName = nextIdx >= 0 && phases[nextIdx] ? (phases[nextIdx].title || 'Phase ' + (nextIdx + 1)) : '';
     const phaseLabel = totalPhases > 0 ? (totalPhases === 1 ? '1 phase' : doneCount + '/' + totalPhases + ' phases') : '';
     let desc = (p.description || '').trim();
@@ -17122,8 +17376,7 @@
     quickNoteProjectId = projectId;
     const phases = p.phases || [];
     let targetIdx = phases.findIndex(function(ph) {
-      if (ph.checklist && ph.checklist.length > 0) return !ph.checklist.every(function(c) { return c.done; });
-      return !ph.completed;
+      return !isPhaseComplete(ph);
     });
     if (targetIdx < 0) targetIdx = phases.length - 1;
     if (targetIdx < 0) targetIdx = 0;
@@ -17455,13 +17708,10 @@
     }
     projectsViewing = p;
     projectsCurrentPhaseIndex = 0;
-    const firstIncomplete = p.phases.findIndex(ph => {
-      if (ph.checklist && ph.checklist.length > 0) {
-        return ph.checklist.some(c => !c.done);
-      }
-      return !ph.completed;
-    });
-    if (firstIncomplete >= 0) projectsCurrentPhaseIndex = firstIncomplete;
+    if (!p.unordered) {
+      const firstIncomplete = p.phases.findIndex(ph => !isPhaseComplete(ph));
+      if (firstIncomplete >= 0) projectsCurrentPhaseIndex = firstIncomplete;
+    }
     document.getElementById('projectsLanding').style.display = 'none';
     const pv2 = document.getElementById('programView');
     if (pv2) pv2.style.display = 'none';
@@ -17523,9 +17773,195 @@
 
   let projectPendingDelete = null;
 
+  // ── Checklist item vocabulary (v3.5.0) ──────────────────────────
+  // Item types: check (default) | tally {value,target} | stage {stages[],stage} | fact {value}
+  // One micro-syntax shared by the modal editor, wizard, AI copilot, and (later) sheet link:
+  //   "Joy Pendants [40]"  /  "Joy Pendants [3/40]"          → tally (count toward a target)
+  //   "Chart 7 [Found>Collected]"  /  "[1/Found>Collected]"  → stage (multi-step item)
+  //   "Dragon Roost Cavern = Headstone Island"               → fact (reference; never counts)
+  //   "#tag" words anywhere in a name render as small badges
+
+  function parseClItemSyntax(rawLine) {
+    var t = String(rawLine == null ? '' : rawLine).trim();
+    if (!t) return null;
+    // fact: "Key = Value" — requires a spaced equals; value may be empty
+    if (/\s=(\s|$)/.test(t)) {
+      var mFact = t.match(/^(.+?)\s=\s*(.*)$/);
+      if (mFact && mFact[1].trim()) {
+        return { type: 'fact', text: mFact[1].trim(), value: (mFact[2] || '').trim() };
+      }
+    }
+    // bracket suffix: tally or stage
+    var mB = t.match(/^(.*?)\s*\[([^\[\]]+)\]\s*$/);
+    if (mB && mB[1].trim()) {
+      var name = mB[1].trim();
+      var inner = mB[2].trim();
+      if (inner.indexOf('>') >= 0) {
+        var stagesPart = inner;
+        var explicitStage = false;
+        var stageIdx = 0;
+        var slash = inner.indexOf('/');
+        if (slash > 0 && /^\d+$/.test(inner.slice(0, slash).trim())) {
+          stageIdx = parseInt(inner.slice(0, slash).trim(), 10);
+          stagesPart = inner.slice(slash + 1);
+          explicitStage = true;
+        }
+        var stages = stagesPart.split('>').map(function(s) { return s.trim(); }).filter(Boolean);
+        if (stages.length >= 2) {
+          return {
+            type: 'stage', text: name, stages: stages,
+            stage: Math.max(0, Math.min(stages.length, stageIdx)),
+            explicitStage: explicitStage
+          };
+        }
+      } else {
+        var mVT = inner.match(/^(\d+)\s*\/\s*(\d+)$/);
+        if (mVT) {
+          var tgt = Math.max(1, parseInt(mVT[2], 10));
+          return {
+            type: 'tally', text: name, target: tgt,
+            value: Math.max(0, Math.min(tgt, parseInt(mVT[1], 10))),
+            explicitValue: true
+          };
+        }
+        if (/^\d+$/.test(inner)) {
+          return { type: 'tally', text: name, target: Math.max(1, parseInt(inner, 10)), value: 0, explicitValue: false };
+        }
+      }
+    }
+    return { type: 'check', text: t };
+  }
+
+  /** Builds/updates an item from an edited text line, preserving progress + blocked state from prev. */
+  function applyClSyntaxToItem(prev, rawText) {
+    var parsed = parseClItemSyntax(rawText) || { type: 'check', text: String(rawText || '').trim() };
+    var base = prev || {};
+    var out = { id: base.id || genId(), text: parsed.text };
+    if (base.blocked) out.blocked = true;
+    if (base.blockedReason) out.blockedReason = base.blockedReason;
+    if (parsed.type === 'tally') {
+      out.type = 'tally';
+      out.target = parsed.target;
+      out.value = (!parsed.explicitValue && base.type === 'tally' && typeof base.value === 'number')
+        ? Math.min(base.value, parsed.target)
+        : parsed.value;
+    } else if (parsed.type === 'stage') {
+      out.type = 'stage';
+      out.stages = parsed.stages;
+      var prevStage = (base.type === 'stage' && typeof base.stage === 'number') ? base.stage : 0;
+      out.stage = parsed.explicitStage ? parsed.stage : Math.min(prevStage, parsed.stages.length);
+    } else if (parsed.type === 'fact') {
+      out.type = 'fact';
+      out.value = parsed.value !== '' ? parsed.value : (base.type === 'fact' ? (base.value || '') : '');
+      delete out.blocked;
+      delete out.blockedReason;
+    } else {
+      out.done = !!base.done;
+    }
+    return out;
+  }
+
+  /** Serializes an item back to its editable text line. */
+  function serializeClItemText(c) {
+    if (!c) return '';
+    var t = c.text || '';
+    if (c.type === 'tally') return t + ' [' + (c.value || 0) + '/' + (c.target || 1) + ']';
+    if (c.type === 'stage') return t + ' [' + (c.stage || 0) + '/' + (c.stages || []).join('>') + ']';
+    if (c.type === 'fact') return t + ' = ' + (c.value || '');
+    return t;
+  }
+
+  function clItemCountable(c) { return !!c && c.type !== 'fact'; }
+
+  function clItemDone(c) {
+    if (!c) return false;
+    if (c.type === 'fact') return true;
+    if (c.type === 'tally') return (c.value || 0) >= (c.target || 1);
+    if (c.type === 'stage') {
+      var n = (c.stages && c.stages.length) || 1;
+      return (c.stage || 0) >= n;
+    }
+    return !!c.done;
+  }
+
+  function clChecklistCountables(list) { return (list || []).filter(clItemCountable); }
+
+  function clChecklistDoneCount(list) { return clChecklistCountables(list).filter(clItemDone).length; }
+
+  /** Resets an item's progress (undo flows). Facts are untouched. */
+  function clResetItem(c) {
+    if (!c) return;
+    if (c.type === 'tally') c.value = 0;
+    else if (c.type === 'stage') c.stage = 0;
+    else if (c.type !== 'fact') c.done = false;
+  }
+
+  /** Sets an item fully done/undone (AI patch ops). Facts are untouched. */
+  function clSetItemDone(c, done) {
+    if (!c) return;
+    if (c.type === 'tally') c.value = done ? (c.target || 1) : 0;
+    else if (c.type === 'stage') c.stage = done ? ((c.stages && c.stages.length) || 1) : 0;
+    else if (c.type !== 'fact') c.done = !!done;
+  }
+
+  /** Splits "#tag" tokens out of an item name. */
+  function clSplitTags(text) {
+    var tags = [];
+    var name = String(text || '').replace(/(^|\s)#([\w-]+)/g, function(_, sp, tag) {
+      tags.push(tag);
+      return sp ? ' ' : '';
+    }).replace(/\s{2,}/g, ' ').trim();
+    return { name: name || String(text || '').trim(), tags: tags };
+  }
+
+  /**
+   * Matches edited text lines against previous items so progress survives edits.
+   * Pass 1 matches exact names (order-independent, so reordering is safe).
+   * Pass 2 gives leftover lines the same-index previous item — but only if that
+   * slot is still unclaimed, so a rename keeps its progress while an insertion
+   * does not steal the next item's state.
+   */
+  function matchClItemsToPrev(lines, prevList) {
+    var prev = prevList || [];
+    var used = {};
+    var matched = new Array(lines.length);
+    var i, k;
+    for (i = 0; i < lines.length; i++) {
+      var name = (parseClItemSyntax(lines[i]) || {}).text || lines[i];
+      for (k = 0; k < prev.length; k++) {
+        if (!used[k] && prev[k] && prev[k].text === name) {
+          matched[i] = prev[k];
+          used[k] = true;
+          break;
+        }
+      }
+    }
+    for (i = 0; i < lines.length; i++) {
+      if (matched[i]) continue;
+      if (prev[i] && !used[i]) {
+        matched[i] = prev[i];
+        used[i] = true;
+      }
+    }
+    return lines.map(function(text, j) {
+      return applyClSyntaxToItem(matched[j] || null, text);
+    });
+  }
+
+  /** Parses editor textarea lines into items, preserving state across edits. */
+  function parseChecklistTextarea(listRaw, prevList) {
+    var lines = String(listRaw || '').split('\n').map(function(s) { return s.trim(); }).filter(Boolean);
+    if (!lines.length) return null;
+    return matchClItemsToPrev(lines, prevList);
+  }
+
   function isPhaseComplete(ph) {
     if (!ph) return false;
-    if (ph.checklist && ph.checklist.length > 0) return ph.checklist.every(c => c.done);
+    if (ph.checklist && ph.checklist.length > 0) {
+      var cs = clChecklistCountables(ph.checklist);
+      if (cs.length === 0) return true; // reference-only phase never gates completion
+      return cs.every(clItemDone);
+    }
     return !!ph.completed;
   }
 
@@ -17556,32 +17992,86 @@
     renderPhaseCards();
   }
 
-  function buildPhaseCardHTML(ph, idx, phasesLength) {
-    const phaseComplete = isPhaseComplete(ph);
-    let checklistHtml = '';
-    if (ph.checklist && ph.checklist.length > 0) {
-      checklistHtml = ph.checklist.map((c, i) => {
-        const doneClass = c.done ? ' cl-done' : '';
-        const blockedClass = c.blocked ? ' cl-blocked' : '';
-        const dashOffset = c.done ? '0' : '69.1';
-        return `<div class="phase-cl-item${doneClass}${blockedClass}"
-    onclick="projectsToggleCheck(${idx}, ${i})"
-    oncontextmenu="event.preventDefault();projectsToggleBlocked(${idx}, ${i})"
-    data-long-press-start=""
-  >
-    <div class="cl-ring-wrap">
+  function clItemFrac(c) {
+    if (!c) return 0;
+    if (clItemDone(c)) return 1;
+    if (c.type === 'tally') return Math.min(1, (c.value || 0) / (c.target || 1));
+    if (c.type === 'stage') return Math.min(1, (c.stage || 0) / ((c.stages && c.stages.length) || 1));
+    return 0;
+  }
+
+  function buildClRingHTML(c) {
+    const dashOffset = (69.1 * (1 - clItemFrac(c))).toFixed(1);
+    return `<div class="cl-ring-wrap">
       <svg class="cl-ring-svg" viewBox="0 0 28 28">
         <circle class="cl-ring-track" cx="14" cy="14" r="11"/>
         <circle class="cl-ring-fill" cx="14" cy="14" r="11" style="stroke-dashoffset:${dashOffset}"/>
       </svg>
-      <div class="cl-ring-check" aria-hidden="true">${c.blocked ? '🔒' : (c.done ? '✓' : '')}</div>
-    </div>
-    <span class="cl-item-text">${escapeHtml(c.text)}</span>
+      <div class="cl-ring-check" aria-hidden="true">${c.blocked ? '🔒' : (clItemDone(c) ? '✓' : '')}</div>
+    </div>`;
+  }
+
+  function buildClItemHTML(c, idx, i) {
+    const done = clItemDone(c);
+    const split = clSplitTags(c.text);
+    const tagsHtml = split.tags.map(function(t) {
+      return `<span class="cl-tag">${escapeHtml(t)}</span>`;
+    }).join('');
+
+    if (c.type === 'fact') {
+      const valSet = c.value != null && String(c.value).trim() !== '';
+      return `<div class="phase-cl-item cl-t-fact${valSet ? ' cl-fact-set' : ''}"
+    onclick="projectsEditFact(${idx}, ${i})">
+    <div class="cl-fact-glyph" aria-hidden="true">◈</div>
+    <span class="cl-item-text">${escapeHtml(split.name)}${tagsHtml}</span>
+    <span class="cl-fact-value">${valSet ? escapeHtml(String(c.value)) : 'tap to set'}</span>
   </div>`;
-      }).join('');
     }
+
+    const doneClass = done ? ' cl-done' : '';
+    const blockedClass = c.blocked ? ' cl-blocked' : '';
+    const typeClass = c.type ? ' cl-t-' + c.type : '';
+    const frac = clItemFrac(c);
+    const partialClass = (!done && frac > 0) ? ' cl-partial' : '';
+    const fracStyle = (!done && frac > 0) ? ` style="--cl-frac:${(frac * 100).toFixed(1)}%"` : '';
+    let subHtml = '';
+    if (c.type === 'stage' && c.stages && c.stages.length) {
+      const chain = c.stages.map(function(s, si) {
+        return si < (c.stage || 0)
+          ? `<span class="cl-stage-done">${escapeHtml(s)}✓</span>`
+          : `<span class="cl-stage-todo">${escapeHtml(s)}</span>`;
+      }).join('<span class="cl-stage-sep">›</span>');
+      subHtml = `<span class="cl-sub cl-stage-chain">${chain}</span>`;
+    }
+    if (c.blocked && c.blockedReason) {
+      subHtml += `<span class="cl-sub cl-reason">${escapeHtml(c.blockedReason)}</span>`;
+    }
+    let rightHtml = '';
+    if (c.type === 'tally') {
+      const atZero = (c.value || 0) <= 0;
+      rightHtml = `<span class="cl-count">${c.value || 0}<span class="cl-count-sep">/</span>${c.target || 1}</span>` +
+        `<button type="button" class="cl-minus${atZero ? ' cl-minus-off' : ''}" aria-label="Minus one"${atZero ? ' disabled' : ''} onclick="event.stopPropagation();projectsTallyMinus(${idx}, ${i})">−</button>`;
+    }
+    return `<div class="phase-cl-item${doneClass}${blockedClass}${typeClass}${partialClass}"${fracStyle}
+    onclick="projectsToggleCheck(${idx}, ${i})"
+    oncontextmenu="event.preventDefault();projectsToggleBlocked(${idx}, ${i})"
+    data-long-press-start=""
+  >
+    ${buildClRingHTML(c)}
+    <span class="cl-item-main"><span class="cl-item-text">${escapeHtml(split.name)}${tagsHtml}</span>${subHtml}</span>
+    ${rightHtml}
+  </div>`;
+  }
+
+  function buildPhaseCardHTML(ph, idx, phasesLength) {
+    const phaseComplete = isPhaseComplete(ph);
+    let checklistHtml = '';
+    if (ph.checklist && ph.checklist.length > 0) {
+      checklistHtml = ph.checklist.map((c, i) => buildClItemHTML(c, idx, i)).join('');
+    }
+    const gridClass = ph.layout === 'grid' ? ' cl-grid' : '';
     const checklistBlock = (ph.checklist && ph.checklist.length > 0)
-      ? `<div class="phase-checklist">${checklistHtml}</div>` : '';
+      ? `<div class="phase-checklist${gridClass}">${checklistHtml}</div>` : '';
     const completeBtnBlock = !phaseComplete && (!ph.checklist || ph.checklist.length === 0)
       ? `<button type="button" class="phase-complete-btn" onclick="projectsCompletePhase(${idx})">Complete</button>` : '';
     const undoBlock = phaseComplete
@@ -17593,11 +18083,20 @@
       timelineHtml = `<div class="phase-timeline ${hrs <= 48 ? 'urgent' : ''}">Due: ${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>`;
     }
     let progressHtml = '';
-    if (ph.checklist && ph.checklist.length > 0) {
-      const done = ph.checklist.filter(c => c.done).length;
-      const pct = (done / ph.checklist.length) * 100;
+    const countables = clChecklistCountables(ph.checklist);
+    if (countables.length > 0) {
+      const done = countables.filter(clItemDone).length;
+      const pct = (done / countables.length) * 100;
       const completeClass = pct >= 100 ? ' progress-complete' : '';
-      progressHtml = `<div class="phase-progress-wrap"><div class="phase-progress-bar"><div class="phase-progress-fill${completeClass}" style="width:${pct}%"></div></div></div>`;
+      let ticksHtml = '';
+      const ms = parseInt(ph.milestone, 10) || 0;
+      if (ms > 0 && ms < countables.length) {
+        for (let m = ms; m < countables.length; m += ms) {
+          ticksHtml += `<span class="phase-progress-tick" style="left:${(m / countables.length) * 100}%"></span>`;
+        }
+      }
+      const countLabel = countables.length >= 10 ? `<span class="phase-progress-count">${done}/${countables.length}</span>` : '';
+      progressHtml = `<div class="phase-progress-wrap"><div class="phase-progress-bar">${ticksHtml}<div class="phase-progress-fill${completeClass}" style="width:${pct}%"></div></div>${countLabel}</div>`;
     }
     const phaseLabel = (phasesLength || 1) > 1 ? `Phase ${idx + 1} of ${phasesLength || 1}` : `Phase ${idx + 1}`;
     const notesDot = ph.notes ? `<span class="phase-notes-dot"></span>` : '';
@@ -17806,28 +18305,44 @@
     var p = all.find(function(x) { return projectIdEq(x.id, projectsViewing.id); });
     if (!p || !p.phases[phaseIdx] || !p.phases[phaseIdx].checklist) return;
     var item = p.phases[phaseIdx].checklist[itemIdx];
-    if (!item) return;
-    item.blocked = !item.blocked;
-    if (item.blocked) item.done = false;
+    if (!item || item.type === 'fact') return;
+    if (!item.blocked) {
+      var reason = prompt("What's blocking this? (optional)", item.blockedReason || '');
+      if (reason === null) return; // cancelled — don't block
+      item.blocked = true;
+      var r = String(reason).trim();
+      if (r) item.blockedReason = r;
+      else delete item.blockedReason;
+      clResetItem(item);
+    } else {
+      item.blocked = false;
+      delete item.blockedReason;
+    }
     p.modifiedAt = Date.now();
     saveProjects(all);
     projectsViewing = p;
     renderProjectsView();
   }
 
-  function _patchChecklistItemDOM(phaseIdx, itemIdx, isDone, isBlocked) {
+  function _patchChecklistItemDOM(phaseIdx, itemIdx, item) {
     const card = document.querySelector('.projects-phase-card[data-phase-idx="' + phaseIdx + '"]');
     if (!card) return;
     const items = card.querySelectorAll('.phase-cl-item');
     const el = items[itemIdx];
-    if (!el) return;
+    if (!el || !item) return;
 
+    const isDone = clItemDone(item);
+    const isBlocked = !!item.blocked;
+    const frac = clItemFrac(item);
     el.classList.toggle('cl-done', isDone);
     el.classList.toggle('cl-blocked', isBlocked);
+    el.classList.toggle('cl-partial', !isDone && frac > 0);
+    if (!isDone && frac > 0) el.style.setProperty('--cl-frac', (frac * 100).toFixed(1) + '%');
+    else el.style.removeProperty('--cl-frac');
 
     const ringFill = el.querySelector('.cl-ring-fill');
     if (ringFill) {
-      ringFill.style.strokeDashoffset = isDone ? '0' : '69.1';
+      ringFill.style.strokeDashoffset = (69.1 * (1 - frac)).toFixed(1);
     }
 
     const check = el.querySelector('.cl-ring-check');
@@ -17835,28 +18350,59 @@
       check.textContent = isBlocked ? '🔒' : (isDone ? '✓' : '');
     }
 
-    const textEl = el.querySelector('.cl-item-text');
-    if (textEl) {
-      // CSS classes handle color/strikethrough via cl-done / cl-blocked
+    const countEl = el.querySelector('.cl-count');
+    if (countEl && item.type === 'tally') {
+      countEl.innerHTML = (item.value || 0) + '<span class="cl-count-sep">/</span>' + (item.target || 1);
     }
+  }
+
+  /** Fires the small mid-list celebration when done-count crosses a multiple of ph.milestone. */
+  function maybeMilestoneCelebrate(ph, prevDone, nowDone) {
+    const ms = parseInt(ph && ph.milestone, 10) || 0;
+    if (ms <= 0 || nowDone <= prevDone) return false;
+    if (Math.floor(nowDone / ms) > Math.floor(prevDone / ms)) {
+      hapticLight();
+      launchConfetti(30, null, 'small');
+      return true;
+    }
+    return false;
   }
 
   function projectsToggleCheck(phaseIdx, itemIdx) {
     const all = getProjects();
     const p = all.find(x => x.id === projectsViewing.id);
     if (!p || !p.phases[phaseIdx] || !p.phases[phaseIdx].checklist) return;
+    const ph = p.phases[phaseIdx];
+    const item = ph.checklist[itemIdx];
+    if (!item) return;
+    if (item.type === 'fact') { projectsEditFact(phaseIdx, itemIdx); return; }
 
     const wasProjectComplete = isProjectCompleted(p);
-    const item = p.phases[phaseIdx].checklist[itemIdx];
-    item.done = !item.done;
-    if (item.blocked) item.blocked = false;
+    const wasPhaseComplete = isPhaseComplete(ph);
+    const prevDone = clChecklistDoneCount(ph.checklist);
+
+    if (item.type === 'tally') {
+      const tgt = item.target || 1;
+      if ((item.value || 0) >= tgt) return; // full — use the − button to step back
+      item.value = (item.value || 0) + 1;
+    } else if (item.type === 'stage') {
+      const n = (item.stages && item.stages.length) || 1;
+      item.stage = ((item.stage || 0) >= n) ? 0 : (item.stage || 0) + 1;
+    } else {
+      item.done = !item.done;
+    }
+    if (item.blocked) {
+      item.blocked = false;
+      delete item.blockedReason;
+    }
     p.modifiedAt = Date.now();
     if (isProjectCompleted(p)) p.completedAt = Date.now();
     saveProjects(all);
     projectsViewing = p;
 
     const nowProjectComplete = isProjectCompleted(p);
-    const phaseComplete = p.phases[phaseIdx].checklist.every(c => c.done);
+    const phaseComplete = isPhaseComplete(ph);
+    const nowDone = clChecklistDoneCount(ph.checklist);
 
     if (nowProjectComplete && !wasProjectComplete) {
       hapticDoublePulse();
@@ -17865,11 +18411,11 @@
       return;
     }
 
-    if (phaseComplete) {
-      _patchChecklistItemDOM(phaseIdx, itemIdx, true, false);
+    if (phaseComplete && !wasPhaseComplete) {
+      _patchChecklistItemDOM(phaseIdx, itemIdx, item);
       hapticLight();
       launchConfetti(45, null, 'small');
-      projectsCurrentPhaseIndex = phaseIdx + 1;
+      if (!p.unordered) projectsCurrentPhaseIndex = phaseIdx + 1;
       setTimeout(function() {
         renderProjectsView();
         showPhaseCelebrationThenScroll();
@@ -17877,11 +18423,45 @@
       return;
     }
 
+    maybeMilestoneCelebrate(ph, prevDone, nowDone);
+
     // Normal toggle — patch DOM in-place, re-render after transition
-    _patchChecklistItemDOM(phaseIdx, itemIdx, item.done, item.blocked || false);
+    _patchChecklistItemDOM(phaseIdx, itemIdx, item);
     setTimeout(function() {
       renderProjectsView();
     }, 520);
+  }
+
+  function projectsTallyMinus(phaseIdx, itemIdx) {
+    const all = getProjects();
+    const p = all.find(x => x.id === projectsViewing.id);
+    if (!p || !p.phases[phaseIdx] || !p.phases[phaseIdx].checklist) return;
+    const item = p.phases[phaseIdx].checklist[itemIdx];
+    if (!item || item.type !== 'tally') return;
+    if ((item.value || 0) <= 0) return;
+    const wasDone = clItemDone(item);
+    item.value = (item.value || 0) - 1;
+    p.modifiedAt = Date.now();
+    if (wasDone) p.completedAt = null;
+    saveProjects(all);
+    projectsViewing = p;
+    _patchChecklistItemDOM(phaseIdx, itemIdx, item);
+    setTimeout(function() { renderProjectsView(); }, 300);
+  }
+
+  function projectsEditFact(phaseIdx, itemIdx) {
+    const all = getProjects();
+    const p = all.find(x => x.id === projectsViewing.id);
+    if (!p || !p.phases[phaseIdx] || !p.phases[phaseIdx].checklist) return;
+    const item = p.phases[phaseIdx].checklist[itemIdx];
+    if (!item || item.type !== 'fact') return;
+    const v = prompt(item.text, item.value || '');
+    if (v === null) return;
+    item.value = String(v).trim();
+    p.modifiedAt = Date.now();
+    saveProjects(all);
+    projectsViewing = p;
+    renderProjectsView();
   }
 
   function projectsCompletePhase(phaseIdx) {
@@ -17900,7 +18480,7 @@
       showProjectCelebrationThenLand(p.id);
     } else {
       hapticLight();
-      projectsCurrentPhaseIndex = phaseIdx < p.phases.length - 1 ? phaseIdx + 1 : phaseIdx;
+      if (!p.unordered) projectsCurrentPhaseIndex = phaseIdx < p.phases.length - 1 ? phaseIdx + 1 : phaseIdx;
       renderProjectsView();
       showPhaseCelebrationThenScroll();
     }
@@ -17912,7 +18492,7 @@
     if (!p || !p.phases[phaseIdx]) return;
     const ph = p.phases[phaseIdx];
     if (ph.checklist && ph.checklist.length > 0) {
-      ph.checklist.forEach(c => { c.done = false; });
+      ph.checklist.forEach(c => { clResetItem(c); });
     } else {
       ph.completed = false;
     }
@@ -17931,7 +18511,7 @@
     if (lastIdx < 0) return;
     const ph = p.phases[lastIdx];
     if (ph.checklist && ph.checklist.length > 0) {
-      ph.checklist.forEach(c => { c.done = false; });
+      ph.checklist.forEach(c => { clResetItem(c); });
     } else {
       ph.completed = false;
     }
@@ -18215,8 +18795,8 @@
         ul.className = 'blathers-snippet-check';
         ph.checklist.slice(0, 12).forEach(function(c) {
           const li = document.createElement('li');
-          li.textContent = c.text || '';
-          if (c.done) li.classList.add('done');
+          li.textContent = c.type ? serializeClItemText(c) : (c.text || '');
+          if (clItemDone(c) && c.type !== 'fact') li.classList.add('done');
           ul.appendChild(li);
         });
         wrap.appendChild(ul);
@@ -18345,7 +18925,7 @@
         if (!ph.checklist) ph.checklist = [];
         items.forEach(function(line) {
           const t = line != null ? String(line).trim() : '';
-          if (t) ph.checklist.push({ id: genId(), text: t, done: false });
+          if (t) ph.checklist.push(applyClSyntaxToItem(null, t));
         });
       } else if (typ === 'setphasecompleted') {
         const idx = parseInt(op.phaseIndex, 10);
@@ -18354,7 +18934,7 @@
         const done = op.completed === true || op.completed === 'true';
         ph.completed = done;
         if (ph.checklist && ph.checklist.length) {
-          ph.checklist.forEach(function(c) { c.done = done; });
+          ph.checklist.forEach(function(c) { clSetItemDone(c, done); });
         }
       }
     }
@@ -18377,6 +18957,23 @@
     if (!Array.isArray(arr)) return [];
     const out = [];
     arr.forEach(function(item) {
+      if (item != null && typeof item === 'object') {
+        // Typed object from the model: {text, target} | {text, stages[]} | {text, fact/value} | {text}
+        const name = item.text != null ? String(item.text).trim() : '';
+        if (!name) return;
+        if (item.target != null && !isNaN(parseInt(item.target, 10))) {
+          const v = item.value != null && !isNaN(parseInt(item.value, 10)) ? parseInt(item.value, 10) : 0;
+          out.push(name + ' [' + v + '/' + Math.max(1, parseInt(item.target, 10)) + ']');
+        } else if (Array.isArray(item.stages) && item.stages.length >= 2) {
+          const st = item.stage != null && !isNaN(parseInt(item.stage, 10)) ? parseInt(item.stage, 10) : 0;
+          out.push(name + ' [' + st + '/' + item.stages.map(function(s) { return String(s).trim(); }).filter(Boolean).join('>') + ']');
+        } else if (item.type === 'fact' || item.fact === true) {
+          out.push(name + ' = ' + (item.value != null ? String(item.value).trim() : ''));
+        } else {
+          out.push(name);
+        }
+        return;
+      }
       const t = item != null ? String(item).trim() : '';
       if (t) out.push(t);
     });
@@ -18406,6 +19003,10 @@
       checklist: null,
       completed: false
     };
+    const layoutVal = draftPh && draftPh.layout !== undefined ? draftPh.layout : (old ? old.layout : undefined);
+    if (layoutVal === 'grid') phase.layout = 'grid';
+    const msVal = draftPh && draftPh.milestone !== undefined ? parseInt(draftPh.milestone, 10) : (old ? parseInt(old.milestone, 10) : NaN);
+    if (!isNaN(msVal) && msVal > 0) phase.milestone = msVal;
 
     if (draftPh && Object.prototype.hasOwnProperty.call(draftPh, 'checklist')) {
       if (draftPh.checklist === null) {
@@ -18413,19 +19014,11 @@
         phase.completed = old ? !!old.completed : false;
       } else if (Array.isArray(draftPh.checklist)) {
         const strings = normalizeCopilotChecklistStrings(draftPh.checklist);
-        const oldItems = (old && old.checklist) || [];
-        const lines = [];
-        strings.forEach(function(text) {
-          const match = oldItems.find(function(c) { return c.text === text; });
-          if (match) {
-            lines.push({ id: match.id, text: text, done: !!match.done });
-          } else {
-            lines.push({ id: genId(), text: text, done: false });
-          }
-        });
+        const lines = matchClItemsToPrev(strings, (old && old.checklist) || []);
         phase.checklist = lines.length ? lines : null;
         if (phase.checklist) {
-          phase.completed = phase.checklist.length > 0 && phase.checklist.every(function(c) { return c.done; });
+          const cs = clChecklistCountables(phase.checklist);
+          phase.completed = cs.length > 0 && cs.every(clItemDone);
         } else {
           phase.completed = old ? !!old.completed : false;
         }
@@ -18433,9 +19026,10 @@
     } else if (old) {
       if (old.checklist && old.checklist.length) {
         phase.checklist = old.checklist.map(function(c) {
-          return { id: c.id, text: c.text, done: !!c.done };
+          return Object.assign({}, c);
         });
-        phase.completed = phase.checklist.every(function(c) { return c.done; });
+        const csOld = clChecklistCountables(phase.checklist);
+        phase.completed = csOld.length > 0 && csOld.every(clItemDone);
       } else {
         phase.checklist = null;
         phase.completed = !!old.completed;
@@ -18539,6 +19133,10 @@
       phases = [{ id: genId(), title: title, description: desc, checklist: null, completionDate: null, completed: false }];
     }
 
+    const unorderedFlag = draft.unordered !== undefined
+      ? (draft.unordered === true || draft.unordered === 'true')
+      : !!(existing && existing.unordered);
+
     let selectId;
     if (existing) {
       const mergedComplete = isProjectCompleted({ phases: phases });
@@ -18547,7 +19145,8 @@
         createdAt: existing.createdAt || Date.now(),
         completedAt: mergedComplete ? (existing.completedAt || Date.now()) : null,
         completeQuote: mergedComplete ? existing.completeQuote : undefined,
-        icon: draft.icon !== undefined ? normalizeProjectIcon(draft.icon) : normalizeProjectIcon(existing.icon)
+        icon: draft.icon !== undefined ? normalizeProjectIcon(draft.icon) : normalizeProjectIcon(existing.icon),
+        unordered: unorderedFlag
       };
       persistProjectRecord(title, desc, finishDate, phases);
       projectsEditing = null;
@@ -18558,7 +19157,8 @@
         id: newId,
         createdAt: Date.now(),
         modifiedAt: Date.now(),
-        icon: normalizeProjectIcon(draft && draft.icon)
+        icon: normalizeProjectIcon(draft && draft.icon),
+        unordered: unorderedFlag
       };
       persistProjectRecord(title, desc, finishDate, phases);
       projectsEditing = null;
@@ -18670,6 +19270,8 @@
     document.getElementById('projectTitleInput').value = projectsEditing ? projectsEditing.title : '';
     document.getElementById('projectDescInput').value = projectsEditing ? (projectsEditing.description || '') : '';
     document.getElementById('projectFinishDateInput').value = projectsEditing && projectsEditing.finishDate ? projectsEditing.finishDate : '';
+    const unorderedInp = document.getElementById('projectUnorderedInput');
+    if (unorderedInp) unorderedInp.checked = !!(projectsEditing && projectsEditing.unordered);
     renderProjectPhasesEditors();
     renderProjectIconPickerInto('projectModalIconPicker', projectsEditing ? projectsEditing.icon : '', 'projectIconOptionClickModal');
     const modal = document.getElementById('projectModal');
@@ -18696,14 +19298,17 @@
     ph.description = (ed.querySelector('.phase-editor-desc')?.value || '').trim();
     ph.completionDate = ed.querySelector('.phase-editor-date')?.value || null;
     const listRaw = (ed.querySelector('.phase-editor-checklist')?.value || '').trim();
-    if (listRaw) {
-      const lines = listRaw.split('\n').filter(Boolean);
-      ph.checklist = lines.map((text, j) => {
-        const prev = ph.checklist && ph.checklist[j];
-        return prev ? { ...prev, text: text.trim() } : { id: genId(), text: text.trim(), done: false };
-      });
-    } else {
-      ph.checklist = null;
+    ph.checklist = listRaw ? parseChecklistTextarea(listRaw, ph.checklist) : null;
+    const gridEl = ed.querySelector('.phase-editor-grid');
+    if (gridEl) {
+      if (gridEl.checked) ph.layout = 'grid';
+      else delete ph.layout;
+    }
+    const msEl = ed.querySelector('.phase-editor-milestone');
+    if (msEl) {
+      const ms = parseInt(msEl.value, 10);
+      if (ms > 0) ph.milestone = ms;
+      else delete ph.milestone;
     }
   }
 
@@ -18726,9 +19331,10 @@
   function renderPhaseEditor(ph, idx, opts) {
     const wizard = opts && opts.wizard;
     const checklistStr = ph.checklist && ph.checklist.length > 0
-      ? ph.checklist.map(c => escapeHtml(c.text)).join('\n')
+      ? ph.checklist.map(c => escapeHtml(serializeClItemText(c))).join('\n')
       : '';
     const removeBtn = wizard ? '' : `<button type="button" class="project-phase-remove" onclick="removePhaseFromProject(${idx})">Remove this leg</button>`;
+    const msVal = parseInt(ph.milestone, 10) > 0 ? parseInt(ph.milestone, 10) : '';
     return `<div class="project-phase-editor" data-phase-idx="${idx}">
       <h4 class="project-phase-part-title">Part ${idx + 1}</h4>
       <input type="text" class="phase-editor-title" placeholder="What happens in this stretch?" value="${escapeHtml(ph.title || '')}">
@@ -18738,7 +19344,12 @@
         <input type="date" class="phase-editor-date" value="${ph.completionDate || ''}">
       </div>
       <label class="project-date-label">Small steps—one per line</label>
-      <textarea class="phase-editor-checklist" placeholder="Pick up supplies&#10;Book the appointment" rows="3">${checklistStr}</textarea>
+      <textarea class="phase-editor-checklist" placeholder="Pick up supplies&#10;Joy Pendants [40]&#10;Chart 7 [Found>Collected]&#10;Dungeon = Where it is" rows="3">${checklistStr}</textarea>
+      <p class="phase-editor-syntax-hint">Extras: <code>Name [40]</code> counts to a target · <code>Name [Found>Collected]</code> steps · <code>Name = value</code> reference · <code>#tag</code> badges</p>
+      <div class="phase-editor-extra-row">
+        <label class="phase-editor-flag"><input type="checkbox" class="phase-editor-grid" ${ph.layout === 'grid' ? 'checked' : ''}> Compact grid</label>
+        <label class="phase-editor-flag">Celebrate every <input type="number" class="phase-editor-milestone" min="0" inputmode="numeric" value="${msVal}" placeholder="–"> steps</label>
+      </div>
       ${removeBtn}
     </div>`;
   }
@@ -18788,6 +19399,7 @@
       const ic = normalizeProjectIcon(projectsEditing.icon);
       if (ic) newProj.icon = ic;
       else delete newProj.icon;
+      if (projectsEditing.unordered) newProj.unordered = true;
     }
 
     const idx = projectsEditing ? all.findIndex(p => p.id === projectsEditing.id) : -1;
@@ -18976,11 +19588,11 @@
     if (mode === 'checklist') {
       const items = ph.checklist && ph.checklist.length ? ph.checklist : [{ id: genId(), text: '', done: false }];
       for (let r = 0; r < items.length; r++) {
-        checklistRows += '<div class="pjw-checklist-row"><span class="pjw-checklist-num">' + (r + 1) + '</span><input type="text" class="pjw-checklist-input" autocomplete="off" value="' + escapeHtml(items[r].text || '') + '" placeholder="Something to check off"><button type="button" class="pjw-checklist-add" aria-label="Add line below" onclick="projectWizardInsertChecklistRowAfter(' + r + ')">+</button></div>';
+        checklistRows += '<div class="pjw-checklist-row"><span class="pjw-checklist-num">' + (r + 1) + '</span><input type="text" class="pjw-checklist-input" autocomplete="off" value="' + escapeHtml(serializeClItemText(items[r]) || '') + '" placeholder="Something to check off"><button type="button" class="pjw-checklist-add" aria-label="Add line below" onclick="projectWizardInsertChecklistRowAfter(' + r + ')">+</button></div>';
       }
     }
     let singleVal = '';
-    if (mode === 'single' && ph.checklist && ph.checklist.length === 1) singleVal = ph.checklist[0].text || '';
+    if (mode === 'single' && ph.checklist && ph.checklist.length === 1) singleVal = serializeClItemText(ph.checklist[0]) || '';
     const modeQuestion = pi === 0 ? 'Is this first phase…' : 'Is this phase…';
     const descExpanded = projectWizardPhaseDescExpanded(ph);
     const descChevron = '<svg class="pjw-desc-chevron' + (descExpanded ? ' pjw-desc-chevron-open' : '') + '" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -19070,8 +19682,8 @@
     if (mode === 'single') {
       const single = document.getElementById('pjwSingleStep');
       const txt = single ? single.value.trim() : '';
-      const keepId = ph.checklist && ph.checklist[0] && ph.checklist[0].id ? ph.checklist[0].id : genId();
-      ph.checklist = txt ? [{ id: keepId, text: txt, done: false }] : null;
+      const prev0 = ph.checklist && ph.checklist[0];
+      ph.checklist = txt ? [applyClSyntaxToItem(prev0 || null, txt)] : null;
       ph._wizardMode = 'single';
     } else {
       ph._wizardMode = 'checklist';
@@ -19080,10 +19692,7 @@
       const lines = [];
       rows.forEach(function(inp, j) {
         const v = inp.value.trim();
-        if (v) {
-          const p = prev[j];
-          lines.push(p ? { ...p, text: v } : { id: genId(), text: v, done: false });
-        }
+        if (v) lines.push(applyClSyntaxToItem(prev[j] || null, v));
       });
       ph.checklist = lines.length ? lines : null;
     }
@@ -19373,15 +19982,20 @@
       const dateVal = existing.completionDate || null;
       let checklist = existing.checklist;
       if (checklist && checklist.length === 0) checklist = null;
-      return {
+      const phObj = {
         id: existing.id,
         title: t || ('Phase ' + (i + 1)),
         description: d,
         checklist: checklist || null,
         completionDate: dateVal,
         completed: !!existing.completed,
-        quote: existing.quote ? existing.quote : undefined
+        quote: existing.quote ? existing.quote : undefined,
+        notes: existing.notes ? existing.notes : undefined
       };
+      if (existing.layout === 'grid') phObj.layout = 'grid';
+      const ms = parseInt(existing.milestone, 10);
+      if (ms > 0) phObj.milestone = ms;
+      return phObj;
     });
     persistProjectRecord(title, desc, finishDate, phases);
     closeProjectWizard();
@@ -19392,6 +20006,8 @@
     if (!title) return;
     const desc = document.getElementById('projectDescInput').value.trim();
     const finishDate = document.getElementById('projectFinishDateInput').value || null;
+    const unorderedEl = document.getElementById('projectUnorderedInput');
+    if (projectsEditing && unorderedEl) projectsEditing.unordered = !!unorderedEl.checked;
     const editors = document.querySelectorAll('.project-phase-editor');
     const phases = [];
     editors.forEach((ed, i) => {
@@ -19400,23 +20016,25 @@
       const dateVal = ed.querySelector('.phase-editor-date').value || null;
       const listRaw = ed.querySelector('.phase-editor-checklist').value.trim();
       const existing = projectsEditing && projectsEditing.phases[i];
-      let checklist = null;
-      if (listRaw) {
-        const lines = listRaw.split('\n').filter(Boolean);
-        checklist = lines.map((text, j) => {
-          const prev = existing && existing.checklist && existing.checklist[j];
-          return prev ? { ...prev, text: text.trim() } : { id: genId(), text: text.trim(), done: false };
-        });
-      }
-      phases.push({
+      const checklist = listRaw
+        ? parseChecklistTextarea(listRaw, existing && existing.checklist)
+        : null;
+      const phObj = {
         id: existing ? existing.id : genId(),
         title: t || 'Phase ' + (i + 1),
         description: d,
         checklist,
         completionDate: dateVal,
         completed: existing ? !!existing.completed : false,
-        quote: existing && existing.quote ? existing.quote : undefined
-      });
+        quote: existing && existing.quote ? existing.quote : undefined,
+        notes: existing && existing.notes ? existing.notes : undefined
+      };
+      const gridEl = ed.querySelector('.phase-editor-grid');
+      if (gridEl && gridEl.checked) phObj.layout = 'grid';
+      const msEl = ed.querySelector('.phase-editor-milestone');
+      const ms = msEl ? parseInt(msEl.value, 10) : 0;
+      if (ms > 0) phObj.milestone = ms;
+      phases.push(phObj);
     });
     if (phases.length === 0) {
       phases.push({ id: genId(), title: 'Phase 1', description: '', checklist: null, completionDate: null, completed: false });
