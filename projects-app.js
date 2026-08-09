@@ -680,7 +680,11 @@ function sectionProgress(sec) {
  * spreadsheet (play-verified) rather than a wiki, so the counts match what she
  * actually tracks. She can add or remove anything afterwards.
  */
+window.detectTheme = detectTheme; // shared so the Blathers chat picks the same look
 function buildWindWakerRun(title) {
+  // One source of truth for game look-and-feel, so a run gets the Zelda icon
+  // as well as the Zelda palette.
+  const wwLook = detectTheme('The Legend of Zelda: The Wind Waker');
   const list = (names, key) => names.map(n => { const o = { name: n }; o[key] = false; return o; });
   const charts = [];
   for (let i = 1; i <= 41; i++) charts.push({ name: 'Chart ' + i, state: 0 });
@@ -693,8 +697,8 @@ function buildWindWakerRun(title) {
     id: uid('proj'),
     title: title || 'Wind Waker Run',
     subtitle: 'Randomizer',
-    theme: 'zelda',
-    cover: null,
+    theme: wwLook.theme,
+    cover: wwLook.cover,
     started: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     sheetTab: title || 'Wind Waker Run',
     sections: [
@@ -2998,7 +3002,7 @@ function titlecase(s) {
 }
 function detectTheme(text) {
   const t = text.toLowerCase();
-  if (/zelda|wind ?waker|triforce|hyrule|ganon|link\b|korok/.test(t)) return {
+  if (/zelda|ocarina|wind ?waker|majora|twilight princess|triforce|hyrule|ganon|\blink\b|korok|breath of the wild|tears of the kingdom|skyward/.test(t)) return {
     theme: 'zelda',
     label: 'Zelda',
     cover: 'https://stormyreigns.github.io/HATH/projects-assets/king-of-red-lions.png'
@@ -5474,10 +5478,11 @@ function ProjectsApp() {
                   say((res && res.error) || 'That tab has no rows to restore', true);
                   return;
                 }
+                const look = detectTheme(((r.game || '') + ' ' + (r.title || r.tab)).trim());
                 const shell = {
                   id: uid('proj'), title: r.title || r.tab, subtitle: r.kind || '',
-                  theme: /wind waker/i.test(r.game || '') ? 'zelda' : 'base',
-                  cover: null, started: r.started || '', sheetTab: r.tab, sections: []
+                  theme: look.theme, cover: look.cover,
+                  started: r.started || '', sheetTab: r.tab, sections: []
                 };
                 const merged = applyPulledRun(shell, res);
                 setProjects(ps => [merged.project, ...ps]);

@@ -10743,7 +10743,7 @@
   window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
   window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '3.9.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '3.9.1';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
@@ -18572,12 +18572,21 @@
     }
     if (!sections.length) return { ok: false, message: 'No steps to track in that one.' };
 
+    // Match the look the Projects app would pick for this game, so a tracker
+    // Blathers makes doesn't look plainer than one made in the app.
+    let look = { theme: 'base', cover: null };
+    try {
+      if (typeof window.detectTheme === 'function') {
+        look = window.detectTheme(title + ' ' + (draft.description || '')) || look;
+      }
+    } catch (e) {}
+
     const tracker = {
       id: (target && target.id) || ('t_' + Date.now().toString(36)),
       title: title,
       subtitle: String(draft.description || (target && target.subtitle) || '').slice(0, 120),
-      theme: (target && target.theme) || 'base',
-      cover: (target && target.cover) || null,
+      theme: (target && target.theme) || look.theme || 'base',
+      cover: (target && target.cover) || look.cover || null,
       started: (target && target.started) || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
       sections: sections
     };
@@ -26646,6 +26655,6 @@ html.dark-mode #projectsAppRoot [data-theme="ffxiv"]{
 @keyframes hath-pulse{0%,100%{opacity:.4}50%{opacity:1}}
 
 </style>
-<script id="projects-app-runtime" src="projects-app.js?v=390"></script>
+<script id="projects-app-runtime" src="projects-app.js?v=391"></script>
 </body>
 </html>
