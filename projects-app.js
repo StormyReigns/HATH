@@ -707,7 +707,7 @@ function buildWindWakerRun(title) {
         'Earth Temple', 'Wind Temple', 'Savage Labyrinth'
       ].map(n => ({ name: n, value: '' })) },
       { id: uid('sec'), type: 'rated', title: 'Treasure Charts', noun: 'charts',
-        states: ['Unknown', 'Found', 'Collected'], items: charts },
+        states: ['Unknown', 'Found', 'Collected'], milestone: 10, items: charts },
       { id: uid('sec'), type: 'checklist', title: 'Triforce Shards', noun: 'shards', items: shards, celebrate: true },
       { id: uid('sec'), type: 'checklist', title: 'Fairy Islands', noun: 'fairies', items: list([
         'Northern', 'Mother and Child', 'Western', 'Eastern', 'Thorned', 'Southern', 'Outset', 'Big Octo'
@@ -735,8 +735,12 @@ function buildWindWakerRun(title) {
         'Needle Rock', 'Stone Watcher', "Bird's Peak Rock", 'Diamond Steppe', 'Shark',
         'Southern Fairy', 'Cliff Plateau', 'Horseshoe', 'Angular', 'Boating Course'
       ], 'done') },
-      { id: uid('sec'), type: 'counter', title: 'Heart Pieces', noun: 'pieces', shape: 'circle', items: hearts },
+      // Four pieces make a Heart Container — the real in-game reward, so that's
+      // where the small celebration belongs rather than only at 44.
+      { id: uid('sec'), type: 'counter', title: 'Heart Pieces', noun: 'pieces', shape: 'circle',
+        milestone: 4, milestoneLabel: 'Heart Container {n}', items: hearts },
       { id: uid('sec'), type: 'counter', title: 'Nintendo Gallery', noun: 'figurines', shape: 'circle',
+        milestone: 25,
         items: (function () { const a = []; for (let i = 1; i <= 134; i++) a.push({ name: 'Figurine ' + i, got: false }); return a; })() },
       { id: uid('sec'), type: 'notes', title: 'Field Notes', items: [] }
     ]
@@ -2399,9 +2403,11 @@ window.Home = Home;
     const seen = React.useRef(null);
     React.useEffect(() => {
       const secDone = {};
+      const secCount = {};
       project.sections.forEach(s => {
         const p = sectionProgress(s);
         secDone[s.id] = !!(p && p.total > 0 && p.done >= p.total);
+        secCount[s.id] = p ? p.done : 0;
       });
       const projDone = overall >= 1;
       const prev = seen.current;
@@ -2419,10 +2425,38 @@ window.Home = Home;
             title: justDone.title,
             parent: project.title
           });
+          else {
+            // A long list with a single payoff at the end is a slog. Sections can
+            // set `milestone: N` to mark the real in-game rewards along the way —
+            // every 4 heart pieces is a heart container, and that should feel like
+            // something. Skipped when the section just finished, so the bigger
+            // moment isn't stepped on.
+            const hit = project.sections.find(s => {
+              const n = parseInt(s.milestone, 10) || 0;
+              if (n <= 0 || secDone[s.id]) return false;
+              const now = secCount[s.id] || 0;
+              const was = (prev.count && prev.count[s.id]) || 0;
+              return now > was && Math.floor(now / n) > Math.floor(was / n);
+            });
+            if (hit) {
+              const n = parseInt(hit.milestone, 10) || 1;
+              const now = secCount[hit.id] || 0;
+              celebrate({
+                kind: 'milestone',
+                title: hit.milestoneLabel
+                  ? hit.milestoneLabel.replace('{n}', String(Math.floor(now / n)))
+                  : (now + ' ' + (hit.noun || 'done')),
+                parent: hit.title,
+                count: now,
+                total: (sectionProgress(hit) || {}).total
+              });
+            }
+          }
         }
       }
       seen.current = {
         sec: secDone,
+        count: secCount,
         proj: projDone
       };
     });
@@ -5251,10 +5285,21 @@ function ProjectsApp() {
     setTimeout(() => setSyncMsg(null), bad ? 7000 : 4000);
   };
 
+  const [cheer, setCheer] = React.useState(null);
+  const cheerTimer = React.useRef(null);
   const celebrate = reason => {
-    if (t.celebrations) setChest(reason || {
-      kind: 'section'
-    });
+    if (!t.celebrations) return;
+    const r = reason || { kind: 'section' };
+    // A milestone is a nudge, not an event: the full chest would be exhausting
+    // eleven times over on a 44-item list.
+    if (r.kind === 'milestone') {
+      try { playChime(); } catch (e) {}
+      setCheer(r);
+      if (cheerTimer.current) clearTimeout(cheerTimer.current);
+      cheerTimer.current = setTimeout(() => setCheer(null), 1900);
+      return;
+    }
+    setChest(r);
   };
   const current = projects.find(p => p.id === sel);
 
@@ -5445,7 +5490,31 @@ function ProjectsApp() {
       WebkitOverflowScrolling: 'touch',
       paddingTop: 8
     }
-  }, screen), restoreList !== null && /*#__PURE__*/React.createElement("div", {
+  }, screen), cheer && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'absolute', left: 0, right: 0, top: '38%', zIndex: 65,
+      display: 'flex', justifyContent: 'center', pointerEvents: 'none'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '14px 22px', borderRadius: 16, textAlign: 'center',
+      background: 'var(--surface)', border: '1px solid var(--line)',
+      boxShadow: 'var(--shadow-lg)', animation: 'cheerPop .45s cubic-bezier(.2,1.3,.4,1)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: { fontSize: 22, lineHeight: 1, marginBottom: 6 }
+  }, "\u2728"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16,
+      color: 'var(--text)', whiteSpace: 'nowrap'
+    }
+  }, cheer.title), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '.06em',
+      textTransform: 'uppercase', color: 'var(--text-faint)', marginTop: 3
+    }
+  }, cheer.parent + (cheer.total ? ' \u00b7 ' + cheer.count + '/' + cheer.total : '')))),
+  restoreList !== null && /*#__PURE__*/React.createElement("div", {
     onClick: () => setRestoreList(null),
     style: {
       position: 'absolute', inset: 0, zIndex: 70, background: 'rgba(20,16,12,.45)',

@@ -10743,7 +10743,7 @@
   window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
   window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '3.9.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '3.10.0';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
@@ -18304,6 +18304,150 @@
     turnEl.appendChild(card);
   }
 
+  /**
+   * Applies a Blathers patch to a live tracker (sections + items), matching by
+   * name so he can work from the same summary he was given. Previously patches
+   * targeted the retired phases store, so nothing visible ever changed.
+   */
+  function applyTrackerPatch(patch) {
+    if (!patch || typeof patch !== 'object') return null;
+    const all = getLiveTrackers();
+    if (!all.length) return null;
+    const want = String(patch.trackerId || patch.projectId || patch.title || '').trim().toLowerCase();
+    let t = all.find(function(x) { return String(x.id).toLowerCase() === want; });
+    if (!t) t = all.find(function(x) { return String(x.title || '').trim().toLowerCase() === want; });
+    // Only fall back to the single tracker when no name was given at all. If a
+    // name was given and doesn't match, refuse — silently editing a different
+    // tracker than the one named is worse than doing nothing.
+    if (!t && !want && all.length === 1) t = all[0];
+    if (!t) {
+      return { ok: false, message: want
+        ? "I couldn't find a tracker called \"" + (patch.title || patch.trackerId || patch.projectId) + "\"."
+        : "I couldn't tell which tracker you meant." };
+    }
+
+    const proj = JSON.parse(JSON.stringify(t));
+    const norm = function(v) { return String(v == null ? '' : v).trim().toLowerCase(); };
+    const findSec = function(name) {
+      const n = norm(name);
+      if (!n) return null;
+      return (proj.sections || []).find(function(s) { return norm(s.title) === n; })
+          || (proj.sections || []).find(function(s) { return norm(s.title).indexOf(n) === 0; })
+          || null;
+    };
+    const findItem = function(sec, name) {
+      const n = norm(name);
+      return (sec.items || []).find(function(i) { return norm(i.name) === n; })
+          || (sec.items || []).find(function(i) { return norm(i.name).indexOf(n) === 0; })
+          || null;
+    };
+    const setDone = function(sec, item, on) {
+      if (sec.type === 'rated') {
+        item.state = on ? ((sec.states || []).length - 1) : 0;
+      } else if (sec.type === 'checklist') {
+        item.done = !!on;
+      } else {
+        item.got = !!on;
+      }
+    };
+
+    const ops = Array.isArray(patch.ops) ? patch.ops : [];
+    const changes = [];
+
+    ops.forEach(function(op) {
+      if (!op || typeof op !== 'object') return;
+      const kind = String(op.op || '').toLowerCase().replace(/[\s_-]+/g, '');
+      const names = Array.isArray(op.items) ? op.items
+        : (op.item != null ? [op.item] : []);
+
+      if (kind === 'rename' || kind === 'settitle') {
+        if (op.title) { proj.title = String(op.title).trim().slice(0, 200); changes.push('renamed'); }
+        return;
+      }
+      if (kind === 'addsection') {
+        const items = (Array.isArray(op.items) ? op.items : []).map(function(n) {
+          const nm = String(n && n.name != null ? n.name : n).trim();
+          return nm ? { name: nm, done: false } : null;
+        }).filter(Boolean);
+        if (!op.title || !items.length) return;
+        proj.sections.push({
+          id: 's_' + Date.now().toString(36) + '_' + proj.sections.length,
+          type: 'checklist', title: String(op.title).trim(), noun: 'items', items: items
+        });
+        changes.push('added section "' + op.title + '"');
+        return;
+      }
+
+      const sec = findSec(op.section || op.sectionTitle);
+      if (!sec) return;
+
+      if (kind === 'tick' || kind === 'check' || kind === 'markdone' || kind === 'complete') {
+        let n = 0;
+        names.forEach(function(nm) { const it = findItem(sec, nm); if (it) { setDone(sec, it, true); n++; } });
+        if (n) changes.push('ticked ' + n + ' in ' + sec.title);
+      } else if (kind === 'untick' || kind === 'uncheck' || kind === 'markundone') {
+        let n = 0;
+        names.forEach(function(nm) { const it = findItem(sec, nm); if (it) { setDone(sec, it, false); n++; } });
+        if (n) changes.push('unticked ' + n + ' in ' + sec.title);
+      } else if (kind === 'setstate') {
+        const it = findItem(sec, op.item);
+        if (it && sec.type === 'rated') {
+          const idx = (sec.states || []).findIndex(function(st) { return norm(st) === norm(op.state); });
+          if (idx >= 0) { it.state = idx; changes.push(it.name + ' \u2192 ' + sec.states[idx]); }
+        }
+      } else if (kind === 'setvalue') {
+        const it = findItem(sec, op.item);
+        if (it) {
+          if (sec.type === 'ref') it.value = String(op.value == null ? '' : op.value).trim();
+          else it.where = String(op.value == null ? '' : op.value).trim();
+          changes.push(it.name + ' = ' + (op.value || ''));
+        }
+      } else if (kind === 'additems') {
+        let n = 0;
+        names.forEach(function(nm) {
+          const clean = String(nm && nm.name != null ? nm.name : nm).trim();
+          if (!clean || findItem(sec, clean)) return;
+          const it = { name: clean };
+          if (sec.type === 'rated') it.state = 0;
+          else if (sec.type === 'checklist') it.done = false;
+          else if (sec.type === 'ref') it.value = '';
+          else it.got = false;
+          sec.items.push(it); n++;
+        });
+        if (n) changes.push('added ' + n + ' to ' + sec.title);
+      } else if (kind === 'removeitems') {
+        const before = (sec.items || []).length;
+        const drop = {};
+        names.forEach(function(nm) { drop[norm(nm)] = true; });
+        sec.items = (sec.items || []).filter(function(i) { return !drop[norm(i.name)]; });
+        if (before !== sec.items.length) changes.push('removed ' + (before - sec.items.length) + ' from ' + sec.title);
+      } else if (kind === 'addnote' || kind === 'note') {
+        const txt = String(op.text || op.note || '').trim();
+        if (!txt) return;
+        if (sec.type === 'notes') { sec.items = (sec.items || []).concat([txt]); changes.push('noted'); }
+      }
+    });
+
+    if (!changes.length) return { ok: false, message: "I couldn't find anything to change there." };
+
+    let applied = false;
+    try {
+      if (typeof window.__projectsUpsertTracker === 'function') applied = window.__projectsUpsertTracker(proj);
+    } catch (e) { applied = false; }
+    if (!applied) {
+      try {
+        const key = 'shasta_projapp_' + (getApiUser() || 'guest');
+        const arr = getLiveTrackers();
+        const i = arr.findIndex(function(x) { return String(x.id) === String(proj.id); });
+        if (i >= 0) arr[i] = proj; else arr.push(proj);
+        localStorage.setItem(key, JSON.stringify(arr));
+        applied = true;
+      } catch (e) { applied = false; }
+    }
+    if (!applied) return { ok: false, message: "I couldn't save that change." };
+    return { ok: true, title: proj.title, message: 'Updated "' + proj.title + '" \u2014 ' + changes.join(', ') + '.' };
+  }
+
   function applyProjectPatchJson(patch) {
     if (!patch || typeof patch !== 'object' || !patch.projectId) return null;
     const projectId = String(patch.projectId).trim();
@@ -23895,6 +24039,23 @@
         }
       } catch (e) {}
       parts.push('Trackers saved on this device:\n' + summarizeProjectsForBlathersBlock());
+      if (getLiveTrackers().length) {
+        parts.push(
+          'To CHANGE an existing tracker, reply with a [[[PROJECT_PATCH ... PROJECT_PATCH]]] block containing ' +
+          '{"title":"<exact tracker title>","ops":[...]}. Ops, matched by section title and item name ' +
+          '(case-insensitive) exactly as listed above:\n' +
+          '  {"op":"tick","section":"Reefs","items":["Four-Eye","Cyclops"]}\n' +
+          '  {"op":"untick","section":"Reefs","items":["Four-Eye"]}\n' +
+          '  {"op":"setstate","section":"Treasure Charts","item":"Chart 7","state":"Collected"}\n' +
+          '  {"op":"setvalue","section":"Dungeon Entrances","item":"Wind Temple","value":"Fire Mountain"}\n' +
+          '  {"op":"additems","section":"Reefs","items":["Seven-Eye"]}\n' +
+          '  {"op":"removeitems","section":"Reefs","items":["Seven-Eye"]}\n' +
+          '  {"op":"addnote","section":"Field Notes","text":"Go back with Iron Boots"}\n' +
+          '  {"op":"addsection","title":"Side Quests","items":["Fishmen","Tingle Statues"]}\n' +
+          'Use the exact names shown above; do not invent sections or items. ' +
+          'Use a patch to change an existing tracker and only use [[[PROJECT_JSON]]] to create a brand new one.'
+        );
+      }
       try {
         const finSnap = buildFinGoalsSnapshotForBlathers();
         if (finSnap) {
@@ -24264,7 +24425,7 @@
       if (r) addBlathersResultCard(turnEl, r);
     }
     if (structured.projectPatch) {
-      const r2 = applyProjectPatchJson(structured.projectPatch);
+      const r2 = applyTrackerPatch(structured.projectPatch);
       if (r2) addBlathersResultCard(turnEl, r2);
     }
     if (structured.localEventDraft && getApiUser()) {
@@ -26654,7 +26815,14 @@ html.dark-mode #projectsAppRoot [data-theme="ffxiv"]{
 @keyframes hath-spark{0%{transform:translate(0,0) scale(.4);opacity:0}20%{opacity:1}100%{transform:translate(var(--tx),var(--ty)) scale(1);opacity:0}}
 @keyframes hath-pulse{0%,100%{opacity:.4}50%{opacity:1}}
 
+
+/* Projects: milestone cheer (v3.10.0) */
+@keyframes cheerPop {
+  0%   { opacity: 0; transform: scale(.82) translateY(6px); }
+  60%  { opacity: 1; transform: scale(1.04) translateY(0); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
 </style>
-<script id="projects-app-runtime" src="projects-app.js?v=391"></script>
+<script id="projects-app-runtime" src="projects-app.js?v=3100"></script>
 </body>
 </html>
