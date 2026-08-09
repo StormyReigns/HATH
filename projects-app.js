@@ -430,6 +430,15 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
         return d;
       }).catch(function (e) { return { error: String((e && e.message) || e) }; });
     },
+    rename: function (from, to) {
+      return fetch(AI_ENDPOINT, {
+        method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'runsRenameTab', user: _user(), from: from || '', to: to })
+      }).then(function (r) { return r.text(); }).then(function (raw) {
+        var d = {}; try { d = JSON.parse(raw); } catch (e) { return { error: 'Bad reply from the sheet' }; }
+        return d;
+      }).catch(function (e) { return { error: String((e && e.message) || e) }; });
+    },
     list: function () {
       var url = AI_ENDPOINT + '?action=runsList&user=' + encodeURIComponent(_user());
       return fetch(url, { redirect: 'follow' }).then(function (r) { return r.json(); })
@@ -5211,10 +5220,24 @@ function ProjectsApp() {
       onBack: () => setView('home'),
       update: updateForView,
       onEditProject: np => setProjects(ps => ps.map(p => p.id === np.id ? np : p)),
-      onRename: (pid, vals) => setProjects(ps => ps.map(p => p.id === pid ? {
-        ...p,
-        ...vals
-      } : p)),
+      onRename: (pid, vals) => {
+        const before = projects.find(p => p.id === pid);
+        setProjects(ps => ps.map(p => p.id === pid ? { ...p, ...vals } : p));
+        // Keep the sheet tab named after the tracker, so pushes and pulls keep
+        // finding it. If the tab can't be renamed, the old name stays linked
+        // rather than silently pointing at nothing.
+        const newTitle = vals && vals.title;
+        if (!before || !newTitle || newTitle === before.title || !window.__runsSync) return;
+        const oldTab = before.sheetTab || before.title;
+        window.__runsSync.rename(oldTab, newTitle).then(res => {
+          if (!res || res.error) {
+            say(res && res.error ? res.error : 'Could not rename the sheet tab', true);
+            return;
+          }
+          setProjects(ps => ps.map(p => p.id === pid ? { ...p, sheetTab: res.tab } : p));
+          if (res.renamed) say('Sheet tab renamed to "' + res.tab + '"');
+        });
+      },
       onDelete: pid => {
         setProjects(ps => ps.filter(p => p.id !== pid));
         setSel(null);
@@ -5233,11 +5256,18 @@ function ProjectsApp() {
         const tab = proj.sheetTab || proj.title;
         if (!window.confirm('Push "' + proj.title + '" to the sheet?\n\nThis replaces the "' + tab + '" tab with what is in the app right now.')) return;
         say('Pushing to the sheet\u2026');
-        window.__runsSync.push(proj).then(res => {
+        const pushNow = () => window.__runsSync.push(proj).then(res => {
           if (!res || res.error) { say(res && res.error ? res.error : 'Push failed', true); return; }
           setProjects(ps => ps.map(p => p.id === proj.id ? { ...p, sheetTab: res.tab, lastPush: Date.now() } : p));
           say('Pushed ' + res.rows + ' rows to "' + res.tab + '"');
         });
+        // Safety net: if a rename didn't reach the sheet earlier, fix it now.
+        if (proj.sheetTab && proj.sheetTab !== proj.title) {
+          window.__runsSync.rename(proj.sheetTab, proj.title).then(res => {
+            if (res && res.tab && !res.error) proj = { ...proj, sheetTab: res.tab };
+            pushNow();
+          });
+        } else { pushNow(); }
       },
       onPullSheet: proj => {
         if (!window.__runsSync) return;
