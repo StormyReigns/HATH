@@ -1889,13 +1889,13 @@ window.Home = Home;
       width: '100%',
       border: 'none',
       background: 'transparent',
-      padding: '10px 11px',
+      padding: '14px 13px',
       borderRadius: 'var(--radius-sm)',
       cursor: 'pointer',
       textAlign: 'left',
       fontFamily: 'var(--font-body)',
       fontWeight: 700,
-      fontSize: 14,
+      fontSize: 15,
       color: c,
       WebkitTapHighlightColor: 'transparent'
     };
@@ -2576,26 +2576,29 @@ window.Home = Home;
       cy: "9",
       r: "1.6",
       fill: "currentColor"
-    }))), menu && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    }))), menu && ReactDOM.createPortal(/*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
       onClick: () => setMenu(false),
       style: {
         position: 'fixed',
         inset: 0,
-        zIndex: 40
+        zIndex: 2147482000,
+        background: 'rgba(20,16,12,.4)'
       }
     }), /*#__PURE__*/React.createElement("div", {
+      onClick: e => e.stopPropagation(),
       style: {
-        position: 'absolute',
-        top: 40,
-        right: 0,
-        zIndex: 41,
-        minWidth: 168,
-        background: 'var(--surface)',
-        borderRadius: 'var(--radius-md)',
+        position: 'fixed',
+        left: 0, right: 0, bottom: 0,
+        zIndex: 2147482001,
+        maxHeight: '72vh',
+        overflowY: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        background: 'var(--surface, #fffaf3)',
+        borderTopLeftRadius: 18,
+        borderTopRightRadius: 18,
         boxShadow: 'var(--shadow-lg)',
         border: '1px solid var(--line)',
-        overflow: 'hidden',
-        padding: 5
+        padding: '10px 10px calc(18px + env(safe-area-inset-bottom))'
       }
     }, /*#__PURE__*/React.createElement("button", {
       onClick: () => {
@@ -2630,7 +2633,7 @@ window.Home = Home;
         setConfirmDel(true);
       },
       style: menuItemStyle('var(--danger, #C0492F)')
-    }, Ic.trash('var(--danger, #C0492F)'), " Delete tracker"))))), /*#__PURE__*/React.createElement("div", {
+    }, Ic.trash('var(--danger, #C0492F)'), " Delete tracker"))), document.body))), /*#__PURE__*/React.createElement("div", {
       style: {
         display: 'flex',
         alignItems: 'center',
