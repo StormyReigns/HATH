@@ -390,6 +390,53 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       })
       .catch(function (e) { _bkSet('error', { error: String((e && e.message) || e) }); return false; });
   }
+  // ── Runs sheet sync (Jessica's spreadsheet) ─────────────────
+  // Manual push / pull only. The app is the everyday surface; the sheet is the
+  // desk surface. Neither syncs in the background, so nothing changes under her.
+  window.__runsSync = {
+    push: function (project) {
+      var run = {
+        title: project.title,
+        tab: project.sheetTab || project.title,
+        kind: project.subtitle || '',
+        started: project.started || '',
+        percent: Math.round(projectProgress(project) * 100),
+        sections: (project.sections || []).map(function (sec) {
+          var items = [];
+          if (sec.type === 'map') {
+            (sec.cells || []).forEach(function (on, i) {
+              items.push({ name: (sec.labels && sec.labels[i]) || ('Area ' + (i + 1)), done: !!on });
+            });
+          } else if (sec.type === 'notes') {
+            (sec.items || []).forEach(function (t) { items.push({ name: String(t) }); });
+          } else {
+            items = (sec.items || []).slice();
+          }
+          return { id: sec.id, type: sec.type, title: sec.title, states: sec.states, items: items };
+        })
+      };
+      return fetch(AI_ENDPOINT, {
+        method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'runsPush', user: _user(), run: run })
+      }).then(function (r) { return r.text(); }).then(function (raw) {
+        var d = {}; try { d = JSON.parse(raw); } catch (e) { return { error: 'Bad reply from the sheet' }; }
+        return d;
+      }).catch(function (e) { return { error: String((e && e.message) || e) }; });
+    },
+    pull: function (tab) {
+      var url = AI_ENDPOINT + '?action=runsPull&tab=' + encodeURIComponent(tab) + '&user=' + encodeURIComponent(_user());
+      return fetch(url, { redirect: 'follow' }).then(function (r) { return r.text(); }).then(function (raw) {
+        var d = {}; try { d = JSON.parse(raw); } catch (e) { return { error: 'Bad reply from the sheet' }; }
+        return d;
+      }).catch(function (e) { return { error: String((e && e.message) || e) }; });
+    },
+    list: function () {
+      var url = AI_ENDPOINT + '?action=runsList&user=' + encodeURIComponent(_user());
+      return fetch(url, { redirect: 'follow' }).then(function (r) { return r.json(); })
+        .then(function (d) { return (d && d.runs) || []; }).catch(function () { return []; });
+    }
+  };
+
   window.__projBackup = {
     signedIn: _bkSignedIn,
     get: _bkGet,
@@ -600,6 +647,145 @@ function sectionProgress(sec) {
  * overwrites them) but notes are cleared, since they describe the old run.
  * Returns a NEW object; the source is never mutated.
  */
+/**
+ * Merges rows pulled from the sheet back into a tracker.
+ * Sections are matched by title, items by name, so she can reorder freely in
+ * Sheets. Items she added in the sheet appear; ones she deleted go away.
+ * Section metadata the sheet can't carry (rated states, map columns, theme)
+ * is preserved from the local copy.
+ */
+/**
+ * A fully-loaded Wind Waker 100% tracker. Item lists come from Jessica's own
+ * spreadsheet (play-verified) rather than a wiki, so the counts match what she
+ * actually tracks. She can add or remove anything afterwards.
+ */
+function buildWindWakerRun(title) {
+  const list = (names, key) => names.map(n => { const o = { name: n }; o[key] = false; return o; });
+  const charts = [];
+  for (let i = 1; i <= 41; i++) charts.push({ name: 'Chart ' + i, state: 0 });
+  const hearts = [];
+  for (let i = 1; i <= 44; i++) hearts.push({ name: 'Heart Piece ' + i, got: false });
+  const shards = [];
+  for (let i = 1; i <= 8; i++) shards.push({ name: 'Triforce Shard ' + i, done: false });
+
+  return {
+    id: uid('proj'),
+    title: title || 'Wind Waker Run',
+    subtitle: 'Randomizer',
+    theme: 'zelda',
+    cover: null,
+    started: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    sheetTab: title || 'Wind Waker Run',
+    sections: [
+      { id: uid('sec'), type: 'ref', title: 'Dungeon Entrances', noun: '', items: [
+        'Dragon Roost Cavern', 'Forbidden Woods', 'Tower of the Gods', 'Forsaken Fortress',
+        'Earth Temple', 'Wind Temple', 'Savage Labyrinth'
+      ].map(n => ({ name: n, value: '' })) },
+      { id: uid('sec'), type: 'rated', title: 'Treasure Charts', noun: 'charts',
+        states: ['Unknown', 'Found', 'Collected'], items: charts },
+      { id: uid('sec'), type: 'checklist', title: 'Triforce Shards', noun: 'shards', items: shards, celebrate: true },
+      { id: uid('sec'), type: 'checklist', title: 'Fairy Islands', noun: 'fairies', items: list([
+        'Northern', 'Mother and Child', 'Western', 'Eastern', 'Thorned', 'Southern', 'Outset', 'Big Octo'
+      ], 'done') },
+      { id: uid('sec'), type: 'checklist', title: 'Reefs', noun: 'reefs', items: list([
+        'Four-Eye', 'Three-Eye', 'Cyclops', 'Six-Eye', 'Five-Eye', 'Two-Eye'
+      ], 'done') },
+      { id: uid('sec'), type: 'checklist', title: 'Submarines', noun: 'subs', items: list([
+        'A3', 'A5', 'B7', 'D4', 'E6', 'G3', 'G7'
+      ], 'done') },
+      { id: uid('sec'), type: 'checklist', title: 'Big Octos', noun: 'octos', items: list([
+        'A6', 'C3', 'C6', 'E5', 'F1', 'G4'
+      ], 'done') },
+      { id: uid('sec'), type: 'checklist', title: 'Lookout Platforms', noun: 'platforms', items: list([
+        'C1', 'G1', 'A2', 'C2', 'E2', 'F2', 'D3', 'E3', 'D4', 'F4',
+        'G4', 'B5', 'C5', 'A6', 'C6', 'E6', 'C7', 'D7', 'F7', 'G7'
+      ], 'done') },
+      { id: uid('sec'), type: 'checklist', title: 'Secret Caves', noun: 'caves', items: list([
+        'A2', 'A7', 'B5', 'B6', 'C2', 'C6', 'E1', 'E3', 'E5', 'E6',
+        'E7', 'F1', 'F3', 'F5', 'F7', 'G1', 'G2', 'G5', 'G6'
+      ], 'done') },
+      { id: uid('sec'), type: 'checklist', title: 'Blue ChuChus', noun: 'chuchus', items: list([
+        'Star', 'Northern Fairy', 'Crescent Moon', 'Overlook', 'Mother & Child', 'Spectacle',
+        'Pawprint', 'Western Fairy', 'Rock Spire', 'Tingle', 'Eastern Fairy', 'Thorned Fairy',
+        'Needle Rock', 'Stone Watcher', "Bird's Peak Rock", 'Diamond Steppe', 'Shark',
+        'Southern Fairy', 'Cliff Plateau', 'Horseshoe', 'Angular', 'Boating Course'
+      ], 'done') },
+      { id: uid('sec'), type: 'counter', title: 'Heart Pieces', noun: 'pieces', shape: 'circle', items: hearts },
+      { id: uid('sec'), type: 'counter', title: 'Nintendo Gallery', noun: 'figurines', shape: 'circle',
+        items: (function () { const a = []; for (let i = 1; i <= 134; i++) a.push({ name: 'Figurine ' + i, got: false }); return a; })() },
+      { id: uid('sec'), type: 'notes', title: 'Field Notes', items: [] }
+    ]
+  };
+}
+
+function applyPulledRun(project, pulled) {
+  const out = clone(project);
+  const byTitle = {};
+  (out.sections || []).forEach(s => { byTitle[String(s.title || '').trim().toLowerCase()] = s; });
+  const built = [];
+  const summary = { sections: 0, items: 0, added: 0, removed: 0 };
+
+  (pulled.sections || []).forEach(ps => {
+    const key = String(ps.title || '').trim().toLowerCase();
+    const local = byTitle[key];
+    const type = (local && local.type) || ps.type || 'checklist';
+    const rows = ps.items || [];
+    summary.sections++;
+    summary.items += rows.length;
+
+    if (type === 'map') {
+      const labels = rows.map(r => r.name);
+      const cells = rows.map(r => !!r.done);
+      const prevN = local && local.cells ? local.cells.length : cells.length;
+      if (cells.length > prevN) summary.added += cells.length - prevN;
+      if (cells.length < prevN) summary.removed += prevN - cells.length;
+      built.push({ ...(local || {}), id: (local && local.id) || uid('sec'), type: 'map',
+        title: ps.title, cols: (local && local.cols) || Math.min(8, Math.max(3, Math.ceil(Math.sqrt(cells.length)))),
+        labels: labels, cells: cells });
+      return;
+    }
+    if (type === 'notes') {
+      const items = rows.map(r => (r.value && String(r.value).trim()) || r.name).filter(Boolean);
+      built.push({ ...(local || {}), id: (local && local.id) || uid('sec'), type: 'notes', title: ps.title, items: items });
+      return;
+    }
+
+    const prevItems = (local && local.items) || [];
+    const prevByName = {};
+    prevItems.forEach(i => { prevByName[String(i.name || '').trim().toLowerCase()] = i; });
+    const seen = {};
+    const items = rows.map(r => {
+      const nm = String(r.name || '').trim();
+      const prev = prevByName[nm.toLowerCase()];
+      if (prev) seen[nm.toLowerCase()] = true; else summary.added++;
+      if (type === 'ref') return { ...(prev || {}), name: nm, value: r.value || '' };
+      if (type === 'rated') {
+        const states = (local && local.states) || ['Unknown', 'Found', 'Collected'];
+        let idx = states.findIndex(st => String(st).toLowerCase() === String(r.value || '').trim().toLowerCase());
+        if (idx < 0) idx = r.done ? states.length - 1 : 0;
+        return { ...(prev || {}), name: nm, state: idx };
+      }
+      if (type === 'checklist') return { ...(prev || {}), name: nm, done: !!r.done, where: r.value || (prev && prev.where) || '' };
+      return { ...(prev || {}), name: nm, got: !!r.done, where: r.value || (prev && prev.where) || '' };
+    });
+    summary.removed += prevItems.filter(i => !seen[String(i.name || '').trim().toLowerCase()]).length;
+    built.push({ ...(local || {}), id: (local && local.id) || uid('sec'), type: type, title: ps.title, items: items });
+  });
+
+  // Sections with no rows (an empty Field Notes, say) never come back from the
+  // sheet. Keep them rather than letting a round trip delete them.
+  if (built.length) {
+    const pulledTitles = {};
+    built.forEach(b => { pulledTitles[String(b.title || '').trim().toLowerCase()] = true; });
+    (out.sections || []).forEach(local => {
+      if (!pulledTitles[String(local.title || '').trim().toLowerCase()]) built.push(local);
+    });
+    out.sections = built;
+  }
+  out.lastPull = Date.now();
+  return { project: out, summary };
+}
+
 function resetTrackerProgress(src) {
   const c = clone(src);
   c.id = uid('proj');
@@ -1466,6 +1652,7 @@ function Home({
   projects,
   onOpen,
   onNew,
+  onNewWindWaker,
   backup
 }) {
   const done = projects.filter(p => _pp(p) >= 1).length;
@@ -1577,7 +1764,17 @@ function Home({
       fontSize: 16,
       color: 'var(--text)'
     }
-  }, "New tracker"))));
+  }, "New tracker")), onNewWindWaker && /*#__PURE__*/React.createElement("button", {
+    onClick: onNewWindWaker,
+    style: {
+      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+      width: '100%', marginTop: 10, padding: '13px 16px',
+      border: '1px dashed var(--line)', borderRadius: 'var(--radius-md)',
+      background: 'transparent', cursor: 'pointer',
+      fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 14.5,
+      color: 'var(--text-muted)'
+    }
+  }, "\uD83C\uDF0A Start a Wind Waker run")));
 }
 window.Home = Home;
 
@@ -2107,6 +2304,9 @@ window.Home = Home;
     onRename,
     onDelete,
     onStartNewRun,
+    onPushSheet,
+    onPullSheet,
+    syncMsg,
     onEditProject
   }) {
     const overall = projectProgress(project);
@@ -2294,6 +2494,12 @@ window.Home = Home;
       },
       style: menuItemStyle('var(--text)')
     }, Ic.pencil('var(--text-muted)'), " Rename"), /*#__PURE__*/React.createElement("button", {
+      onClick: () => { setMenu(false); if (onPushSheet) onPushSheet(project); },
+      style: menuItemStyle('var(--text)')
+    }, Ic.up ? Ic.up('var(--text-muted)') : null, " Push to sheet"), /*#__PURE__*/React.createElement("button", {
+      onClick: () => { setMenu(false); if (onPullSheet) onPullSheet(project); },
+      style: menuItemStyle('var(--text)')
+    }, Ic.down ? Ic.down('var(--text-muted)') : null, " Pull from sheet"), /*#__PURE__*/React.createElement("button", {
       onClick: () => {
         setMenu(false);
         if (onStartNewRun) onStartNewRun(project);
@@ -4953,6 +5159,11 @@ function ProjectsApp() {
     return () => { delete window.__projectsUpsertTracker; };
   }, []);
   const [chest, setChest] = React.useState(null); // celebration payload or null
+  const [syncMsg, setSyncMsg] = React.useState(null); // {text, bad}
+  const say = (text, bad) => {
+    setSyncMsg({ text: text, bad: !!bad });
+    setTimeout(() => setSyncMsg(null), bad ? 7000 : 4000);
+  };
 
   const celebrate = reason => {
     if (t.celebrations) setChest(reason || {
@@ -5011,8 +5222,38 @@ function ProjectsApp() {
       },
       onStartNewRun: src => {
         const fresh = resetTrackerProgress(src);
+        fresh.sheetTab = fresh.title;
         setProjects(ps => [fresh, ...ps]);
         setSel(fresh.id);
+        say('Started "' + fresh.title + '". Push it to create its sheet tab.');
+      },
+      syncMsg: syncMsg,
+      onPushSheet: proj => {
+        if (!window.__runsSync) return;
+        const tab = proj.sheetTab || proj.title;
+        if (!window.confirm('Push "' + proj.title + '" to the sheet?\n\nThis replaces the "' + tab + '" tab with what is in the app right now.')) return;
+        say('Pushing to the sheet\u2026');
+        window.__runsSync.push(proj).then(res => {
+          if (!res || res.error) { say(res && res.error ? res.error : 'Push failed', true); return; }
+          setProjects(ps => ps.map(p => p.id === proj.id ? { ...p, sheetTab: res.tab, lastPush: Date.now() } : p));
+          say('Pushed ' + res.rows + ' rows to "' + res.tab + '"');
+        });
+      },
+      onPullSheet: proj => {
+        if (!window.__runsSync) return;
+        const tab = proj.sheetTab || proj.title;
+        if (!window.confirm('Pull "' + tab + '" from the sheet?\n\nThis replaces what is in the app with what is in the sheet.')) return;
+        say('Pulling from the sheet\u2026');
+        window.__runsSync.pull(tab).then(res => {
+          if (!res || res.error) { say(res && res.error ? res.error : 'Pull failed', true); return; }
+          if (!res.sections || !res.sections.length) { say('Nothing in the "' + tab + '" tab yet \u2014 push first.', true); return; }
+          const merged = applyPulledRun(proj, res);
+          setProjects(ps => ps.map(p => p.id === proj.id ? merged.project : p));
+          let msg = 'Pulled ' + merged.summary.items + ' items from "' + tab + '"';
+          if (merged.summary.added) msg += ' \u00b7 ' + merged.summary.added + ' new';
+          if (merged.summary.removed) msg += ' \u00b7 ' + merged.summary.removed + ' removed';
+          say(msg);
+        });
       }
     });
   } else {
@@ -5023,7 +5264,15 @@ function ProjectsApp() {
         setSel(id);
         setView('tracker');
       },
-      onNew: () => setView('build')
+      onNew: () => setView('build'),
+      onNewWindWaker: () => {
+        const n = projects.filter(p => /^Wind Waker Run/.test(p.title || '')).length + 1;
+        const fresh = buildWindWakerRun('Wind Waker Run ' + n);
+        setProjects(ps => [fresh, ...ps]);
+        setSel(fresh.id);
+        setView('tracker');
+        say('Created "' + fresh.title + '" \u2014 322 items. Push it to the sheet when ready.');
+      }
     });
   }
   return /*#__PURE__*/React.createElement("div", {
@@ -5041,7 +5290,15 @@ function ProjectsApp() {
       WebkitOverflowScrolling: 'touch',
       paddingTop: 8
     }
-  }, screen), chest && /*#__PURE__*/React.createElement(_Chest, {
+  }, screen), syncMsg && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'absolute', left: 16, right: 16, bottom: 22, zIndex: 60,
+      padding: '11px 15px', borderRadius: 12, textAlign: 'center',
+      background: syncMsg.bad ? 'var(--danger, #C0492F)' : 'var(--accent-ink, #2f2a24)',
+      color: '#fff', fontSize: 13.5, fontWeight: 600,
+      boxShadow: 'var(--shadow-lg)', pointerEvents: 'none'
+    }
+  }, syncMsg.text), chest && /*#__PURE__*/React.createElement(_Chest, {
     reason: chest,
     onClose: () => setChest(null)
   }), /*#__PURE__*/React.createElement(window.TweaksPanel, null, /*#__PURE__*/React.createElement(window.TweakSection, {
