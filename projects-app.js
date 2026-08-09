@@ -591,7 +591,41 @@ function sectionProgress(sec) {
     done: sec.items.reduce((a, i) => a + i.state, 0),
     total: sec.items.length * 2
   };
+  if (sec.type === 'ref') return null; // reference pairs — informational, not scored
   return null; // notes — informational, not scored
+}
+/**
+ * Clones a tracker as a fresh run: same sections and item names, all progress
+ * cleared. Reference values are kept as a starting point (a randomiser run
+ * overwrites them) but notes are cleared, since they describe the old run.
+ * Returns a NEW object; the source is never mutated.
+ */
+function resetTrackerProgress(src) {
+  const c = clone(src);
+  c.id = uid('proj');
+  const m = String(src.title || 'Run').match(/^(.*?)(?:\s+(\d+))?$/);
+  const stem = (m && m[1] ? m[1] : String(src.title || 'Run')).trim();
+  const n = (m && m[2]) ? (parseInt(m[2], 10) + 1) : 2;
+  c.title = stem + ' ' + n;
+  c.started = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  c.sections = (c.sections || []).map(s => {
+    const sec = { ...s, id: uid('sec') };
+    if (sec.type === 'map') {
+      sec.cells = (sec.cells || []).map(() => false);
+    } else if (sec.type === 'notes') {
+      sec.items = [];
+    } else if (sec.type === 'ref') {
+      sec.items = (sec.items || []).map(i => ({ name: i.name, value: i.value || '' }));
+    } else if (sec.type === 'rated') {
+      sec.items = (sec.items || []).map(i => ({ ...i, state: 0 }));
+    } else if (sec.type === 'checklist') {
+      sec.items = (sec.items || []).map(i => ({ ...i, done: false }));
+    } else {
+      sec.items = (sec.items || []).map(i => ({ ...i, got: false }));
+    }
+    return sec;
+  });
+  return c;
 }
 function projectProgress(p) {
   const secs = (p && Array.isArray(p.sections)) ? p.sections : [];
@@ -1152,6 +1186,11 @@ function sectionEntries(sec) {
     name: sec.labels && sec.labels[i] || 'Area ' + (i + 1),
     done: !!on
   }));
+  if (sec.type === 'ref') return (sec.items || []).map(i => ({
+    name: i.name,
+    where: i.value || '',
+    done: false
+  }));
   if (sec.type === 'notes') return (sec.items || []).map(t => ({
     name: t,
     done: false
@@ -1206,6 +1245,14 @@ function buildSection(sec, type, entries) {
       cells: entries.map(e => !!e.done)
     };
   }
+  if (type === 'ref') return {
+    ...base,
+    type: 'ref',
+    items: entries.map(e => ({
+      name: e.name,
+      value: e.where || ''
+    }))
+  };
   if (type === 'notes') return {
     ...base,
     type: 'notes',
@@ -1708,7 +1755,7 @@ window.Home = Home;
         fontSize: 12.5,
         color: 'var(--text-faint)'
       }
-    }, sec.items.length, " notes")), collapsible && /*#__PURE__*/React.createElement("span", {
+    }, (sec.items || []).length, sec.type === 'ref' ? ((sec.items || []).filter(i => i && i.value).length === (sec.items || []).length ? ' recorded' : ' to note') : " notes")), collapsible && /*#__PURE__*/React.createElement("span", {
       style: {
         flexShrink: 0
       }
@@ -1953,6 +2000,55 @@ window.Home = Home;
           })
         })));
       }
+      if (sec.type === 'ref') {
+        return /*#__PURE__*/React.createElement("div", {
+          style: { display: 'grid', gap: 6 }
+        }, (sec.items || []).map((it, i) => /*#__PURE__*/React.createElement("div", {
+          key: i,
+          style: {
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '9px 12px',
+            borderRadius: 10,
+            background: 'var(--surface-2, rgba(0,0,0,0.03))',
+            border: '1px dashed ' + color + '55'
+          }
+        }, /*#__PURE__*/React.createElement("span", {
+          style: {
+            flex: 1,
+            minWidth: 0,
+            fontSize: 13.5,
+            color: 'var(--text)',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }
+        }, it.name), /*#__PURE__*/React.createElement("input", {
+          value: it.value || '',
+          placeholder: 'tap to set',
+          "aria-label": it.name,
+          onChange: e => {
+            const v = e.target.value;
+            update(items => { items[i].value = v; });
+          },
+          style: {
+            flexShrink: 0,
+            width: '48%',
+            maxWidth: 200,
+            border: 'none',
+            borderBottom: '1px solid ' + color + '44',
+            background: 'transparent',
+            textAlign: 'right',
+            fontFamily: 'var(--font-mono)',
+            fontSize: 12.5,
+            fontWeight: 600,
+            color: (it.value ? color : 'var(--text-faint)'),
+            padding: '2px 0',
+            outline: 'none'
+          }
+        }))));
+      }
       if (sec.type === 'notes') {
         return /*#__PURE__*/React.createElement(NotesEditor, {
           sec: sec,
@@ -2010,6 +2106,7 @@ window.Home = Home;
     celebrate,
     onRename,
     onDelete,
+    onStartNewRun,
     onEditProject
   }) {
     const overall = projectProgress(project);
@@ -2197,6 +2294,12 @@ window.Home = Home;
       },
       style: menuItemStyle('var(--text)')
     }, Ic.pencil('var(--text-muted)'), " Rename"), /*#__PURE__*/React.createElement("button", {
+      onClick: () => {
+        setMenu(false);
+        if (onStartNewRun) onStartNewRun(project);
+      },
+      style: menuItemStyle('var(--text)')
+    }, Ic.plus ? Ic.plus('var(--text-muted)') : null, " Start a new run"), /*#__PURE__*/React.createElement("button", {
       onClick: () => {
         setMenu(false);
         setConfirmDel(true);
@@ -4116,6 +4219,10 @@ window.Build = Build;
     label: 'Rated',
     tip: 'stages of mastery'
   }, {
+    k: 'ref',
+    label: 'Reference',
+    tip: 'name → value, not scored'
+  }, {
     k: 'notes',
     label: 'Notes',
     tip: 'free text'
@@ -4901,6 +5008,11 @@ function ProjectsApp() {
         setProjects(ps => ps.filter(p => p.id !== pid));
         setSel(null);
         setView('home');
+      },
+      onStartNewRun: src => {
+        const fresh = resetTrackerProgress(src);
+        setProjects(ps => [fresh, ...ps]);
+        setSel(fresh.id);
       }
     });
   } else {
