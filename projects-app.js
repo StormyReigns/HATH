@@ -4827,6 +4827,24 @@ function ProjectsApp() {
   }, []);
   const [view, setView] = React.useState('home'); // home | build | tracker
   const [sel, setSel] = React.useState(null);
+  // Published so the Blathers chat in index.html can say which tracker is open.
+  React.useEffect(() => {
+    window.__projectsOpenId = (view === 'tracker') ? sel : null;
+  }, [sel, view]);
+  // Lets the Blathers chat add or update a tracker through React rather than
+  // writing localStorage behind the app's back (which wouldn't re-render).
+  React.useEffect(() => {
+    window.__projectsUpsertTracker = function (t) {
+      if (!t || !Array.isArray(t.sections)) return false;
+      setProjects(prev => {
+        const i = prev.findIndex(p => String(p.id) === String(t.id));
+        if (i >= 0) { const c = prev.slice(); c[i] = t; return c; }
+        return prev.concat([t]);
+      });
+      return true;
+    };
+    return () => { delete window.__projectsUpsertTracker; };
+  }, []);
   const [chest, setChest] = React.useState(null); // celebration payload or null
 
   const celebrate = reason => {
