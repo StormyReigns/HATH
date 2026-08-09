@@ -439,8 +439,20 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
         return d;
       }).catch(function (e) { return { error: String((e && e.message) || e) }; });
     },
-    list: function () {
-      var url = AI_ENDPOINT + '?action=runsList&user=' + encodeURIComponent(_user());
+    restore: function (tab) {
+      return fetch(AI_ENDPOINT, {
+        method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'runsRestoreTab', user: _user(), tab: tab })
+      }).then(function (r) { return r.json(); }).catch(function (e) { return { error: String(e) }; });
+    },
+    archive: function (tab) {
+      return fetch(AI_ENDPOINT, {
+        method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'runsDeleteTab', user: _user(), tab: tab })
+      }).then(function (r) { return r.json(); }).catch(function (e) { return { error: String(e) }; });
+    },
+    list: function (includeArchived) {
+      var url = AI_ENDPOINT + '?action=runsList' + (includeArchived ? '&all=1' : '') + '&user=' + encodeURIComponent(_user());
       return fetch(url, { redirect: 'follow' }).then(function (r) { return r.json(); })
         .then(function (d) { return (d && d.runs) || []; }).catch(function () { return []; });
     }
@@ -759,6 +771,17 @@ function applyPulledRun(project, pulled) {
       return;
     }
 
+    // A restored run has no local copy, so the state names have to come from
+    // the sheet's Value column; otherwise a three-state section loses its labels.
+    let ratedStates = (local && local.states) || null;
+    if (type === 'rated' && !ratedStates) {
+      ratedStates = ['Unknown', 'Found', 'Collected'];
+      rows.forEach(r => {
+        const v = String(r.value || '').trim();
+        if (v && !ratedStates.some(st => String(st).toLowerCase() === v.toLowerCase())) ratedStates.push(v);
+      });
+    }
+
     const prevItems = (local && local.items) || [];
     const prevByName = {};
     prevItems.forEach(i => { prevByName[String(i.name || '').trim().toLowerCase()] = i; });
@@ -769,16 +792,17 @@ function applyPulledRun(project, pulled) {
       if (prev) seen[nm.toLowerCase()] = true; else summary.added++;
       if (type === 'ref') return { ...(prev || {}), name: nm, value: r.value || '' };
       if (type === 'rated') {
-        const states = (local && local.states) || ['Unknown', 'Found', 'Collected'];
-        let idx = states.findIndex(st => String(st).toLowerCase() === String(r.value || '').trim().toLowerCase());
-        if (idx < 0) idx = r.done ? states.length - 1 : 0;
+        let idx = ratedStates.findIndex(st => String(st).toLowerCase() === String(r.value || '').trim().toLowerCase());
+        if (idx < 0) idx = r.done ? ratedStates.length - 1 : 0;
         return { ...(prev || {}), name: nm, state: idx };
       }
       if (type === 'checklist') return { ...(prev || {}), name: nm, done: !!r.done, where: r.value || (prev && prev.where) || '' };
       return { ...(prev || {}), name: nm, got: !!r.done, where: r.value || (prev && prev.where) || '' };
     });
     summary.removed += prevItems.filter(i => !seen[String(i.name || '').trim().toLowerCase()]).length;
-    built.push({ ...(local || {}), id: (local && local.id) || uid('sec'), type: type, title: ps.title, items: items });
+    const sec = { ...(local || {}), id: (local && local.id) || uid('sec'), type: type, title: ps.title, items: items };
+    if (type === 'rated') sec.states = ratedStates;
+    built.push(sec);
   });
 
   // Sections with no rows (an empty Field Notes, say) never come back from the
@@ -1658,12 +1682,17 @@ function ProjectCard({
   })));
 }
 function Home({
-  projects,
+  projects: allProjects,
   onOpen,
   onNew,
   onNewWindWaker,
+  onUnarchive,
+  onRestore,
   backup
 }) {
+  const [showArch, setShowArch] = React.useState(false);
+  const projects = (allProjects || []).filter(p => !p.archived);
+  const archived = (allProjects || []).filter(p => p.archived);
   const done = projects.filter(p => _pp(p) >= 1).length;
   const backupLabel = (function () {
     if (!backup || !window.__projBackup || !window.__projBackup.signedIn()) return null;
@@ -1783,7 +1812,43 @@ function Home({
       fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 14.5,
       color: 'var(--text-muted)'
     }
-  }, "\uD83C\uDF0A Start a Wind Waker run")));
+  }, "\uD83C\uDF0A Start a Wind Waker run"), archived.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: { marginTop: 18 }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowArch(v => !v),
+    style: {
+      display: 'flex', alignItems: 'center', gap: 6, width: '100%',
+      border: 'none', background: 'transparent', cursor: 'pointer', padding: '6px 2px',
+      fontFamily: 'var(--font-mono)', fontSize: 11.5, letterSpacing: '.08em',
+      textTransform: 'uppercase', color: 'var(--text-faint)'
+    }
+  }, (showArch ? '\u25BE ' : '\u25B8 ') + 'Archived (' + archived.length + ')'),
+    showArch && /*#__PURE__*/React.createElement("div", { style: { display: 'grid', gap: 8, marginTop: 6 } },
+      archived.map(p => /*#__PURE__*/React.createElement("div", {
+        key: p.id,
+        style: {
+          display: 'flex', alignItems: 'center', gap: 10, padding: '11px 13px',
+          border: '1px solid var(--line)', borderRadius: 'var(--radius-md)',
+          background: 'var(--surface)', opacity: .75
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: { flex: 1, minWidth: 0, fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 14, color: 'var(--text)' }
+      }, p.title), /*#__PURE__*/React.createElement("button", {
+        onClick: () => onOpen && onOpen(p.id),
+        style: { border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 12.5, color: 'var(--text-muted)' }
+      }, "Open"), /*#__PURE__*/React.createElement("button", {
+        onClick: () => onUnarchive && onUnarchive(p.id),
+        style: { border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 12.5, fontWeight: 600, color: 'var(--accent)' }
+      }, "Unarchive")))
+    )), onRestore && /*#__PURE__*/React.createElement("button", {
+    onClick: onRestore,
+    style: {
+      display: 'block', width: '100%', marginTop: 12, padding: '10px 16px',
+      border: 'none', background: 'transparent', cursor: 'pointer',
+      fontFamily: 'var(--font-mono)', fontSize: 11.5, letterSpacing: '.06em',
+      textTransform: 'uppercase', color: 'var(--text-faint)'
+    }
+  }, "Restore a run from the sheet")));
 }
 window.Home = Home;
 
@@ -2313,6 +2378,7 @@ window.Home = Home;
     onRename,
     onDelete,
     onStartNewRun,
+    onArchive,
     onPushSheet,
     onPullSheet,
     syncMsg,
@@ -2509,6 +2575,12 @@ window.Home = Home;
       onClick: () => { setMenu(false); if (onPullSheet) onPullSheet(project); },
       style: menuItemStyle('var(--text)')
     }, Ic.down ? Ic.down('var(--text-muted)') : null, " Pull from sheet"), /*#__PURE__*/React.createElement("button", {
+      onClick: () => { setMenu(false); if (onArchive) onArchive(project, false); },
+      style: menuItemStyle('var(--text)')
+    }, "\uD83D\uDCE6 Archive run"), /*#__PURE__*/React.createElement("button", {
+      onClick: () => { setMenu(false); if (onArchive) onArchive(project, true); },
+      style: menuItemStyle('var(--text-muted)')
+    }, "\u2193 Archive & remove from device"), /*#__PURE__*/React.createElement("button", {
       onClick: () => {
         setMenu(false);
         if (onStartNewRun) onStartNewRun(project);
@@ -5169,6 +5241,7 @@ function ProjectsApp() {
   }, []);
   const [chest, setChest] = React.useState(null); // celebration payload or null
   const [syncMsg, setSyncMsg] = React.useState(null); // {text, bad}
+  const [restoreList, setRestoreList] = React.useState(null); // null | 'loading' | [runs]
   const say = (text, bad) => {
     setSyncMsg({ text: text, bad: !!bad });
     setTimeout(() => setSyncMsg(null), bad ? 7000 : 4000);
@@ -5251,6 +5324,37 @@ function ProjectsApp() {
         say('Started "' + fresh.title + '". Push it to create its sheet tab.');
       },
       syncMsg: syncMsg,
+      onArchive: (proj, alsoRemove) => {
+        const tab = proj.sheetTab || proj.title;
+        const q = alsoRemove
+          ? 'Archive "' + proj.title + '" and remove it from this device?\n\nIt is saved to the sheet first, hidden there, and you can bring it back any time with "Restore a run".'
+          : 'Archive "' + proj.title + '"?\n\nIt is saved to the sheet, hidden there, and moves to Archived at the bottom of your list.';
+        if (!window.confirm(q)) return;
+        if (!window.__runsSync) return;
+        say('Saving to the sheet before archiving\u2026');
+        // Always push first. If the save fails, nothing is archived or removed.
+        window.__runsSync.push(proj).then(res => {
+          if (!res || res.error) {
+            say('Could not save to the sheet, so nothing was archived: ' + ((res && res.error) || 'unknown error'), true);
+            return;
+          }
+          window.__runsSync.archive(res.tab).then(a => {
+            if (!a || a.error) { say((a && a.error) || 'Could not hide the sheet tab', true); return; }
+            if (alsoRemove) {
+              setProjects(ps => ps.filter(p => p.id !== proj.id));
+              setSel(null);
+              setView('home');
+              say('Archived "' + proj.title + '" \u2014 ' + res.rows + ' rows kept in the sheet');
+            } else {
+              setProjects(ps => ps.map(p => p.id === proj.id
+                ? { ...p, archived: true, sheetTab: res.tab, lastPush: Date.now() } : p));
+              setSel(null);
+              setView('home');
+              say('Archived "' + proj.title + '"');
+            }
+          });
+        });
+      },
       onPushSheet: proj => {
         if (!window.__runsSync) return;
         const tab = proj.sheetTab || proj.title;
@@ -5295,6 +5399,23 @@ function ProjectsApp() {
         setView('tracker');
       },
       onNew: () => setView('build'),
+      onUnarchive: pid => {
+        const p = projects.find(x => x.id === pid);
+        setProjects(ps => ps.map(x => x.id === pid ? { ...x, archived: false } : x));
+        if (p && window.__runsSync) {
+          window.__runsSync.restore(p.sheetTab || p.title).then(() => {});
+        }
+        say('Unarchived');
+      },
+      onRestore: () => {
+        if (!window.__runsSync) return;
+        setRestoreList('loading');
+        window.__runsSync.list(true).then(runs => {
+          const have = {};
+          projects.forEach(p => { have[String(p.sheetTab || p.title).toLowerCase()] = true; });
+          setRestoreList(runs.filter(r => !have[String(r.tab).toLowerCase()]));
+        });
+      },
       onNewWindWaker: () => {
         const n = projects.filter(p => /^Wind Waker Run/.test(p.title || '')).length + 1;
         const fresh = buildWindWakerRun('Wind Waker Run ' + n);
@@ -5320,7 +5441,62 @@ function ProjectsApp() {
       WebkitOverflowScrolling: 'touch',
       paddingTop: 8
     }
-  }, screen), syncMsg && /*#__PURE__*/React.createElement("div", {
+  }, screen), restoreList !== null && /*#__PURE__*/React.createElement("div", {
+    onClick: () => setRestoreList(null),
+    style: {
+      position: 'absolute', inset: 0, zIndex: 70, background: 'rgba(20,16,12,.45)',
+      display: 'flex', alignItems: 'flex-end'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    onClick: e => e.stopPropagation(),
+    style: {
+      width: '100%', maxHeight: '70%', overflowY: 'auto',
+      background: 'var(--surface)', borderTopLeftRadius: 18, borderTopRightRadius: 18,
+      padding: '18px 16px 26px', boxShadow: 'var(--shadow-lg)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17, color: 'var(--text)', marginBottom: 4 }
+  }, "Restore a run"), /*#__PURE__*/React.createElement("div", {
+    style: { fontSize: 12.5, color: 'var(--text-muted)', marginBottom: 14 }
+  }, "Runs saved in the sheet that aren't on this device."),
+    restoreList === 'loading'
+      ? /*#__PURE__*/React.createElement("div", { style: { padding: 18, textAlign: 'center', color: 'var(--text-faint)' } }, "Looking\u2026")
+      : (restoreList.length === 0
+        ? /*#__PURE__*/React.createElement("div", { style: { padding: 18, textAlign: 'center', color: 'var(--text-faint)' } }, "Nothing to restore \u2014 every run in the sheet is already here.")
+        : /*#__PURE__*/React.createElement("div", { style: { display: 'grid', gap: 8 } },
+          restoreList.map(r => /*#__PURE__*/React.createElement("button", {
+            key: r.tab,
+            onClick: () => {
+              setRestoreList(null);
+              say('Restoring "' + r.tab + '"\u2026');
+              window.__runsSync.restore(r.tab).then(() => window.__runsSync.pull(r.tab)).then(res => {
+                if (!res || res.error || !(res.sections || []).length) {
+                  say((res && res.error) || 'That tab has no rows to restore', true);
+                  return;
+                }
+                const shell = {
+                  id: uid('proj'), title: r.title || r.tab, subtitle: r.kind || '',
+                  theme: /wind waker/i.test(r.game || '') ? 'zelda' : 'base',
+                  cover: null, started: r.started || '', sheetTab: r.tab, sections: []
+                };
+                const merged = applyPulledRun(shell, res);
+                setProjects(ps => [merged.project, ...ps]);
+                setSel(merged.project.id);
+                setView('tracker');
+                say('Restored "' + (r.title || r.tab) + '" \u2014 ' + merged.summary.items + ' items');
+              });
+            },
+            style: {
+              display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'left',
+              padding: '13px 14px', border: '1px solid var(--line)', borderRadius: 'var(--radius-md)',
+              background: 'var(--surface-2, transparent)', cursor: 'pointer'
+            }
+          }, /*#__PURE__*/React.createElement("span", {
+            style: { flex: 1, minWidth: 0, fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 14.5, color: 'var(--text)' }
+          }, r.title || r.tab), /*#__PURE__*/React.createElement("span", {
+            style: { flexShrink: 0, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-faint)' }
+          }, r.status === 'archived' ? 'archived' : (r.notes || ''))))
+        )))), syncMsg && /*#__PURE__*/React.createElement("div", {
     style: {
       position: 'absolute', left: 16, right: 16, bottom: 22, zIndex: 60,
       padding: '11px 15px', borderRadius: 12, textAlign: 'center',
