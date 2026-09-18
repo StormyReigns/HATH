@@ -747,6 +747,39 @@ function buildWindWakerRun(title) {
   };
 }
 
+/**
+ * A ready-made Fire Emblem: Fortune's Weave collect-everything tracker
+ * (characters, paralogues, dungeons, classes, quests, deeds).
+ */
+function buildFortunesWeaveRun(title) {
+  // Checklist compiled from Game8, RPG Site, Polygon, IGN and the FE wiki (Sept 2026).
+  // Character notes read 'C 3/9' = Cai route, Support 3 + Renown 9.
+  const look = detectTheme("Fire Emblem: Fortune's Weave");
+  const ck = rows => rows.map(r => (typeof r === 'string' ? { name: r, done: false } : { name: r[0], where: r[1] || '', done: false }));
+  const rt = names => names.map(n => ({ name: n, state: 0 }));
+  const name = title || "Fortune's Weave Run";
+  return {
+    id: uid('proj'), title: name, subtitle: 'Collect-everything run',
+    theme: look.theme, cover: look.cover,
+    started: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    sheetTab: name,
+    sections: [
+      { id: uid('sec'), type: 'rated', title: 'Flame Lord Routes', noun: 'routes', states: ['Not started', 'Part I done', 'War Arc done'], items: rt(['Cai', 'Dietrich', 'Theodora', 'Leda']) },
+      { id: uid('sec'), type: 'checklist', title: 'Paralogues', noun: 'paralogues', celebrate: true, items: ck([["Diversionary Tactics (Leda)", "Silver Shield · D Ch9, T Ch10 · 9/2–9/8"], ["Missing Brave-Warrior Statue (Theodora)", "Pilum · D Ch9 · 9/3–9/15"], ["Secret of the Vanished Carriage (Talimun)", "Cleansing Blade · C/D/T · 9/17–9/22 & 10/1–10/12"], ["Friendly Match with Brigid's King (Bertrand)", "Extra Large Bullion · C/T 9/17–9/25 · D 9/17 only!"], ["Golden Secret (Anna)", "Orichalcum · C/D/T · 9/24–10/5"], ["Queen of the Erased (Anatolia)", "Electron Agitator · D/L · 10/5–10/17"], ["Sealed-Off Past (Dietrich)", "Salamander · L Ch11 · 10/16–11/1"], ["Great Escape (Cai)", "Gem Box · D/T/L · 10/16–10/22"], ["Orchel's Regret (Orchel)", "Healing Staff · all routes · 10/18–10/27"]]) },
+      { id: uid('sec'), type: 'checklist', title: 'Characters', noun: 'recruited', milestone: 10, items: ck([["Eshmel", "Your avatar · Prologue"], ["Hong Hua", "Auto · Prologue & Part III"], ["Troy", "Auto · Prologue & Part III"], ["Cai", "Flame Lord · Fox Obelisk"], ["Tialla", "C auto · D 3/9 · T 3/10 · L 3/8 — Cai's Paralogue + 3,000G"], ["Peter", "C auto · D 3/8 · T 3/7 · L 3/10 — his request"], ["Ultand", "C auto Ch6 · D 3/5 · T 3/6 · L 3/8 — her request"], ["Dietrich", "Flame Lord · Lion Obelisk"], ["Fabio", "C — · D auto · T — · L 3/9 — Dietrich's Paralogue, after Dietrich is out (~Ch12), + a gift (Da Mina weapon)"], ["Esmeralda", "C 3/7 · D auto · T 3/9 · L 3/6 — her request"], ["Mikaela", "C 3/5 · D auto · T 3/8 · L 3/6 — 3,000G"], ["Theodora", "Flame Lord · Wolf Obelisk"], ["Bonaventure", "Theodora route only"], ["Tobias", "Theodora route only"], ["Lysander", "C 3/8 · D 3/6 · T auto · L 3/7 — 5 Iron Spears"], ["Lilian", "C 2/8 · D 2/8 · T auto · L 2/7 — 5,000G"], ["Leda", "Flame Lord · Eagle Obelisk"], ["Buccar", "C — · D 3/8 · T 3/8 · L auto — Leda's Paralogue"], ["Sirocco", "C 3/9 · D 3/9 · T 1/5 · L auto — his request"], ["Mu", "C 3/9 · D 3/7 · T 3/9 · L auto — 3 Glirmosa"], ["Olympia", "C 3/8 · D 3/6 · T 3/9 · L auto — 3 requests"], ["Bertrand", "Guest Part II, joins Part III · do his Paralogue"], ["Gaitz", "C — · D 3/10 · T — · L — — Bertrand's Paralogue, after Bertrand is out (~Ch12)"], ["Dante", "C 3/10 · D 2/8 · T 3/6 · L 3/10 — 8,000G"], ["Goliath", "C 3/7 · D 3/6 · T 3/9 · L 3/10 — 3 Giant's Meat (Sand-Shadow Fort)"], ["Jester", "C 3/10 · D 3/6 · T 3/9 · L 3/10 — 3 requests"], ["Talimun", "Joins Part III · do his Paralogue"], ["Ursula", "C 3/10 · D 3/7 · T 3/9 · L — — Talimun's Paralogue, answer Yes x3"], ["Simon", "C 3/8 · D 3/7 · T 3/7 · L 3/6 — coin flip: Tails"], ["Ludia", "C 3/9 · D 3/9 · T 3/7 · L 3/7 — her request"], ["Fianna", "C 3/8 · D 3/7 · T 3/9 · L 3/5 — 3,000G"], ["Orchel", "Joins Part III · do Orchel's Regret"], ["Diego", "C 3/10 · D 3/9 · T 2/8 · L 3/8 — Orchel's Regret"], ["Ninae", "C 3/6 · D 3/8 · T 3/6 · L 3/6 — 1 Paradise Fish (Lake Brontes)"], ["Seteth", "C 3/6 · D — · T 3/6 · L 3/10 — his request"], ["Loretta", "C 3/7 · D 3/9 · T 3/5 · L 3/5 — 3 Iron Swords"], ["Anatolia", "Joins Part III · do her Paralogue"], ["Sha Lan", "C — · D 3/10 · T — · L 3/8 — Anatolia's Paralogue · Saramis, Da Mina, Grounded Ship"], ["Nezha", "C 3/6 · D 3/10 · T 2/6 · L 3/9 — 3 Sandworm Meat"], ["Dadao", "C 3/7 · D 3/10 · T 2/5 · L 2/5 — 2 Kothar Gar"], ["Halvin", "C 3/9 · D 3/9 · T 3/7 · L 3/7 — 10 Dates"], ["Creek", "Part II Ch2 — only if \"My Late Sister's Accessory\" done in Part I"], ["Nathan", "Part II Ch3 — Creek lands the final blow"], ["Aswan", "Part III — must survive as guest in Part II Ch3"], ["Tahonia", "Part III — must survive as guest in Part II Ch3"], ["Benditz", "C 3/9 · D 2/7 · T 1/8 · L 3/7 — appears ~4/11"], ["Alexandra", "C 2/7 · D 3/8 · T 1/6 · L 3/10 — appears ~5/29"], ["Zarcone", "C 3/8 · D 3/7 · T 1/4 · L 2/5 — haggle: refuse twice, pay 500G"], ["Jasmine", "C 1/8 · D 3/9 · T 3/8 · L 2/4 — 500–5,000G · appears ~5/8"], ["Kiroc", "C 3/8 · D 1/4 · T 3/10 · L 1/4 — 3–8 Pure Water · ~5/4"], ["Inyoni", "C 3/8 · D 3/8 · T 1/9 · L 1/7 — 3,000–6,000G · ~7/10"], ["Peppe", "C 1/9 · D 3/8 · T 2/7 · L — — Bertrand's Paralogue"], ["Centurio", "Part III — quest \"Rescue Centurio\""], ["Sofia", "C 3/9 · D 3/9 · T auto · L 3/7"], ["Guzran", "C auto · D 3/8 · T 3/8 · L 1/3"], ["Yang Jie", "C 2/3 · D auto · T 3/9 · L 3/8 — Cheese, Moon, Potatoes"], ["Io", "C 3/10 · D 2/3 · T 3/10 · L 1/6 — 800–4,000G"], ["Catania", "C 3/10 · D 1/8 · T 3/7 · L auto"], ["Noctula", "C 1/4 · D 1/6 · T 1/3 · L 3/8"], ["Nydine", "C 1/6 · D 2/5 · T 3/5 · L 3/10 — 2 Bronze Axes / 3 Iron Axes"], ["Nuzzuo", "C 2/6 · D 1/9 · T 1/6 · L 3/9 — 2–3 Iron Bows · ~7/1"], ["Majide", "C 2/5 · D 3/8 · T 3/8 · L 3/9 — admit you need him x3"], ["Klapka", "Part III — must survive as guest"], ["Castor", "Limited playability"], ["Maria", "Limited playability"], ["Solel", "How to recruit: not documented yet"], ["Anna", "How to recruit: not documented yet"], ["Long", "How to recruit: not documented yet"]]) },
+      { id: uid('sec'), type: 'checklist', title: 'Keys of the Diadem', noun: 'keys', celebrate: true, items: ck([["Key of the Diadem — Heretics' Cave", "Part III chest"], ["Key of the Diadem — Enno Isle", "Part III chest"], ["Key of the Diadem — Cougar Woodlands", "Part III chest"], ["Key of the Diadem — Sand-Shadow Fort", "Part III chest"], ["Key of the Diadem — Giant's-Print Fort", "Part III chest"]]) },
+      { id: uid('sec'), type: 'rated', title: 'Dungeons', noun: 'dungeons', states: ['Not visited', 'Part I chests', 'Part III chests'], items: rt(["Wandering Wood", "Niraga Mine", "Eastern Passage", "Coris Mine", "Southern Passage", "Galen Fort Ruins", "Northern Passage", "Cindered Road Cave", "Palace of Sand", "Shadowy Cave", "Heretics' Cave", "Hundred-Hole Cave", "Cave Behind the Falls", "Nowah's Cave", "Enno Isle", "Valhalla Mine", "Uncharted Isle", "Nemea Cavern", "Cougar Woodlands", "Rubess Forest", "Masked Woods", "Fort Hayn", "Collapsed Fort", "Sand-Shadow Fort", "Stoppered Shrine", "Dione Fort", "Corroios Fort Ruins", "Dragonbone Tangle", "Beast's Path", "Aditi's Cave", "Iapetus Cavern", "Giant's-Print Fort"]) },
+      { id: uid('sec'), type: 'checklist', title: 'Secret Classes', noun: 'classes', items: ck([["Dancer", "Leda · Great Dancer's Successor (Ch9)"], ["Ranger", "Leda · Elegant Drink Recipes"], ["Troubadour", "Cai · Bertrand mentoring, or Leda · Elegant Drink Recipes"], ["Caladrius", "Cai · Castor mentoring (Special Request from Pop)"], ["Dragoon", "Cai · Aurora mentoring, or Theodora · Send Supplies Lir Fish + Sea-Star Stone"], ["Guardian", "Dietrich · beat Il-Lara, or Theodora · Send Supplies Roca + Kothar Gar"], ["Cataphract", "Theodora · Send Supplies Ladon Loach + Steel Fish"], ["Blacksmith", "Dietrich · Smyrnos Lv1 + Renown 8 (unconfirmed)"], ["Elephant Rider", "Part III · conditions TBD"], ["Master classes (10)", "Part III quests · Lv 45"], ["Divine classes", "Diadem Temple · needs all 5 Keys"]]) },
+      { id: uid('sec'), type: 'rated', title: 'Blessings', noun: 'blessings', states: ['Locked', 'Unlocked', 'Max level'], items: rt(["Fortuna (rewind)", "Aurora", "Mars", "Smyrnos", "Jurah", "Kalla", "Credna"]) },
+      { id: uid('sec'), type: 'checklist', title: 'Boons of Salvation', noun: 'boons', items: ck(["Increased Exp", "Gifts Discount", "Weapons Discount", "Items Discount", "Sword Exp", "Spear Exp", "Axe Exp", "Bow Exp", "Brawling Exp", "Black-Magic Exp", "White-Magic Exp", "Infantry Exp", "Rider Exp", "Heavy Exp", "Flier Exp", "Authority Exp"]) },
+      { id: uid('sec'), type: 'checklist', title: 'Subquests', noun: 'quests', items: ck([["Valeri's Eight Fangs", "Ch4 · Valeri Gorge"], ["Searching for Smithing Stones", "Ch4 · 3 Smithing Stones"], ["Knowing More About Him", "Ch4 · Dagsion"], ["Granada's Thieves", "Ch4 · Granada Fort Ruins"], ["Stolen Viewership", "Ch4 · Showdown Square"], ["The Fabled Insect Pearl", "Ch4 · 3 Insect Pearls"], ["Stolen Knowledge", "Ch4 · Wodan Pass"], ["Sinister Sacrifices", "Ch5 · Sunset Fortress"], ["Petals of Encouragement", "Ch5 · Yaamanthemum"], ["Behelda Axes", "Ch5 · Napier Woods"], ["Fate of the Expedition", "Ch5"], ["More Fabled Insect Pearls", "Ch5 · 2 Large Insect Pearls"], ["Primal Crystal", "Ch5 · Fallen General's Barrows"], ["Soil Survey", "Ch6 · Ruins of Megrez"], ["Energy Nuts", "Ch6 · Enrietto"], ["Defeat Aguino's Thieves", "Ch6 · Lyoshan Fort"], ["A Taste of Nostalgia", "Ch6 · Sandworm Meat"], ["A Challenge", "Ch7 · Sonai Pass"], ["A Sword of Deadly Renown", "Ch7 · Killing Edge"], ["A Screeching, Strange Shadow", "Ch7 · Fallen General's Barrows"], ["A Taste from Home", "Ch7 · Jyoppa"], ["Rare Stone Hunting", "Ch7 · 3 Ouranotite, Cougar Woodlands"], ["Legacy of a Legendary Sculptor", "Ch7 · 4 god statues"], ["Purloined Spellcasters Tools", "Ch8 · Secret Altar"], ["Blight-Louse Extermination", "Ch8 · Bugs' Burrow"], ["Huge Hairy Beasts", "Ch8 · Moonwatch Pass"], ["Garum, Garum, Garum!", "Ch8 · 5 Garum"], ["A Letter of Some Gravity", "Ch8 · chain A (excludes B)"], ["For the Empire's Safety", "Ch8 · chain B (excludes A)"], ["Another Challenge", "Ch9 · Cape Damasen"], ["Spellcasters in the Forest", "Ch9 · Faun's Forest"], ["Something a God Eats", "Ch9 · Rahlan, Port of Pandora"], ["Even More Fabled Insect Pearls", "Ch9 · 8 pearls"], ["Missing Customer", "Ch9 · Fina"], ["My Late Sister's Accessory", "Ch9 · Axion Gorge · unlocks Creek!"], ["One Last Challenge", "Ch10 · Mount Ouranos"], ["Skeletons in the Ruins", "Ch10 · Krove Ditch"], ["Attack of the Huge Birds", "Ch10 · Lake Brontes"], ["Assassination (No Questions)", "Ch10 · chain A"], ["Flamma Smugglers", "Ch10 · chain B"], ["Its Name Is Da Mina", "Ch10 · 2 Da Mina weapons"], ["Secret Sparkle", "Ch11 · Pyroxene Cave"], ["A Lost Object", "Ch11 · Iapetus Cavern · chain A"], ["Defeat the Rampaging Golems", "Ch11 · Kurdelind Ruins"], ["Can't Go Home", "Ch11 · Benetnasch"], ["Can't Stay Home", "Ch12 · Ribeira"], ["Gold-Coin Chase", "Ch12 · Giant's-Print Fort"], ["Stolen Star Observations", "Ch12 · Bau-Caller's Cape"], ["The Hunter for Gisco's Treasure", "Ch12 · Dagsion Port"], ["The Divine Sovereign's Secret", "Ch12 · Dagsion"]]) },
+      { id: uid('sec'), type: 'checklist', title: 'Flame Lord Quests', noun: 'quests', items: ck([["Mentor: Centurio", "Cai · Archer's Ring, Levin Sword"], ["Mentor: Castor", "Cai · Bolt Gem, Caladrius"], ["Mentor: Aurora", "Cai · Healing Staff, Dragoon"], ["Mentor: Bertrand", "Cai · Halberd, Troubadour"], ["Dread Warrior: Borges", "Dietrich · Hidden Soulrend"], ["Dread Warrior: Sepente", "Dietrich · Hidden Flowform"], ["Dread Warrior: Aguirre", "Dietrich · Hidden Birdbane"], ["Dread Warrior: Camilo", "Dietrich · Fort Hayn"], ["Dread Warrior: Il-Lara", "Dietrich · Guardian class"], ["Send Supplies: Roca + Kothar Gar", "Theodora · Guardian"], ["Send Supplies: Ladon Loach + Steel Fish", "Theodora · Cataphract"], ["Send Supplies: Lir Fish + Sea-Star Stone", "Theodora · Dragoon"], ["Perform: Dance at the Tavern", "Leda · Song of Icewater"], ["Perform: Simple Drink Recipes", "Leda · Song of Madness"], ["Perform: Captains' Drink Recipes", "Leda · Song of Icewater+"], ["Perform: Elegant Drink Recipes", "Leda · Ranger, Troubadour"], ["Perform: Great Dancer's Successor", "Leda · Dancer"]]) },
+      { id: uid('sec'), type: 'counter', title: 'Notable Deeds', noun: 'deeds', shape: 'star', milestone: 10, items: ["Obtained 10 pieces of ore", "Obtained 50 pieces of ore", "Completed 1 paralogue", "Watched 5 C-Support conversations", "Watched 5 B-Support conversations", "Watched 5 A-Support conversations", "Played for more than 10 hours", "Reached Skill Level C 3 times", "Reached Skill Level B 3 times", "Reached Skill Level A 3 times", "Reached Skill Level S 3 times", "Maximized a skill 3 times", "Completed Cai's Path in Part I", "Completed Dietrich's Path in Part I", "Completed Theodora's Path in Part I", "Completed Leda's Path in Part I", "Rented a room at an inn 10 times", "Spent 10 turns performing individual actions", "Dined at an inn 10 times", "Gave 10 gifts", "Had 10 perfect interactions at the perch", "Deepened bond with the Pale Raven 10 times", "Spent a total of 10,000G at shops in bases", "Defeated 10 foes in battle", "Defeated 20 foes in battle", "Defeated 30 foes in battle", "Defeated 40 foes in battle", "Defeated 50 foes in battle", "Defeated 75 foes in battle", "Defeated 10 undead foes in battle", "Defeated 20 undead foes in battle", "Defeated 30 undead foes in battle", "Defeated 10 large foes in battle", "Defeated 10 beasts in battle", "Defeated 10 livestock in battle", "Defeated 10 golden or silver mummies", "Avoided 10 attacks", "Avoided 20 attacks", "Avoided 30 attacks", "Performed 10 critical attacks", "Performed 10 assists", "Used Blaze Arts 10 times", "Used a gambit 10 times", "Triggered support salvation 10 times", "Won 5 skirmishes", "Won 10 clashes", "Won 20 clashes", "Performed an Attack Link 10 times", "Performed an Attack Link 20 times", "Performed a Recovery Link 10 times", "Performed a Mixed Link 10 times", "Paid 10,000G to wandering merchants", "Had 5 feasts"].map(n => ({ name: n, got: false })) },
+      { id: uid('sec'), type: 'notes', title: 'Field Notes', items: ["Watch support conversations as they unlock — Part I ones lock once you enter Part II.", "Recruiting only happens in Part I. Same character on several routes = merged, stronger Part III version.", "Paralogues have short date windows (see Paralogues) — set Calendar reminders.", "Finish one route before starting the next so map + subquests carry over.", "Ch8 subquest chains are mutually exclusive — do chain A on one route, chain B on another."] }
+    ]
+  };
+}
+
 function applyPulledRun(project, pulled) {
   const out = clone(project);
   const byTitle = {};
@@ -1681,7 +1714,8 @@ function ProjectCard({
     src: project.cover,
     alt: "",
     style: {
-      width: 46,
+      width: 'auto',
+      maxWidth: 110,
       height: 46,
       objectFit: 'contain',
       flexShrink: 0,
@@ -1694,6 +1728,7 @@ function Home({
   onOpen,
   onNew,
   onNewWindWaker,
+  onNewFortunesWeave,
   onUnarchive,
   onRestore,
   backup
@@ -1820,7 +1855,17 @@ function Home({
       fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 14.5,
       color: 'var(--text-muted)'
     }
-  }, "\uD83C\uDF0A Start a Wind Waker run"), archived.length > 0 && /*#__PURE__*/React.createElement("div", {
+  }, "\uD83C\uDF0A Start a Wind Waker run"), onNewFortunesWeave && /*#__PURE__*/React.createElement("button", {
+    onClick: onNewFortunesWeave,
+    style: {
+      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+      width: '100%', marginTop: 10, padding: '13px 16px',
+      border: '1px dashed var(--line)', borderRadius: 'var(--radius-md)',
+      background: 'transparent', cursor: 'pointer',
+      fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 14.5,
+      color: 'var(--text-muted)'
+    }
+  }, "\u2694\uFE0F Start a Fortune\u2019s Weave run"), archived.length > 0 && /*#__PURE__*/React.createElement("div", {
     style: { marginTop: 18 }
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => setShowArch(v => !v),
@@ -2254,6 +2299,7 @@ window.Home = Home;
         }, sec.items.map((it, i) => /*#__PURE__*/React.createElement(CheckRow, {
           key: i,
           label: it.name,
+          sub: it.where,
           done: it.done,
           color: color,
           onToggle: () => update(items => {
@@ -2692,7 +2738,8 @@ window.Home = Home;
       src: project.cover,
       alt: "",
       style: {
-        width: 64,
+        width: 'auto',
+        maxWidth: 150,
         height: 64,
         objectFit: 'contain',
         filter: 'drop-shadow(0 4px 8px rgba(30,22,14,.25))'
@@ -3039,6 +3086,11 @@ function titlecase(s) {
 }
 function detectTheme(text) {
   const t = text.toLowerCase();
+  if (/fire emblem|fortune'?s weave|fortunes weave|flame lords?|dagsion/.test(t)) return {
+    theme: 'fe',
+    label: 'Fire Emblem',
+    cover: 'https://stormyreigns.github.io/HATH/projects-assets/fefw-logo.webp'
+  };
   if (/zelda|ocarina|wind ?waker|majora|twilight princess|triforce|hyrule|ganon|\blink\b|korok|breath of the wild|tears of the kingdom|skyward/.test(t)) return {
     theme: 'zelda',
     label: 'Zelda',
@@ -3608,6 +3660,10 @@ window.Build = Build;
   }
   function detectThemeLocal(s) {
     const t = (s || '').toLowerCase();
+    if (/fire emblem|fortune'?s weave|fortunes weave|flame lords?|dagsion/.test(t)) return {
+      theme: 'fe',
+      cover: 'https://stormyreigns.github.io/HATH/projects-assets/fefw-logo.webp'
+    };
     if (/zelda|ocarina|wind ?waker|majora|triforce|hyrule|ganon|\blink\b|korok|breath of the wild|tears of the kingdom|skyward/.test(t)) return {
       theme: 'zelda',
       cover: 'https://stormyreigns.github.io/HATH/projects-assets/king-of-red-lions.png'
@@ -5475,6 +5531,15 @@ function ProjectsApp() {
         setSel(fresh.id);
         setView('tracker');
         say('Created "' + fresh.title + '" \u2014 322 items. Push it to the sheet when ready.');
+      },
+      onNewFortunesWeave: () => {
+        const n = projects.filter(p => /^Fortune.s Weave Run/.test(p.title || '')).length + 1;
+        const fresh = buildFortunesWeaveRun("Fortune's Weave Run" + (n > 1 ? ' ' + n : ''));
+        const count = fresh.sections.reduce((a, s) => a + ((s.items || s.cells || []).length), 0);
+        setProjects(ps => [fresh, ...ps]);
+        setSel(fresh.id);
+        setView('tracker');
+        say('Created "' + fresh.title + '" \u2014 ' + count + ' items. Push it to the sheet when ready.');
       }
     });
   }

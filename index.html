@@ -10745,7 +10745,7 @@
   window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
   window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '3.11.0';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '3.12.0';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
@@ -26810,6 +26810,11 @@
   --accent:#3a6ea5; --accent-soft:rgba(58,110,165,.14); --accent-deep:#2a5687;
   --accent-ink:#1d3b5f; --accent-contrast:#ffffff; --hero-tint-1:#dde7f2; --hero-tint-2:#ccd9ea;
 }
+/* themed: fe (Fire Emblem: Fortune's Weave — crimson & gold) */
+#projectsAppRoot [data-theme="fe"]{
+  --accent:#9e2f3c; --accent-soft:rgba(158,47,60,.13); --accent-deep:#7c2130;
+  --accent-ink:#4f1620; --accent-contrast:#ffffff; --hero-tint-1:#f1e3cb; --hero-tint-2:#e6d0ac;
+}
 
 /* dark mode */
 html.dark-mode #projectsAppRoot{
@@ -26824,6 +26829,10 @@ html.dark-mode #projectsAppRoot{
 html.dark-mode #projectsAppRoot [data-theme="zelda"]{
   --accent:#62b074; --accent-soft:rgba(98,176,116,.17); --accent-deep:#79c389;
   --accent-ink:#e9f5ea; --accent-contrast:#102210; --hero-tint-1:#23311f; --hero-tint-2:#1c2a18;
+}
+html.dark-mode #projectsAppRoot [data-theme="fe"]{
+  --accent:#e0808c; --accent-soft:rgba(224,128,140,.17); --accent-deep:#eb97a1;
+  --accent-ink:#f8e6e8; --accent-contrast:#2a0f14; --hero-tint-1:#352419; --hero-tint-2:#2a1c13;
 }
 html.dark-mode #projectsAppRoot [data-theme="ffxiv"]{
   --accent:#74a3da; --accent-soft:rgba(116,163,218,.17); --accent-deep:#8bb4e6;
@@ -26853,6 +26862,6 @@ html.dark-mode #projectsAppRoot [data-theme="ffxiv"]{
   100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 </style>
-<script id="projects-app-runtime" src="projects-app.js?v=3101"></script>
+<script id="projects-app-runtime" src="projects-app.js?v=3120"></script>
 </body>
 </html>
