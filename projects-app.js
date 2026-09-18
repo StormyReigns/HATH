@@ -757,6 +757,8 @@ function buildFortunesWeaveRun(title) {
   const look = detectTheme("Fire Emblem: Fortune's Weave");
   const ck = rows => rows.map(r => (typeof r === 'string' ? { name: r, done: false } : { name: r[0], where: r[1] || '', done: false }));
   const rt = names => names.map(n => ({ name: n, state: 0 }));
+  // 'collection' = checklist that also drives the card's summary line ("0/68 recruited").
+  const col = rows => rows.map(r => ({ name: r[0], where: r[1] || '', got: false }));
   const name = title || "Fortune's Weave Run";
   return {
     id: uid('proj'), title: name, subtitle: 'Collect-everything run',
@@ -766,7 +768,7 @@ function buildFortunesWeaveRun(title) {
     sections: [
       { id: uid('sec'), type: 'rated', title: 'Flame Lord Routes', noun: 'routes', states: ['Not started', 'Part I done', 'War Arc done'], items: rt(['Cai', 'Dietrich', 'Theodora', 'Leda']) },
       { id: uid('sec'), type: 'checklist', title: 'Paralogues', noun: 'paralogues', celebrate: true, items: ck([["Diversionary Tactics (Leda)", "Silver Shield · D Ch9, T Ch10 · 9/2–9/8"], ["Missing Brave-Warrior Statue (Theodora)", "Pilum · D Ch9 · 9/3–9/15"], ["Secret of the Vanished Carriage (Talimun)", "Cleansing Blade · C/D/T · 9/17–9/22 & 10/1–10/12"], ["Friendly Match with Brigid's King (Bertrand)", "Extra Large Bullion · C/T 9/17–9/25 · D 9/17 only!"], ["Golden Secret (Anna)", "Orichalcum · C/D/T · 9/24–10/5"], ["Queen of the Erased (Anatolia)", "Electron Agitator · D/L · 10/5–10/17"], ["Sealed-Off Past (Dietrich)", "Salamander · L Ch11 · 10/16–11/1"], ["Great Escape (Cai)", "Gem Box · D/T/L · 10/16–10/22"], ["Orchel's Regret (Orchel)", "Healing Staff · all routes · 10/18–10/27"]]) },
-      { id: uid('sec'), type: 'checklist', title: 'Characters', noun: 'recruited', milestone: 10, items: ck([["Eshmel", "Your avatar · Prologue"], ["Hong Hua", "Auto · Prologue & Part III"], ["Troy", "Auto · Prologue & Part III"], ["Cai", "Flame Lord · Fox Obelisk"], ["Tialla", "C auto · D 3/9 · T 3/10 · L 3/8 — Cai's Paralogue + 3,000G"], ["Peter", "C auto · D 3/8 · T 3/7 · L 3/10 — his request"], ["Ultand", "C auto Ch6 · D 3/5 · T 3/6 · L 3/8 — her request"], ["Dietrich", "Flame Lord · Lion Obelisk"], ["Fabio", "C — · D auto · T — · L 3/9 — Dietrich's Paralogue, after Dietrich is out (~Ch12), + a gift (Da Mina weapon)"], ["Esmeralda", "C 3/7 · D auto · T 3/9 · L 3/6 — her request"], ["Mikaela", "C 3/5 · D auto · T 3/8 · L 3/6 — 3,000G"], ["Theodora", "Flame Lord · Wolf Obelisk"], ["Bonaventure", "Theodora route only"], ["Tobias", "Theodora route only"], ["Lysander", "C 3/8 · D 3/6 · T auto · L 3/7 — 5 Iron Spears"], ["Lilian", "C 2/8 · D 2/8 · T auto · L 2/7 — 5,000G"], ["Leda", "Flame Lord · Eagle Obelisk"], ["Buccar", "C — · D 3/8 · T 3/8 · L auto — Leda's Paralogue"], ["Sirocco", "C 3/9 · D 3/9 · T 1/5 · L auto — his request"], ["Mu", "C 3/9 · D 3/7 · T 3/9 · L auto — 3 Glirmosa"], ["Olympia", "C 3/8 · D 3/6 · T 3/9 · L auto — 3 requests"], ["Bertrand", "Guest Part II, joins Part III · do his Paralogue"], ["Gaitz", "C — · D 3/10 · T — · L — — Bertrand's Paralogue, after Bertrand is out (~Ch12)"], ["Dante", "C 3/10 · D 2/8 · T 3/6 · L 3/10 — 8,000G"], ["Goliath", "C 3/7 · D 3/6 · T 3/9 · L 3/10 — 3 Giant's Meat (Sand-Shadow Fort)"], ["Jester", "C 3/10 · D 3/6 · T 3/9 · L 3/10 — 3 requests"], ["Talimun", "Joins Part III · do his Paralogue"], ["Ursula", "C 3/10 · D 3/7 · T 3/9 · L — — Talimun's Paralogue, answer Yes x3"], ["Simon", "C 3/8 · D 3/7 · T 3/7 · L 3/6 — coin flip: Tails"], ["Ludia", "C 3/9 · D 3/9 · T 3/7 · L 3/7 — her request"], ["Fianna", "C 3/8 · D 3/7 · T 3/9 · L 3/5 — 3,000G"], ["Orchel", "Joins Part III · do Orchel's Regret"], ["Diego", "C 3/10 · D 3/9 · T 2/8 · L 3/8 — Orchel's Regret"], ["Ninae", "C 3/6 · D 3/8 · T 3/6 · L 3/6 — 1 Paradise Fish (Lake Brontes)"], ["Seteth", "C 3/6 · D — · T 3/6 · L 3/10 — his request"], ["Loretta", "C 3/7 · D 3/9 · T 3/5 · L 3/5 — 3 Iron Swords"], ["Anatolia", "Joins Part III · do her Paralogue"], ["Sha Lan", "C — · D 3/10 · T — · L 3/8 — Anatolia's Paralogue · Saramis, Da Mina, Grounded Ship"], ["Nezha", "C 3/6 · D 3/10 · T 2/6 · L 3/9 — 3 Sandworm Meat"], ["Dadao", "C 3/7 · D 3/10 · T 2/5 · L 2/5 — 2 Kothar Gar"], ["Halvin", "C 3/9 · D 3/9 · T 3/7 · L 3/7 — 10 Dates"], ["Creek", "Part II Ch2 — only if \"My Late Sister's Accessory\" done in Part I"], ["Nathan", "Part II Ch3 — Creek lands the final blow"], ["Aswan", "Part III — must survive as guest in Part II Ch3"], ["Tahonia", "Part III — must survive as guest in Part II Ch3"], ["Benditz", "C 3/9 · D 2/7 · T 1/8 · L 3/7 — appears ~4/11"], ["Alexandra", "C 2/7 · D 3/8 · T 1/6 · L 3/10 — appears ~5/29"], ["Zarcone", "C 3/8 · D 3/7 · T 1/4 · L 2/5 — haggle: refuse twice, pay 500G"], ["Jasmine", "C 1/8 · D 3/9 · T 3/8 · L 2/4 — 500–5,000G · appears ~5/8"], ["Kiroc", "C 3/8 · D 1/4 · T 3/10 · L 1/4 — 3–8 Pure Water · ~5/4"], ["Inyoni", "C 3/8 · D 3/8 · T 1/9 · L 1/7 — 3,000–6,000G · ~7/10"], ["Peppe", "C 1/9 · D 3/8 · T 2/7 · L — — Bertrand's Paralogue"], ["Centurio", "Part III — quest \"Rescue Centurio\""], ["Sofia", "C 3/9 · D 3/9 · T auto · L 3/7"], ["Guzran", "C auto · D 3/8 · T 3/8 · L 1/3"], ["Yang Jie", "C 2/3 · D auto · T 3/9 · L 3/8 — Cheese, Moon, Potatoes"], ["Io", "C 3/10 · D 2/3 · T 3/10 · L 1/6 — 800–4,000G"], ["Catania", "C 3/10 · D 1/8 · T 3/7 · L auto"], ["Noctula", "C 1/4 · D 1/6 · T 1/3 · L 3/8"], ["Nydine", "C 1/6 · D 2/5 · T 3/5 · L 3/10 — 2 Bronze Axes / 3 Iron Axes"], ["Nuzzuo", "C 2/6 · D 1/9 · T 1/6 · L 3/9 — 2–3 Iron Bows · ~7/1"], ["Majide", "C 2/5 · D 3/8 · T 3/8 · L 3/9 — admit you need him x3"], ["Klapka", "Part III — must survive as guest"], ["Castor", "Limited playability"], ["Maria", "Limited playability"], ["Solel", "How to recruit: not documented yet"], ["Anna", "How to recruit: not documented yet"], ["Long", "How to recruit: not documented yet"]]) },
+      { id: uid('sec'), type: 'collection', title: 'Characters', noun: 'recruited', milestone: 10, items: col([["Eshmel", "Your avatar · Prologue"], ["Hong Hua", "Auto · Prologue & Part III"], ["Troy", "Auto · Prologue & Part III"], ["Cai", "Flame Lord · Fox Obelisk"], ["Tialla", "C auto · D 3/9 · T 3/10 · L 3/8 — Cai's Paralogue + 3,000G"], ["Peter", "C auto · D 3/8 · T 3/7 · L 3/10 — his request"], ["Ultand", "C auto Ch6 · D 3/5 · T 3/6 · L 3/8 — her request"], ["Dietrich", "Flame Lord · Lion Obelisk"], ["Fabio", "C — · D auto · T — · L 3/9 — Dietrich's Paralogue, after Dietrich is out (~Ch12), + a gift (Da Mina weapon)"], ["Esmeralda", "C 3/7 · D auto · T 3/9 · L 3/6 — her request"], ["Mikaela", "C 3/5 · D auto · T 3/8 · L 3/6 — 3,000G"], ["Theodora", "Flame Lord · Wolf Obelisk"], ["Bonaventure", "Theodora route only"], ["Tobias", "Theodora route only"], ["Lysander", "C 3/8 · D 3/6 · T auto · L 3/7 — 5 Iron Spears"], ["Lilian", "C 2/8 · D 2/8 · T auto · L 2/7 — 5,000G"], ["Leda", "Flame Lord · Eagle Obelisk"], ["Buccar", "C — · D 3/8 · T 3/8 · L auto — Leda's Paralogue"], ["Sirocco", "C 3/9 · D 3/9 · T 1/5 · L auto — his request"], ["Mu", "C 3/9 · D 3/7 · T 3/9 · L auto — 3 Glirmosa"], ["Olympia", "C 3/8 · D 3/6 · T 3/9 · L auto — 3 requests"], ["Bertrand", "Guest Part II, joins Part III · do his Paralogue"], ["Gaitz", "C — · D 3/10 · T — · L — — Bertrand's Paralogue, after Bertrand is out (~Ch12)"], ["Dante", "C 3/10 · D 2/8 · T 3/6 · L 3/10 — 8,000G"], ["Goliath", "C 3/7 · D 3/6 · T 3/9 · L 3/10 — 3 Giant's Meat (Sand-Shadow Fort)"], ["Jester", "C 3/10 · D 3/6 · T 3/9 · L 3/10 — 3 requests"], ["Talimun", "Joins Part III · do his Paralogue"], ["Ursula", "C 3/10 · D 3/7 · T 3/9 · L — — Talimun's Paralogue, answer Yes x3"], ["Simon", "C 3/8 · D 3/7 · T 3/7 · L 3/6 — coin flip: Tails"], ["Ludia", "C 3/9 · D 3/9 · T 3/7 · L 3/7 — her request"], ["Fianna", "C 3/8 · D 3/7 · T 3/9 · L 3/5 — 3,000G"], ["Orchel", "Joins Part III · do Orchel's Regret"], ["Diego", "C 3/10 · D 3/9 · T 2/8 · L 3/8 — Orchel's Regret"], ["Ninae", "C 3/6 · D 3/8 · T 3/6 · L 3/6 — 1 Paradise Fish (Lake Brontes)"], ["Seteth", "C 3/6 · D — · T 3/6 · L 3/10 — his request"], ["Loretta", "C 3/7 · D 3/9 · T 3/5 · L 3/5 — 3 Iron Swords"], ["Anatolia", "Joins Part III · do her Paralogue"], ["Sha Lan", "C — · D 3/10 · T — · L 3/8 — Anatolia's Paralogue · Saramis, Da Mina, Grounded Ship"], ["Nezha", "C 3/6 · D 3/10 · T 2/6 · L 3/9 — 3 Sandworm Meat"], ["Dadao", "C 3/7 · D 3/10 · T 2/5 · L 2/5 — 2 Kothar Gar"], ["Halvin", "C 3/9 · D 3/9 · T 3/7 · L 3/7 — 10 Dates"], ["Creek", "Part II Ch2 — only if \"My Late Sister's Accessory\" done in Part I"], ["Nathan", "Part II Ch3 — Creek lands the final blow"], ["Aswan", "Part III — must survive as guest in Part II Ch3"], ["Tahonia", "Part III — must survive as guest in Part II Ch3"], ["Benditz", "C 3/9 · D 2/7 · T 1/8 · L 3/7 — appears ~4/11"], ["Alexandra", "C 2/7 · D 3/8 · T 1/6 · L 3/10 — appears ~5/29"], ["Zarcone", "C 3/8 · D 3/7 · T 1/4 · L 2/5 — haggle: refuse twice, pay 500G"], ["Jasmine", "C 1/8 · D 3/9 · T 3/8 · L 2/4 — 500–5,000G · appears ~5/8"], ["Kiroc", "C 3/8 · D 1/4 · T 3/10 · L 1/4 — 3–8 Pure Water · ~5/4"], ["Inyoni", "C 3/8 · D 3/8 · T 1/9 · L 1/7 — 3,000–6,000G · ~7/10"], ["Peppe", "C 1/9 · D 3/8 · T 2/7 · L — — Bertrand's Paralogue"], ["Centurio", "Part III — quest \"Rescue Centurio\""], ["Sofia", "C 3/9 · D 3/9 · T auto · L 3/7"], ["Guzran", "C auto · D 3/8 · T 3/8 · L 1/3"], ["Yang Jie", "C 2/3 · D auto · T 3/9 · L 3/8 — Cheese, Moon, Potatoes"], ["Io", "C 3/10 · D 2/3 · T 3/10 · L 1/6 — 800–4,000G"], ["Catania", "C 3/10 · D 1/8 · T 3/7 · L auto"], ["Noctula", "C 1/4 · D 1/6 · T 1/3 · L 3/8"], ["Nydine", "C 1/6 · D 2/5 · T 3/5 · L 3/10 — 2 Bronze Axes / 3 Iron Axes"], ["Nuzzuo", "C 2/6 · D 1/9 · T 1/6 · L 3/9 — 2–3 Iron Bows · ~7/1"], ["Majide", "C 2/5 · D 3/8 · T 3/8 · L 3/9 — admit you need him x3"], ["Klapka", "Part III — must survive as guest"], ["Castor", "Limited playability"], ["Maria", "Limited playability"], ["Solel", "How to recruit: not documented yet"], ["Anna", "How to recruit: not documented yet"], ["Long", "How to recruit: not documented yet"]]) },
       { id: uid('sec'), type: 'checklist', title: 'Keys of the Diadem', noun: 'keys', celebrate: true, items: ck([["Key of the Diadem — Heretics' Cave", "Part III chest"], ["Key of the Diadem — Enno Isle", "Part III chest"], ["Key of the Diadem — Cougar Woodlands", "Part III chest"], ["Key of the Diadem — Sand-Shadow Fort", "Part III chest"], ["Key of the Diadem — Giant's-Print Fort", "Part III chest"]]) },
       { id: uid('sec'), type: 'rated', title: 'Dungeons', noun: 'dungeons', states: ['Not visited', 'Part I chests', 'Part III chests'], items: rt(["Wandering Wood", "Niraga Mine", "Eastern Passage", "Coris Mine", "Southern Passage", "Galen Fort Ruins", "Northern Passage", "Cindered Road Cave", "Palace of Sand", "Shadowy Cave", "Heretics' Cave", "Hundred-Hole Cave", "Cave Behind the Falls", "Nowah's Cave", "Enno Isle", "Valhalla Mine", "Uncharted Isle", "Nemea Cavern", "Cougar Woodlands", "Rubess Forest", "Masked Woods", "Fort Hayn", "Collapsed Fort", "Sand-Shadow Fort", "Stoppered Shrine", "Dione Fort", "Corroios Fort Ruins", "Dragonbone Tangle", "Beast's Path", "Aditi's Cave", "Iapetus Cavern", "Giant's-Print Fort"]) },
       { id: uid('sec'), type: 'checklist', title: 'Secret Classes', noun: 'classes', items: ck([["Dancer", "Leda · Great Dancer's Successor (Ch9)"], ["Ranger", "Leda · Elegant Drink Recipes"], ["Troubadour", "Cai · Bertrand mentoring, or Leda · Elegant Drink Recipes"], ["Caladrius", "Cai · Castor mentoring (Special Request from Pop)"], ["Dragoon", "Cai · Aurora mentoring, or Theodora · Send Supplies Lir Fish + Sea-Star Stone"], ["Guardian", "Dietrich · beat Il-Lara, or Theodora · Send Supplies Roca + Kothar Gar"], ["Cataphract", "Theodora · Send Supplies Ladon Loach + Steel Fish"], ["Blacksmith", "Dietrich · Smyrnos Lv1 + Renown 8 (unconfirmed)"], ["Elephant Rider", "Part III · conditions TBD"], ["Master classes (10)", "Part III quests · Lv 45"], ["Divine classes", "Diadem Temple · needs all 5 Keys"]]) },
@@ -1618,11 +1620,28 @@ function summaryLine(p) {
   const s = _sp(first);
   return s ? `${s.done}/${s.total}` : `${(first.items || []).length} notes`;
 }
+// Wide covers (game logos) need a different layout from square icons, or they
+// crowd the title on a phone. Measures the image once; null until known.
+function useCoverWide(src) {
+  const [wide, setWide] = React.useState(null);
+  React.useEffect(() => {
+    if (!src) { setWide(false); return; }
+    let live = true;
+    const im = new Image();
+    im.onload = () => { if (live) setWide(im.naturalHeight > 0 && im.naturalWidth / im.naturalHeight > 1.6); };
+    im.onerror = () => { if (live) setWide(false); };
+    im.src = src;
+    return () => { live = false; };
+  }, [src]);
+  return wide;
+}
+window.__useCoverWide = useCoverWide;
 function ProjectCard({
   project,
   onOpen
 }) {
   const prog = _pp(project);
+  const coverWide = useCoverWide(project.cover);
   const themed = project.theme && project.theme !== 'base';
   return /*#__PURE__*/React.createElement("button", {
     "data-theme": project.theme,
@@ -1710,12 +1729,19 @@ function ProjectCard({
       fontSize: 11,
       color: 'var(--text-faint)'
     }
-  }, project.sections.length, " sections"))), project.cover && /*#__PURE__*/React.createElement("img", {
+  }, project.sections.length, " sections"))), project.cover && coverWide !== null && /*#__PURE__*/React.createElement("img", {
     src: project.cover,
     alt: "",
-    style: {
+    style: coverWide ? {
       width: 'auto',
-      maxWidth: 110,
+      height: 'auto',
+      maxWidth: 76,
+      maxHeight: 40,
+      objectFit: 'contain',
+      flexShrink: 0,
+      filter: 'drop-shadow(0 2px 4px rgba(30,22,14,.2))'
+    } : {
+      width: 46,
       height: 46,
       objectFit: 'contain',
       flexShrink: 0,
@@ -2442,6 +2468,8 @@ window.Home = Home;
     const themed = project.theme && project.theme !== 'base';
     const color = 'var(--accent)';
     const heroFont = themed ? 'var(--font-theme-display)' : 'var(--font-display)';
+    // A wide logo sits on its own line above the title; a square icon stays beside it.
+    const coverWide = window.__useCoverWide ? window.__useCoverWide(project.cover) : false;
 
     // Fire the celebration whenever ANY section crosses into 100%, and a bigger
     // one when the whole project reaches 100%. Never on initial mount; never
@@ -2679,12 +2707,25 @@ window.Home = Home;
         setConfirmDel(true);
       },
       style: menuItemStyle('var(--danger, #C0492F)')
-    }, Ic.trash('var(--danger, #C0492F)'), " Delete tracker"))), document.body))), /*#__PURE__*/React.createElement("div", {
+    }, Ic.trash('var(--danger, #C0492F)'), " Delete tracker"))), document.body))), project.cover && coverWide === true && /*#__PURE__*/React.createElement("img", {
+      src: project.cover,
+      alt: "",
+      style: {
+        display: 'block',
+        width: 'auto',
+        height: 'auto',
+        maxWidth: '72%',
+        maxHeight: 52,
+        marginTop: 14,
+        objectFit: 'contain',
+        filter: 'drop-shadow(0 3px 6px rgba(30,22,14,.22))'
+      }
+    }), /*#__PURE__*/React.createElement("div", {
       style: {
         display: 'flex',
         alignItems: 'center',
         gap: 16,
-        marginTop: 18
+        marginTop: coverWide ? 12 : 18
       }
     }, /*#__PURE__*/React.createElement(ProgressRing, {
       value: overall,
@@ -2732,14 +2773,15 @@ window.Home = Home;
         fontSize: 30,
         lineHeight: 1.05,
         color: 'var(--accent-ink)',
-        letterSpacing: themed ? '.01em' : '-0.01em'
+        letterSpacing: themed ? '.01em' : '-0.01em',
+        overflowWrap: 'break-word'
       }
-    }, project.title)), project.cover && /*#__PURE__*/React.createElement("img", {
+    }, project.title)), project.cover && coverWide === false && /*#__PURE__*/React.createElement("img", {
       src: project.cover,
       alt: "",
       style: {
-        width: 'auto',
-        maxWidth: 150,
+        width: 64,
+        flexShrink: 0,
         height: 64,
         objectFit: 'contain',
         filter: 'drop-shadow(0 4px 8px rgba(30,22,14,.25))'
