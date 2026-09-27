@@ -10745,7 +10745,7 @@
   window.onerror = function(msg, src, line, col, err) { console.error('App error:', msg, src, line); };
   window.onunhandledrejection = function(e) { console.error('Unhandled promise rejection:', e.reason); };
   // ── VERSION ────────────────────────────────────────────────────
-  const SHASTAPP_VERSION = '3.12.1';  // Bump this when you deploy changes.
+  const SHASTAPP_VERSION = '3.12.2';  // Bump this when you deploy changes.
 
   // ── CONFETTI ENGINE ──
   // Lives on a body-level <canvas#shastConfettiCanvas>. Must NOT be nested
@@ -11852,10 +11852,36 @@
   function friendlyBlathersError(err) {
     if (!err) return "Hoo! Something got a bit tangled. Could you try that again?";
     const msg = typeof err === 'string' ? err : (err.message || String(err));
+
+    if (/credit balance|purchase credits|plans\s*&\s*billing/i.test(msg)) {
+      return "Oh dear — the household's Anthropic account has run out of credits. Someone will need to add more under Plans & Billing at console.anthropic.com before I can help again.";
+    }
+    if (/invalid x-api-key|authentication_error|incorrect api key/i.test(msg)) {
+      return "Hoo! Anthropic is refusing my connection — the API key looks invalid or was revoked. It may need to be replaced in the backend's Script Properties (SHASTAPP_API).";
+    }
+    if (/SHASTAPP_API not set/i.test(msg)) {
+      return "Ah! I don't have an Anthropic API key configured at all right now — one needs to be added to Script Properties as SHASTAPP_API.";
+    }
+    if (/rate_limit|overloaded_error|\b429\b/i.test(msg)) {
+      return "Hoo hoo, everyone's asking me questions at once! Anthropic's servers are busy — give it a minute and try again.";
+    }
+    if (/Unauthorized: session expired/i.test(msg)) {
+      return "Ah, it looks like your sign-in has expired. Try signing out and back in from Settings.";
+    }
+    if (/Unauthorized/i.test(msg)) {
+      return "Hoo! I couldn't verify who's asking — try signing out and back in from Settings.";
+    }
     if (/network|fetch|failed|connection/i.test(msg)) {
       return "I'm having trouble reaching the clouds right now — check your connection and we'll try again in a moment.";
     }
-    return "Hoo! Something got a bit tangled on my end. Could you try that again in a moment?";
+    const serverErrorMatch = msg.match(/Server error\s*(\d+)/i);
+    if (serverErrorMatch) {
+      return "Hoo! The household server hiccupped (error " + serverErrorMatch[1] + "). Could you try again in a moment?";
+    }
+
+    // Unknown cause — still surface it rather than hiding it completely.
+    const short = msg.length > 140 ? msg.slice(0, 140) + '…' : msg;
+    return "Hoo! Something got tangled on my end (" + short + "). Could you try that again in a moment?";
   }
 
   function setWellbeing(status) {
